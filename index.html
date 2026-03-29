@@ -43,7 +43,7 @@ window.onload = loadData;
 // GET DATA
 async function loadData() {
 
-  let res = await fetch("http://127.0.0.1:5000/get-data");
+  let res = await fetch("https://office-management-f425.onrender.com/get-data");
   let data = await res.json();
 
   let table = document.getElementById("table");
@@ -79,7 +79,7 @@ async function saveData() {
     Basic: document.getElementById("basic").value
   };
 
-  await fetch("http://127.0.0.1:5000/add-data", {
+  await fetch("https://office-management-f425.onrender.com/add-data", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify(data)
