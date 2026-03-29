@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>PayBill Dashboard</title>
-  <base target="_top">
-  <!-- font style -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <!-- Icon -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+  <head>
+    <title>OFFICE MANAGEMENT</title>
+    <base target="_top">
+    <!-- font style -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet">
+    <!-- Icon -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 
-
-  <style>
+    <style>
     /* =========================
       RESET
       ========================= */
@@ -1361,288 +1367,310 @@
     }
   </style>
 
-</head>
+  </head>
 
-<body>
+  <body>
 
-<div class="app">
+    <div class="app">
 
-  <div class="left-panel collapsed" id="sidebar">
+      <div class="left-panel collapsed" id="sidebar">
 
-  <!-- Toggle button -->
-  <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+        <!-- Toggle button -->
+        <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-    <div class="menu-list">
+        <div class="menu-list">
 
-      <button class="menu-btn active" data-tooltip="Dashboard" data-page="DashBoard">
-        <i data-lucide="layout-dashboard"></i>
-        <span>Dashboard</span>
-      </button>
+          <button class="menu-btn active" data-tooltip="Dashboard"
+            data-page="DashBoard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </button>
 
-      <button class="menu-btn" data-tooltip="Employee Details" data-page="EmpPage">
-        <i data-lucide="user"></i>
-        <span>Employee Details</span>
-      </button>
+          <button class="menu-btn" data-tooltip="Employee Details"
+            data-page="EmpPage">
+            <i data-lucide="user"></i>
+            <span>Employee Details</span>
+          </button>
 
-      <button class="menu-btn" data-tooltip="Pay Bill" data-page="PayBillPage">
-        <i data-lucide="file-text"></i>
-        <span>Pay Bill</span>
-      </button>
+          <button class="menu-btn" data-tooltip="Pay Bill"
+            data-page="PayBillPage">
+            <i data-lucide="file-text"></i>
+            <span>Pay Bill</span>
+          </button>
 
-      <button class="menu-btn" data-tooltip="Salary Slip" data-page="SalarySlipPage">
-        <i data-lucide="receipt"></i>
-        <span>Salary Slip</span>
-      </button>
+          <button class="menu-btn" data-tooltip="Salary Slip"
+            data-page="SalarySlipPage">
+            <i data-lucide="receipt"></i>
+            <span>Salary Slip</span>
+          </button>
 
-      <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
-        <i data-lucide="calculator"></i>
-        <span>Income Tax</span>
-      </button>
+          <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
+            <i data-lucide="calculator"></i>
+            <span>Income Tax</span>
+          </button>
 
-      <button class="menu-btn" data-tooltip="Pensions" data-page="PensionPage">
-        <i data-lucide="landmark"></i>
-        <span>Pensions</span>
-      </button>
+          <button class="menu-btn" data-tooltip="Pensions"
+            data-page="PensionPage">
+            <i data-lucide="landmark"></i>
+            <span>Pensions</span>
+          </button>
 
-      <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
-        <i data-lucide="pie-chart"></i>
-        <span>Budgets</span>
-      </button>
-      
-      <button class="menu-btn" data-tooltip="Database" data-page="DatabasePage">
-        <i data-lucide="database"></i>
-        <span>Database</span>
-      </button>
-      
-    </div>
+          <button class="menu-btn" data-tooltip="Budgets"
+            data-page="BudgetPage">
+            <i data-lucide="pie-chart"></i>
+            <span>Budgets</span>
+          </button>
 
-    <div class="menu-footer">
-      <button class="logout-btn" data-tooltip="Logout">
-        <i data-lucide="log-out"></i>
-        <span>Logout</span>
-      </button>
-    </div>
+          <button class="menu-btn" data-tooltip="Database"
+            data-page="DatabasePage">
+            <i data-lucide="database"></i>
+            <span>Database</span>
+          </button>
 
-  </div>
-
-  <div class="right-panel">
-    
-  <img  class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-
-    <div class="SectionPage" id="DashBoard">
-      <div class="header">
-        <h2>Office Management</h2>
-      </div>
-    </div>
-
-    <div class="SectionPage" id="EmpPage" style="display:none">
-      <div class="header">
-        <h2>Employee Profile Details</h2>
-      </div>
-      <div class="Selection-bar">
-        <table>
-          <colgroup>
-            <col style="width:100px">
-            <col style="width:120px">
-            <col style="width:100px">
-            <col style="width:270px">
-            <col style="width:100px">
-            <col style="width:80px">            
-            <col style="width:90px">
-            <col style="width:80px">
-            <col style="width:0px">
-            <col style="width:70px">
-            <col style="width:50px">
-            <col style="width:50px">
-            <col style="width:120px">
-            <col style="width:80px">
-            <col style="width:120px">
-            <col style="width:30px">
-          </colgroup>
-          <tr>
-            <td><label for="EmpPage_Station">Station :</label></td>
-            <td><select id="EmpPage_Station"></select></td>
-            <td><label for="EmpPage_Emp">Employee :</label></td>
-            <td><select id="EmpPage_Emp"></select></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><label>TA Zone :</label></td>
-            <td><input disabled id="EmpPage_TAZone"></td>
-            <td><label>HRA Zone :</label></td>
-            <td><input disabled id="EmpPage_HRAZone"></td>
-            <td></td>
-          </tr>
-        </table>
-        <div class="action-group"></div>
-      </div>
-      <div class="Emp-Table-Wrapper">
-        <table id="EmpDetailTbl">
-          <tr><th colspan="2">Personal Details</th></tr>
-          <tr><td>Name</td><td id="Employee Name"></td></tr>
-          <tr><td>Department</td><td id="Department"></td></tr>
-          <tr><td>HRIS</td><td id="HRIS"></td></tr>
-          <tr><td>Designation</td><td id="Designation"></td></tr>
-          <tr><td>Section</td><td id="Section"></td></tr>
-          <tr><td>Group</td><td id="Group"></td></tr>
-          <tr><td>PAN</td><td id="PAN"></td></tr>
-          <tr><td>Aadhaar</td><td id="Aadhaar"></td></tr>
-          <tr><td>PFMS</td><td id="PFMS"></td></tr>
-          <tr><td>PRAN</td><td id="PRAN"></td></tr>
-          <tr><td>GPF</td><td id="GPF"></td></tr>
-          <tr><td>Salary Account</td><td id="Account"></td></tr>
-          <tr><td>Mobile</td><td id="Mobile"></td></tr>
-          <tr><td>Address</td><td id="Address"></td></tr>
-        </table>
-        <table>
-          <tr><th colspan="2">Pay Details</th></tr>
-          <tr><td>Date of Birth</td><td id="DOB"></td></tr>
-          <tr><td>Date of Joining</td><td id="DOJ"></td></tr>
-          <tr><td>Superannuation</td><td id="DOR"></td></tr>
-          <tr><td>Last Increment Date</td><td id="LastInc"></td></tr>
-          <tr><td>Last Drawn Salary Month</td><td id="LastSalMonth"></td></tr>
-          <tr><td>Last Drawn Pay Level</td><td id="LastPayLevel"></td></tr>          
-          <tr><td>Last Drawn Grade Pay</td><td id="LastGradePay"></td></tr>
-          <tr><td>Last Drawn Pay Band</td><td id="LastPayBand"></td></tr>
-          <tr><td>Last Increment Level</td><td id="LastIndex"></td></tr>
-          <tr><td>Last Drawn Basic Pay</td><td id="LastBP"></td></tr>
-          <tr><td>Last Drawn DA</td><td id="LastDA"></td></tr>     
-          <tr><td>Qualifying Service as on Today</td><td id="Qualifying Service"></td></tr>    
-          <tr><td>Completed 6 Monthly Period as on Today</td><td id="Completed 6 Monthly Period"></td></tr>         
-        </table>        
-      </div>
-    </div>
-
-    <div class="SectionPage" id="PayBillPage" style="display:none">
-      <div class="header">
-        <h2>Pay Bill Generation</h2>
-      </div>
-      <div class="Selection-bar">
-        <table>
-           <colgroup>
-            <col style="width:100px">
-            <col style="width:120px">
-            <col style="width:100px">
-            <col style="width:270px">
-            <col style="width:100px">
-            <col style="width:90px">            
-            <col style="width:100px">
-            <col style="width:90px">
-            <col style="width:0px">
-            <col style="width:70px">
-            <col style="width:50px">
-            <col style="width:40px">
-            <col style="width:120px">
-            <col style="width:80px">
-            <col style="width:120px">
-            <col style="width:30px">
-          </colgroup>
-          <tr>
-            <td><label for="PayBillPage_Station">Station :</label></td>
-            <td><select id="PayBillPage_Station"></select></td>
-            <td></td>
-            <td></td>
-            <td style="display:none"><label for="PayBillPage_Emp">Employee :</label></td>
-            <td style="display:none"><select id="PayBillPage_Emp"></select></td>
-            <td><label for="PayBillPage_FY">FY :</label></td>
-            <td><select id="PayBillPage_FY"></select></td>
-            <td><label for="PayBillPage_SalMonth">Month :</label></td>
-            <td><select id="PayBillPage_SalMonth"></select></td>
-            <td></td>
-            <td><span class="status paid">PAID</span></td>
-            <td><label>DA(%) :</td>
-            <td><input style="max-width:40px;" disabled id="PayBillPage_DA%" type="text"></td>
-            <td><label>TA Zone :</label></td>
-            <td><input disabled id="PayBillPage_TAZone"></td>
-            <td><label>HRA Zone :</label></td>
-            <td><input disabled id="PayBillPage_HRAZone"></td>
-            <td></td>
-          </tr>
-        </table>
-        <div class="action-group">
-          <button id="PBeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
-          <button id="PBaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
-          <button id="PBprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
-          <button id="PBexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
         </div>
-      </div>
-      <div class="PB-Table-Wrapper">
-        <div class="PB-Table-WrapperGO">
-          <table id="PB_GOViewTbl"></table>
-          <table id="PB_GOEditTbl"></table>       
+
+        <div class="menu-footer">
+          <button class="logout-btn" data-tooltip="Logout">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </button>
         </div>
-        <div class="PB-Table-WrapperNPS">
-          <table id="PB_NPSViewTbl"></table>
-          <table id="PB_NPSEditTbl"></table>
-        </div>                         
-      </div>
-      <div class="Error_Note">
-          <span id="DA_Error" class="PB-error"></span> 
-          <span id="GPF_Error" class="PB-error"></span> 
-      </div>       
-    </div>
-    
-    <div class="SectionPage" id="SalarySlipPage" style="display:none">
-      <div class="header">
-        <h2>Salary Slip</h2>
-      </div>
-    </div>
-    
-    <div class="SectionPage" id="ITPage" style="display:none">
-      <div class="header">
-        <h2>Income Tax Calculation</h2>
-      </div>
-    </div>
 
-    <div class="SectionPage" id="PensionPage" style="display:none">
-      <div class="header">
-        <h2>Pension Benifits & Calculations</h2>
-      </div>
-    </div>
-
-    <div class="SectionPage" id="BudgetPage" style="display:none">
-      <div class="header">
-        <h2>Budgets</h2>
-      </div>
-    </div>
-
-    <div class="SectionPage" id="DatabasePage" style="display:none">
-      <div class="header">
-        <h2>Database</h2>
       </div>
 
-      <div class="button-bar">
-        <button onclick="showSheet('EmpDB',this)" class="active">Employee Database</button>
-        <button onclick="showSheet('PBDB',this)">Pay Bill Database</button>
-        <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th CPC</button>
-        <button onclick="showSheet('QtrsRateDB',this)">Quarters Rate</button>
-        <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
-        <button onclick="showSheet('CommFactDB',this)">Commutation Factors</button>
-        <button onclick="showSheet('ITDB',this)">IT Database</button>
+      <div class="right-panel">
+
+        <img class="watermark"
+          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
+
+        <div class="SectionPage" id="DashBoard">
+          <div class="header">
+            <h2>Office Management</h2>
+          </div>
+        </div>
+
+        <div class="SectionPage" id="EmpPage" style="display:none">
+          <div class="header">
+            <h2>Employee Profile Details</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:100px">
+                <col style="width:120px">
+                <col style="width:100px">
+                <col style="width:270px">
+                <col style="width:100px">
+                <col style="width:80px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:0px">
+                <col style="width:70px">
+                <col style="width:50px">
+                <col style="width:50px">
+                <col style="width:120px">
+                <col style="width:80px">
+                <col style="width:120px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="EmpPage_Station">Station :</label></td>
+                <td><select id="EmpPage_Station"></select></td>
+                <td><label for="EmpPage_Emp">Employee :</label></td>
+                <td><select id="EmpPage_Emp"></select></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><label>TA Zone :</label></td>
+                <td><input disabled id="EmpPage_TAZone"></td>
+                <td><label>HRA Zone :</label></td>
+                <td><input disabled id="EmpPage_HRAZone"></td>
+                <td></td>
+              </tr>
+            </table>
+            <div class="action-group"></div>
+          </div>
+          <div class="Emp-Table-Wrapper">
+            <table id="EmpDetailTbl">
+              <tr><th colspan="2">Personal Details</th></tr>
+              <tr><td>Name</td><td id="Employee Name"></td></tr>
+              <tr><td>Department</td><td id="Department"></td></tr>
+              <tr><td>HRIS</td><td id="HRIS"></td></tr>
+              <tr><td>Designation</td><td id="Designation"></td></tr>
+              <tr><td>Section</td><td id="Section"></td></tr>
+              <tr><td>Group</td><td id="Group"></td></tr>
+              <tr><td>PAN</td><td id="PAN"></td></tr>
+              <tr><td>Aadhaar</td><td id="Aadhaar"></td></tr>
+              <tr><td>PFMS</td><td id="PFMS"></td></tr>
+              <tr><td>PRAN</td><td id="PRAN"></td></tr>
+              <tr><td>GPF</td><td id="GPF"></td></tr>
+              <tr><td>Salary Account</td><td id="Account"></td></tr>
+              <tr><td>Mobile</td><td id="Mobile"></td></tr>
+              <tr><td>Address</td><td id="Address"></td></tr>
+            </table>
+            <table>
+              <tr><th colspan="2">Pay Details</th></tr>
+              <tr><td>Date of Birth</td><td id="DOB"></td></tr>
+              <tr><td>Date of Joining</td><td id="DOJ"></td></tr>
+              <tr><td>Superannuation</td><td id="DOR"></td></tr>
+              <tr><td>Last Increment Date</td><td id="LastInc"></td></tr>
+              <tr><td>Last Drawn Salary Month</td><td
+                  id="LastSalMonth"></td></tr>
+              <tr><td>Last Drawn Pay Level</td><td id="LastPayLevel"></td></tr>
+              <tr><td>Last Drawn Grade Pay</td><td id="LastGradePay"></td></tr>
+              <tr><td>Last Drawn Pay Band</td><td id="LastPayBand"></td></tr>
+              <tr><td>Last Increment Level</td><td id="LastIndex"></td></tr>
+              <tr><td>Last Drawn Basic Pay</td><td id="LastBP"></td></tr>
+              <tr><td>Last Drawn DA</td><td id="LastDA"></td></tr>
+              <tr><td>Qualifying Service as on Today</td><td
+                  id="Qualifying Service"></td></tr>
+              <tr><td>Completed 6 Monthly Period as on Today</td><td
+                  id="Completed 6 Monthly Period"></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="SectionPage" id="PayBillPage" style="display:none">
+          <div class="header">
+            <h2>Pay Bill Generation</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:100px">
+                <col style="width:120px">
+                <col style="width:100px">
+                <col style="width:270px">
+                <col style="width:100px">
+                <col style="width:90px">
+                <col style="width:100px">
+                <col style="width:90px">
+                <col style="width:0px">
+                <col style="width:70px">
+                <col style="width:50px">
+                <col style="width:40px">
+                <col style="width:120px">
+                <col style="width:80px">
+                <col style="width:120px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="PayBillPage_Station">Station :</label></td>
+                <td><select id="PayBillPage_Station"></select></td>
+                <td></td>
+                <td></td>
+                <td style="display:none"><label for="PayBillPage_Emp">Employee
+                    :</label></td>
+                <td style="display:none"><select
+                    id="PayBillPage_Emp"></select></td>
+                <td><label for="PayBillPage_FY">FY :</label></td>
+                <td><select id="PayBillPage_FY"></select></td>
+                <td><label for="PayBillPage_SalMonth">Month :</label></td>
+                <td><select id="PayBillPage_SalMonth"></select></td>
+                <td></td>
+                <td><span class="status paid">PAID</span></td>
+                <td><label>DA(%) :</td>
+                  <td><input style="max-width:40px;" disabled
+                      id="PayBillPage_DA%" type="text"></td>
+                  <td><label>TA Zone :</label></td>
+                  <td><input disabled id="PayBillPage_TAZone"></td>
+                  <td><label>HRA Zone :</label></td>
+                  <td><input disabled id="PayBillPage_HRAZone"></td>
+                  <td></td>
+                </tr>
+              </table>
+              <div class="action-group">
+                <button id="PBeditBtn"><i
+                    data-lucide="edit"></i><span>Edit</span></button>
+                <button id="PBaddBtn"><i
+                    data-lucide="plus"></i><span>Add</span></button>
+                <button id="PBprintBtn"><i
+                    data-lucide="printer"></i><span>Print</span></button>
+                <button id="PBexcelBtn"><i
+                    data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+              </div>
+            </div>
+            <div class="PB-Table-Wrapper">
+              <div class="PB-Table-WrapperGO">
+                <table id="PB_GOViewTbl"></table>
+                <table id="PB_GOEditTbl"></table>
+              </div>
+              <div class="PB-Table-WrapperNPS">
+                <table id="PB_NPSViewTbl"></table>
+                <table id="PB_NPSEditTbl"></table>
+              </div>
+            </div>
+            <div class="Error_Note">
+              <span id="DA_Error" class="PB-error"></span>
+              <span id="GPF_Error" class="PB-error"></span>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="SalarySlipPage" style="display:none">
+            <div class="header">
+              <h2>Salary Slip</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="ITPage" style="display:none">
+            <div class="header">
+              <h2>Income Tax Calculation</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="PensionPage" style="display:none">
+            <div class="header">
+              <h2>Pension Benifits & Calculations</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="BudgetPage" style="display:none">
+            <div class="header">
+              <h2>Budgets</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="DatabasePage" style="display:none">
+            <div class="header">
+              <h2>Database</h2>
+            </div>
+
+            <div class="button-bar">
+              <button onclick="showSheet('EmpDB',this)" class="active">Employee
+                Database</button>
+              <button onclick="showSheet('PBDB',this)">Pay Bill
+                Database</button>
+              <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
+                CPC</button>
+              <button onclick="showSheet('QtrsRateDB',this)">Quarters
+                Rate</button>
+              <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
+              <button onclick="showSheet('CommFactDB',this)">Commutation
+                Factors</button>
+              <button onclick="showSheet('ITDB',this)">IT Database</button>
+            </div>
+
+            <div class="DB-Table-Wrapper">
+              <table id="EmpDB"></table>
+              <table id="PBDB" style="display:none;"></table>
+              <table id="CPC7DB" style="display:none;"></table>
+              <table id="QtrsRateDB" style="display:none;"></table>
+              <table id="CityZoneDB" style="display:none;"></table>
+              <table id="CommFactDB" style="display:none;"></table>
+              <table id="ITDB" style="display:none;"></table>
+            </div>
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="DB-Table-Wrapper">
-        <table id="EmpDB"></table>
-        <table id="PBDB" style="display:none;"></table>
-        <table id="CPC7DB" style="display:none;"></table>
-        <table id="QtrsRateDB" style="display:none;"></table>
-        <table id="CityZoneDB" style="display:none;"></table>
-        <table id="CommFactDB" style="display:none;"></table>
-        <table id="ITDB" style="display:none;"></table>
-      </div>
-    </div>  
-    
-      
-  </div>
-
-</div>
-
-<script>
+      <script>
   
 /* =========================
    ELEMENT HELPERS
@@ -1785,8 +1813,21 @@ function log(...args) {
   let GPF_MESSAGES = [];
 
 // Load data on start
-window.onload = loadData;
+window.onload = loadAllData;
 
+function renderIcons() {
+  document.querySelectorAll("i[data-lucide]").forEach(el => {
+    el.innerHTML = "";
+  });
+
+  lucide.createIcons({
+    icons: lucide.icons,
+    nameAttr: "data-lucide",
+    attrs: {
+      "stroke-width": 2
+    }
+  });
+}
 
 // GET DATA
 async function loadTable(api, tableId) {
@@ -1964,8 +2005,6 @@ qsa(".button-bar button").forEach(btn => {
   });
 });
 
-/* run once on load */
-window.addEventListener("load", loadData);
 window.addEventListener("resize", moveIndicator);
 // SAVE DATA
 //async function saveData() {
@@ -1988,5 +2027,5 @@ window.addEventListener("resize", moveIndicator);
 
 </script>
 
-</body>
-</html>
+    </body>
+  </html>
