@@ -1643,6 +1643,146 @@
 </div>
 
 <script>
+  
+/* =========================
+   ELEMENT HELPERS
+========================= */
+function createEl(tag, props = {}, children = []) {
+  const el = document.createElement(tag);
+
+  Object.entries(props).forEach(([k, v]) => {
+    if (k === "class") el.className = v;
+    else if (k === "html") el.innerHTML = v;
+    else if (k === "text") el.textContent = v;
+    else el.setAttribute(k, v);
+  });
+
+  children.forEach(child => el.appendChild(child));
+  return el;
+}
+
+function clearEl(el) {
+  if (typeof el === "string") el = id(el);
+  if (el) el.innerHTML = "";
+}
+
+
+/* =========================
+   CLASS HELPERS
+========================= */
+function addClass(el, cls) {
+  if (typeof el === "string") el = id(el);
+  el?.classList.add(cls);
+}
+
+function removeClass(el, cls) {
+  if (typeof el === "string") el = id(el);
+  el?.classList.remove(cls);
+}
+
+function toggleClass(el, cls) {
+  if (typeof el === "string") el = id(el);
+  el?.classList.toggle(cls);
+}
+
+
+/* =========================
+   EVENT HELPERS
+========================= */
+function on(el, event, handler) {
+  if (typeof el === "string") el = id(el);
+  el?.addEventListener(event, handler);
+}
+
+
+/* =========================
+   DATA HELPERS
+========================= */
+function groupBy(arr, key) {
+  return arr.reduce((acc, obj) => {
+    const k = obj[key];
+    (acc[k] = acc[k] || []).push(obj);
+    return acc;
+  }, {});
+}
+
+function unique(arr, key) {
+  return [...new Map(arr.map(item => [item[key], item])).values()];
+}
+
+
+/* =========================
+   FORMAT HELPERS
+========================= */
+
+function formatNumber(num) {
+  return Number(num || 0).toLocaleString("en-IN");
+}
+
+function formatCurrency(num) {
+  return "₹ " + formatNumber(num);
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return isNaN(d) ? "" : d.toLocaleDateString("en-IN");
+}
+
+function setValue(input, val) {
+  if (!input) return;
+  input.dataset.raw = val;
+  input.value = formatCurrency(val);
+}
+
+function getNum(tr, col) {
+  const el = getCellInput(tr, col);
+  return num(el?.dataset?.raw ?? el?.value);
+}
+
+/* =========================
+   SAFE VALUE HELPERS
+========================= */
+function val(v, def = "") {
+  return (v === null || v === undefined) ? def : v;
+}
+
+function num(v) {
+  return Number(String(v).replace(/[^\d.-]/g, "")) || 0;
+}
+
+/* =========================
+   VISIBILITY HELPERS
+========================= */
+function show(el) {
+  if (typeof el === "string") el = id(el);
+  if (el) el.style.display = "block";
+}
+
+function hide(el) {
+  if (typeof el === "string") el = id(el);
+  if (el) el.style.display = "none";
+}
+
+function getColIndex(headers, name) {
+  return headers.findIndex(h => h.toLowerCase().trim() === name.toLowerCase());
+}
+/* =========================
+   DEBUG
+========================= */
+function log(...args) {
+  console.log(...args);
+}
+
+    /* =========================
+    DOM SHORTCUTS
+  ========================= */
+  const id  = document.getElementById.bind(document);
+  const qs  = document.querySelector.bind(document);
+  const qsa = document.querySelectorAll.bind(document);
+
+  let sheetCache = {};
+  let financialYears = [];
+  let GPF_MESSAGES = [];
 
 // Load data on start
 window.onload = loadData;
@@ -1689,6 +1829,144 @@ function loadAllData() {
   loadTable("it", "ITDB");
 }
 
+
+/* =========================
+   SIDEBAR TOGGLE
+========================= */
+function toggleSidebar() {
+  const sidebar = id("sidebar");
+  const app = document.querySelector(".app");
+
+  toggleClass(sidebar, "collapsed");
+  toggleClass(app, "collapsed");
+
+  localStorage.setItem(
+    "sidebarCollapsed",
+    sidebar.classList.contains("collapsed")
+  );
+}
+
+
+/* =========================
+   LOAD SIDEBAR STATE
+========================= */
+function loadSidebarState() {
+  const sidebar = id("sidebar");
+  const app = document.querySelector(".app");
+
+  if (localStorage.getItem("sidebarCollapsed") === "true") {
+    addClass(sidebar, "collapsed");
+    addClass(app, "collapsed");   /* 🔥 FIX */
+  }
+}
+
+
+/* =========================
+   INIT APP
+========================= */
+window.addEventListener("DOMContentLoaded", () => {
+
+  loadSidebarState();
+  initMenu();
+  moveIndicator();
+
+  // 🔥 default page
+  const firstBtn = document.querySelector('.menu-btn');
+  if (firstBtn) firstBtn.click();
+
+  if (typeof lucide !== "undefined") {
+    renderIcons();
+  }
+});
+
+
+/* =========================
+   MENU HANDLER (USING HELPERS)
+========================= */
+
+function initMenu() {
+
+  const buttons = document.querySelectorAll('.menu-btn');
+  const pages = document.querySelectorAll('.SectionPage');
+
+  buttons.forEach(btn => {
+
+    on(btn, 'click', () => {
+
+      const pageId = btn.dataset.page;
+
+      // 🔥 hide all pages
+      pages.forEach(p => hide(p));
+
+      // 🔥 show selected page
+      show(pageId);
+
+      // 🔥 active state
+      buttons.forEach(b => removeClass(b, 'active'));
+      addClass(btn, 'active');
+    });
+
+  });
+
+}
+
+
+  /* =========================
+   SWITCH
+========================= */
+function showSheet(name, btn){
+
+  document.querySelectorAll(".DB-Table-Wrapper table").forEach(hide);
+  show(name);
+
+  document.querySelectorAll(".button-bar button")
+    .forEach(b => b.classList.remove("active"));
+
+  if(btn) btn.classList.add("active");
+
+  moveIndicator(); // 🔥 move indicator here
+}
+
+
+function initDatabaseDefault() {
+  const firstBtn = document.querySelector(".button-bar button");
+  if (firstBtn) {
+    showSheet("EmpDB", firstBtn);
+  }
+}
+
+
+function moveIndicator() {
+  const bar = document.querySelector(".button-bar");
+  const active = bar.querySelector("button.active"); // 🔥 FIX
+
+  if (!active) return;
+
+  const rect = active.getBoundingClientRect();
+  const parentRect = bar.getBoundingClientRect();
+
+  const left = rect.left - parentRect.left;
+  const width = rect.width;
+
+  bar.style.setProperty("--indicator-left", left + "px");
+  bar.style.setProperty("--indicator-width", width + "px");
+  bar.style.setProperty("--indicator-height", rect.height + "px");
+}
+
+qsa(".button-bar button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    qsa(".button-bar button")
+      .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    moveIndicator();
+  });
+});
+
+/* run once on load */
+window.addEventListener("load", loadData);
+window.addEventListener("resize", moveIndicator);
 // SAVE DATA
 //async function saveData() {
 
