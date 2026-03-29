@@ -1,26 +1,20 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>PayBill Dashboard</title>
-    <base target="_top">
-    <!-- font style -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-      rel="stylesheet">
-    <!-- Icon -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 
-    <style>
+<head>
+  <title>PayBill Dashboard</title>
+  <base target="_top">
+  <!-- font style -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Icon -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+
+  <style>
     /* =========================
       RESET
       ========================= */
@@ -32,33 +26,33 @@
       font-family: "Roboto Condensed", "Inter", sans-serif;
       background: transparent;
     }
-  
+
     body {
       background: #f5f7fb;
       overflow: visible;
     }
-  
+
     select {
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
-  
+
       width: 100%;
       min-width: 60px;
       padding: 5px 18px 5px 8px;
-  
+
       color: #78350f;
-  
+
       border: 1px solid #94a3b8;
       /*#cbd5e1;*/
       border-radius: 6px;
-  
+
       background-color: #d3fc58;
       background-image: url("data:image/svg+xml;utf8,<svg fill='%236b7280' height='12' viewBox='0 0 20 20' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 4 4.5-4'/></svg>");
       background-repeat: no-repeat;
       background-position: right 8px center;
       background-size: 12px;
-  
+
       transition:
         background-color 0.2s ease,
         border-color 0.2s ease,
@@ -66,14 +60,14 @@
         transform 0.1s ease;
       cursor: pointer;
     }
-  
+
     select:hover,
     input:hover {
       border-color: #cbd5e1;
       background-color: #e0e7ff;
       /* 🔥 hover */
     }
-  
+
     select:focus,
     input:focus {
       outline: none;
@@ -83,12 +77,12 @@
       box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
       background-image: url("data:image/svg+xml;utf8,<svg fill='%23ffffff' height='12' viewBox='0 0 20 20' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 4 4.5-4'/></svg>");
     }
-  
+
     select:disabled {
       background-color: #e5e7eb;
       color: #9ca3af;
     }
-  
+
     input {
       padding: 6px 8px;
       border: 1px solid #94a3b8;
@@ -99,7 +93,7 @@
       text-align: left;
       cursor: pointer;
     }
-  
+
     input:disabled {
       cursor: auto;
       background: transparent;
@@ -107,24 +101,24 @@
       border: none;
       color: black;
     }
-  
+
     input:not([type="checkbox"]) {
       appearance: none;
       -webkit-appearance: none;
-  
+
       background-image: none !important;
-  
+
       transform: translateZ(0);
       backface-visibility: hidden;
     }
-  
+
     input:not([type="checkbox"]):focus {
       outline: none;
-  
+
       transform: scale(1);
       background-clip: padding-box;
     }
-  
+
     textarea {
       resize: none;
       /* ❌ disable drag */
@@ -140,7 +134,7 @@
       box-sizing: border-box;
       background: transparent;
     }
-  
+
     /* =========================
       SCROLLBAR
     ========================= */
@@ -148,22 +142,22 @@
       height: 5px;
       width: 5px;
     }
-  
+
     div::-webkit-scrollbar-thumb {
       background: #3b82f6;
       border-radius: 5px;
     }
-  
+
     div::-webkit-scrollbar-track {
       background: #f1f5f9;
     }
-  
+
     /* Firefox */
     div {
       scrollbar-width: thin;
       scrollbar-color: #3b82f6 #f1f5f9;
     }
-  
+
     /* =========================
       APP LAYOUT
     ========================= */
@@ -177,13 +171,13 @@
       z-index: 0;
       /* behind content */
     }
-  
+
     .app {
       display: flex;
       height: 100vh;
       overflow: visible;
     }
-  
+
     /* =========================
       SIDEBAR
     ========================= */
@@ -202,32 +196,32 @@
       overflow: visible;
       transition: all 0.25s ease;
     }
-  
+
     .left-panel.collapsed {
       width: 60px;
       min-width: 60px;
     }
-  
+
     /* =========================
       RIGHT PANEL
     ========================= */
     .right-panel {
       position: relative;
       z-index: 1;
-  
+
       flex: 1;
       display: flex;
       flex-direction: column;
       background: transparent;
       height: 100vh;
-  
+
       /* 🔥 CRITICAL FIX */
       overflow-x: hidden;
       overflow-y: auto;
-  
+
       transition: all 0.35s ease;
     }
-  
+
     .SectionPage {
       flex: 1;
       display: flex;
@@ -241,7 +235,7 @@
       z-index: 1;
       transition: opacity 0.25s ease;
     }
-  
+
     /* =========================
       SIDEBAR TOGGLE
     ========================= */
@@ -255,11 +249,11 @@
       color: #374151;
       border-bottom: 1px solid #e5e7eb;
     }
-  
+
     .sidebar-toggle:hover {
       background: #e5e7eb;
     }
-  
+
     /* =========================
       MENU LIST
     ========================= */
@@ -269,11 +263,11 @@
       padding: 10px;
       scrollbar-width: none;
     }
-  
+
     .menu-list::-webkit-scrollbar {
       display: none;
     }
-  
+
     /* =========================
       BUTTON BASE
     ========================= */
@@ -295,7 +289,7 @@
       cursor: pointer;
       transition: all 0.25s ease;
     }
-  
+
     /* ICON (Lucide fix) */
     .menu-btn svg,
     .logout-btn svg {
@@ -304,20 +298,20 @@
       flex-shrink: 0;
       transition: all 0.25s ease;
     }
-  
+
     /* Bigger icon collapsed */
     .left-panel.collapsed .menu-btn svg {
       width: 20px;
       height: 20px;
     }
-  
+
     /* TEXT */
     .menu-btn span,
     .logout-btn span {
       white-space: nowrap;
       transition: opacity 0.2s ease;
     }
-  
+
     /* COLLAPSED TEXT */
     .left-panel.collapsed .menu-btn span,
     .left-panel.collapsed .logout-btn span {
@@ -325,7 +319,7 @@
       width: 0;
       overflow: hidden;
     }
-  
+
     /* COLLAPSED ALIGNMENT */
     .left-panel.collapsed .menu-btn,
     .left-panel.collapsed .logout-btn {
@@ -336,13 +330,13 @@
       display: flex;
       width: 100%;
     }
-  
+
     /* HOVER */
     .menu-btn:hover {
       background: #e0f2fe;
       color: #1d4ed8;
     }
-  
+
     /* ACTIVE */
     .menu-btn.active {
       color: black;
@@ -352,16 +346,16 @@
       margin-left: 10px;
       font-weight: 600;
       color: blue;
-  
+
       /* 🔥 glow effect */
       text-shadow: 0 0 4px rgba(255, 255, 255, 0.6),
         0 0 8px rgba(59, 130, 246, 0.6),
         0 0 12px rgba(59, 130, 246, 0.5);
-  
+
       /*background: linear-gradient(90deg, #2563eb, #3b82f6);*/
       background: white;
     }
-  
+
     /* Left indicator */
     .menu-btn.active::before {
       content: "";
@@ -373,13 +367,13 @@
       background: #2563eb;
       border-radius: 8px 0 0 8px;
     }
-  
+
     .menu-btn.active i {
       color: blue;
-  
+
       filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.7)) drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
     }
-  
+
     /* COLLAPSED ACTIVE */
     .left-panel.collapsed .menu-btn.active {
       border-radius: 0;
@@ -388,15 +382,15 @@
       justify-content: center;
       box-shadow: 0 3px 8px rgba(59, 130, 246, 0.25);
       color: blue;
-  
+
       /* 🔥 glow effect */
       text-shadow: 0 0 4px rgba(255, 255, 255, 0.6),
         0 0 8px rgba(59, 130, 246, 0.6),
         0 0 12px rgba(59, 130, 246, 0.5);
-  
+
       background: white;
     }
-  
+
     /* =========================
       TOOLTIP (FINAL FIXED)
     ========================= */
@@ -417,13 +411,13 @@
       z-index: 999999;
       box-shadow: inset 0px 0px 2px 1px white;
     }
-  
+
     /* SHOW TOOLTIP */
     .left-panel.collapsed .menu-btn:hover::after,
     .left-panel.collapsed .logout-btn:hover::after {
       opacity: 1;
     }
-  
+
     /* =========================
       FOOTER
     ========================= */
@@ -432,29 +426,29 @@
       padding: 10px;
       border-top: 1px solid #e5e7eb;
     }
-  
+
     .logout-btn {
       background: #ef4444;
       color: #fff;
     }
-  
+
     .logout-btn:hover {
       background: #dc2626;
     }
-  
+
     /* HEADER */
     .header {
       padding: 5px;
       background: linear-gradient(180deg, #f8fbff, #eaf2ff);
       border-bottom: 1px solid #dbeafe;
     }
-  
+
     .header h2 {
       font-size: 13px;
       font-weight: bold;
       padding: 5px;
     }
-  
+
     /* =========================
      BUTTON BAR
   ========================= */
@@ -467,7 +461,7 @@
       border-bottom: 1px solid #e5e7eb;
       margin: 2px;
     }
-  
+
     /* =========================
      SLIDING INDICATOR
   ========================= */
@@ -485,7 +479,7 @@
       transition: all 0.35s ease;
       z-index: 0;
     }
-  
+
     /* =========================
      BUTTON BASE
   ========================= */
@@ -507,8 +501,8 @@
         color 0.3s ease,
         transform 0.2s ease;
     }
-  
-  
+
+
     /* =========================
      HOVER
   ========================= */
@@ -516,8 +510,8 @@
       color: #111827;
       transform: translateY(-2px) scale(1.02);
     }
-  
-  
+
+
     /* =========================
      ACTIVE BUTTON
   ========================= */
@@ -525,16 +519,16 @@
       color: #fff;
       transform: scale(1.04);
     }
-  
-  
+
+
     /* =========================
      CLICK EFFECT
   ========================= */
     .button-bar button:active {
       transform: scale(0.97);
     }
-  
-  
+
+
     /* =========================
      SHINE EFFECT
   ========================= */
@@ -549,12 +543,12 @@
       transform: translateX(-100%);
       transition: transform 0.4s ease;
     }
-  
+
     .button-bar button:hover::before {
       transform: translateX(100%);
     }
-  
-  
+
+
     /* =========================
      FOCUS
   ========================= */
@@ -562,7 +556,7 @@
       outline: 2px solid #3b82f6;
       outline-offset: 2px;
     }
-  
+
     /* ==========================================
      TABLE WRAPPER FOR EMPOLYEE DETAIL PAGE
   ============================================ */
@@ -575,8 +569,8 @@
       margin: 0 auto;
       display: flex;
     }
-  
-  
+
+
     .Emp-Table-Wrapper table {
       width: 100%;
       border-collapse: collapse;
@@ -587,12 +581,12 @@
       margin: 10px;
       height: max-content;
     }
-  
+
     .Emp-Table-Wrapper td {
       padding: 8px 10px;
       border-bottom: 1px solid #e5e7eb;
     }
-  
+
     /* label column */
     .Emp-Table-Wrapper td:first-child {
       width: 220px;
@@ -600,22 +594,22 @@
       color: #334155;
       background: #f8fafc;
     }
-  
+
     /* value column */
     .Emp-Table-Wrapper td:last-child {
       color: #111827;
     }
-  
+
     /* zebra effect */
     .Emp-Table-Wrapper tr:nth-child(even) td:last-child {
       background: #fafafa;
     }
-  
+
     /* hover */
     .Emp-Table-Wrapper tr:hover td {
       background: #eef6ff;
     }
-  
+
     .Emp-Table-Wrapper th {
       position: sticky;
       top: 0;
@@ -631,7 +625,7 @@
       overflow-wrap: break-word;
       line-height: 1.2;
     }
-  
+
     /* =========================
      TABLE WRAPPER
   ========================= */
@@ -642,8 +636,8 @@
       width: 99.8%;
       height: calc(100vh - 90px);
     }
-  
-  
+
+
     /* =========================
      TABLE BASE
   ========================= */
@@ -658,8 +652,8 @@
       border-radius: 8px;
       margin: 0 auto;
     }
-  
-  
+
+
     /* =========================
      HEADER (TOP ROW)
   ========================= */
@@ -678,11 +672,11 @@
       overflow-wrap: break-word;
       line-height: 1.2;
     }
-  
+
     #PBDB thead th {
       max-width: 60px;
     }
-  
+
     /* =========================
      BODY CELLS
   ========================= */
@@ -692,24 +686,24 @@
       white-space: nowrap;
       z-index: 1;
     }
-  
-  
+
+
     /* =========================
      ROW STRIPING
   ========================= */
     .DB-Table-Wrapper tbody tr:nth-child(even) {
       background: #fafafa;
     }
-  
-  
+
+
     /* =========================
      ROW HOVER
   ========================= */
     .DB-Table-Wrapper tbody tr:hover td {
       background: yellow;
     }
-  
-  
+
+
     /* =========================
      FIRST COLUMN (STICKY)
   ========================= */
@@ -723,8 +717,8 @@
       box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08), 4px 0 8px rgba(0, 0, 0, 0.04);
       /* 🔥 layered shadow */
     }
-  
-  
+
+
     /* =========================
      TOP-LEFT CELL (CRITICAL FIX)
   ========================= */
@@ -739,8 +733,8 @@
       border-right: 1px solid #374151;
       box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.2);
     }
-  
-  
+
+
     /* =========================
      COLUMN DIVIDERS
   ========================= */
@@ -748,8 +742,8 @@
     .DB-Table-Wrapper th:not(:last-child) {
       border-right: 1px solid #f1f5f9;
     }
-  
-  
+
+
     /* =========================
      CHECKBOX STYLE
   ========================= */
@@ -758,7 +752,7 @@
       accent-color: #3b82f6;
       pointer-events: none;
     }
-  
+
     .Selection-bar {
       display: flex;
       flex-direction: row;
@@ -770,20 +764,20 @@
       align-items: center;
       justify-content: space-between;
     }
-  
+
     .Selection-bar table {
       width: 100%;
       display: block;
       flex: 1;
     }
-  
+
     .Selection-bar td:nth-child(odd) {
       padding-right: 3px;
       text-align: right;
       font-weight: 600;
     }
-  
-  
+
+
     /* ===============================================
      PAY BILL PAGE CSS
   =================================================== */
@@ -796,7 +790,7 @@
       /* adjust header height */
       gap: 10px;
     }
-  
+
     /* ================= CHILD TABLE WRAPPERS ================= */
     .PB-Table-WrapperGO,
     .PB-Table-WrapperNPS {
@@ -812,7 +806,7 @@
       gap: 0;
       margin: 0 3px;
     }
-  
+
     /* ================= TABLE ================= */
     .PB-Table-WrapperGO table,
     .PB-Table-WrapperNPS table {
@@ -823,48 +817,48 @@
       background: #ffffff;
       border-radius: 10px;
     }
-  
+
     /* ================= TOGGLE ================= */
     /* safer than absolute */
     #PB_GOEditTbl,
     #PB_NPSEditTbl {
       display: none;
     }
-  
+
     .hidden-col {
       display: none;
     }
-  
+
     #PB_GOEditTbl tbody tr:not(:last-child) td:not(:first-child),
     #PB_NPSEditTbl tbody tr:not(:last-child) td:not(:first-child) {
       padding: 0;
     }
-  
+
     #PB_GOEditTbl td:first-child,
     #PB_NPSEditTbl td:first-child {
       padding: 0 8px;
     }
-  
+
     .edit-mode #PB_GOEditTbl,
     .edit-mode #PB_NPSEditTbl {
       display: table;
     }
-  
+
     .edit-mode #PB_GOViewTbl,
     .edit-mode #PB_NPSViewTbl {
       display: none;
     }
-  
+
     #PB_GOEditTbl td,
     #PB_NPSEditTbl td {
       height: 20px;
     }
-  
+
     #PB_GOEditTbl td *,
     #PB_NPSEditTbl td * {
       line-height: 1 !important;
     }
-  
+
     /* ================= CELLS ================= */
     .PB-Table-WrapperGO th,
     .PB-Table-WrapperGO td,
@@ -874,15 +868,15 @@
       border-bottom: 1px solid #e5e7eb;
       border-right: dotted 1px #d7dae0;
     }
-  
+
     /* ================= HOVER ================= */
     .PB-Table-WrapperGO tbody tr:hover td,
     .PB-Table-WrapperNPS tbody tr:hover td {
       background: #eef6ff;
     }
-  
+
     /* ================= TITLE ROW ================= */
-  
+
     .pb-title-div {
       width: 100%;
       text-align: center;
@@ -897,7 +891,7 @@
       margin: 0 2px;
       margin-bottom: -10px;
     }
-  
+
     /* ================= HEADER ROW ================= */
     .PB-Table-Wrapper thead tr th {
       position: sticky;
@@ -914,8 +908,8 @@
       color: #ffffff;
       font-size: 10px;
     }
-  
-  
+
+
     /* ================= STICKY FIRST COLUMN ================= */
     .PB-Table-Wrapper table th:first-child,
     .PB-Table-Wrapper table td:first-child {
@@ -923,26 +917,26 @@
       left: 0;
       z-index: 8;
       white-space: nowrap;
-  
+
       /* 🔥 IMPORTANT FIX */
       background: white;
       min-width: 210px;
       width: 210px;
     }
-  
+
     /* header row first column */
     .PB-Table-Wrapper thead tr th:first-child {
       z-index: 50;
       background: #1f4e79;
       color: #ffffff;
     }
-  
+
     /* ================= SEPARATOR ================= */
     .PB-Table-Wrapper table td:first-child,
     .PB-Table-Wrapper table th:first-child {
       box-shadow: 2px 0 0 #e5e7eb;
     }
-  
+
     /* ================= TOTAL ROW ================= */
     .total-row td {
       position: sticky;
@@ -953,12 +947,12 @@
       box-shadow: 0 -2px 0 #f59e0b;
       padding: 6px 4px !important;
     }
-  
+
     .PB-Table-Wrapper table tr:last-child td:first-child {
       box-shadow: 0 -2px 0 #f59e0b;
       background: #fef3c7;
     }
-  
+
     /* 🔹 TEXT INPUT */
     .PB-Table-Wrapper input[type="text"] {
       padding: 0 2px;
@@ -973,14 +967,14 @@
       box-sizing: border-box;
       height: 100%;
     }
-  
+
     .PB-Table-Wrapper input[type="text"]:hover,
     .PB-Table-Wrapper textarea:hover {
       border-color: #cbd5e1;
       background-color: #e0e7ff;
       /* 🔥 hover */
     }
-  
+
     .PB-Table-Wrapper input[type="text"]:focus,
     .PB-Table-Wrapper textarea:focus {
       outline: none;
@@ -988,7 +982,7 @@
       background-color: #151a36;
       color: white;
     }
-  
+
     /* 🔹 READONLY + DISABLED INPUT → transparent */
     .PB-Table-Wrapper input[type="text"]:read-only,
     .PB-Table-Wrapper input[type="text"]:disabled {
@@ -997,7 +991,7 @@
       /* optional muted */
       border: none;
     }
-  
+
     /* 🔹 SELECT (only NOT disabled → keep normal look) */
     .PB-Table-Wrapper select:not(:disabled) {
       padding: 0 2px;
@@ -1011,12 +1005,12 @@
       height: 100%;
       /* ❗ no background override → keeps default */
     }
-  
+
     .PB-Table-Wrapper select:disabled {
       border-radius: 0;
       border: none;
     }
-  
+
     /* 🔹 CHECKBOX */
     .PB-Table-Wrapper input[type="checkbox"] {
       height: 14px;
@@ -1029,36 +1023,36 @@
       justify-content: center;
       margin: auto;
     }
-  
+
     /* 🔹 CELL with editable input/select */
     .PB-Table-Wrapper td:has(input:not(:disabled):not(:read-only), select:not(:disabled), textarea) {
       border: 0.2px solid #94a3b8;
       background-color: #d3fc58;
     }
-  
+
     /* 🔹 CELL with readonly or disabled input */
     .PB-Table-Wrapper td:has(input:disabled, input:read-only, span) {
       background: transparent;
     }
-  
+
     /* 🔹 CELL with checkbox → always border */
     .PB-Table-Wrapper td:has(input[type="checkbox"]) {
       border: 0.2px solid #94a3b8;
       background-color: #d3fc58;
     }
-  
+
     .PB-Table-Wrapper td:has(input[type="checkbox"]:disabled, select:disabled) {
       border: 0.2px solid #94a3b8;
       background-color: #e5e7eb;
     }
-  
+
     /* 🔹 REMOVE checkbox focus glow */
     .PB-Table-Wrapper input[type="checkbox"]:focus {
       outline: none;
       box-shadow: none;
-  
+
     }
-  
+
     .month-toggle-input {
       width: 80px;
       border: none;
@@ -1073,7 +1067,7 @@
       background-color: #d3fc58;
       text-align: center;
     }
-  
+
     .readonly-cell {
       background: white;
       color: #444;
@@ -1081,7 +1075,7 @@
       pointer-events: none;
       font-weight: 500;
     }
-  
+
     .Error_Note {
       background: linear-gradient(180deg, rgba(114, 204, 197, 1) 0%, rgba(255, 255, 255, 1) 34%, rgba(114, 204, 197, 1) 100%);
       padding: 4px 10px;
@@ -1096,14 +1090,14 @@
       border: solid 1px #cccccc;
       overflow: auto;
     }
-  
+
     .PB-error {
       color: red;
       font-weight: bold;
       font-size: 11px;
       font-style: italic;
     }
-  
+
     /* Container */
     .action-group {
       display: flex;
@@ -1116,39 +1110,39 @@
       border-radius: 8px;
       justify-content: center;
       min-height: 32px;
-  
+
     }
-  
+
     /* Base button */
     .action-group button {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-  
+
       padding: 4px 0px 4px 8px;
       font-weight: 500;
-  
+
       border-radius: 6px;
       border: 1px solid transparent;
-  
+
       /* 🔥 subtle layered background */
       background: #ffffff;
       color: #334155;
-  
+
       cursor: pointer;
       transition: all 0.25s ease;
-  
+
       /* soft elevation */
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.36);
     }
-  
+
     /* Disabled */
     .action-group button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       box-shadow: none;
     }
-  
+
     /* Hover ONLY when NOT disabled */
     .action-group button:not(:disabled):hover {
       padding: 4px 8px;
@@ -1156,7 +1150,7 @@
       border-color: #cbd5e1;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
-  
+
     /* Show text only when enabled */
     .action-group button:not(:disabled):hover span {
       max-width: 120px;
@@ -1164,20 +1158,20 @@
       transition: max-width 2s ease;
       font-weight: 800;
     }
-  
+
     /* Icon resize only when enabled */
     .action-group button:not(:disabled):hover svg {
       width: 16px;
       height: 16px;
     }
-  
+
     /* Icon */
     .action-group button svg {
       width: 18px;
       height: 18px;
       flex-shrink: 0;
     }
-  
+
     /* Hide text */
     .action-group button span {
       max-width: 0;
@@ -1186,71 +1180,71 @@
       opacity: 0;
       transition: max-width 0.5s ease, opacity 1s ease;
     }
-  
+
     /* Active */
     .action-group button:active {
       transform: scale(0.96);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
-  
+
     /* ✏️ Edit (Professional Blue - soft) */
     .action-group button:nth-child(1) {
       color: #1d4ed8;
       border-color: #dbeafe;
       background: #f8fbff;
     }
-  
+
     .action-group button:nth-child(1):hover {
       background: #eef5ff;
     }
-  
+
     /* ➕ Add (Professional Green - soft) */
     .action-group button:nth-child(2) {
       color: #15803d;
       border-color: #dcfce7;
       background: #f7fef9;
     }
-  
+
     .action-group button:nth-child(2):hover {
       background: #ecfdf5;
     }
-  
+
     /* 🖨️ Print (Neutral Professional Gray) */
     .action-group button:nth-child(3) {
       color: #334155;
       border-color: #e2e8f0;
       background: #f8fafc;
     }
-  
+
     .action-group button:nth-child(3):hover {
       background: #f1f5f9;
     }
-  
+
     .action-group button:nth-child(4) {
       color: #217346;
       border-color: #e2e8f0;
       background: white;
     }
-  
+
     .action-group button:nth-child(4):hover {
       background: #f1f5f9;
     }
-  
+
     /* Upload mode */
     .action-group button.upload-mode {
       background: #16a34a !important;
       color: #ffffff !important;
-  
+
       box-shadow:
         0 0 6px rgba(34, 197, 94, 0.4),
         0 0 12px rgba(34, 197, 94, 0.3);
     }
-  
+
     .action-group button.upload-mode:hover {
       background: #15803d !important;
     }
-  
-  
+
+
     .status {
       display: inline-block;
       padding: 3px 8px;
@@ -1261,833 +1255,1108 @@
       letter-spacing: 0.3px;
       margin-left: 10px;
     }
-  
+
     /* Paid → Green */
     .status.paid {
       color: #166534;
       background: #dcfce7;
       border: 1px solid #86efac;
     }
-  
+
     /* Unpaid → Red */
     .status.unpaid {
       color: #991b1b;
       background: #fee2e2;
       border: 1px solid #fca5a5;
     }
-  
+
     /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
   =================================================== */
     @media (max-width: 900px) {
-  
+
       body::before {
         opacity: 0.06;
       }
-  
+
       .button-bar {
         flex-direction: column;
         align-items: stretch;
       }
-  
+
       select {
         min-width: 90%;
         width: 90%
       }
-  
+
       div {
         width: 100%
       }
-  
+
       .Selection-bar {
         flex-direction: column;
       }
-  
+
       .action-group {
         width: 100%;
       }
-  
+
       .button-bar button {
         width: 100%;
         text-align: center;
         flex: none;
-  
+
         /* 🔥 restore base look */
         background: #e5e7eb;
         color: #374151;
       }
-  
+
       /* 🔥 active button visible */
       .button-bar button.active {
         background: #111827;
         color: #ffffff;
       }
-  
+
       /* 🔥 remove sliding indicator */
       .button-bar::after {
         display: none;
       }
-  
+
       /* Sidebar collapse */
       .left-panel {
         width: 60px !important;
         min-width: 60px !important;
       }
-  
+
       /* Hide text */
       .left-panel .menu-btn span,
       .left-panel .logout-btn span {
         display: none;
       }
-  
+
       /* Center icons */
       .left-panel .menu-btn,
       .left-panel .logout-btn {
         justify-content: center;
         padding: 4px 0;
       }
-  
+
       /* Active button adjust */
       .left-panel .menu-btn.active {
         transform: translateX(10px);
         border-radius: 999px 0 0 999px;
       }
-  
-  
+
+
       #EmpPage td:first-child {
         width: 140px;
       }
-  
+
       .status {
         padding: 3px 8px;
         font-size: 11px;
       }
-  
-  
+
+
     }
   </style>
 
-  </head>
+</head>
 
-  <body>
+<body>
 
-    <div class="app">
+  <div class="app">
 
-      <div class="left-panel collapsed" id="sidebar">
+    <div class="left-panel collapsed" id="sidebar">
 
-        <!-- Toggle button -->
-        <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+      <!-- Toggle button -->
+      <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-        <div class="menu-list">
+      <div class="menu-list">
 
-          <button class="menu-btn active" data-tooltip="Dashboard"
-            data-page="DashBoard">
-            <i data-lucide="layout-dashboard"></i>
-            <span>Dashboard</span>
-          </button>
+        <button class="menu-btn active" data-tooltip="Dashboard" data-page="DashBoard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </button>
 
-          <button class="menu-btn" data-tooltip="Employee Details"
-            data-page="EmpPage">
-            <i data-lucide="user"></i>
-            <span>Employee Details</span>
-          </button>
+        <button class="menu-btn" data-tooltip="Employee Details" data-page="EmpPage">
+          <i data-lucide="user"></i>
+          <span>Employee Details</span>
+        </button>
 
-          <button class="menu-btn" data-tooltip="Pay Bill"
-            data-page="PayBillPage">
-            <i data-lucide="file-text"></i>
-            <span>Pay Bill</span>
-          </button>
+        <button class="menu-btn" data-tooltip="Pay Bill" data-page="PayBillPage">
+          <i data-lucide="file-text"></i>
+          <span>Pay Bill</span>
+        </button>
 
-          <button class="menu-btn" data-tooltip="Salary Slip"
-            data-page="SalarySlipPage">
-            <i data-lucide="receipt"></i>
-            <span>Salary Slip</span>
-          </button>
+        <button class="menu-btn" data-tooltip="Salary Slip" data-page="SalarySlipPage">
+          <i data-lucide="receipt"></i>
+          <span>Salary Slip</span>
+        </button>
 
-          <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
-            <i data-lucide="calculator"></i>
-            <span>Income Tax</span>
-          </button>
+        <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
+          <i data-lucide="calculator"></i>
+          <span>Income Tax</span>
+        </button>
 
-          <button class="menu-btn" data-tooltip="Pensions"
-            data-page="PensionPage">
-            <i data-lucide="landmark"></i>
-            <span>Pensions</span>
-          </button>
+        <button class="menu-btn" data-tooltip="Pensions" data-page="PensionPage">
+          <i data-lucide="landmark"></i>
+          <span>Pensions</span>
+        </button>
 
-          <button class="menu-btn" data-tooltip="Budgets"
-            data-page="BudgetPage">
-            <i data-lucide="pie-chart"></i>
-            <span>Budgets</span>
-          </button>
+        <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
+          <i data-lucide="pie-chart"></i>
+          <span>Budgets</span>
+        </button>
 
-          <button class="menu-btn" data-tooltip="Database"
-            data-page="DatabasePage">
-            <i data-lucide="database"></i>
-            <span>Database</span>
-          </button>
-
-        </div>
-
-        <div class="menu-footer">
-          <button class="logout-btn" data-tooltip="Logout">
-            <i data-lucide="log-out"></i>
-            <span>Logout</span>
-          </button>
-        </div>
+        <button class="menu-btn" data-tooltip="Database" data-page="DatabasePage">
+          <i data-lucide="database"></i>
+          <span>Database</span>
+        </button>
 
       </div>
 
-      <div class="right-panel">
-
-        <img class="watermark"
-          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-
-        <div class="SectionPage" id="DashBoard">
-          <div class="header">
-            <h2>Office Management</h2>
-          </div>
-        </div>
-
-        <div class="SectionPage" id="EmpPage" style="display:none">
-          <div class="header">
-            <h2>Employee Profile Details</h2>
-          </div>
-          <div class="Selection-bar">
-            <table>
-              <colgroup>
-                <col style="width:100px">
-                <col style="width:120px">
-                <col style="width:100px">
-                <col style="width:270px">
-                <col style="width:100px">
-                <col style="width:80px">
-                <col style="width:90px">
-                <col style="width:80px">
-                <col style="width:0px">
-                <col style="width:70px">
-                <col style="width:50px">
-                <col style="width:50px">
-                <col style="width:120px">
-                <col style="width:80px">
-                <col style="width:120px">
-                <col style="width:30px">
-              </colgroup>
-              <tr>
-                <td><label for="EmpPage_Station">Station :</label></td>
-                <td><select id="EmpPage_Station"></select></td>
-                <td><label for="EmpPage_Emp">Employee :</label></td>
-                <td><select id="EmpPage_Emp"></select></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><label>TA Zone :</label></td>
-                <td><input disabled id="EmpPage_TAZone"></td>
-                <td><label>HRA Zone :</label></td>
-                <td><input disabled id="EmpPage_HRAZone"></td>
-                <td></td>
-              </tr>
-            </table>
-            <div class="action-group"></div>
-          </div>
-          <div class="Emp-Table-Wrapper">
-            <table id="EmpDetailTbl">
-              <tr><th colspan="2">Personal Details</th></tr>
-              <tr><td>Name</td><td id="Employee Name"></td></tr>
-              <tr><td>Department</td><td id="Department"></td></tr>
-              <tr><td>HRIS</td><td id="HRIS"></td></tr>
-              <tr><td>Designation</td><td id="Designation"></td></tr>
-              <tr><td>Section</td><td id="Section"></td></tr>
-              <tr><td>Group</td><td id="Group"></td></tr>
-              <tr><td>PAN</td><td id="PAN"></td></tr>
-              <tr><td>Aadhaar</td><td id="Aadhaar"></td></tr>
-              <tr><td>PFMS</td><td id="PFMS"></td></tr>
-              <tr><td>PRAN</td><td id="PRAN"></td></tr>
-              <tr><td>GPF</td><td id="GPF"></td></tr>
-              <tr><td>Salary Account</td><td id="Account"></td></tr>
-              <tr><td>Mobile</td><td id="Mobile"></td></tr>
-              <tr><td>Address</td><td id="Address"></td></tr>
-            </table>
-            <table>
-              <tr><th colspan="2">Pay Details</th></tr>
-              <tr><td>Date of Birth</td><td id="DOB"></td></tr>
-              <tr><td>Date of Joining</td><td id="DOJ"></td></tr>
-              <tr><td>Superannuation</td><td id="DOR"></td></tr>
-              <tr><td>Last Increment Date</td><td id="LastInc"></td></tr>
-              <tr><td>Last Drawn Salary Month</td><td
-                  id="LastSalMonth"></td></tr>
-              <tr><td>Last Drawn Pay Level</td><td id="LastPayLevel"></td></tr>
-              <tr><td>Last Drawn Grade Pay</td><td id="LastGradePay"></td></tr>
-              <tr><td>Last Drawn Pay Band</td><td id="LastPayBand"></td></tr>
-              <tr><td>Last Increment Level</td><td id="LastIndex"></td></tr>
-              <tr><td>Last Drawn Basic Pay</td><td id="LastBP"></td></tr>
-              <tr><td>Last Drawn DA</td><td id="LastDA"></td></tr>
-              <tr><td>Qualifying Service as on Today</td><td
-                  id="Qualifying Service"></td></tr>
-              <tr><td>Completed 6 Monthly Period as on Today</td><td
-                  id="Completed 6 Monthly Period"></td></tr>
-            </table>
-          </div>
-        </div>
-
-        <div class="SectionPage" id="PayBillPage" style="display:none">
-          <div class="header">
-            <h2>Pay Bill Generation</h2>
-          </div>
-          <div class="Selection-bar">
-            <table>
-              <colgroup>
-                <col style="width:100px">
-                <col style="width:120px">
-                <col style="width:100px">
-                <col style="width:270px">
-                <col style="width:100px">
-                <col style="width:90px">
-                <col style="width:100px">
-                <col style="width:90px">
-                <col style="width:0px">
-                <col style="width:70px">
-                <col style="width:50px">
-                <col style="width:40px">
-                <col style="width:120px">
-                <col style="width:80px">
-                <col style="width:120px">
-                <col style="width:30px">
-              </colgroup>
-              <tr>
-                <td><label for="PayBillPage_Station">Station :</label></td>
-                <td><select id="PayBillPage_Station"></select></td>
-                <td></td>
-                <td></td>
-                <td style="display:none"><label for="PayBillPage_Emp">Employee
-                    :</label></td>
-                <td style="display:none"><select
-                    id="PayBillPage_Emp"></select></td>
-                <td><label for="PayBillPage_FY">FY :</label></td>
-                <td><select id="PayBillPage_FY"></select></td>
-                <td><label for="PayBillPage_SalMonth">Month :</label></td>
-                <td><select id="PayBillPage_SalMonth"></select></td>
-                <td></td>
-                <td><span class="status paid">PAID</span></td>
-                <td><label>DA(%) :</td>
-                  <td><input style="max-width:40px;" disabled
-                      id="PayBillPage_DA%" type="text"></td>
-                  <td><label>TA Zone :</label></td>
-                  <td><input disabled id="PayBillPage_TAZone"></td>
-                  <td><label>HRA Zone :</label></td>
-                  <td><input disabled id="PayBillPage_HRAZone"></td>
-                  <td></td>
-                </tr>
-              </table>
-              <div class="action-group">
-                <button id="PBeditBtn"><i
-                    data-lucide="edit"></i><span>Edit</span></button>
-                <button id="PBaddBtn"><i
-                    data-lucide="plus"></i><span>Add</span></button>
-                <button id="PBprintBtn"><i
-                    data-lucide="printer"></i><span>Print</span></button>
-                <button id="PBexcelBtn"><i
-                    data-lucide="file-spreadsheet"></i><span>Excel</span></button>
-              </div>
-            </div>
-            <div class="PB-Table-Wrapper">
-              <div class="PB-Table-WrapperGO">
-                <table id="PB_GOViewTbl"></table>
-                <table id="PB_GOEditTbl"></table>
-              </div>
-              <div class="PB-Table-WrapperNPS">
-                <table id="PB_NPSViewTbl"></table>
-                <table id="PB_NPSEditTbl"></table>
-              </div>
-            </div>
-            <div class="Error_Note">
-              <span id="DA_Error" class="PB-error"></span>
-              <span id="GPF_Error" class="PB-error"></span>
-            </div>
-          </div>
-
-          <div class="SectionPage" id="SalarySlipPage" style="display:none">
-            <div class="header">
-              <h2>Salary Slip</h2>
-            </div>
-          </div>
-
-          <div class="SectionPage" id="ITPage" style="display:none">
-            <div class="header">
-              <h2>Income Tax Calculation</h2>
-            </div>
-          </div>
-
-          <div class="SectionPage" id="PensionPage" style="display:none">
-            <div class="header">
-              <h2>Pension Benifits & Calculations</h2>
-            </div>
-          </div>
-
-          <div class="SectionPage" id="BudgetPage" style="display:none">
-            <div class="header">
-              <h2>Budgets</h2>
-            </div>
-          </div>
-
-          <div class="SectionPage" id="DatabasePage" style="display:none">
-            <div class="header">
-              <h2>Database</h2>
-            </div>
-
-            <div class="button-bar">
-              <button onclick="showSheet('EmpDB',this)" class="active">Employee
-                Database</button>
-              <button onclick="showSheet('PBDB',this)">Pay Bill
-                Database</button>
-              <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
-                CPC</button>
-              <button onclick="showSheet('QtrsRateDB',this)">Quarters
-                Rate</button>
-              <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
-              <button onclick="showSheet('CommFactDB',this)">Commutation
-                Factors</button>
-              <button onclick="showSheet('ITDB',this)">IT Database</button>
-            </div>
-
-            <div class="DB-Table-Wrapper">
-              <table id="EmpDB"></table>
-              <table id="PBDB" style="display:none;"></table>
-              <table id="CPC7DB" style="display:none;"></table>
-              <table id="QtrsRateDB" style="display:none;"></table>
-              <table id="CityZoneDB" style="display:none;"></table>
-              <table id="CommFactDB" style="display:none;"></table>
-              <table id="ITDB" style="display:none;"></table>
-            </div>
-          </div>
-
-        </div>
-
+      <div class="menu-footer">
+        <button class="logout-btn" data-tooltip="Logout">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
       </div>
 
-      <script>
-  
-/* =========================
-   ELEMENT HELPERS
-========================= */
-function createEl(tag, props = {}, children = []) {
-  const el = document.createElement(tag);
+    </div>
 
-  Object.entries(props).forEach(([k, v]) => {
-    if (k === "class") el.className = v;
-    else if (k === "html") el.innerHTML = v;
-    else if (k === "text") el.textContent = v;
-    else el.setAttribute(k, v);
-  });
+    <div class="right-panel">
 
-  children.forEach(child => el.appendChild(child));
-  return el;
-}
+      <img class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
 
-function clearEl(el) {
-  if (typeof el === "string") el = id(el);
-  if (el) el.innerHTML = "";
-}
+      <div class="SectionPage" id="DashBoard">
+        <div class="header">
+          <h2>Office Management</h2>
+        </div>
+      </div>
 
+      <div class="SectionPage" id="EmpPage" style="display:none">
+        <div class="header">
+          <h2>Employee Profile Details</h2>
+        </div>
+        <div class="Selection-bar">
+          <table>
+            <colgroup>
+              <col style="width:100px">
+              <col style="width:120px">
+              <col style="width:100px">
+              <col style="width:270px">
+              <col style="width:100px">
+              <col style="width:80px">
+              <col style="width:90px">
+              <col style="width:80px">
+              <col style="width:0px">
+              <col style="width:70px">
+              <col style="width:50px">
+              <col style="width:50px">
+              <col style="width:120px">
+              <col style="width:80px">
+              <col style="width:120px">
+              <col style="width:30px">
+            </colgroup>
+            <tr>
+              <td><label for="EmpPage_Station">Station :</label></td>
+              <td><select id="EmpPage_Station"></select></td>
+              <td><label for="EmpPage_Emp">Employee :</label></td>
+              <td><select id="EmpPage_Emp"></select></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td><label>TA Zone :</label></td>
+              <td><input disabled id="EmpPage_TAZone"></td>
+              <td><label>HRA Zone :</label></td>
+              <td><input disabled id="EmpPage_HRAZone"></td>
+              <td></td>
+            </tr>
+          </table>
+          <div class="action-group"></div>
+        </div>
+        <div class="Emp-Table-Wrapper">
+          <table id="EmpDetailTbl">
+            <tr>
+              <th colspan="2">Personal Details</th>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td id="Employee Name"></td>
+            </tr>
+            <tr>
+              <td>Department</td>
+              <td id="Department"></td>
+            </tr>
+            <tr>
+              <td>HRIS</td>
+              <td id="HRIS"></td>
+            </tr>
+            <tr>
+              <td>Designation</td>
+              <td id="Designation"></td>
+            </tr>
+            <tr>
+              <td>Section</td>
+              <td id="Section"></td>
+            </tr>
+            <tr>
+              <td>Group</td>
+              <td id="Group"></td>
+            </tr>
+            <tr>
+              <td>PAN</td>
+              <td id="PAN"></td>
+            </tr>
+            <tr>
+              <td>Aadhaar</td>
+              <td id="Aadhaar"></td>
+            </tr>
+            <tr>
+              <td>PFMS</td>
+              <td id="PFMS"></td>
+            </tr>
+            <tr>
+              <td>PRAN</td>
+              <td id="PRAN"></td>
+            </tr>
+            <tr>
+              <td>GPF</td>
+              <td id="GPF"></td>
+            </tr>
+            <tr>
+              <td>Salary Account</td>
+              <td id="Account"></td>
+            </tr>
+            <tr>
+              <td>Mobile</td>
+              <td id="Mobile"></td>
+            </tr>
+            <tr>
+              <td>Address</td>
+              <td id="Address"></td>
+            </tr>
+          </table>
+          <table>
+            <tr>
+              <th colspan="2">Pay Details</th>
+            </tr>
+            <tr>
+              <td>Date of Birth</td>
+              <td id="DOB"></td>
+            </tr>
+            <tr>
+              <td>Date of Joining</td>
+              <td id="DOJ"></td>
+            </tr>
+            <tr>
+              <td>Superannuation</td>
+              <td id="DOR"></td>
+            </tr>
+            <tr>
+              <td>Last Increment Date</td>
+              <td id="LastInc"></td>
+            </tr>
+            <tr>
+              <td>Last Drawn Salary Month</td>
+              <td id="LastSalMonth"></td>
+            </tr>
+            <tr>
+              <td>Last Drawn Pay Level</td>
+              <td id="LastPayLevel"></td>
+            </tr>
+            <tr>
+              <td>Last Drawn Grade Pay</td>
+              <td id="LastGradePay"></td>
+            </tr>
+            <tr>
+              <td>Last Drawn Pay Band</td>
+              <td id="LastPayBand"></td>
+            </tr>
+            <tr>
+              <td>Last Increment Level</td>
+              <td id="LastIndex"></td>
+            </tr>
+            <tr>
+              <td>Last Drawn Basic Pay</td>
+              <td id="LastBP"></td>
+            </tr>
+            <tr>
+              <td>Last Drawn DA</td>
+              <td id="LastDA"></td>
+            </tr>
+            <tr>
+              <td>Qualifying Service as on Today</td>
+              <td id="Qualifying Service"></td>
+            </tr>
+            <tr>
+              <td>Completed 6 Monthly Period as on Today</td>
+              <td id="Completed 6 Monthly Period"></td>
+            </tr>
+          </table>
+        </div>
+      </div>
 
-/* =========================
-   CLASS HELPERS
-========================= */
-function addClass(el, cls) {
-  if (typeof el === "string") el = id(el);
-  el?.classList.add(cls);
-}
+      <div class="SectionPage" id="PayBillPage" style="display:none">
+        <div class="header">
+          <h2>Pay Bill Generation</h2>
+        </div>
+        <div class="Selection-bar">
+          <table>
+            <colgroup>
+              <col style="width:100px">
+              <col style="width:120px">
+              <col style="width:100px">
+              <col style="width:270px">
+              <col style="width:100px">
+              <col style="width:90px">
+              <col style="width:100px">
+              <col style="width:90px">
+              <col style="width:0px">
+              <col style="width:70px">
+              <col style="width:50px">
+              <col style="width:40px">
+              <col style="width:120px">
+              <col style="width:80px">
+              <col style="width:120px">
+              <col style="width:30px">
+            </colgroup>
+            <tr>
+              <td><label for="PayBillPage_Station">Station :</label></td>
+              <td><select id="PayBillPage_Station"></select></td>
+              <td></td>
+              <td></td>
+              <td style="display:none"><label for="PayBillPage_Emp">Employee
+                  :</label></td>
+              <td style="display:none"><select id="PayBillPage_Emp"></select></td>
+              <td><label for="PayBillPage_FY">FY :</label></td>
+              <td><select id="PayBillPage_FY"></select></td>
+              <td><label for="PayBillPage_SalMonth">Month :</label></td>
+              <td><select id="PayBillPage_SalMonth"></select></td>
+              <td></td>
+              <td><span class="status paid">PAID</span></td>
+              <td><label>DA(%) :</td>
+              <td><input style="max-width:40px;" disabled id="PayBillPage_DA%" type="text"></td>
+              <td><label>TA Zone :</label></td>
+              <td><input disabled id="PayBillPage_TAZone"></td>
+              <td><label>HRA Zone :</label></td>
+              <td><input disabled id="PayBillPage_HRAZone"></td>
+              <td></td>
+            </tr>
+          </table>
+          <div class="action-group">
+            <button id="PBeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
+            <button id="PBaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
+            <button id="PBprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
+            <button id="PBexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+          </div>
+        </div>
+        <div class="PB-Table-Wrapper">
+          <div class="PB-Table-WrapperGO">
+            <table id="PB_GOViewTbl"></table>
+            <table id="PB_GOEditTbl"></table>
+          </div>
+          <div class="PB-Table-WrapperNPS">
+            <table id="PB_NPSViewTbl"></table>
+            <table id="PB_NPSEditTbl"></table>
+          </div>
+        </div>
+        <div class="Error_Note">
+          <span id="DA_Error" class="PB-error"></span>
+          <span id="GPF_Error" class="PB-error"></span>
+        </div>
+      </div>
 
-function removeClass(el, cls) {
-  if (typeof el === "string") el = id(el);
-  el?.classList.remove(cls);
-}
+      <div class="SectionPage" id="SalarySlipPage" style="display:none">
+        <div class="header">
+          <h2>Salary Slip</h2>
+        </div>
+      </div>
 
-function toggleClass(el, cls) {
-  if (typeof el === "string") el = id(el);
-  el?.classList.toggle(cls);
-}
+      <div class="SectionPage" id="ITPage" style="display:none">
+        <div class="header">
+          <h2>Income Tax Calculation</h2>
+        </div>
+      </div>
 
+      <div class="SectionPage" id="PensionPage" style="display:none">
+        <div class="header">
+          <h2>Pension Benifits & Calculations</h2>
+        </div>
+      </div>
 
-/* =========================
-   EVENT HELPERS
-========================= */
-function on(el, event, handler) {
-  if (typeof el === "string") el = id(el);
-  el?.addEventListener(event, handler);
-}
+      <div class="SectionPage" id="BudgetPage" style="display:none">
+        <div class="header">
+          <h2>Budgets</h2>
+        </div>
+      </div>
 
+      <div class="SectionPage" id="DatabasePage" style="display:none">
+        <div class="header">
+          <h2>Database</h2>
+        </div>
 
-/* =========================
-   DATA HELPERS
-========================= */
-function groupBy(arr, key) {
-  return arr.reduce((acc, obj) => {
-    const k = obj[key];
-    (acc[k] = acc[k] || []).push(obj);
-    return acc;
-  }, {});
-}
+        <div class="button-bar">
+          <button onclick="showSheet('EmpDB',this)" class="active">Employee
+            Database</button>
+          <button onclick="showSheet('PBDB',this)">Pay Bill
+            Database</button>
+          <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
+            CPC</button>
+          <button onclick="showSheet('QtrsRateDB',this)">Quarters
+            Rate</button>
+          <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
+          <button onclick="showSheet('CommFactDB',this)">Commutation
+            Factors</button>
+          <button onclick="showSheet('ITDB',this)">IT Database</button>
+        </div>
 
-function unique(arr, key) {
-  return [...new Map(arr.map(item => [item[key], item])).values()];
-}
+        <div class="DB-Table-Wrapper">
+          <table id="EmpDB"></table>
+          <table id="PBDB" style="display:none;"></table>
+          <table id="CPC7DB" style="display:none;"></table>
+          <table id="QtrsRateDB" style="display:none;"></table>
+          <table id="CityZoneDB" style="display:none;"></table>
+          <table id="CommFactDB" style="display:none;"></table>
+          <table id="ITDB" style="display:none;"></table>
+        </div>
+      </div>
 
+    </div>
 
-/* =========================
-   FORMAT HELPERS
-========================= */
+  </div>
 
-function formatNumber(num) {
-  return Number(num || 0).toLocaleString("en-IN");
-}
+  <script>
 
-function formatCurrency(num) {
-  return "₹ " + formatNumber(num);
-}
-
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return isNaN(d) ? "" : d.toLocaleDateString("en-IN");
-}
-
-function setValue(input, val) {
-  if (!input) return;
-  input.dataset.raw = val;
-  input.value = formatCurrency(val);
-}
-
-function getNum(tr, col) {
-  const el = getCellInput(tr, col);
-  return num(el?.dataset?.raw ?? el?.value);
-}
-
-/* =========================
-   SAFE VALUE HELPERS
-========================= */
-function val(v, def = "") {
-  return (v === null || v === undefined) ? def : v;
-}
-
-function num(v) {
-  return Number(String(v).replace(/[^\d.-]/g, "")) || 0;
-}
-
-/* =========================
-   VISIBILITY HELPERS
-========================= */
-function show(el) {
-  if (typeof el === "string") el = id(el);
-  if (el) el.style.display = "block";
-}
-
-function hide(el) {
-  if (typeof el === "string") el = id(el);
-  if (el) el.style.display = "none";
-}
-
-function getColIndex(headers, name) {
-  return headers.findIndex(h => h.toLowerCase().trim() === name.toLowerCase());
-}
-/* =========================
-   DEBUG
-========================= */
-function log(...args) {
-  console.log(...args);
-}
 
     /* =========================
     DOM SHORTCUTS
-  ========================= */
-  const id  = document.getElementById.bind(document);
-  const qs  = document.querySelector.bind(document);
-  const qsa = document.querySelectorAll.bind(document);
+    ========================= */
+    const id = document.getElementById.bind(document);
+    const qs = document.querySelector.bind(document);
+    const qsa = document.querySelectorAll.bind(document);
 
-  let sheetCache = {};
-  let financialYears = [];
-  let GPF_MESSAGES = [];
+    let sheetCache = {};
+    let financialYears = [];
+    let GPF_MESSAGES = [];
 
-// Load data on start
-window.onload = loadAllData;
+    /* ============================================================
+    🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
+    =================================================================== */
 
-function renderIcons() {
-  qsa("i[data-lucide]").forEach(el => {
-    el.innerHTML = "";
-  });
+    window.addEventListener("resize", moveIndicator);
 
-  lucide.createIcons({
-    icons: lucide.icons,
-    nameAttr: "data-lucide",
-    attrs: {
-      "stroke-width": 2
-    }
-  });
-}
+    document.addEventListener("DOMContentLoaded", async () => {
 
-// GET DATA
-async function loadTable(api, tableId) {
+      loadSidebarState();
+      initMenu();
 
-  try {
-    let res = await fetch(`https://office-management-f425.onrender.com/${api}`);
+      // Default page click
+      const firstBtn = qs('.menu-btn');
+      if (firstBtn) firstBtn.click();
 
-    if (!res.ok) {
-      console.error("API failed:", api);
-      return;
-    }
+      // Load ALL DATA HERE (🔥 single place)
+      await loadAllData();
+      await loadData();
+      initFilters();
 
-    let result = await res.json();
+      // Indicator AFTER UI ready
+      moveIndicator();
 
-    console.log("API:", api, result); // debug
-
-    let headers, data;
-
-    // 🔥 HANDLE BOTH API FORMATS
-    if (Array.isArray(result)) {
-      // OLD FORMAT (get_all_records)
-      headers = Object.keys(result[0]);
-      data = result.map(obj => headers.map(h => obj[h]));
-    } else if (result.headers && result.rows) {
-      // NEW FORMAT (get_all_values)
-      headers = result.headers;
-      data = result.rows;
-    } else {
-      console.error("Invalid API format:", api);
-      return;
-    }
-
-    let table = document.getElementById(tableId);
-    if (!table) {
-      console.error("Table not found:", tableId);
-      return;
-    }
-
-    table.innerHTML = "";
-
-    if (!data || data.length === 0) return;
-
-    // =========================
-    // HEADER
-    // =========================
-    let thead = "<thead><tr>";
-    headers.forEach(h => {
-      thead += `<th>${h}</th>`;
+      if (typeof lucide !== "undefined") {
+        renderIcons();
+      }
     });
-    thead += "</tr></thead>";
 
-    // =========================
-    // BODY
-    // =========================
-    let tbody = "<tbody>";
 
-    data.forEach(row => {
-      let tr = "<tr>";
 
-      row.forEach(val => {
-        tr += `<td>${val ?? ""}</td>`;
+    //🔥🔥🔥🔥 GET DATA FROM SHEET🔥🔥🔥🔥//
+    async function loadTable(api, tableId) {
+
+      try {
+        let res = await fetch(`https://office-management-f425.onrender.com/${api}`);
+
+        if (!res.ok) {
+          console.error("API failed:", api);
+          return;
+        }
+
+        let result = await res.json();
+
+        console.log("API:", api, result); // debug
+
+        let headers, data;
+
+        // 🔥 HANDLE BOTH API FORMATS
+        if (Array.isArray(result)) {
+          // OLD FORMAT (get_all_records)
+          headers = Object.keys(result[0]);
+          data = result.map(obj => headers.map(h => obj[h]));
+        } else if (result.headers && result.rows) {
+          // NEW FORMAT (get_all_values)
+          headers = result.headers;
+          data = result.rows;
+        } else {
+          console.error("Invalid API format:", api);
+          return;
+        }
+
+        let table = document.getElementById(tableId);
+        if (!table) {
+          console.error("Table not found:", tableId);
+          return;
+        }
+
+        table.innerHTML = "";
+
+        if (!data || data.length === 0) return;
+
+        // ==============HEADER=========================
+        let thead = "<thead><tr>";
+        headers.forEach(h => {
+          thead += `<th>${h}</th>`;
+        });
+        thead += "</tr></thead>";
+
+        // =============BODY=========================
+        let tbody = "<tbody>";
+
+        data.forEach(row => {
+          let tr = "<tr>";
+
+          row.forEach(val => {
+            tr += `<td>${val ?? ""}</td>`;
+          });
+
+          tr += "</tr>";
+          tbody += tr;
+        });
+
+        tbody += "</tbody>";
+
+        // ===========FINAL TABLE========================
+        table.innerHTML = thead + tbody;
+
+      } catch (err) {
+        console.error("Error loading table:", api, err);
+      }
+    }
+
+    function loadAllData() {
+      loadTable("emp", "EmpDB");
+      loadTable("pb", "PBDB");
+      loadTable("cpc", "CPC7DB");
+      loadTable("qtrs", "QtrsRateDB");
+      loadTable("city", "CityZoneDB");
+      loadTable("comm", "CommFactDB");
+      loadTable("it", "ITDB");
+    }
+
+    function renderIcons() {
+      qsa("i[data-lucide]").forEach(el => {
+        el.innerHTML = "";
       });
 
-      tr += "</tr>";
-      tbody += tr;
-    });
-
-    tbody += "</tbody>";
-
-    // =========================
-    // FINAL TABLE
-    // =========================
-    table.innerHTML = thead + tbody;
-
-  } catch (err) {
-    console.error("Error loading table:", api, err);
-  }
-}
-
-function loadAllData() {
-  loadTable("emp", "EmpDB");
-  loadTable("pb", "PBDB");
-  loadTable("cpc", "CPC7DB");
-  loadTable("qtrs", "QtrsRateDB");
-  loadTable("city", "CityZoneDB");
-  loadTable("comm", "CommFactDB");
-  loadTable("it", "ITDB");
-}
+      lucide.createIcons({
+        icons: lucide.icons,
+        nameAttr: "data-lucide",
+        attrs: {
+          "stroke-width": 2
+        }
+      });
+    }
 
 
-/* =========================
-   SIDEBAR TOGGLE
-========================= */
-function toggleSidebar() {
-  const sidebar = id("sidebar");
-  const app = qs(".app");
 
-  toggleClass(sidebar, "collapsed");
-  toggleClass(app, "collapsed");
+    /* =======================================================================
+    🔥🔥🔥🔥SELECT DROPDOWN UPDATION & SYNCH WITH ALL SELECT🔥🔥🔥🔥
+    ========================================================================== */
+    let filters = {
+      station: "",
+      employee: "",
+      fy: "",
+      month: ""
+    };
 
-  localStorage.setItem(
-    "sidebarCollapsed",
-    sidebar.classList.contains("collapsed")
-  );
-}
+    const selectMap = {
+      station: [
+        "EmpPage_Station",
+        //"SalarySlipPage_Station",
+        //"ITPage_Station",
+        //"PensionPage_Station",
+        "PayBillPage_Station"
+      ],
+      employee: [
+        "EmpPage_Emp",
+        //"ITPage_Emp",
+        //"PensionPage_Emp",
+        //"SalarySlipPage_Emp",
+        "PayBillPage_Emp"
+      ],
+      fy: [
+        "PayBillPage_FY",
+        //"ITPage_FY",
+        //"SalarySlipPage_FY"
+      ],
+      month: [
+        "PayBillPage_SalMonth",
+        //"SalarySlipPage_SalMonth"
+      ]
+    };
 
-
-/* =========================
-   LOAD SIDEBAR STATE
-========================= */
-function loadSidebarState() {
-  const sidebar = id("sidebar");
-  const app = qs(".app");
-
-  if (localStorage.getItem("sidebarCollapsed") === "true") {
-    addClass(sidebar, "collapsed");
-    addClass(app, "collapsed");   /* 🔥 FIX */
-  }
-}
-
-
-/* =========================
-   INIT APP
-========================= */
-window.addEventListener("DOMContentLoaded", () => {
-
-  loadSidebarState();
-  initMenu();  
-
-  // 🔥 default page
-  const firstBtn = qs('.menu-btn');
-  if (firstBtn) firstBtn.click();
-
-  moveIndicator();
-
-  if (typeof lucide !== "undefined") {
-    renderIcons();
-  }
-});
-
-
-/* =========================
-   MENU HANDLER (USING HELPERS)
-========================= */
-
-function initMenu() {
-
-  const buttons = qsa('.menu-btn');
-  const pages = qsa('.SectionPage');
-
-  buttons.forEach(btn => {
-
-    on(btn, 'click', () => {
-
-      const pageId = btn.dataset.page;
-
-      // hide all pages
-      pages.forEach(p => hide(p));
-
-      // show selected page
-      show(pageId);
-
-      // active state
-      buttons.forEach(b => removeClass(b, 'active'));
-      addClass(btn, 'active');
-
-      // 🔥 ADD THIS BLOCK HERE
-      if (pageId === "DatabasePage") {
-        setTimeout(() => {
-          initDatabaseDefault();
-          moveIndicator();
-        }, 0);
+    function getValue(type) {
+      for (let elId of selectMap[type]) {
+        let el = id(elId);  // ✅ correct
+        if (el && el.value) return el.value;
       }
+      return "";
+    }
 
+    function setValueSelect(type, value) {
+      selectMap[type].forEach(eid => {
+        let el = id(eid);
+        if (el) el.value = value;
+      });
+    }
+
+
+    function getFinancialYear(monthStr) {
+
+      // Example: Apr-2025
+      let [mon, year] = monthStr.split("-");
+      year = parseInt(year);
+
+      const months = {
+        Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+        Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+      };
+
+      let m = months[mon];
+
+      if (m >= 3) {
+        return `${year}-${(year + 1).toString().slice(-2)}`;
+      } else {
+        return `${year - 1}-${year.toString().slice(-2)}`;
+      }
+    }
+
+
+    function updateAllSelects(type, dataSet, selectedValue) {
+
+      let values = [...dataSet].sort((a, b) => {
+
+        const order = ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"];
+
+        let [ma, ya] = a.split("-");
+        let [mb, yb] = b.split("-");
+
+        ya = parseInt(ya);
+        yb = parseInt(yb);
+
+        // sort by financial year logic
+        if (ya !== yb) return ya - yb;
+
+        return order.indexOf(ma) - order.indexOf(mb);
+      });
+      let valid = values.includes(selectedValue);
+      let finalValue = valid ? selectedValue : "";
+
+      selectMap[type].forEach(eid => {
+
+        let select = id(eid);
+        if (!select) return;
+
+        select.innerHTML = "<option value='' hidden>Select</option>";
+
+        values.forEach(val => {
+          let sel = val === finalValue ? "selected" : "";
+          select.innerHTML += `<option value="${val}" ${sel}>${val}</option>`;
+        });
+
+        select.value = finalValue;
+      });
+
+      return finalValue;
+    }
+
+
+    let empData = {};
+    let pbData = {};
+
+    async function loadData() {
+
+      let empRes = await fetch("https://office-management-f425.onrender.com/emp");
+      let pbRes = await fetch("https://office-management-f425.onrender.com/pb");
+
+      empData = await empRes.json();
+      pbData = await pbRes.json();
+    }
+
+    function applyFilters() {
+
+      if (!pbData.headers) return;
+
+      let headers = pbData.headers;
+      let rows = pbData.rows;
+
+      let stationIndex = headers.indexOf("Pay Drawn Station");
+      let empIndex = headers.indexOf("Employee Name");
+      let monthIndex = headers.indexOf("Salary Month");
+
+      let stationSet = new Set();
+      let empSet = new Set();
+      let fySet = new Set();
+      let monthSet = new Set();
+
+      rows.forEach(r => {
+
+        let station = r[stationIndex];
+        let emp = r[empIndex];
+        let month = r[monthIndex];
+        let fy = getFinancialYear(month);
+
+        if (filters.station && filters.station !== station) return;
+        if (filters.employee && filters.employee !== emp) return;
+        if (filters.fy && filters.fy !== fy) return;
+        if (filters.month && filters.month !== month) return;
+
+        stationSet.add(station);
+        empSet.add(emp);
+        fySet.add(fy);
+        monthSet.add(month);
+      });
+
+      filters.station = updateAllSelects("station", stationSet, filters.station);
+      filters.employee = updateAllSelects("employee", empSet, filters.employee);
+      filters.fy = updateAllSelects("fy", fySet, filters.fy);
+      filters.month = updateAllSelects("month", monthSet, filters.month);
+
+      // 🔥 ADD THIS LINE
+      if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+      }
+    }
+
+    function initGlobalEvents() {
+
+      Object.keys(selectMap).forEach(type => {
+
+        selectMap[type].forEach(eid => {
+
+          let el = id(eid);
+          if (!el) return;
+
+          el.addEventListener("change", () => {
+
+            filters[type] = el.value;
+
+            // 🔥 Sync all same-type dropdowns
+            setValueSelect(type, el.value);
+
+            applyFilters();
+          });
+        });
+      });
+    }
+
+
+
+    function fillSelectSmart(id, dataSet, oldValue) {
+
+      let select = document.getElementById(id);
+
+      let values = [...dataSet].sort();
+
+      // check if old value exists
+      let valid = values.includes(oldValue);
+
+      let selected = valid ? oldValue : "";
+
+      select.innerHTML = "<option value=''>All</option>";
+
+      values.forEach(val => {
+        let sel = val === selected ? "selected" : "";
+        select.innerHTML += `<option value="${val}" ${sel}>${val}</option>`;
+      });
+
+      return selected; // 🔥 return updated value
+    }
+
+
+    async function initFilters() {
+      initGlobalEvents();
+      applyFilters();
+    }
+
+
+    /* =======================================================================
+    🔥🔥🔥🔥MAIN PAGE (DASHBOARD) 🔥🔥🔥🔥
+    ========================================================================== */
+
+    /* ============== SIDEBAR TOGGLE======================== */
+    function toggleSidebar() {
+      const sidebar = id("sidebar");
+      const app = qs(".app");
+
+      toggleClass(sidebar, "collapsed");
+      toggleClass(app, "collapsed");
+
+      localStorage.setItem(
+        "sidebarCollapsed",
+        sidebar.classList.contains("collapsed")
+      );
+    }
+
+
+    /* ========================LOAD SIDEBAR STATE======================== */
+    function loadSidebarState() {
+      const sidebar = id("sidebar");
+      const app = qs(".app");
+
+      if (localStorage.getItem("sidebarCollapsed") === "true") {
+        addClass(sidebar, "collapsed");
+        addClass(app, "collapsed");   /* 🔥 FIX */
+      }
+    }
+
+
+
+    /* ===========MENU HANDLER (USING HELPERS)====================== */
+    function initMenu() {
+
+      const buttons = qsa('.menu-btn');
+      const pages = qsa('.SectionPage');
+
+      buttons.forEach(btn => {
+
+        on(btn, 'click', () => {
+
+          const pageId = btn.dataset.page;
+
+          // hide all pages
+          pages.forEach(p => hide(p));
+
+          // show selected page
+          show(pageId);
+
+          // active state
+          buttons.forEach(b => removeClass(b, 'active'));
+          addClass(btn, 'active');
+
+          // 🔥 ADD THIS BLOCK HERE
+          if (pageId === "DatabasePage") {
+            setTimeout(() => {
+              initDatabaseDefault();
+              moveIndicator();
+            }, 0);
+          }
+
+        });
+
+      });
+
+    }
+
+    /* ==================================================================
+    🔥🔥🔥🔥 DATABASE PAGE SCRIPT 🔥🔥🔥🔥
+    =====================================================================*/
+
+
+    /* ===========  WITHIN DATABASE PAGE SWITCH TABLE ==================== */
+
+    function showSheet(name, btn) {
+
+      qsa(".DB-Table-Wrapper table").forEach(hide);
+      show(name);
+
+      qsa(".button-bar button")
+        .forEach(b => b.classList.remove("active"));
+
+      if (btn) btn.classList.add("active");
+
+      // 🔥 DELAY FIX (CRITICAL)
+      setTimeout(moveIndicator, 50);
+    }
+
+
+    function initDatabaseDefault() {
+      const firstBtn = qs(".button-bar button");
+      if (firstBtn) {
+        showSheet("EmpDB", firstBtn);
+      }
+    }
+
+
+    function moveIndicator() {
+      const bar = qs(".button-bar");
+      if (!bar) return;
+
+      const active = bar.querySelector("button.active");
+      if (!active) return;
+
+      const rect = active.getBoundingClientRect();
+      const parentRect = bar.getBoundingClientRect();
+
+      // 🔥 Prevent zero width issue
+      if (rect.width === 0) return;
+
+      const left = rect.left - parentRect.left;
+
+      bar.style.setProperty("--indicator-left", left + "px");
+      bar.style.setProperty("--indicator-width", rect.width + "px");
+      bar.style.setProperty("--indicator-height", rect.height + "px");
+    }
+
+
+    qsa(".button-bar button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        qsa(".button-bar button")
+          .forEach(b => b.classList.remove("active"));
+
+        btn.classList.add("active");
+
+        moveIndicator();
+      });
     });
 
-  });
-
-}
 
 
-  /* =========================
-   SWITCH
-========================= */
-function showSheet(name, btn){
+    /* ==================================================================
+    🔥🔥🔥🔥 HELPERS 🔥🔥🔥🔥
+    =====================================================================*/
+    function createEl(tag, props = {}, children = []) {
+      const el = document.createElement(tag);
 
-  qsa(".DB-Table-Wrapper table").forEach(hide);
-  show(name);
+      Object.entries(props).forEach(([k, v]) => {
+        if (k === "class") el.className = v;
+        else if (k === "html") el.innerHTML = v;
+        else if (k === "text") el.textContent = v;
+        else el.setAttribute(k, v);
+      });
 
-  qsa(".button-bar button")
-    .forEach(b => b.classList.remove("active"));
+      children.forEach(child => el.appendChild(child));
+      return el;
+    }
 
-  if(btn) btn.classList.add("active");
-
-  // 🔥 DELAY FIX (CRITICAL)
-  setTimeout(moveIndicator, 50);
-}
-
-
-function initDatabaseDefault() {
-  const firstBtn = qs(".button-bar button");
-  if (firstBtn) {
-    showSheet("EmpDB", firstBtn);
-  }
-}
+    function clearEl(el) {
+      if (typeof el === "string") el = id(el);
+      if (el) el.innerHTML = "";
+    }
 
 
-function moveIndicator() {
-  const bar = qs(".button-bar");
-  if (!bar) return;
+    /* =========================
+       CLASS HELPERS
+    ========================= */
+    function addClass(el, cls) {
+      if (typeof el === "string") el = id(el);
+      el?.classList.add(cls);
+    }
 
-  const active = bar.querySelector("button.active");
-  if (!active) return;
+    function removeClass(el, cls) {
+      if (typeof el === "string") el = id(el);
+      el?.classList.remove(cls);
+    }
 
-  const rect = active.getBoundingClientRect();
-  const parentRect = bar.getBoundingClientRect();
-
-  // 🔥 Prevent zero width issue
-  if (rect.width === 0) return;
-
-  const left = rect.left - parentRect.left;
-
-  bar.style.setProperty("--indicator-left", left + "px");
-  bar.style.setProperty("--indicator-width", rect.width + "px");
-  bar.style.setProperty("--indicator-height", rect.height + "px");
-}
+    function toggleClass(el, cls) {
+      if (typeof el === "string") el = id(el);
+      el?.classList.toggle(cls);
+    }
 
 
-qsa(".button-bar button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    qsa(".button-bar button")
-      .forEach(b => b.classList.remove("active"));
+    /* =========================
+       EVENT HELPERS
+    ========================= */
+    function on(el, event, handler) {
+      if (typeof el === "string") el = id(el);
+      el?.addEventListener(event, handler);
+    }
 
-    btn.classList.add("active");
 
-    moveIndicator();
-  });
-});
+    /* =========================
+       DATA HELPERS
+    ========================= */
+    function groupBy(arr, key) {
+      return arr.reduce((acc, obj) => {
+        const k = obj[key];
+        (acc[k] = acc[k] || []).push(obj);
+        return acc;
+      }, {});
+    }
 
-window.addEventListener("resize", moveIndicator);
-// SAVE DATA
-//async function saveData() {
+    function unique(arr, key) {
+      return [...new Map(arr.map(item => [item[key], item])).values()];
+    }
 
-//  let data = {
-//    ID: id("id").value,
-//    Name: id("name").value,
-//    Basic: id("basic").value
-//  };
 
-//  await fetch("https://office-management-f425.onrender.com/add-data", {
-//    method: "POST",
-//    headers: {"Content-Type":"application/json"},
-//    body: JSON.stringify(data)
-//  });
+    /* =========================
+       FORMAT HELPERS
+    ========================= */
 
-//  alert("Saved!");
-//  loadData();
-//}
+    function formatNumber(num) {
+      return Number(num || 0).toLocaleString("en-IN");
+    }
 
-</script>
+    function formatCurrency(num) {
+      return "₹ " + formatNumber(num);
+    }
 
-    </body>
-  </html>
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return isNaN(d) ? "" : d.toLocaleDateString("en-IN");
+    }
+
+    function setValue(input, val) {
+      if (!input) return;
+      input.dataset.raw = val;
+      input.value = formatCurrency(val);
+    }
+
+    function getNum(tr, col) {
+      const el = getCellInput(tr, col);
+      return num(el?.dataset?.raw ?? el?.value);
+    }
+
+    /* =========================
+       SAFE VALUE HELPERS
+    ========================= */
+    function val(v, def = "") {
+      return (v === null || v === undefined) ? def : v;
+    }
+
+    function num(v) {
+      return Number(String(v).replace(/[^\d.-]/g, "")) || 0;
+    }
+
+    /* =========================
+       VISIBILITY HELPERS
+    ========================= */
+    function show(el) {
+      if (typeof el === "string") el = id(el);
+      if (el) el.style.display = "block";
+    }
+
+    function hide(el) {
+      if (typeof el === "string") el = id(el);
+      if (el) el.style.display = "none";
+    }
+
+    function getColIndex(headers, name) {
+      return headers.findIndex(h => h.toLowerCase().trim() === name.toLowerCase());
+    }
+    /* =========================
+       DEBUG
+    ========================= */
+    function log(...args) {
+      console.log(...args);
+    }
+  </script>
+
+</body>
+
+</html>
