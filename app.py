@@ -39,40 +39,51 @@ it_sheet = spreadsheet.worksheet("ITDB")
 # API ROUTES
 # =========================
 
+def sheet_to_json(sheet):
+    data = sheet.get_all_values()
+
+    headers = data[0]   # first row
+    rows = data[1:]     # rest rows
+
+    return {
+        "headers": headers,
+        "rows": rows
+    }
+
+
 @app.route("/emp", methods=["GET"])
 def get_emp():
-    return jsonify(emp_sheet.get_all_records())
+    return jsonify(sheet_to_json(emp_sheet))
 
 
 @app.route("/pb", methods=["GET"])
 def get_pb():
-    return jsonify(pb_sheet.get_all_records())
+    return jsonify(sheet_to_json(pb_sheet))
 
 
 @app.route("/cpc", methods=["GET"])
 def get_cpc():
-    return jsonify(cpc_sheet.get_all_records())
+    return jsonify(sheet_to_json(cpc_sheet))
 
 
 @app.route("/city", methods=["GET"])
 def get_city():
-    return jsonify(city_sheet.get_all_records())
+    return jsonify(sheet_to_json(city_sheet))
 
 
 @app.route("/qtrs", methods=["GET"])
 def get_qtrs():
-    return jsonify(qtrs_sheet.get_all_records())
+    return jsonify(sheet_to_json(qtrs_sheet))
 
 
 @app.route("/comm", methods=["GET"])
 def get_comm():
-    return jsonify(comm_sheet.get_all_records())
+    return jsonify(sheet_to_json(comm_sheet))
 
 
 @app.route("/it", methods=["GET"])
 def get_it():
-    return jsonify(it_sheet.get_all_records())
-
+    return jsonify(sheet_to_json(it_sheet))
 
 # =========================
 # RUN SERVER
