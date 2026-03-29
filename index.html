@@ -168,12 +168,12 @@
       APP LAYOUT
     ========================= */
     .watermark {
-      width: 300px;
-      height: 300px;
+      width: 600px;
+      height: 600px;
       opacity: 0.06;
       position: absolute;
-      left: 0;
-      top: 0;
+      left: 30%;
+      top: 10%;
       z-index: 0;
       /* behind content */
     }
@@ -1832,32 +1832,79 @@ function renderIcons() {
 // GET DATA
 async function loadTable(api, tableId) {
 
-  let res = await fetch(`https://office-management-f425.onrender.com/${api}`);
-  let data = await res.json();
+  try {
+    let res = await fetch(`https://office-management-f425.onrender.com/${api}`);
 
-  let table = id(tableId);
-  table.innerHTML = "";
+    if (!res.ok) {
+      console.error("API failed:", api);
+      return;
+    }
 
-  if (data.length === 0) return;
+    let result = await res.json();
 
-  // HEADER
-  let header = "<tr>";
-  Object.keys(data[0]).forEach(key => {
-    header += `<th>${key}</th>`;
-  });
-  header += "</tr>";
+    console.log("API:", api, result); // debug
 
-  table.innerHTML += header;
+    let headers, data;
 
-  // ROWS
-  data.forEach(row => {
-    let tr = "<tr>";
-    Object.values(row).forEach(val => {
-      tr += `<td>${val}</td>`;
+    // 🔥 HANDLE BOTH API FORMATS
+    if (Array.isArray(result)) {
+      // OLD FORMAT (get_all_records)
+      headers = Object.keys(result[0]);
+      data = result.map(obj => headers.map(h => obj[h]));
+    } else if (result.headers && result.rows) {
+      // NEW FORMAT (get_all_values)
+      headers = result.headers;
+      data = result.rows;
+    } else {
+      console.error("Invalid API format:", api);
+      return;
+    }
+
+    let table = document.getElementById(tableId);
+    if (!table) {
+      console.error("Table not found:", tableId);
+      return;
+    }
+
+    table.innerHTML = "";
+
+    if (!data || data.length === 0) return;
+
+    // =========================
+    // HEADER
+    // =========================
+    let thead = "<thead><tr>";
+    headers.forEach(h => {
+      thead += `<th>${h}</th>`;
     });
-    tr += "</tr>";
-    table.innerHTML += tr;
-  });
+    thead += "</tr></thead>";
+
+    // =========================
+    // BODY
+    // =========================
+    let tbody = "<tbody>";
+
+    data.forEach(row => {
+      let tr = "<tr>";
+
+      row.forEach(val => {
+        tr += `<td>${val ?? ""}</td>`;
+      });
+
+      tr += "</tr>";
+      tbody += tr;
+    });
+
+    tbody += "</tbody>";
+
+    // =========================
+    // FINAL TABLE
+    // =========================
+    table.innerHTML = thead + tbody;
+
+  } catch (err) {
+    console.error("Error loading table:", api, err);
+  }
 }
 
 function loadAllData() {
