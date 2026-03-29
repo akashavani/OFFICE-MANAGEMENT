@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PayBill Dashboard</title>
+
+<style>
+body { font-family: Arial; background:#f4f6f9; }
+.container {
+  width: 80%; margin:auto; background:white;
+  padding:20px; border-radius:10px;
+}
+input { padding:8px; margin:5px; }
+button { padding:10px; background:#007bff; color:white; border:none; }
+table { width:100%; margin-top:20px; border-collapse: collapse; }
+th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+th { background:#007bff; color:white; }
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>💼 PayBill Dashboard</h2>
+
+<input id="id" placeholder="ID">
+<input id="name" placeholder="Name">
+<input id="basic" placeholder="Basic">
+
+<button onclick="saveData()">Save</button>
+
+<table id="table"></table>
+
+</div>
+
+<script>
+
+// Load data on start
+window.onload = loadData;
+
+
+// GET DATA
+async function loadData() {
+
+  let res = await fetch("http://127.0.0.1:5000/get-data");
+  let data = await res.json();
+
+  let table = document.getElementById("table");
+  table.innerHTML = "";
+
+  if (data.length === 0) return;
+
+  let header = "<tr>";
+  Object.keys(data[0]).forEach(key => {
+    header += `<th>${key}</th>`;
+  });
+  header += "</tr>";
+
+  table.innerHTML += header;
+
+  data.forEach(row => {
+    let tr = "<tr>";
+    Object.values(row).forEach(val => {
+      tr += `<td>${val}</td>`;
+    });
+    tr += "</tr>";
+    table.innerHTML += tr;
+  });
+}
+
+
+// SAVE DATA
+async function saveData() {
+
+  let data = {
+    ID: document.getElementById("id").value,
+    Name: document.getElementById("name").value,
+    Basic: document.getElementById("basic").value
+  };
+
+  await fetch("http://127.0.0.1:5000/add-data", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(data)
+  });
+
+  alert("Saved!");
+  loadData();
+}
+
+</script>
+
+</body>
+</html>
