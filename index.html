@@ -1649,16 +1649,17 @@ window.onload = loadData;
 
 
 // GET DATA
-async function loadData() {
+async function loadTable(api, tableId) {
 
-  let res = await fetch("https://office-management-f425.onrender.com/get-data");
+  let res = await fetch(`https://office-management-f425.onrender.com/${api}`);
   let data = await res.json();
 
-  let table = document.getElementById("EmpDB");
+  let table = document.getElementById(tableId);
   table.innerHTML = "";
 
   if (data.length === 0) return;
 
+  // HEADER
   let header = "<tr>";
   Object.keys(data[0]).forEach(key => {
     header += `<th>${key}</th>`;
@@ -1667,6 +1668,7 @@ async function loadData() {
 
   table.innerHTML += header;
 
+  // ROWS
   data.forEach(row => {
     let tr = "<tr>";
     Object.values(row).forEach(val => {
@@ -1677,6 +1679,15 @@ async function loadData() {
   });
 }
 
+function loadAllData() {
+  loadTable("emp", "EmpDB");
+  loadTable("pb", "PBDB");
+  loadTable("cpc", "CPC7DB");
+  loadTable("qtrs", "QtrsRateDB");
+  loadTable("city", "CityZoneDB");
+  loadTable("comm", "CommFactDB");
+  loadTable("it", "ITDB");
+}
 
 // SAVE DATA
 //async function saveData() {
