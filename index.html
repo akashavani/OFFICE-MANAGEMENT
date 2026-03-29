@@ -1,36 +1,1644 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>PayBill Dashboard</title>
+  <title>PayBill Dashboard</title>
+  <base target="_top">
+  <!-- font style -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Icon -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 
-<style>
-body { font-family: Arial; background:#f4f6f9; }
-.container {
-  width: 80%; margin:auto; background:white;
-  padding:20px; border-radius:10px;
-}
-input { padding:8px; margin:5px; }
-button { padding:10px; background:#007bff; color:white; border:none; }
-table { width:100%; margin-top:20px; border-collapse: collapse; }
-th, td { border:1px solid #ddd; padding:8px; text-align:center; }
-th { background:#007bff; color:white; }
-</style>
+
+  <style>
+    /* =========================
+      RESET
+      ========================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-size: 11px;
+      font-family: "Roboto Condensed", "Inter", sans-serif;
+      background: transparent;
+    }
+  
+    body {
+      background: #f5f7fb;
+      overflow: visible;
+    }
+  
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+  
+      width: 100%;
+      min-width: 60px;
+      padding: 5px 18px 5px 8px;
+  
+      color: #78350f;
+  
+      border: 1px solid #94a3b8;
+      /*#cbd5e1;*/
+      border-radius: 6px;
+  
+      background-color: #d3fc58;
+      background-image: url("data:image/svg+xml;utf8,<svg fill='%236b7280' height='12' viewBox='0 0 20 20' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 4 4.5-4'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 12px;
+  
+      transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.1s ease;
+      cursor: pointer;
+    }
+  
+    select:hover,
+    input:hover {
+      border-color: #cbd5e1;
+      background-color: #e0e7ff;
+      /* 🔥 hover */
+    }
+  
+    select:focus,
+    input:focus {
+      outline: none;
+      border-color: #6366f1;
+      background-color: #151a36;
+      color: white;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+      background-image: url("data:image/svg+xml;utf8,<svg fill='%23ffffff' height='12' viewBox='0 0 20 20' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 4 4.5-4'/></svg>");
+    }
+  
+    select:disabled {
+      background-color: #e5e7eb;
+      color: #9ca3af;
+    }
+  
+    input {
+      padding: 6px 8px;
+      border: 1px solid #94a3b8;
+      border-radius: 6px;
+      background: #d3fc58;
+      outline: none;
+      width: 70px;
+      text-align: left;
+      cursor: pointer;
+    }
+  
+    input:disabled {
+      cursor: auto;
+      background: transparent;
+      outline: none;
+      border: none;
+      color: black;
+    }
+  
+    input:not([type="checkbox"]) {
+      appearance: none;
+      -webkit-appearance: none;
+  
+      background-image: none !important;
+  
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+  
+    input:not([type="checkbox"]):focus {
+      outline: none;
+  
+      transform: scale(1);
+      background-clip: padding-box;
+    }
+  
+    textarea {
+      resize: none;
+      /* ❌ disable drag */
+      min-width: 500px;
+      border: none;
+      border-radius: 0;
+      height: 100%;
+      padding: 0 2px;
+      margin: 0;
+      outline: none;
+      font-weight: 500;
+      display: block;
+      box-sizing: border-box;
+      background: transparent;
+    }
+  
+    /* =========================
+      SCROLLBAR
+    ========================= */
+    div::-webkit-scrollbar {
+      height: 5px;
+      width: 5px;
+    }
+  
+    div::-webkit-scrollbar-thumb {
+      background: #3b82f6;
+      border-radius: 5px;
+    }
+  
+    div::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+  
+    /* Firefox */
+    div {
+      scrollbar-width: thin;
+      scrollbar-color: #3b82f6 #f1f5f9;
+    }
+  
+    /* =========================
+      APP LAYOUT
+    ========================= */
+    .watermark {
+      width: 300px;
+      height: 300px;
+      opacity: 0.06;
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 0;
+      /* behind content */
+    }
+  
+    .app {
+      display: flex;
+      height: 100vh;
+      overflow: visible;
+    }
+  
+    /* =========================
+      SIDEBAR
+    ========================= */
+    .left-panel {
+      position: relative;
+      /* 🔥  */
+      z-index: 2000;
+      /* 🔥  */
+      width: 160px;
+      min-width: 160px;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, #f8fbff 0%, #eaf2ff 100%);
+      color: #1f2937;
+      box-shadow: inset -1px 0 0 #dbeafe;
+      overflow: visible;
+      transition: all 0.25s ease;
+    }
+  
+    .left-panel.collapsed {
+      width: 60px;
+      min-width: 60px;
+    }
+  
+    /* =========================
+      RIGHT PANEL
+    ========================= */
+    .right-panel {
+      position: relative;
+      z-index: 1;
+  
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      height: 100vh;
+  
+      /* 🔥 CRITICAL FIX */
+      overflow-x: hidden;
+      overflow-y: auto;
+  
+      transition: all 0.35s ease;
+    }
+  
+    .SectionPage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      height: 100vh;
+      overflow: hidden;
+      margin-right: 4px;
+      margin-bottom: 0px;
+      padding-bottom: 2px;
+      z-index: 1;
+      transition: opacity 0.25s ease;
+    }
+  
+    /* =========================
+      SIDEBAR TOGGLE
+    ========================= */
+    .sidebar-toggle {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      color: #374151;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  
+    .sidebar-toggle:hover {
+      background: #e5e7eb;
+    }
+  
+    /* =========================
+      MENU LIST
+    ========================= */
+    .menu-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      scrollbar-width: none;
+    }
+  
+    .menu-list::-webkit-scrollbar {
+      display: none;
+    }
+  
+    /* =========================
+      BUTTON BASE
+    ========================= */
+    .menu-btn,
+    .logout-btn {
+      position: relative;
+      z-index: 2100;
+      /* 🔥 FIX */
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 8px 15px;
+      margin-bottom: 4px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+  
+    /* ICON (Lucide fix) */
+    .menu-btn svg,
+    .logout-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+  
+    /* Bigger icon collapsed */
+    .left-panel.collapsed .menu-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+  
+    /* TEXT */
+    .menu-btn span,
+    .logout-btn span {
+      white-space: nowrap;
+      transition: opacity 0.2s ease;
+    }
+  
+    /* COLLAPSED TEXT */
+    .left-panel.collapsed .menu-btn span,
+    .left-panel.collapsed .logout-btn span {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+  
+    /* COLLAPSED ALIGNMENT */
+    .left-panel.collapsed .menu-btn,
+    .left-panel.collapsed .logout-btn {
+      justify-content: center;
+      padding: 8px 2px;
+      align-items: center;
+      gap: 0;
+      display: flex;
+      width: 100%;
+    }
+  
+    /* HOVER */
+    .menu-btn:hover {
+      background: #e0f2fe;
+      color: #1d4ed8;
+    }
+  
+    /* ACTIVE */
+    .menu-btn.active {
+      color: black;
+      border-radius: 0;
+      /*border-radius: 999px 0 0 999px;*/
+      box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+      margin-left: 10px;
+      font-weight: 600;
+      color: blue;
+  
+      /* 🔥 glow effect */
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.6),
+        0 0 8px rgba(59, 130, 246, 0.6),
+        0 0 12px rgba(59, 130, 246, 0.5);
+  
+      /*background: linear-gradient(90deg, #2563eb, #3b82f6);*/
+      background: white;
+    }
+  
+    /* Left indicator */
+    .menu-btn.active::before {
+      content: "";
+      position: absolute;
+      left: -4px;
+      top: 0;
+      height: 100%;
+      width: 5px;
+      background: #2563eb;
+      border-radius: 8px 0 0 8px;
+    }
+  
+    .menu-btn.active i {
+      color: blue;
+  
+      filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.7)) drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+    }
+  
+    /* COLLAPSED ACTIVE */
+    .left-panel.collapsed .menu-btn.active {
+      border-radius: 0;
+      /*border-radius: 999px 0 0 999px;*/
+      padding: 6px 0px;
+      justify-content: center;
+      box-shadow: 0 3px 8px rgba(59, 130, 246, 0.25);
+      color: blue;
+  
+      /* 🔥 glow effect */
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.6),
+        0 0 8px rgba(59, 130, 246, 0.6),
+        0 0 12px rgba(59, 130, 246, 0.5);
+  
+      background: white;
+    }
+  
+    /* =========================
+      TOOLTIP (FINAL FIXED)
+    ========================= */
+    .menu-btn::after,
+    .logout-btn::after {
+      content: attr(data-tooltip);
+      position: fixed;
+      /* 🔥 KEY FIX */
+      background: black;
+      color: white;
+      padding: 6px 15px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      left: 60px;
+      z-index: 999999;
+      box-shadow: inset 0px 0px 2px 1px white;
+    }
+  
+    /* SHOW TOOLTIP */
+    .left-panel.collapsed .menu-btn:hover::after,
+    .left-panel.collapsed .logout-btn:hover::after {
+      opacity: 1;
+    }
+  
+    /* =========================
+      FOOTER
+    ========================= */
+    .menu-footer {
+      margin-top: auto;
+      padding: 10px;
+      border-top: 1px solid #e5e7eb;
+    }
+  
+    .logout-btn {
+      background: #ef4444;
+      color: #fff;
+    }
+  
+    .logout-btn:hover {
+      background: #dc2626;
+    }
+  
+    /* HEADER */
+    .header {
+      padding: 5px;
+      background: linear-gradient(180deg, #f8fbff, #eaf2ff);
+      border-bottom: 1px solid #dbeafe;
+    }
+  
+    .header h2 {
+      font-size: 13px;
+      font-weight: bold;
+      padding: 5px;
+    }
+  
+    /* =========================
+     BUTTON BAR
+  ========================= */
+    .button-bar {
+      position: relative;
+      display: flex;
+      gap: 5px;
+      padding: 5px;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      margin: 2px;
+    }
+  
+    /* =========================
+     SLIDING INDICATOR
+  ========================= */
+    .button-bar::after {
+      content: "";
+      position: absolute;
+      left: var(--indicator-left, 10px);
+      width: var(--indicator-width, 80px);
+      height: var(--indicator-height, 70%);
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 8px;
+      background: #111827;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+      transition: all 0.35s ease;
+      z-index: 0;
+    }
+  
+    /* =========================
+     BUTTON BASE
+  ========================= */
+    .button-bar button {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      background: transparent;
+      color: #374151;
+      transform: scale(1);
+      overflow: hidden;
+      transition:
+        color 0.3s ease,
+        transform 0.2s ease;
+    }
+  
+  
+    /* =========================
+     HOVER
+  ========================= */
+    .button-bar button:hover {
+      color: #111827;
+      transform: translateY(-2px) scale(1.02);
+    }
+  
+  
+    /* =========================
+     ACTIVE BUTTON
+  ========================= */
+    .button-bar button.active {
+      color: #fff;
+      transform: scale(1.04);
+    }
+  
+  
+    /* =========================
+     CLICK EFFECT
+  ========================= */
+    .button-bar button:active {
+      transform: scale(0.97);
+    }
+  
+  
+    /* =========================
+     SHINE EFFECT
+  ========================= */
+    .button-bar button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg,
+          transparent,
+          rgba(255, 255, 255, 0.4),
+          transparent);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+  
+    .button-bar button:hover::before {
+      transform: translateX(100%);
+    }
+  
+  
+    /* =========================
+     FOCUS
+  ========================= */
+    .button-bar button:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+  
+    /* ==========================================
+     TABLE WRAPPER FOR EMPOLYEE DETAIL PAGE
+  ============================================ */
+    .Emp-Table-Wrapper {
+      flex: 1;
+      overflow: auto;
+      margin: 4px;
+      width: 100%;
+      height: calc(100vh - 100px);
+      margin: 0 auto;
+      display: flex;
+    }
+  
+  
+    .Emp-Table-Wrapper table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      margin: 10px;
+      height: max-content;
+    }
+  
+    .Emp-Table-Wrapper td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  
+    /* label column */
+    .Emp-Table-Wrapper td:first-child {
+      width: 220px;
+      font-weight: 600;
+      color: #334155;
+      background: #f8fafc;
+    }
+  
+    /* value column */
+    .Emp-Table-Wrapper td:last-child {
+      color: #111827;
+    }
+  
+    /* zebra effect */
+    .Emp-Table-Wrapper tr:nth-child(even) td:last-child {
+      background: #fafafa;
+    }
+  
+    /* hover */
+    .Emp-Table-Wrapper tr:hover td {
+      background: #eef6ff;
+    }
+  
+    .Emp-Table-Wrapper th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      padding: 10px 8px;
+      background: linear-gradient(180deg, #1f2937, #111827);
+      color: #f9fafb;
+      font-weight: 600;
+      text-align: center;
+      border-bottom: 2px solid #374151;
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.2;
+    }
+  
+    /* =========================
+     TABLE WRAPPER
+  ========================= */
+    .DB-Table-Wrapper {
+      flex: 1;
+      overflow: auto;
+      margin: 4px;
+      width: 99.8%;
+      height: calc(100vh - 90px);
+    }
+  
+  
+    /* =========================
+     TABLE BASE
+  ========================= */
+    .DB-Table-Wrapper table {
+      table-layout: fixed;
+      border-collapse: collapse;
+      /* 🔥 */
+      width: max-content;
+      /* 🔥 allow horizontal scroll */
+      color: #111827;
+      background: #ffffff;
+      border-radius: 8px;
+      margin: 0 auto;
+    }
+  
+  
+    /* =========================
+     HEADER (TOP ROW)
+  ========================= */
+    .DB-Table-Wrapper thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      padding: 10px 8px;
+      background: linear-gradient(180deg, #1f2937, #111827);
+      color: #f9fafb;
+      font-weight: 600;
+      text-align: left;
+      border-bottom: 2px solid #374151;
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.2;
+    }
+  
+    #PBDB thead th {
+      max-width: 60px;
+    }
+  
+    /* =========================
+     BODY CELLS
+  ========================= */
+    .DB-Table-Wrapper td {
+      padding: 4px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+      z-index: 1;
+    }
+  
+  
+    /* =========================
+     ROW STRIPING
+  ========================= */
+    .DB-Table-Wrapper tbody tr:nth-child(even) {
+      background: #fafafa;
+    }
+  
+  
+    /* =========================
+     ROW HOVER
+  ========================= */
+    .DB-Table-Wrapper tbody tr:hover td {
+      background: yellow;
+    }
+  
+  
+    /* =========================
+     FIRST COLUMN (STICKY)
+  ========================= */
+    .DB-Table-Wrapper td:first-child,
+    .DB-Table-Wrapper th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: #f9fafb;
+      border-right: 1px solid #e5e7eb;
+      box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08), 4px 0 8px rgba(0, 0, 0, 0.04);
+      /* 🔥 layered shadow */
+    }
+  
+  
+    /* =========================
+     TOP-LEFT CELL (CRITICAL FIX)
+  ========================= */
+    .DB-Table-Wrapper thead th:first-child {
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 4;
+      /* highest */
+      background: linear-gradient(180deg, #111827, #020617);
+      color: #ffffff;
+      border-right: 1px solid #374151;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+  
+  
+    /* =========================
+     COLUMN DIVIDERS
+  ========================= */
+    .DB-Table-Wrapper td:not(:last-child),
+    .DB-Table-Wrapper th:not(:last-child) {
+      border-right: 1px solid #f1f5f9;
+    }
+  
+  
+    /* =========================
+     CHECKBOX STYLE
+  ========================= */
+    .DB-Table-Wrapper input[type="checkbox"] {
+      transform: scale(1.1);
+      accent-color: #3b82f6;
+      pointer-events: none;
+    }
+  
+    .Selection-bar {
+      display: flex;
+      flex-direction: row;
+      padding: 2px 2px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      margin: 4px;
+      align-items: center;
+      justify-content: space-between;
+    }
+  
+    .Selection-bar table {
+      width: 100%;
+      display: block;
+      flex: 1;
+    }
+  
+    .Selection-bar td:nth-child(odd) {
+      padding-right: 3px;
+      text-align: right;
+      font-weight: 600;
+    }
+  
+  
+    /* ===============================================
+     PAY BILL PAGE CSS
+  =================================================== */
+    /* ================= WRAPPER ================= */
+    .PB-Table-Wrapper {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 130px);
+      /* adjust header height */
+      gap: 10px;
+    }
+  
+    /* ================= CHILD TABLE WRAPPERS ================= */
+    .PB-Table-WrapperGO,
+    .PB-Table-WrapperNPS {
+      flex: 1;
+      /* 🔥 equal height */
+      min-height: 0;
+      /* 🔥 IMPORTANT for scroll */
+      overflow: auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid gray;
+      gap: 0;
+      margin: 0 3px;
+    }
+  
+    /* ================= TABLE ================= */
+    .PB-Table-WrapperGO table,
+    .PB-Table-WrapperNPS table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: auto;
+      background: #ffffff;
+      border-radius: 10px;
+    }
+  
+    /* ================= TOGGLE ================= */
+    /* safer than absolute */
+    #PB_GOEditTbl,
+    #PB_NPSEditTbl {
+      display: none;
+    }
+  
+    .hidden-col {
+      display: none;
+    }
+  
+    #PB_GOEditTbl tbody tr:not(:last-child) td:not(:first-child),
+    #PB_NPSEditTbl tbody tr:not(:last-child) td:not(:first-child) {
+      padding: 0;
+    }
+  
+    #PB_GOEditTbl td:first-child,
+    #PB_NPSEditTbl td:first-child {
+      padding: 0 8px;
+    }
+  
+    .edit-mode #PB_GOEditTbl,
+    .edit-mode #PB_NPSEditTbl {
+      display: table;
+    }
+  
+    .edit-mode #PB_GOViewTbl,
+    .edit-mode #PB_NPSViewTbl {
+      display: none;
+    }
+  
+    #PB_GOEditTbl td,
+    #PB_NPSEditTbl td {
+      height: 20px;
+    }
+  
+    #PB_GOEditTbl td *,
+    #PB_NPSEditTbl td * {
+      line-height: 1 !important;
+    }
+  
+    /* ================= CELLS ================= */
+    .PB-Table-WrapperGO th,
+    .PB-Table-WrapperGO td,
+    .PB-Table-WrapperNPS th,
+    .PB-Table-WrapperNPS td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      border-right: dotted 1px #d7dae0;
+    }
+  
+    /* ================= HOVER ================= */
+    .PB-Table-WrapperGO tbody tr:hover td,
+    .PB-Table-WrapperNPS tbody tr:hover td {
+      background: #eef6ff;
+    }
+  
+    /* ================= TITLE ROW ================= */
+  
+    .pb-title-div {
+      width: 100%;
+      text-align: center;
+      font-weight: 600;
+      font-size: 11px;
+      padding: 8px;
+      background: linear-gradient(90deg, #f5f7fa, #e4ecf7);
+      border: 1px solid #d0d7e2;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      margin: 0 2px;
+      margin-bottom: -10px;
+    }
+  
+    /* ================= HEADER ROW ================= */
+    .PB-Table-Wrapper thead tr th {
+      position: sticky;
+      top: 0;
+      z-index: 9;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      height: 30px;
+      padding: 2px 6px;
+      text-align: left;
+      border-bottom: 2px solid #374151;
+      border-right: dotted 1px lightgray;
+      background: #1f4e79;
+      color: #ffffff;
+      font-size: 10px;
+    }
+  
+  
+    /* ================= STICKY FIRST COLUMN ================= */
+    .PB-Table-Wrapper table th:first-child,
+    .PB-Table-Wrapper table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 8;
+      white-space: nowrap;
+  
+      /* 🔥 IMPORTANT FIX */
+      background: white;
+      min-width: 210px;
+      width: 210px;
+    }
+  
+    /* header row first column */
+    .PB-Table-Wrapper thead tr th:first-child {
+      z-index: 50;
+      background: #1f4e79;
+      color: #ffffff;
+    }
+  
+    /* ================= SEPARATOR ================= */
+    .PB-Table-Wrapper table td:first-child,
+    .PB-Table-Wrapper table th:first-child {
+      box-shadow: 2px 0 0 #e5e7eb;
+    }
+  
+    /* ================= TOTAL ROW ================= */
+    .total-row td {
+      position: sticky;
+      bottom: 0;
+      background: #fef3c7;
+      font-weight: 600;
+      z-index: 7;
+      box-shadow: 0 -2px 0 #f59e0b;
+      padding: 6px 4px !important;
+    }
+  
+    .PB-Table-Wrapper table tr:last-child td:first-child {
+      box-shadow: 0 -2px 0 #f59e0b;
+      background: #fef3c7;
+    }
+  
+    /* 🔹 TEXT INPUT */
+    .PB-Table-Wrapper input[type="text"] {
+      padding: 0 2px;
+      display: block;
+      outline: none;
+      border-radius: 0;
+      color: black;
+      font-weight: 500;
+      border: none;
+      background: transparent;
+      /* default */
+      box-sizing: border-box;
+      height: 100%;
+    }
+  
+    .PB-Table-Wrapper input[type="text"]:hover,
+    .PB-Table-Wrapper textarea:hover {
+      border-color: #cbd5e1;
+      background-color: #e0e7ff;
+      /* 🔥 hover */
+    }
+  
+    .PB-Table-Wrapper input[type="text"]:focus,
+    .PB-Table-Wrapper textarea:focus {
+      outline: none;
+      border-color: #6366f1;
+      background-color: #151a36;
+      color: white;
+    }
+  
+    /* 🔹 READONLY + DISABLED INPUT → transparent */
+    .PB-Table-Wrapper input[type="text"]:read-only,
+    .PB-Table-Wrapper input[type="text"]:disabled {
+      background: transparent !important;
+      color: black;
+      /* optional muted */
+      border: none;
+    }
+  
+    /* 🔹 SELECT (only NOT disabled → keep normal look) */
+    .PB-Table-Wrapper select:not(:disabled) {
+      padding: 0 2px;
+      display: block;
+      outline: none;
+      border-radius: 0;
+      font-weight: 500;
+      margin: 0;
+      border: none;
+      box-sizing: border-box;
+      height: 100%;
+      /* ❗ no background override → keeps default */
+    }
+  
+    .PB-Table-Wrapper select:disabled {
+      border-radius: 0;
+      border: none;
+    }
+  
+    /* 🔹 CHECKBOX */
+    .PB-Table-Wrapper input[type="checkbox"] {
+      height: 14px;
+      line-height: 14px;
+      padding: 0;
+      display: flex;
+      outline: none;
+      margin: 0;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+    }
+  
+    /* 🔹 CELL with editable input/select */
+    .PB-Table-Wrapper td:has(input:not(:disabled):not(:read-only), select:not(:disabled), textarea) {
+      border: 0.2px solid #94a3b8;
+      background-color: #d3fc58;
+    }
+  
+    /* 🔹 CELL with readonly or disabled input */
+    .PB-Table-Wrapper td:has(input:disabled, input:read-only, span) {
+      background: transparent;
+    }
+  
+    /* 🔹 CELL with checkbox → always border */
+    .PB-Table-Wrapper td:has(input[type="checkbox"]) {
+      border: 0.2px solid #94a3b8;
+      background-color: #d3fc58;
+    }
+  
+    .PB-Table-Wrapper td:has(input[type="checkbox"]:disabled, select:disabled) {
+      border: 0.2px solid #94a3b8;
+      background-color: #e5e7eb;
+    }
+  
+    /* 🔹 REMOVE checkbox focus glow */
+    .PB-Table-Wrapper input[type="checkbox"]:focus {
+      outline: none;
+      box-shadow: none;
+  
+    }
+  
+    .month-toggle-input {
+      width: 80px;
+      border: none;
+      outline: none;
+      border-radius: 0;
+      height: 18px;
+      /* 🔥 fix vertical alignment */
+      line-height: 18px;
+      /* 🔥 match height */
+      padding: 0 2px;
+      border: 1px solid #94a3b8;
+      background-color: #d3fc58;
+      text-align: center;
+    }
+  
+    .readonly-cell {
+      background: white;
+      color: #444;
+      border: none;
+      pointer-events: none;
+      font-weight: 500;
+    }
+  
+    .Error_Note {
+      background: linear-gradient(180deg, rgba(114, 204, 197, 1) 0%, rgba(255, 255, 255, 1) 34%, rgba(114, 204, 197, 1) 100%);
+      padding: 4px 10px;
+      text-align: left;
+      width: 100%;
+      height: 40px;
+      display: flex;
+      gap: 30px;
+      border-radius: 2px;
+      margin: 2px;
+      margin-bottom: 0px;
+      border: solid 1px #cccccc;
+      overflow: auto;
+    }
+  
+    .PB-error {
+      color: red;
+      font-weight: bold;
+      font-size: 11px;
+      font-style: italic;
+    }
+  
+    /* Container */
+    .action-group {
+      display: flex;
+      gap: 10px;
+      padding: 1px 1px;
+      width: 220px;
+      /* 🔥 software-like background */
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      justify-content: center;
+      min-height: 32px;
+  
+    }
+  
+    /* Base button */
+    .action-group button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+  
+      padding: 4px 0px 4px 8px;
+      font-weight: 500;
+  
+      border-radius: 6px;
+      border: 1px solid transparent;
+  
+      /* 🔥 subtle layered background */
+      background: #ffffff;
+      color: #334155;
+  
+      cursor: pointer;
+      transition: all 0.25s ease;
+  
+      /* soft elevation */
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.36);
+    }
+  
+    /* Disabled */
+    .action-group button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  
+    /* Hover ONLY when NOT disabled */
+    .action-group button:not(:disabled):hover {
+      padding: 4px 8px;
+      background: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+  
+    /* Show text only when enabled */
+    .action-group button:not(:disabled):hover span {
+      max-width: 120px;
+      opacity: 1;
+      transition: max-width 2s ease;
+      font-weight: 800;
+    }
+  
+    /* Icon resize only when enabled */
+    .action-group button:not(:disabled):hover svg {
+      width: 16px;
+      height: 16px;
+    }
+  
+    /* Icon */
+    .action-group button svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+  
+    /* Hide text */
+    .action-group button span {
+      max-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      opacity: 0;
+      transition: max-width 0.5s ease, opacity 1s ease;
+    }
+  
+    /* Active */
+    .action-group button:active {
+      transform: scale(0.96);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+  
+    /* ✏️ Edit (Professional Blue - soft) */
+    .action-group button:nth-child(1) {
+      color: #1d4ed8;
+      border-color: #dbeafe;
+      background: #f8fbff;
+    }
+  
+    .action-group button:nth-child(1):hover {
+      background: #eef5ff;
+    }
+  
+    /* ➕ Add (Professional Green - soft) */
+    .action-group button:nth-child(2) {
+      color: #15803d;
+      border-color: #dcfce7;
+      background: #f7fef9;
+    }
+  
+    .action-group button:nth-child(2):hover {
+      background: #ecfdf5;
+    }
+  
+    /* 🖨️ Print (Neutral Professional Gray) */
+    .action-group button:nth-child(3) {
+      color: #334155;
+      border-color: #e2e8f0;
+      background: #f8fafc;
+    }
+  
+    .action-group button:nth-child(3):hover {
+      background: #f1f5f9;
+    }
+  
+    .action-group button:nth-child(4) {
+      color: #217346;
+      border-color: #e2e8f0;
+      background: white;
+    }
+  
+    .action-group button:nth-child(4):hover {
+      background: #f1f5f9;
+    }
+  
+    /* Upload mode */
+    .action-group button.upload-mode {
+      background: #16a34a !important;
+      color: #ffffff !important;
+  
+      box-shadow:
+        0 0 6px rgba(34, 197, 94, 0.4),
+        0 0 12px rgba(34, 197, 94, 0.3);
+    }
+  
+    .action-group button.upload-mode:hover {
+      background: #15803d !important;
+    }
+  
+  
+    .status {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-left: 10px;
+    }
+  
+    /* Paid → Green */
+    .status.paid {
+      color: #166534;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+    }
+  
+    /* Unpaid → Red */
+    .status.unpaid {
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+    }
+  
+    /* ===============================================
+     RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
+  =================================================== */
+    @media (max-width: 900px) {
+  
+      body::before {
+        opacity: 0.06;
+      }
+  
+      .button-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+  
+      select {
+        min-width: 90%;
+        width: 90%
+      }
+  
+      div {
+        width: 100%
+      }
+  
+      .Selection-bar {
+        flex-direction: column;
+      }
+  
+      .action-group {
+        width: 100%;
+      }
+  
+      .button-bar button {
+        width: 100%;
+        text-align: center;
+        flex: none;
+  
+        /* 🔥 restore base look */
+        background: #e5e7eb;
+        color: #374151;
+      }
+  
+      /* 🔥 active button visible */
+      .button-bar button.active {
+        background: #111827;
+        color: #ffffff;
+      }
+  
+      /* 🔥 remove sliding indicator */
+      .button-bar::after {
+        display: none;
+      }
+  
+      /* Sidebar collapse */
+      .left-panel {
+        width: 60px !important;
+        min-width: 60px !important;
+      }
+  
+      /* Hide text */
+      .left-panel .menu-btn span,
+      .left-panel .logout-btn span {
+        display: none;
+      }
+  
+      /* Center icons */
+      .left-panel .menu-btn,
+      .left-panel .logout-btn {
+        justify-content: center;
+        padding: 4px 0;
+      }
+  
+      /* Active button adjust */
+      .left-panel .menu-btn.active {
+        transform: translateX(10px);
+        border-radius: 999px 0 0 999px;
+      }
+  
+  
+      #EmpPage td:first-child {
+        width: 140px;
+      }
+  
+      .status {
+        padding: 3px 8px;
+        font-size: 11px;
+      }
+  
+  
+    }
+  </style>
 
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
 
-<h2>💼 PayBill Dashboard</h2>
+  <div class="left-panel collapsed" id="sidebar">
 
-<input id="id" placeholder="ID">
-<input id="name" placeholder="Name">
-<input id="basic" placeholder="Basic">
+  <!-- Toggle button -->
+  <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-<button onclick="saveData()">Save</button>
+    <div class="menu-list">
 
-<table id="table"></table>
+      <button class="menu-btn active" data-tooltip="Dashboard" data-page="DashBoard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </button>
+
+      <button class="menu-btn" data-tooltip="Employee Details" data-page="EmpPage">
+        <i data-lucide="user"></i>
+        <span>Employee Details</span>
+      </button>
+
+      <button class="menu-btn" data-tooltip="Pay Bill" data-page="PayBillPage">
+        <i data-lucide="file-text"></i>
+        <span>Pay Bill</span>
+      </button>
+
+      <button class="menu-btn" data-tooltip="Salary Slip" data-page="SalarySlipPage">
+        <i data-lucide="receipt"></i>
+        <span>Salary Slip</span>
+      </button>
+
+      <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
+        <i data-lucide="calculator"></i>
+        <span>Income Tax</span>
+      </button>
+
+      <button class="menu-btn" data-tooltip="Pensions" data-page="PensionPage">
+        <i data-lucide="landmark"></i>
+        <span>Pensions</span>
+      </button>
+
+      <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
+        <i data-lucide="pie-chart"></i>
+        <span>Budgets</span>
+      </button>
+      
+      <button class="menu-btn" data-tooltip="Database" data-page="DatabasePage">
+        <i data-lucide="database"></i>
+        <span>Database</span>
+      </button>
+      
+    </div>
+
+    <div class="menu-footer">
+      <button class="logout-btn" data-tooltip="Logout">
+        <i data-lucide="log-out"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="right-panel">
+    
+  <img  class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
+
+    <div class="SectionPage" id="DashBoard">
+      <div class="header">
+        <h2>Office Management</h2>
+      </div>
+    </div>
+
+    <div class="SectionPage" id="EmpPage" style="display:none">
+      <div class="header">
+        <h2>Employee Profile Details</h2>
+      </div>
+      <div class="Selection-bar">
+        <table>
+          <colgroup>
+            <col style="width:100px">
+            <col style="width:120px">
+            <col style="width:100px">
+            <col style="width:270px">
+            <col style="width:100px">
+            <col style="width:80px">            
+            <col style="width:90px">
+            <col style="width:80px">
+            <col style="width:0px">
+            <col style="width:70px">
+            <col style="width:50px">
+            <col style="width:50px">
+            <col style="width:120px">
+            <col style="width:80px">
+            <col style="width:120px">
+            <col style="width:30px">
+          </colgroup>
+          <tr>
+            <td><label for="EmpPage_Station">Station :</label></td>
+            <td><select id="EmpPage_Station"></select></td>
+            <td><label for="EmpPage_Emp">Employee :</label></td>
+            <td><select id="EmpPage_Emp"></select></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><label>TA Zone :</label></td>
+            <td><input disabled id="EmpPage_TAZone"></td>
+            <td><label>HRA Zone :</label></td>
+            <td><input disabled id="EmpPage_HRAZone"></td>
+            <td></td>
+          </tr>
+        </table>
+        <div class="action-group"></div>
+      </div>
+      <div class="Emp-Table-Wrapper">
+        <table id="EmpDetailTbl">
+          <tr><th colspan="2">Personal Details</th></tr>
+          <tr><td>Name</td><td id="Employee Name"></td></tr>
+          <tr><td>Department</td><td id="Department"></td></tr>
+          <tr><td>HRIS</td><td id="HRIS"></td></tr>
+          <tr><td>Designation</td><td id="Designation"></td></tr>
+          <tr><td>Section</td><td id="Section"></td></tr>
+          <tr><td>Group</td><td id="Group"></td></tr>
+          <tr><td>PAN</td><td id="PAN"></td></tr>
+          <tr><td>Aadhaar</td><td id="Aadhaar"></td></tr>
+          <tr><td>PFMS</td><td id="PFMS"></td></tr>
+          <tr><td>PRAN</td><td id="PRAN"></td></tr>
+          <tr><td>GPF</td><td id="GPF"></td></tr>
+          <tr><td>Salary Account</td><td id="Account"></td></tr>
+          <tr><td>Mobile</td><td id="Mobile"></td></tr>
+          <tr><td>Address</td><td id="Address"></td></tr>
+        </table>
+        <table>
+          <tr><th colspan="2">Pay Details</th></tr>
+          <tr><td>Date of Birth</td><td id="DOB"></td></tr>
+          <tr><td>Date of Joining</td><td id="DOJ"></td></tr>
+          <tr><td>Superannuation</td><td id="DOR"></td></tr>
+          <tr><td>Last Increment Date</td><td id="LastInc"></td></tr>
+          <tr><td>Last Drawn Salary Month</td><td id="LastSalMonth"></td></tr>
+          <tr><td>Last Drawn Pay Level</td><td id="LastPayLevel"></td></tr>          
+          <tr><td>Last Drawn Grade Pay</td><td id="LastGradePay"></td></tr>
+          <tr><td>Last Drawn Pay Band</td><td id="LastPayBand"></td></tr>
+          <tr><td>Last Increment Level</td><td id="LastIndex"></td></tr>
+          <tr><td>Last Drawn Basic Pay</td><td id="LastBP"></td></tr>
+          <tr><td>Last Drawn DA</td><td id="LastDA"></td></tr>     
+          <tr><td>Qualifying Service as on Today</td><td id="Qualifying Service"></td></tr>    
+          <tr><td>Completed 6 Monthly Period as on Today</td><td id="Completed 6 Monthly Period"></td></tr>         
+        </table>        
+      </div>
+    </div>
+
+    <div class="SectionPage" id="PayBillPage" style="display:none">
+      <div class="header">
+        <h2>Pay Bill Generation</h2>
+      </div>
+      <div class="Selection-bar">
+        <table>
+           <colgroup>
+            <col style="width:100px">
+            <col style="width:120px">
+            <col style="width:100px">
+            <col style="width:270px">
+            <col style="width:100px">
+            <col style="width:90px">            
+            <col style="width:100px">
+            <col style="width:90px">
+            <col style="width:0px">
+            <col style="width:70px">
+            <col style="width:50px">
+            <col style="width:40px">
+            <col style="width:120px">
+            <col style="width:80px">
+            <col style="width:120px">
+            <col style="width:30px">
+          </colgroup>
+          <tr>
+            <td><label for="PayBillPage_Station">Station :</label></td>
+            <td><select id="PayBillPage_Station"></select></td>
+            <td></td>
+            <td></td>
+            <td style="display:none"><label for="PayBillPage_Emp">Employee :</label></td>
+            <td style="display:none"><select id="PayBillPage_Emp"></select></td>
+            <td><label for="PayBillPage_FY">FY :</label></td>
+            <td><select id="PayBillPage_FY"></select></td>
+            <td><label for="PayBillPage_SalMonth">Month :</label></td>
+            <td><select id="PayBillPage_SalMonth"></select></td>
+            <td></td>
+            <td><span class="status paid">PAID</span></td>
+            <td><label>DA(%) :</td>
+            <td><input style="max-width:40px;" disabled id="PayBillPage_DA%" type="text"></td>
+            <td><label>TA Zone :</label></td>
+            <td><input disabled id="PayBillPage_TAZone"></td>
+            <td><label>HRA Zone :</label></td>
+            <td><input disabled id="PayBillPage_HRAZone"></td>
+            <td></td>
+          </tr>
+        </table>
+        <div class="action-group">
+          <button id="PBeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
+          <button id="PBaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
+          <button id="PBprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
+          <button id="PBexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+        </div>
+      </div>
+      <div class="PB-Table-Wrapper">
+        <div class="PB-Table-WrapperGO">
+          <table id="PB_GOViewTbl"></table>
+          <table id="PB_GOEditTbl"></table>       
+        </div>
+        <div class="PB-Table-WrapperNPS">
+          <table id="PB_NPSViewTbl"></table>
+          <table id="PB_NPSEditTbl"></table>
+        </div>                         
+      </div>
+      <div class="Error_Note">
+          <span id="DA_Error" class="PB-error"></span> 
+          <span id="GPF_Error" class="PB-error"></span> 
+      </div>       
+    </div>
+    
+    <div class="SectionPage" id="SalarySlipPage" style="display:none">
+      <div class="header">
+        <h2>Salary Slip</h2>
+      </div>
+    </div>
+    
+    <div class="SectionPage" id="ITPage" style="display:none">
+      <div class="header">
+        <h2>Income Tax Calculation</h2>
+      </div>
+    </div>
+
+    <div class="SectionPage" id="PensionPage" style="display:none">
+      <div class="header">
+        <h2>Pension Benifits & Calculations</h2>
+      </div>
+    </div>
+
+    <div class="SectionPage" id="BudgetPage" style="display:none">
+      <div class="header">
+        <h2>Budgets</h2>
+      </div>
+    </div>
+
+    <div class="SectionPage" id="DatabasePage" style="display:none">
+      <div class="header">
+        <h2>Database</h2>
+      </div>
+
+      <div class="button-bar">
+        <button onclick="showSheet('EmpDB',this)" class="active">Employee Database</button>
+        <button onclick="showSheet('PBDB',this)">Pay Bill Database</button>
+        <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th CPC</button>
+        <button onclick="showSheet('QtrsRateDB',this)">Quarters Rate</button>
+        <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
+        <button onclick="showSheet('CommFactDB',this)">Commutation Factors</button>
+        <button onclick="showSheet('ITDB',this)">IT Database</button>
+      </div>
+
+      <div class="DB-Table-Wrapper">
+        <table id="EmpDB"></table>
+        <table id="PBDB" style="display:none;"></table>
+        <table id="CPC7DB" style="display:none;"></table>
+        <table id="QtrsRateDB" style="display:none;"></table>
+        <table id="CityZoneDB" style="display:none;"></table>
+        <table id="CommFactDB" style="display:none;"></table>
+        <table id="ITDB" style="display:none;"></table>
+      </div>
+    </div>  
+    
+      
+  </div>
 
 </div>
 
@@ -46,7 +1654,7 @@ async function loadData() {
   let res = await fetch("https://office-management-f425.onrender.com/get-data");
   let data = await res.json();
 
-  let table = document.getElementById("table");
+  let table = document.getElementById("EmpDB");
   table.innerHTML = "";
 
   if (data.length === 0) return;
@@ -71,23 +1679,23 @@ async function loadData() {
 
 
 // SAVE DATA
-async function saveData() {
+//async function saveData() {
 
-  let data = {
-    ID: document.getElementById("id").value,
-    Name: document.getElementById("name").value,
-    Basic: document.getElementById("basic").value
-  };
+//  let data = {
+//    ID: document.getElementById("id").value,
+//    Name: document.getElementById("name").value,
+//    Basic: document.getElementById("basic").value
+//  };
 
-  await fetch("https://office-management-f425.onrender.com/add-data", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(data)
-  });
+//  await fetch("https://office-management-f425.onrender.com/add-data", {
+//    method: "POST",
+//    headers: {"Content-Type":"application/json"},
+//    body: JSON.stringify(data)
+//  });
 
-  alert("Saved!");
-  loadData();
-}
+//  alert("Saved!");
+//  loadData();
+//}
 
 </script>
 
