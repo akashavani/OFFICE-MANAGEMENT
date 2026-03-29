@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>OFFICE MANAGEMENT</title>
+    <title>PayBill Dashboard</title>
     <base target="_top">
     <!-- font style -->
     <link
@@ -1816,7 +1816,7 @@ function log(...args) {
 window.onload = loadAllData;
 
 function renderIcons() {
-  document.querySelectorAll("i[data-lucide]").forEach(el => {
+  qsa("i[data-lucide]").forEach(el => {
     el.innerHTML = "";
   });
 
@@ -1835,7 +1835,7 @@ async function loadTable(api, tableId) {
   let res = await fetch(`https://office-management-f425.onrender.com/${api}`);
   let data = await res.json();
 
-  let table = document.getElementById(tableId);
+  let table = id(tableId);
   table.innerHTML = "";
 
   if (data.length === 0) return;
@@ -1876,7 +1876,7 @@ function loadAllData() {
 ========================= */
 function toggleSidebar() {
   const sidebar = id("sidebar");
-  const app = document.querySelector(".app");
+  const app = qs(".app");
 
   toggleClass(sidebar, "collapsed");
   toggleClass(app, "collapsed");
@@ -1893,7 +1893,7 @@ function toggleSidebar() {
 ========================= */
 function loadSidebarState() {
   const sidebar = id("sidebar");
-  const app = document.querySelector(".app");
+  const app = qs(".app");
 
   if (localStorage.getItem("sidebarCollapsed") === "true") {
     addClass(sidebar, "collapsed");
@@ -1908,12 +1908,13 @@ function loadSidebarState() {
 window.addEventListener("DOMContentLoaded", () => {
 
   loadSidebarState();
-  initMenu();
-  moveIndicator();
+  initMenu();  
 
   // 🔥 default page
-  const firstBtn = document.querySelector('.menu-btn');
+  const firstBtn = qs('.menu-btn');
   if (firstBtn) firstBtn.click();
+
+  moveIndicator();
 
   if (typeof lucide !== "undefined") {
     renderIcons();
@@ -1927,8 +1928,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
 function initMenu() {
 
-  const buttons = document.querySelectorAll('.menu-btn');
-  const pages = document.querySelectorAll('.SectionPage');
+  const buttons = qsa('.menu-btn');
+  const pages = qsa('.SectionPage');
 
   buttons.forEach(btn => {
 
@@ -1936,15 +1937,24 @@ function initMenu() {
 
       const pageId = btn.dataset.page;
 
-      // 🔥 hide all pages
+      // hide all pages
       pages.forEach(p => hide(p));
 
-      // 🔥 show selected page
+      // show selected page
       show(pageId);
 
-      // 🔥 active state
+      // active state
       buttons.forEach(b => removeClass(b, 'active'));
       addClass(btn, 'active');
+
+      // 🔥 ADD THIS BLOCK HERE
+      if (pageId === "DatabasePage") {
+        setTimeout(() => {
+          initDatabaseDefault();
+          moveIndicator();
+        }, 0);
+      }
+
     });
 
   });
@@ -1957,20 +1967,21 @@ function initMenu() {
 ========================= */
 function showSheet(name, btn){
 
-  document.querySelectorAll(".DB-Table-Wrapper table").forEach(hide);
+  qsa(".DB-Table-Wrapper table").forEach(hide);
   show(name);
 
-  document.querySelectorAll(".button-bar button")
+  qsa(".button-bar button")
     .forEach(b => b.classList.remove("active"));
 
   if(btn) btn.classList.add("active");
 
-  moveIndicator(); // 🔥 move indicator here
+  // 🔥 DELAY FIX (CRITICAL)
+  setTimeout(moveIndicator, 50);
 }
 
 
 function initDatabaseDefault() {
-  const firstBtn = document.querySelector(".button-bar button");
+  const firstBtn = qs(".button-bar button");
   if (firstBtn) {
     showSheet("EmpDB", firstBtn);
   }
@@ -1978,21 +1989,25 @@ function initDatabaseDefault() {
 
 
 function moveIndicator() {
-  const bar = document.querySelector(".button-bar");
-  const active = bar.querySelector("button.active"); // 🔥 FIX
+  const bar = qs(".button-bar");
+  if (!bar) return;
 
+  const active = bar.querySelector("button.active");
   if (!active) return;
 
   const rect = active.getBoundingClientRect();
   const parentRect = bar.getBoundingClientRect();
 
+  // 🔥 Prevent zero width issue
+  if (rect.width === 0) return;
+
   const left = rect.left - parentRect.left;
-  const width = rect.width;
 
   bar.style.setProperty("--indicator-left", left + "px");
-  bar.style.setProperty("--indicator-width", width + "px");
+  bar.style.setProperty("--indicator-width", rect.width + "px");
   bar.style.setProperty("--indicator-height", rect.height + "px");
 }
+
 
 qsa(".button-bar button").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -2010,9 +2025,9 @@ window.addEventListener("resize", moveIndicator);
 //async function saveData() {
 
 //  let data = {
-//    ID: document.getElementById("id").value,
-//    Name: document.getElementById("name").value,
-//    Basic: document.getElementById("basic").value
+//    ID: id("id").value,
+//    Name: id("name").value,
+//    Basic: id("basic").value
 //  };
 
 //  await fetch("https://office-management-f425.onrender.com/add-data", {
