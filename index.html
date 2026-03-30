@@ -38,7 +38,7 @@
       -moz-appearance: none;
 
       width: 100%;
-      min-width: 60px;
+      min-width: 100%;
       padding: 5px 18px 5px 8px;
       color: #78350f;
       border: 1px solid #94a3b8;
@@ -150,8 +150,8 @@
 
     /* =============APP LAYOUT=========== */
     .watermark {
-      width: 600px;
-      height: 600px;
+      width: calc(100vw-500px);
+      height: 80vh;
       opacity: 0.06;
       position: absolute;
       left: 50%;
@@ -169,8 +169,10 @@
 
     /* =============SIDEBAR=========== */
     .left-panel {
-      position: relative;      /* 🔥  */
-      z-index: 2000;      /* 🔥  */
+      position: relative;
+      /* 🔥  */
+      z-index: 2000;
+      /* 🔥  */
       width: 160px;
       min-width: 160px;
       display: flex;
@@ -198,7 +200,6 @@
       height: 100vh;
       overflow-x: hidden;
       overflow-y: auto;
-
       transition: all 0.35s ease;
     }
 
@@ -211,7 +212,6 @@
       overflow: hidden;
       margin-right: 4px;
       margin-bottom: 0px;
-      padding-bottom: 2px;
       z-index: 1;
       transition: opacity 0.25s ease;
     }
@@ -263,6 +263,7 @@
       cursor: pointer;
       transition: all 0.25s ease;
     }
+
     /* ========= END BUTTON BASE ============== */
 
     /* ICON (Lucide fix) */
@@ -726,7 +727,6 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      border: 1px solid gray;
       gap: 0;
       margin: 0 3px;
     }
@@ -1003,11 +1003,10 @@
       padding: 4px 10px;
       text-align: left;
       width: 100%;
-      height: 40px;
+      height: 46px;
       display: flex;
       gap: 30px;
       border-radius: 2px;
-      margin: 2px;
       margin-bottom: 0px;
       border: solid 1px #cccccc;
       overflow: auto;
@@ -1223,6 +1222,11 @@
         color: #374151;
       }
 
+      .watermark {
+        width: calc(100vw-500px);
+        height: 90vh;
+      }
+
       /* 🔥 active button visible */
       .button-bar button.active {
         background: #111827;
@@ -1354,21 +1358,21 @@
         <div class="Selection-bar">
           <table>
             <colgroup>
-              <col style="width:100px">
-              <col style="width:120px">
-              <col style="width:100px">
-              <col style="width:270px">
-              <col style="width:100px">
               <col style="width:80px">
+              <col style="width:170px">
+              <col style="width:100px">
+              <col style="width:300px">
+              <col style="width:40px">
               <col style="width:90px">
-              <col style="width:80px">
+              <col style="width:60px">
+              <col style="width:100px">
               <col style="width:0px">
               <col style="width:70px">
               <col style="width:50px">
-              <col style="width:50px">
-              <col style="width:120px">
+              <col style="width:40px">
+              <col style="width:90px">
               <col style="width:80px">
-              <col style="width:120px">
+              <col style="width:90px">
               <col style="width:30px">
             </colgroup>
             <tr>
@@ -1522,21 +1526,21 @@
         <div class="Selection-bar">
           <table>
             <colgroup>
+              <col style="width:80px">
+              <col style="width:170px">
               <col style="width:100px">
-              <col style="width:120px">
-              <col style="width:100px">
-              <col style="width:270px">
-              <col style="width:100px">
+              <col style="width:300px">
+              <col style="width:40px">
               <col style="width:90px">
+              <col style="width:60px">
               <col style="width:100px">
-              <col style="width:90px">
               <col style="width:0px">
               <col style="width:70px">
               <col style="width:50px">
               <col style="width:40px">
-              <col style="width:120px">
+              <col style="width:90px">
               <col style="width:80px">
-              <col style="width:120px">
+              <col style="width:90px">
               <col style="width:30px">
             </colgroup>
             <tr>
@@ -1682,7 +1686,7 @@
       // Indicator AFTER UI ready
       moveIndicator();
 
-      
+
     });
 
 
@@ -1923,30 +1927,146 @@
       let stationSet = new Set();
       let empSet = new Set();
       let fySet = new Set();
-      let monthSet = new Set();
 
+      // ================= BUILD FULL DATA (NO FILTER LOSS) =================
       rows.forEach(r => {
-
         let station = r[stationIndex];
         let emp = r[empIndex];
         let month = r[monthIndex];
         let fy = getFinancialYear(month);
 
-        if (filters.station && filters.station !== station) return;
-        if (filters.employee && filters.employee !== emp) return;
-        if (filters.fy && filters.fy !== fy) return;
-        if (filters.month && filters.month !== month) return;
-
         stationSet.add(station);
         empSet.add(emp);
         fySet.add(fy);
-        monthSet.add(month);
       });
 
+      // ================= STATION CHANGE LOGIC =================
+      if (filters.station) {
+
+        let validFY = new Set();
+        let validEmp = new Set();
+
+        rows.forEach(r => {
+          let station = r[stationIndex];
+          if (station !== filters.station) return;
+
+          let emp = r[empIndex];
+          let month = r[monthIndex];
+          let fy = getFinancialYear(month);
+
+          validFY.add(fy);
+          validEmp.add(emp);
+        });
+
+        // 🔥 SMART FY SELECTION
+        let sortedFY = [...validFY].sort((a, b) => {
+          let [a1] = a.split("-");
+          let [b1] = b.split("-");
+          return parseInt(a1) - parseInt(b1);
+        });
+
+        if (filters.fy && validFY.has(filters.fy)) {
+          // keep existing
+        } else {
+          filters.fy = sortedFY.length ? sortedFY[sortedFY.length - 1] : "";
+        }
+
+        // 🔥 EMPLOYEE FIX
+        if (filters.employee && !validEmp.has(filters.employee)) {
+          filters.employee = [...validEmp].sort().pop() || "";
+        }
+      }
+
+      // ================= FY CHANGE → MONTH LOGIC =================
+      if (filters.fy) {
+
+        let validMonths = new Set();
+
+        rows.forEach(r => {
+          let month = r[monthIndex];
+          let fy = getFinancialYear(month);
+
+          if (fy === filters.fy) {
+            validMonths.add(month);
+          }
+        });
+
+        const order = ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"];
+
+        let sortedMonths = [...validMonths].sort((a, b) => {
+
+          let [ma, ya] = a.split("-");
+          let [mb, yb] = b.split("-");
+
+          ya = parseInt(ya);
+          yb = parseInt(yb);
+
+          if (ya !== yb) return ya - yb;
+          return order.indexOf(ma) - order.indexOf(mb);
+        });
+
+        // 🔥 KEEP OR SELECT LAST MONTH
+        if (filters.month && validMonths.has(filters.month)) {
+          // keep
+        } else {
+          filters.month = sortedMonths.length
+            ? sortedMonths[sortedMonths.length - 1]
+            : "";
+        }
+
+        // 🔥 BUILD MONTH DROPDOWN (NO OPTION LOSS)
+        selectMap.month.forEach(eid => {
+
+          let select = id(eid);
+          if (!select) return;
+
+          select.innerHTML = "<option value='' hidden></option>";
+
+          sortedMonths.forEach(val => {
+            let sel = val === filters.month ? "selected" : "";
+            select.innerHTML += `<option value="${val}" ${sel}>${val}</option>`;
+          });
+
+          // 🔥 IMPORTANT FIX (NO AUTO "ALL")
+          select.value = filters.month;
+        });
+
+      }       
+
+      // ================= FINAL DROPDOWNS =================
       filters.station = updateAllSelects("station", stationSet, filters.station);
       filters.employee = updateAllSelects("employee", empSet, filters.employee);
       filters.fy = updateAllSelects("fy", fySet, filters.fy);
-      filters.month = updateAllSelects("month", monthSet, filters.month);
+
+      const hasStation = !!filters.station;
+      const hasFY = !!filters.fy;
+
+      // ===== FY (depends on Station) =====
+      selectMap.fy.forEach(eid => {
+        let el = id(eid);
+        if (el) {
+          el.disabled = !hasStation;
+          if (!hasStation) el.value = "";
+        }
+      });
+
+      // ===== Employee (depends on Station) =====
+      selectMap.employee.forEach(eid => {
+        let el = id(eid);
+        if (el) {
+          el.disabled = !hasStation;
+          if (!hasStation) el.value = "";
+        }
+      });
+
+      // ===== Month (depends on FY) =====
+      selectMap.month.forEach(eid => {
+        let el = id(eid);
+        if (el) {
+          el.disabled = !hasFY;
+          if (!hasFY) el.value = "";
+        }
+      });
     }
 
     function initGlobalEvents() {
