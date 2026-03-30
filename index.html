@@ -3,6 +3,7 @@
 
 <head>
   <title>PayBill Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base target="_top">
   <!-- font style -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -150,7 +151,7 @@
 
     /* =============APP LAYOUT=========== */
     .watermark {
-      width: calc(100vw-500px);
+      width: 40vw;
       height: 80vh;
       opacity: 0.06;
       position: absolute;
@@ -536,7 +537,7 @@
 
     /*======= label column ===========*/
     .Emp-Table-Wrapper td:first-child {
-      width: 220px;
+      width: 250px;
       font-weight: 600;
       color: #334155;
       background: #f8fafc;
@@ -1222,11 +1223,6 @@
         color: #374151;
       }
 
-      .watermark {
-        width: calc(100vw-500px);
-        height: 90vh;
-      }
-
       /* 🔥 active button visible */
       .button-bar button.active {
         background: #111827;
@@ -1473,39 +1469,39 @@
             </tr>
             <tr>
               <td>Superannuation</td>
-              <td id="DOR"></td>
+              <td id="Superannuation"></td>
             </tr>
             <tr>
               <td>Last Increment Date</td>
-              <td id="LastInc"></td>
+              <td id="Last Increment Date"></td>
             </tr>
             <tr>
               <td>Last Drawn Salary Month</td>
-              <td id="LastSalMonth"></td>
+              <td id="Last Drawn Salary Month"></td>
             </tr>
             <tr>
               <td>Last Drawn Pay Level</td>
-              <td id="LastPayLevel"></td>
+              <td id="Last Drawn Pay Level"></td>
             </tr>
             <tr>
               <td>Last Drawn Grade Pay</td>
-              <td id="LastGradePay"></td>
+              <td id="Last Drawn Grade Pay"></td>
             </tr>
             <tr>
               <td>Last Drawn Pay Band</td>
-              <td id="LastPayBand"></td>
+              <td id="Last Drawn Pay Band"></td>
             </tr>
             <tr>
               <td>Last Increment Level</td>
-              <td id="LastIndex"></td>
+              <td id="Last Drawn Increment Level"></td>
             </tr>
             <tr>
               <td>Last Drawn Basic Pay</td>
-              <td id="LastBP"></td>
+              <td id="Last Drawn Basic Pay"></td>
             </tr>
             <tr>
-              <td>Last Drawn DA</td>
-              <td id="LastDA"></td>
+              <td>Last DA Drawn</td>
+              <td id="Last Drawn DA"></td>
             </tr>
             <tr>
               <td>Qualifying Service as on Today</td>
@@ -1635,6 +1631,7 @@
 
         <div class="DB-Table-Wrapper">
           <table id="EmpDB"></table>
+          <table id="EmpDBCalc"></table>
           <table id="PBDB" style="display:none;"></table>
           <table id="CPC7DB" style="display:none;"></table>
           <table id="QtrsRateDB" style="display:none;"></table>
@@ -1681,6 +1678,7 @@
       // Load ALL DATA HERE (🔥 single place)
       await loadAllData();
       await loadData();
+      buildEmpDBWithCalc();
       initFilters();
 
       // Indicator AFTER UI ready
@@ -1774,6 +1772,391 @@
         loadTable("it", "ITDB")
       ]);
     }
+
+    /* =========================
+   🔥 DATE PARSERS
+========================= */
+
+    /* =========================
+       🔥 UNIVERSAL DATE UTILITY
+    ========================= */
+
+    const DateUtil = (() => {
+
+      const monthMap = {
+        Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+        Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+      };
+
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      return {
+
+        // 🔹 Parse Salary Month → Apr-2025
+        parseMonth(str) {
+          if (!str) return null;
+
+          let [mon, year] = str.split("-");
+          return new Date(parseInt(year), monthMap[mon], 1);
+        },
+
+        // 🔹 Parse Full Date → Apr-15,1990
+        parseDate(str) {
+          if (!str) return null;
+
+          let [monthDay, year] = str.split(",");
+          let [mon, day] = monthDay.split("-");
+
+          return new Date(
+            parseInt(year),
+            monthMap[mon],
+            parseInt(day)
+          );
+        },
+
+        // 🔹 Format → Apr-15,1990
+        format(date) {
+          if (!date) return "";
+
+          let mon = months[date.getMonth()];
+          let day = String(date.getDate()).padStart(2, "0");
+          let year = date.getFullYear();
+
+          return `${mon}-${day},${year}`;
+        },
+
+        // 🔹 Compare months (for latest PB)
+        toTime(str) {
+          let d = this.parseMonth(str);
+          return d ? d.getTime() : 0;
+        }
+
+      };
+
+    })();
+
+    /* =========================
+       🔥 CALCULATIONS
+    ========================= */
+
+    // Superannuation
+    function calcSuperannuation(dobStr) {
+
+      let d = DateUtil.parseDate(dobStr);
+      if (!d) return "";
+
+      d.setFullYear(d.getFullYear() + 60);
+
+      if (d.getDate() > 1) {
+        d.setMonth(d.getMonth() + 1);
+      }
+
+      d.setDate(0);
+
+      return DateUtil.format(d);
+    }
+
+    // Service (Y M D)
+    function calcService(dojStr) {
+
+      let start = DateUtil.parseDate(dojStr);
+      if (!start) return "";
+
+      let now = new Date();
+
+      let y = now.getFullYear() - start.getFullYear();
+      let m = now.getMonth() - start.getMonth();
+      let d = now.getDate() - start.getDate();
+
+      if (d < 0) {
+        m--;
+        d += 30;
+      }
+
+      if (m < 0) {
+        y--;
+        m += 12;
+      }
+
+      return `${y}Y ${m}M ${d}D`;
+    }
+
+
+    // 6 Month Period
+    function calcSixMonth(dojStr) {
+
+      let start = DateUtil.parseDate(dojStr);
+      if (!start) return "";
+
+      let now = new Date();
+
+      let y = now.getFullYear() - start.getFullYear();
+      let m = now.getMonth() - start.getMonth();
+      let d = now.getDate() - start.getDate();
+
+      if (d > 0) m++;
+
+      return y * 2 + Math.floor(m / 6);
+    }
+
+    /* =========================
+       🔥 GET LATEST PB DATA
+    ========================= */
+
+    function getLatestPBMap() {
+
+      let headers = pbData.headers;
+      let rows = pbData.rows;
+
+      let empIdx = headers.indexOf("Employee Name");
+      let monthIdx = headers.indexOf("Salary Month");
+
+      let latest = {};
+
+      rows.forEach(r => {
+
+        let emp = r[empIdx];
+        let month = r[monthIdx];
+
+        if (!emp || !month) return;
+
+        if (!latest[emp] || DateUtil.toTime(month) > DateUtil.toTime(latest[emp][monthIdx])) {
+          latest[emp] = r;
+        }
+
+      });
+
+      return latest;
+    }
+
+    /* =========================
+       🔥 BUILD EMPDB WITH CALC
+    ========================= */
+
+    function buildEmpDBWithCalc() {
+
+  if (!empData.headers || !pbData.headers) return;
+
+  let eHeaders = [...empData.headers];
+  let eRows = empData.rows;
+
+  let newCols = [
+    "Superannuation",
+    "Last Drawn Salary Month",
+    "Last Increment Index",
+    "Last Drawn Basic Pay",
+    "Last Drawn DA",
+    "Qualifying Service",
+    "Completed 6 Monthly Period",
+    "Last 10 Month Emoluments"
+  ];
+
+  let finalHeaders = [...eHeaders, ...newCols];
+
+  // ✅ FIX HERE
+  let latest = getLatestPBMap();
+  let monthMap = getPBMonthMap();
+
+  let finalRows = [];
+
+  let empIdx = eHeaders.indexOf("Employee Name");
+  let dobIdx = eHeaders.indexOf("DOB");
+  let dojIdx = eHeaders.indexOf("DOJ");
+
+  let pHeaders = pbData.headers;
+  let monthIdx = pHeaders.indexOf("Salary Month");
+  let basicIdx = pHeaders.indexOf("Basic Pay");
+  let daIdx = pHeaders.indexOf("DA");
+  let indexIdx = pHeaders.indexOf("7CPC Index");
+
+  eRows.forEach(r => {
+
+    let emp = r[empIdx];
+    let dob = r[dobIdx];
+    let doj = r[dojIdx];
+
+    let pb = latest[emp] || [];
+
+    let lastMonth = pb[monthIdx] || "";
+    let basic = pb[basicIdx] || "";
+    let da = pb[daIdx] || "";
+    let index = pb[indexIdx] || "";
+
+    let superDate = calcSuperannuation(dob);
+    let service = calcService(doj);
+    let sixMonth = calcSixMonth(doj);
+
+    let emoluments = calcLast10MonthsEmoluments(r, latest, monthMap);
+
+    finalRows.push([
+      ...r,
+      superDate,
+      lastMonth,
+      index,
+      basic,
+      da,
+      service,
+      sixMonth,
+      emoluments
+    ]);
+
+  });
+
+  renderTable("EmpDB", finalHeaders, finalRows);
+}
+
+    /* =========================
+       🔥 RENDER TABLE
+    ========================= */
+
+    function renderTable(id, headers, rows) {
+
+      let table = document.getElementById(id);
+      if (!table) return;
+
+      let html = "<thead><tr>";
+
+      headers.forEach(h => html += `<th>${h}</th>`);
+
+      html += "</tr></thead><tbody>";
+
+      rows.forEach(r => {
+        html += "<tr>";
+        r.forEach(c => html += `<td>${c ?? ""}</td>`);
+        html += "</tr>";
+      });
+
+      html += "</tbody>";
+
+      table.innerHTML = html;
+    }
+
+    function getPBMonthMap() {
+
+  let headers = pbData.headers;
+  let rows = pbData.rows;
+
+  let empIdx = headers.indexOf("Employee Name");
+  let monthIdx = headers.indexOf("Salary Month");
+
+  let map = {};
+
+  rows.forEach(r => {
+    let emp = r[empIdx];
+    let month = r[monthIdx];
+
+    if (!map[emp]) map[emp] = {};
+    map[emp][month] = r;
+  });
+
+  return map;
+}
+
+function getCPCValue(index, level) {
+
+  let headers = cpcData.headers;
+  let rows = cpcData.rows;
+
+  let idxCol = headers.indexOf("7CPC Index");
+  let levelCol = headers.indexOf(String(level));
+
+  if (idxCol === -1 || levelCol === -1) return 0;
+
+  let row = rows.find(r => Number(r[idxCol]) === Number(index));
+
+  return row ? Number(row[levelCol]) : 0;
+}
+
+function formatMonth(date) {
+  const m = ["Jan","Feb","Mar","Apr","May","Jun",
+             "Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${m[date.getMonth()]}-${date.getFullYear()}`;
+}
+
+function calcLast10MonthsEmoluments(empRow, latestPB, pbMap) {
+
+  let eHeaders = empData.headers;
+  let pHeaders = pbData.headers;
+
+  let empName = empRow[eHeaders.indexOf("Employee Name")];
+  let level = empRow[eHeaders.indexOf("Pay Level")];
+  let dob = empRow[eHeaders.indexOf("DOB")];
+
+  let pb = latestPB[empName];
+  if (!pb) return 0;
+
+  let monthIdx = pHeaders.indexOf("Salary Month");
+  let basicIdx = pHeaders.indexOf("Basic Pay");
+  let indexIdx = pHeaders.indexOf("7CPC Index");
+  let incIdx = pHeaders.indexOf("Last Increment");
+
+  let lastMonth = pb[monthIdx];
+  let currentIndex = Number(pb[indexIdx]);
+
+  let incMonthStr = pb[incIdx]; // e.g. "Jan-2025"
+
+let incMonth = null;
+
+if (incMonthStr && incMonthStr.includes("-")) {
+  incMonth = incMonthStr.split("-")[0]; // "Jan"
+}
+
+  // ===== DETERMINE START DATE =====
+  let dobDate = DateUtil.parseDate(dob);
+  let superDate = new Date(dobDate);
+  superDate.setFullYear(superDate.getFullYear() + 60);
+
+  let today = new Date();
+  let startDate;
+
+  if (superDate > today) {
+    startDate = new Date(superDate.getFullYear(), superDate.getMonth(), 1);
+  } else {
+    startDate = DateUtil.parseMonth(lastMonth);
+  }
+
+  // ===== ADJUST FUTURE INCREMENTS =====
+  let tempDate = new Date(today);
+
+  while (tempDate < startDate) {
+    let m = formatMonth(tempDate).split("-")[0];
+    if (m === incMonth) currentIndex++;
+    tempDate.setMonth(tempDate.getMonth() + 1);
+  }
+
+  // ===== BACKWARD 10 MONTHS =====
+  let sum = 0;
+  let loopDate = new Date(startDate);
+
+  for (let i = 0; i < 10; i++) {
+
+    let mStr = formatMonth(loopDate);
+
+    let pbRow = pbMap[empName]?.[mStr];
+
+    let value;
+
+    if (pbRow) {
+      value = Number(pbRow[basicIdx]) || 0;
+    } else {
+      value = getCPCValue(currentIndex, level);
+    }
+
+    sum += value;
+
+    // move back one month
+    loopDate.setMonth(loopDate.getMonth() - 1);
+
+    let prevMonth = formatMonth(loopDate).split("-")[0];
+
+    if (prevMonth === incMonth) {
+      currentIndex--; // 🔥 decrement index
+    }
+  }
+
+  return sum;
+}
 
     function renderIcons() {
       if (typeof lucide === "undefined") return;
@@ -1908,9 +2291,11 @@
 
       let empRes = await fetch("https://office-management-f425.onrender.com/emp");
       let pbRes = await fetch("https://office-management-f425.onrender.com/pb");
+      let cpcRes = await fetch("https://office-management-f425.onrender.com/cpc");
 
       empData = await empRes.json();
       pbData = await pbRes.json();
+      cpcData = await cpcRes.json();
     }
 
     function applyFilters() {
@@ -2031,7 +2416,7 @@
           select.value = filters.month;
         });
 
-      }       
+      }
 
       // ================= FINAL DROPDOWNS =================
       filters.station = updateAllSelects("station", stationSet, filters.station);
