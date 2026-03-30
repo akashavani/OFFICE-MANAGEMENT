@@ -7,7 +7,7 @@
   <!-- font style -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <!-- Icon -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script defer src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
@@ -40,13 +40,9 @@
       width: 100%;
       min-width: 60px;
       padding: 5px 18px 5px 8px;
-
       color: #78350f;
-
       border: 1px solid #94a3b8;
-      /*#cbd5e1;*/
       border-radius: 6px;
-
       background-color: #d3fc58;
       background-image: url("data:image/svg+xml;utf8,<svg fill='%236b7280' height='12' viewBox='0 0 20 20' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 4 4.5-4'/></svg>");
       background-repeat: no-repeat;
@@ -105,23 +101,19 @@
     input:not([type="checkbox"]) {
       appearance: none;
       -webkit-appearance: none;
-
       background-image: none !important;
-
       transform: translateZ(0);
       backface-visibility: hidden;
     }
 
     input:not([type="checkbox"]):focus {
       outline: none;
-
       transform: scale(1);
       background-clip: padding-box;
     }
 
     textarea {
       resize: none;
-      /* ❌ disable drag */
       min-width: 500px;
       border: none;
       border-radius: 0;
@@ -135,9 +127,7 @@
       background: transparent;
     }
 
-    /* =========================
-      SCROLLBAR
-    ========================= */
+    /* =============SCROLLBAR=========== */
     div::-webkit-scrollbar {
       height: 5px;
       width: 5px;
@@ -158,16 +148,15 @@
       scrollbar-color: #3b82f6 #f1f5f9;
     }
 
-    /* =========================
-      APP LAYOUT
-    ========================= */
+    /* =============APP LAYOUT=========== */
     .watermark {
       width: 600px;
       height: 600px;
       opacity: 0.06;
       position: absolute;
-      left: 30%;
-      top: 10%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       z-index: 0;
       /* behind content */
     }
@@ -178,14 +167,10 @@
       overflow: visible;
     }
 
-    /* =========================
-      SIDEBAR
-    ========================= */
+    /* =============SIDEBAR=========== */
     .left-panel {
-      position: relative;
-      /* 🔥  */
-      z-index: 2000;
-      /* 🔥  */
+      position: relative;      /* 🔥  */
+      z-index: 2000;      /* 🔥  */
       width: 160px;
       min-width: 160px;
       display: flex;
@@ -202,20 +187,15 @@
       min-width: 60px;
     }
 
-    /* =========================
-      RIGHT PANEL
-    ========================= */
+    /* =============RIGHT PANEL=========== */
     .right-panel {
       position: relative;
       z-index: 1;
-
       flex: 1;
       display: flex;
       flex-direction: column;
       background: transparent;
       height: 100vh;
-
-      /* 🔥 CRITICAL FIX */
       overflow-x: hidden;
       overflow-y: auto;
 
@@ -236,9 +216,7 @@
       transition: opacity 0.25s ease;
     }
 
-    /* =========================
-      SIDEBAR TOGGLE
-    ========================= */
+    /* =============SIDEBAR TOGGLE=========== */
     .sidebar-toggle {
       height: 42px;
       display: flex;
@@ -254,9 +232,7 @@
       background: #e5e7eb;
     }
 
-    /* =========================
-      MENU LIST
-    ========================= */
+    /* =============MENU LIST=========== */
     .menu-list {
       flex: 1;
       overflow-y: auto;
@@ -268,9 +244,7 @@
       display: none;
     }
 
-    /* =========================
-      BUTTON BASE
-    ========================= */
+    /* ========BUTTON BASE=========== */
     .menu-btn,
     .logout-btn {
       position: relative;
@@ -289,6 +263,7 @@
       cursor: pointer;
       transition: all 0.25s ease;
     }
+    /* ========= END BUTTON BASE ============== */
 
     /* ICON (Lucide fix) */
     .menu-btn svg,
@@ -346,13 +321,9 @@
       margin-left: 10px;
       font-weight: 600;
       color: blue;
-
-      /* 🔥 glow effect */
       text-shadow: 0 0 4px rgba(255, 255, 255, 0.6),
         0 0 8px rgba(59, 130, 246, 0.6),
         0 0 12px rgba(59, 130, 246, 0.5);
-
-      /*background: linear-gradient(90deg, #2563eb, #3b82f6);*/
       background: white;
     }
 
@@ -370,7 +341,6 @@
 
     .menu-btn.active i {
       color: blue;
-
       filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.7)) drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
     }
 
@@ -382,18 +352,13 @@
       justify-content: center;
       box-shadow: 0 3px 8px rgba(59, 130, 246, 0.25);
       color: blue;
-
-      /* 🔥 glow effect */
       text-shadow: 0 0 4px rgba(255, 255, 255, 0.6),
         0 0 8px rgba(59, 130, 246, 0.6),
         0 0 12px rgba(59, 130, 246, 0.5);
-
       background: white;
     }
 
-    /* =========================
-      TOOLTIP (FINAL FIXED)
-    ========================= */
+    /* ======TOOLTIP============= */
     .menu-btn::after,
     .logout-btn::after {
       content: attr(data-tooltip);
@@ -418,9 +383,7 @@
       opacity: 1;
     }
 
-    /* =========================
-      FOOTER
-    ========================= */
+    /* ==========FOOTER=========== */
     .menu-footer {
       margin-top: auto;
       padding: 10px;
@@ -449,9 +412,7 @@
       padding: 5px;
     }
 
-    /* =========================
-     BUTTON BAR
-  ========================= */
+    /* ===========BUTTON BAR============== */
     .button-bar {
       position: relative;
       display: flex;
@@ -462,9 +423,7 @@
       margin: 2px;
     }
 
-    /* =========================
-     SLIDING INDICATOR
-  ========================= */
+    /* =======SLIDING INDICATOR=========== */
     .button-bar::after {
       content: "";
       position: absolute;
@@ -480,9 +439,7 @@
       z-index: 0;
     }
 
-    /* =========================
-     BUTTON BASE
-  ========================= */
+    /* ======= BUTTON BASE=========== */
     .button-bar button {
       position: relative;
       z-index: 1;
@@ -503,35 +460,27 @@
     }
 
 
-    /* =========================
-     HOVER
-  ========================= */
+    /* ==========HOVER============ */
     .button-bar button:hover {
       color: #111827;
       transform: translateY(-2px) scale(1.02);
     }
 
 
-    /* =========================
-     ACTIVE BUTTON
-  ========================= */
+    /* ==========ACTIVE BUTTON=========== */
     .button-bar button.active {
       color: #fff;
       transform: scale(1.04);
     }
 
 
-    /* =========================
-     CLICK EFFECT
-  ========================= */
+    /* ===========CLICK EFFECT================ */
     .button-bar button:active {
       transform: scale(0.97);
     }
 
 
-    /* =========================
-     SHINE EFFECT
-  ========================= */
+    /* ===========SHINE EFFECT================ */
     .button-bar button::before {
       content: "";
       position: absolute;
@@ -549,17 +498,14 @@
     }
 
 
-    /* =========================
-     FOCUS
-  ========================= */
+    /* ===========FOCUS================ */
     .button-bar button:focus-visible {
       outline: 2px solid #3b82f6;
       outline-offset: 2px;
     }
 
-    /* ==========================================
-     TABLE WRAPPER FOR EMPOLYEE DETAIL PAGE
-  ============================================ */
+
+    /* ==========TABLE WRAPPER FOR EMPOLYEE DETAIL PAGE================== */
     .Emp-Table-Wrapper {
       flex: 1;
       overflow: auto;
@@ -587,7 +533,7 @@
       border-bottom: 1px solid #e5e7eb;
     }
 
-    /* label column */
+    /*======= label column ===========*/
     .Emp-Table-Wrapper td:first-child {
       width: 220px;
       font-weight: 600;
@@ -595,17 +541,17 @@
       background: #f8fafc;
     }
 
-    /* value column */
+    /*======= value column ===========*/
     .Emp-Table-Wrapper td:last-child {
       color: #111827;
     }
 
-    /* zebra effect */
+    /*========= zebra effect ===========*/
     .Emp-Table-Wrapper tr:nth-child(even) td:last-child {
       background: #fafafa;
     }
 
-    /* hover */
+    /*========= hover ===========*/
     .Emp-Table-Wrapper tr:hover td {
       background: #eef6ff;
     }
@@ -626,9 +572,7 @@
       line-height: 1.2;
     }
 
-    /* =========================
-     TABLE WRAPPER
-  ========================= */
+    /*===========TABLE WRAPPER ========== */
     .DB-Table-Wrapper {
       flex: 1;
       overflow: auto;
@@ -638,15 +582,11 @@
     }
 
 
-    /* =========================
-     TABLE BASE
-  ========================= */
+    /* ======= TABLE BASE========== */
     .DB-Table-Wrapper table {
       table-layout: fixed;
       border-collapse: collapse;
-      /* 🔥 */
       width: max-content;
-      /* 🔥 allow horizontal scroll */
       color: #111827;
       background: #ffffff;
       border-radius: 8px;
@@ -654,9 +594,7 @@
     }
 
 
-    /* =========================
-     HEADER (TOP ROW)
-  ========================= */
+    /* =====HEADER (TOP ROW)========== */
     .DB-Table-Wrapper thead th {
       position: sticky;
       top: 0;
@@ -677,9 +615,7 @@
       max-width: 60px;
     }
 
-    /* =========================
-     BODY CELLS
-  ========================= */
+    /* ======= BODY CELLS =========== */
     .DB-Table-Wrapper td {
       padding: 4px 8px;
       border-bottom: 1px solid #e5e7eb;
@@ -688,25 +624,19 @@
     }
 
 
-    /* =========================
-     ROW STRIPING
-  ========================= */
+    /* ========== ROW STRIPING =========== */
     .DB-Table-Wrapper tbody tr:nth-child(even) {
       background: #fafafa;
     }
 
 
-    /* =========================
-     ROW HOVER
-  ========================= */
+    /* ========ROW HOVER========== */
     .DB-Table-Wrapper tbody tr:hover td {
       background: yellow;
     }
 
 
-    /* =========================
-     FIRST COLUMN (STICKY)
-  ========================= */
+    /* ==========FIRST COLUMN (STICKY)=========== */
     .DB-Table-Wrapper td:first-child,
     .DB-Table-Wrapper th:first-child {
       position: sticky;
@@ -719,9 +649,7 @@
     }
 
 
-    /* =========================
-     TOP-LEFT CELL (CRITICAL FIX)
-  ========================= */
+    /* =========TOP-LEFT CELL (CRITICAL FIX)============== */
     .DB-Table-Wrapper thead th:first-child {
       position: sticky;
       top: 0;
@@ -735,18 +663,14 @@
     }
 
 
-    /* =========================
-     COLUMN DIVIDERS
-  ========================= */
+    /* ==========COLUMN DIVIDERS============ */
     .DB-Table-Wrapper td:not(:last-child),
     .DB-Table-Wrapper th:not(:last-child) {
       border-right: 1px solid #f1f5f9;
     }
 
 
-    /* =========================
-     CHECKBOX STYLE
-  ========================= */
+    /* =======CHECKBOX STYLE============= */
     .DB-Table-Wrapper input[type="checkbox"] {
       transform: scale(1.1);
       accent-color: #3b82f6;
@@ -953,7 +877,7 @@
       background: #fef3c7;
     }
 
-    /* 🔹 TEXT INPUT */
+    /*========== TEXT INPUT */
     .PB-Table-Wrapper input[type="text"] {
       padding: 0 2px;
       display: block;
@@ -983,7 +907,7 @@
       color: white;
     }
 
-    /* 🔹 READONLY + DISABLED INPUT → transparent */
+    /*========== READONLY + DISABLED INPUT → transparent */
     .PB-Table-Wrapper input[type="text"]:read-only,
     .PB-Table-Wrapper input[type="text"]:disabled {
       background: transparent !important;
@@ -992,7 +916,7 @@
       border: none;
     }
 
-    /* 🔹 SELECT (only NOT disabled → keep normal look) */
+    /*========== SELECT (only NOT disabled → keep normal look) */
     .PB-Table-Wrapper select:not(:disabled) {
       padding: 0 2px;
       display: block;
@@ -1011,7 +935,7 @@
       border: none;
     }
 
-    /* 🔹 CHECKBOX */
+    /*========== CHECKBOX */
     .PB-Table-Wrapper input[type="checkbox"] {
       height: 14px;
       line-height: 14px;
@@ -1024,18 +948,18 @@
       margin: auto;
     }
 
-    /* 🔹 CELL with editable input/select */
+    /*========== CELL with editable input/select============= */
     .PB-Table-Wrapper td:has(input:not(:disabled):not(:read-only), select:not(:disabled), textarea) {
       border: 0.2px solid #94a3b8;
       background-color: #d3fc58;
     }
 
-    /* 🔹 CELL with readonly or disabled input */
+    /*========== CELL with readonly or disabled input============= */
     .PB-Table-Wrapper td:has(input:disabled, input:read-only, span) {
       background: transparent;
     }
 
-    /* 🔹 CELL with checkbox → always border */
+    /*=======CELL with checkbox → always border ==========*/
     .PB-Table-Wrapper td:has(input[type="checkbox"]) {
       border: 0.2px solid #94a3b8;
       background-color: #d3fc58;
@@ -1046,7 +970,7 @@
       background-color: #e5e7eb;
     }
 
-    /* 🔹 REMOVE checkbox focus glow */
+    /*========== REMOVE checkbox focus glow=================== */
     .PB-Table-Wrapper input[type="checkbox"]:focus {
       outline: none;
       box-shadow: none;
@@ -1059,9 +983,7 @@
       outline: none;
       border-radius: 0;
       height: 18px;
-      /* 🔥 fix vertical alignment */
       line-height: 18px;
-      /* 🔥 match height */
       padding: 0 2px;
       border: 1px solid #94a3b8;
       background-color: #d3fc58;
@@ -1104,7 +1026,6 @@
       gap: 10px;
       padding: 1px 1px;
       width: 220px;
-      /* 🔥 software-like background */
       background: #f1f5f9;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
@@ -1118,32 +1039,25 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-
       padding: 4px 0px 4px 8px;
       font-weight: 500;
-
       border-radius: 6px;
       border: 1px solid transparent;
-
-      /* 🔥 subtle layered background */
       background: #ffffff;
       color: #334155;
-
       cursor: pointer;
       transition: all 0.25s ease;
-
-      /* soft elevation */
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.36);
     }
 
-    /* Disabled */
+    /*================ Disabled=================== */
     .action-group button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       box-shadow: none;
     }
 
-    /* Hover ONLY when NOT disabled */
+    /*================ Hover ONLY when NOT disabled================ */
     .action-group button:not(:disabled):hover {
       padding: 4px 8px;
       background: #ffffff;
@@ -1151,7 +1065,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
 
-    /* Show text only when enabled */
+    /*================ Show text only when enabled================ */
     .action-group button:not(:disabled):hover span {
       max-width: 120px;
       opacity: 1;
@@ -1172,7 +1086,7 @@
       flex-shrink: 0;
     }
 
-    /* Hide text */
+    /*========= Hide text ================*/
     .action-group button span {
       max-width: 0;
       overflow: hidden;
@@ -1181,13 +1095,13 @@
       transition: max-width 0.5s ease, opacity 1s ease;
     }
 
-    /* Active */
+    /*=========== Active ===============*/
     .action-group button:active {
       transform: scale(0.96);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
-    /* ✏️ Edit (Professional Blue - soft) */
+    /*========== Edit (Professional Blue - soft)=============== */
     .action-group button:nth-child(1) {
       color: #1d4ed8;
       border-color: #dbeafe;
@@ -1198,7 +1112,7 @@
       background: #eef5ff;
     }
 
-    /* ➕ Add (Professional Green - soft) */
+    /* ==============Add (Professional Green - soft) =================*/
     .action-group button:nth-child(2) {
       color: #15803d;
       border-color: #dcfce7;
@@ -1209,7 +1123,7 @@
       background: #ecfdf5;
     }
 
-    /* 🖨️ Print (Neutral Professional Gray) */
+    /*=============== Print (Neutral Professional Gray)============== */
     .action-group button:nth-child(3) {
       color: #334155;
       border-color: #e2e8f0;
@@ -1234,7 +1148,6 @@
     .action-group button.upload-mode {
       background: #16a34a !important;
       color: #ffffff !important;
-
       box-shadow:
         0 0 6px rgba(34, 197, 94, 0.4),
         0 0 12px rgba(34, 197, 94, 0.3);
@@ -1243,7 +1156,6 @@
     .action-group button.upload-mode:hover {
       background: #15803d !important;
     }
-
 
     .status {
       display: inline-block;
@@ -1256,14 +1168,14 @@
       margin-left: 10px;
     }
 
-    /* Paid → Green */
+    /*===== Paid → Green======= */
     .status.paid {
       color: #166534;
       background: #dcfce7;
       border: 1px solid #86efac;
     }
 
-    /* Unpaid → Red */
+    /*===== Unpaid → Red============= */
     .status.unpaid {
       color: #991b1b;
       background: #fee2e2;
@@ -1285,8 +1197,8 @@
       }
 
       select {
-        min-width: 90%;
-        width: 90%
+        min-width: 100px;
+        width: 100px;
       }
 
       div {
@@ -1756,6 +1668,7 @@
 
       loadSidebarState();
       initMenu();
+      renderIcons();
 
       // Default page click
       const firstBtn = qs('.menu-btn');
@@ -1769,9 +1682,7 @@
       // Indicator AFTER UI ready
       moveIndicator();
 
-      if (typeof lucide !== "undefined") {
-        renderIcons();
-      }
+      
     });
 
 
@@ -1848,27 +1759,27 @@
       }
     }
 
-    function loadAllData() {
-      loadTable("emp", "EmpDB");
-      loadTable("pb", "PBDB");
-      loadTable("cpc", "CPC7DB");
-      loadTable("qtrs", "QtrsRateDB");
-      loadTable("city", "CityZoneDB");
-      loadTable("comm", "CommFactDB");
-      loadTable("it", "ITDB");
+    async function loadAllData() {
+      await Promise.all([
+        loadTable("emp", "EmpDB"),
+        loadTable("pb", "PBDB"),
+        loadTable("cpc", "CPC7DB"),
+        loadTable("qtrs", "QtrsRateDB"),
+        loadTable("city", "CityZoneDB"),
+        loadTable("comm", "CommFactDB"),
+        loadTable("it", "ITDB")
+      ]);
     }
 
     function renderIcons() {
-      qsa("i[data-lucide]").forEach(el => {
-        el.innerHTML = "";
-      });
+      if (typeof lucide === "undefined") return;
+
+      qsa("i[data-lucide]").forEach(el => el.innerHTML = "");
 
       lucide.createIcons({
         icons: lucide.icons,
         nameAttr: "data-lucide",
-        attrs: {
-          "stroke-width": 2
-        }
+        attrs: { "stroke-width": 2 }
       });
     }
 
@@ -2036,11 +1947,6 @@
       filters.employee = updateAllSelects("employee", empSet, filters.employee);
       filters.fy = updateAllSelects("fy", fySet, filters.fy);
       filters.month = updateAllSelects("month", monthSet, filters.month);
-
-      // 🔥 ADD THIS LINE
-      if (typeof lucide !== "undefined") {
-        lucide.createIcons();
-      }
     }
 
     function initGlobalEvents() {
