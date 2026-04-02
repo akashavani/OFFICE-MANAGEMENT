@@ -1684,6 +1684,47 @@
       moveIndicator();
       refreshPBView();
 
+      setupToggleButton("PBeditBtn", {
+        defaultText: "Edit",
+        activeText: "Save",
+        defaultIcon: "edit",
+        activeIcon: "upload",
+        className: "upload-mode"
+      });
+
+      setupToggleButton("PBaddBtn", {
+        defaultText: "Add",
+        activeText: "Save",
+        defaultIcon: "plus",
+        activeIcon: "upload",
+        className: "upload-mode"
+      });
+
+      bindPayBillView(
+        "PayBillPage_Station",
+        "PayBillPage_FY",
+        "PayBillPage_SalMonth"
+      );
+      setTimeout(() => {
+
+        const station = id("PayBillPage_Station")?.value;
+        const fy = id("PayBillPage_FY")?.value;
+        const month = id("PayBillPage_SalMonth")?.value;
+
+        if (station && fy && month) {
+          createPayBillViewTables(station, fy, month);
+          setDAPercent();
+        }
+
+      }, 200);
+
+      /* =========================
+         🔹 DA BINDING
+      ========================= */
+
+      on("PayBillPage_SalMonth", "change", setDAPercent);
+      on("PayBillPage_Station", "change", setDAPercent);
+
     });
 
 
@@ -2429,11 +2470,21 @@
     }
 
 
+    function cleanCity(city) {
+      if (!city) return "";
+
+      return String(city)
+        .replace(/^(AIR|AV|DD|HPT|LRS|CBS|LPT)\s*/i, "") // remove prefix
+        .trim()
+        .toLowerCase();
+    }
+
+
     function getCityZone(city) {
 
-      if (!cityZoneData || !cityZoneData.headers || !cityZoneData.rows) return {};
+      if (!cityData || !cityData.headers || !cityData.rows) return {};
 
-      const rows = cityZoneData.rows;
+      const rows = cityData.rows;
 
       const cleanInput = cleanCity(city).replace(/\s+/g, "");
 
@@ -2483,54 +2534,13 @@
       let pbRes = await fetch("https://office-management-f425.onrender.com/pb");
       let cpcRes = await fetch("https://office-management-f425.onrender.com/cpc");
       let qtrsRes = await fetch("https://office-management-f425.onrender.com/qtrs");
-      let cityZoneRes = await fetch("https://office-management-f425.onrender.com/city");
+      let cityRes = await fetch("https://office-management-f425.onrender.com/city");
 
       empData = await empRes.json();
       pbData = await pbRes.json();
       cpcData = await cpcRes.json();
       qtrsData = await qtrsRes.json();
-      cityZoneData = await cityZoneRes.json();
-
-      setupToggleButton("PBeditBtn", {
-        defaultText: "Edit",
-        activeText: "Save",
-        defaultIcon: "edit",
-        activeIcon: "upload",
-        className: "upload-mode"
-      });
-
-      setupToggleButton("PBaddBtn", {
-        defaultText: "Add",
-        activeText: "Save",
-        defaultIcon: "plus",
-        activeIcon: "upload",
-        className: "upload-mode"
-      });
-
-      bindPayBillView(
-        "PayBillPage_Station",
-        "PayBillPage_FY",
-        "PayBillPage_SalMonth"
-      );
-      setTimeout(() => {
-
-        const station = id("PayBillPage_Station")?.value;
-        const fy = id("PayBillPage_FY")?.value;
-        const month = id("PayBillPage_SalMonth")?.value;
-
-        if (station && fy && month) {
-          createPayBillViewTables(station, fy, month);
-          setDAPercent();
-        }
-
-      }, 200);
-
-      /* =========================
-         🔹 DA BINDING
-      ========================= */
-
-      on("PayBillPage_SalMonth", "change", setDAPercent);
-      on("PayBillPage_Station", "change", setDAPercent);
+      cityData = await cityRes.json();
     }
 
     function applyFilters() {
@@ -5274,14 +5284,6 @@
     }
 
 
-    function cleanCity(city) {
-      if (!city) return "";
-
-      return String(city)
-        .replace(/^(AIR|AV|DD|HPT|LRS|CBS|LPT)\s*/i, "") // remove prefix
-        .trim()
-        .toLowerCase();
-    }
 
     function updateZones() {
 
@@ -5298,6 +5300,7 @@
       id("EmpPage_HRAZone").value = val(empzone.hra);
     }
 
+
     on("PayBillPage_Station", "change", () => {
       enableAllButtons();
       refreshPBView();
@@ -5305,9 +5308,9 @@
     });
 
     on("EmpPage_Station", "change", () => {
-      //enableAllButtons();
-      //refreshPBView();
-      //updateZones();
+      enableAllButtons();
+      refreshPBView();
+      updateZones();
     });
 
     on("PayBillPage_FY", "change", refreshPBView);
@@ -5419,6 +5422,8 @@
       recalculateAllTotals(); // 3️⃣ FINAL totals
 
     });
+
+
 
 
 
@@ -5648,6 +5653,538 @@
     function log(...args) {
       console.log(...args);
     }
+    
+
+    id("PBprintBtn").addEventListener("click", function () {
+
+  const goTable = id("PB_GOViewTbl");
+
+  if (!goTable || !goTable.querySelector("tbody tr")) {
+    alert("No data to print");
+    return;
+  }
+
+  const month = id("PayBillPage_SalMonth")?.value || "";
+
+  const goHTML = buildPrintTable("GO");
+  const npsHTML = buildPrintTable("NPS");
+
+  // 🔥 CRITICAL FIX — REMOVE SCRIPT TAGS
+  let fullHTML = buildPrintHTML(goHTML, npsHTML);
+  fullHTML = fullHTML.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
+
+  const win = window.open("", "_blank");
+
+  if (!win) {
+    alert("Popup blocked. Allow popups.");
+    return;
+  }
+
+  win.document.open();
+
+  win.document.write(fullHTML);
+
+  win.document.close();
+
+  // 🔥 SAFE PRINT
+  setTimeout(() => {
+    win.focus();
+    win.print();
+  }, 500);
+
+  win.onafterprint = function () {
+    win.close();
+  };
+
+});
+
+
+
+id("PBexcelBtn").addEventListener("click", async () => {
+
+  const month = id("PayBillPage_SalMonth")?.value || "";
+  const station = id("PayBillPage_Station")?.value || "";
+  const today = new Date().toLocaleDateString("en-GB");
+
+  const goHTML = buildPrintTable("GO");
+  const npsHTML = buildPrintTable("NPS");
+
+  const workbook = new ExcelJS.Workbook();
+
+  /* ===== COLUMN LETTER FIX (A → Z → AA...) ===== */
+  function getExcelCol(n) {
+    let s = "";
+    while (n > 0) {
+      let m = (n - 1) % 26;
+      s = String.fromCharCode(65 + m) + s;
+      n = Math.floor((n - m) / 26);
+    }
+    return s;
+  }
+
+  async function createSheet(html, name) {
+
+    const sheet = workbook.addWorksheet(`PayBill-${name}`);
+
+    /* ===== LOGO ===== */
+    const response = await fetch("https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l");
+    const blob = await response.blob();
+    const buffer = await blob.arrayBuffer();
+
+    const imageId = workbook.addImage({
+      buffer,
+      extension: "png"
+    });
+
+    sheet.addImage(imageId, {
+      tl: { col: 1, row: 0 },
+      ext: { width: 75, height: 75}
+    });
+
+    /* ===== EXTRACT TABLE ===== */
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    const table = temp.querySelector("table");
+
+    const rows = Array.from(table.rows);
+
+    /* 🔥 FIX: get MAX column count (important for NPS) */
+    let colCount = 0;
+    rows.forEach(r => {
+      colCount = Math.max(colCount, r.cells.length);
+    });
+
+    const lastColLetter = getExcelCol(colCount);
+
+    /* ===== HEADER ===== */
+    const titleText = `MANUAL BILL OF SALARY PAYMENT, DEDUCTIONS / RECOVERIES & NET PAYMENT FOR THE MONTH OF ${month.toUpperCase()} IN r/o ALL ${name} STAFF`;
+
+    sheet.mergeCells(`A1:${lastColLetter}1`);
+    sheet.getCell("A1").value = "PRASAR BHARATI";
+    sheet.getCell("A1").alignment = { horizontal: "center" };
+    sheet.getCell("A1").font = { bold: true, size: 13 };
+
+    sheet.mergeCells(`A2:${lastColLetter}2`);
+    sheet.getCell("A2").value = "INDIA'S PUBLIC SERVICE BROADCASTER";
+    sheet.getCell("A2").alignment = { horizontal: "center" };
+
+    sheet.mergeCells(`A4:${lastColLetter}4`);
+    const cellA4 = sheet.getCell("A4");
+    cellA4.value = "AKASHAVANI KARWAR";
+    cellA4.alignment = { horizontal: "center" };
+    cellA4.font = { bold: true, size: 12 };
+    cellA4.border = { bottom: { style: "medium" } };
+
+    sheet.mergeCells(`A6:${lastColLetter}6`);
+    sheet.getCell("A6").value = titleText;
+    sheet.getCell("A6").alignment = { horizontal: "center", wrapText: true };
+    sheet.getCell("A6").font = { bold: true, size: 12 };
+
+    /* ===== TABLE ===== */
+    let startRow = 8;
+
+    rows.forEach((tr, i) => {
+
+      const excelRow = sheet.getRow(startRow + i);
+
+      /* 🔥 FIX: force equal columns */
+      for (let j = 0; j < colCount; j++) {
+
+        const td = tr.cells[j];
+        const cell = excelRow.getCell(j + 1);
+
+        let val = td ? td.innerText.trim() : "";
+
+        // 🔥 GET STYLE FROM HTML
+        const styleAttr = td?.getAttribute("style") || "";
+
+        // Check highlight
+        const isYellow = styleAttr.includes("background");
+        const isBold = styleAttr.includes("font-weight");
+
+        const num = parseFloat(val.replace(/,/g, ""));
+        cell.value = isNaN(num) ? val : num;
+
+        /* ===== STYLE ===== */
+        if (val !== "") {
+          cell.border = {
+            top: { style: "thin" },
+            bottom: { style: "thin" },
+            left: { style: "thin" },
+            right: { style: "thin" }
+          };
+        }
+
+        cell.font = { size: 11 };
+
+        if (i === 0) {
+          cell.font = { bold: true, size: 10 };
+          cell.alignment = {horizontal: "center",vertical: "middle", wrapText: true};
+        }
+
+        if (i === rows.length - 1) {
+          cell.font = { bold: true };
+        }
+
+        if (!isNaN(num)) {
+          cell.alignment = {horizontal: "right", vertical: "middle"};
+        }
+
+        // 🔥 APPLY HTML STYLE TO EXCEL
+
+        if (isYellow) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFF59D" }
+          };
+        }
+
+        if (isBold) {
+          cell.font = { ...cell.font, bold: true };
+        }
+      }
+    });
+
+    /* ===== AUTO WIDTH ===== */
+    sheet.columns.forEach((col, colIndex) => {
+
+      let max = 3;
+
+      col.eachCell({ includeEmpty: false }, (cell, rowNumber) => {
+
+        if (rowNumber < startRow + 1) return;
+
+        if (cell.value) {
+          max = Math.max(max, cell.value.toString().length);
+        }
+      });
+
+      // 🔥 LIMIT WIDTH
+      if (colIndex === 1) {
+        col.width = Math.min(max + 2, 33); // Employee column max 30
+      } else {
+        col.width = max + 2; // Other columns max 15
+      }
+    });
+
+    /* ===== FOOTER ===== */
+    let footerStartRow = startRow + rows.length + 5;
+
+    sheet.mergeCells(`A${footerStartRow}:${lastColLetter}${footerStartRow}`);
+    sheet.getCell(`A${footerStartRow}`).value = "Programme Executive";
+    sheet.getCell(`A${footerStartRow}`).alignment = { horizontal: "right" };
+    sheet.getCell(`A${footerStartRow}`).font = { bold: true };
+
+    sheet.mergeCells(`A${footerStartRow + 1}:${lastColLetter}${footerStartRow + 1}`);
+    sheet.getCell(`A${footerStartRow + 1}`).value = "Akashavani Karwar";
+    sheet.getCell(`A${footerStartRow + 1}`).alignment = { horizontal: "right" };
+    sheet.getCell(`A${footerStartRow + 1}`).font = { bold: true };
+
+    sheet.mergeCells(`A${footerStartRow + 2}:${lastColLetter}${footerStartRow + 2}`);
+    sheet.getCell(`A${footerStartRow + 2}`).value = `Date: ${today}`;
+    sheet.getCell(`A${footerStartRow + 2}`).alignment = { horizontal: "right" };
+    sheet.getCell(`A${footerStartRow + 2}`).font = { bold: true };
+
+    const lastUsedRow = footerStartRow + 2;
+
+    /* ===== PAGE SETUP ===== */
+    sheet.pageSetup = {
+      paperSize: 9,
+      orientation: "landscape",
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: false,
+      horizontalCentered: true,  // Center on page
+      verticalCentered: false,
+      margins: {
+        left: 0.3,
+        right: 0.3,
+        top: 0.5,
+        bottom: 0.5,
+        header: 0.2,
+        footer: 0.2
+      }
+    };
+
+    /* 🔥 FIX: NO INVALID FREEZE */
+    sheet.views = [{ showGridLines: false }];
+
+    sheet.pageSetup.printArea = `A1:${lastColLetter}${lastUsedRow}`;
+  }
+
+  await createSheet(goHTML, "GO");
+  await createSheet(npsHTML, "NPS");
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), `${station}_PayBill_${month}.xlsx`);
+});
+
+
+function buildPrintTable(type) {
+
+  const table = id(type === "GO" ? "PB_GOViewTbl" : "PB_NPSViewTbl");
+  if (!table) return "";
+
+  const headers = Array.from(table.querySelectorAll("thead th"));
+  const rows = Array.from(table.querySelectorAll("tbody tr:not(.total-row)"));
+  const totalRow = table.querySelector("tbody tr.total-row");
+
+  const wrapper = table.parentNode;
+  const titleDiv = wrapper.previousElementSibling;
+  const titleText = titleDiv?.textContent || "";
+
+  if (!rows.length) return "";
+
+  /* ================= NORMALIZE ================= */
+  function normalize(h) {
+    return String(h).toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  /* ================= PREVIOUS MONTH ================= */
+  function getPrevMonthFormatted(monthStr) {
+    const d = new Date(monthStr);
+    d.setMonth(d.getMonth() - 1);
+
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric"
+    }).replace(" ", "-");
+  }
+
+  const currentMonth = id("PayBillPage_SalMonth")?.value;
+  const prevMonth = getPrevMonthFormatted(currentMonth);
+
+  /* ================= 🔥 FIXED DATA SOURCE ================= */
+  const prevHeaders = pbData.headers || [];
+  const prevData = pbData.rows || [];
+
+  const nameIndex = getColIndex(prevHeaders, "Employee Name");
+  const monthIndex = getColIndex(prevHeaders, "Salary Month");
+
+  const prevMap = {};
+
+  for (let i = 0; i < prevData.length; i++) {
+
+    const rowMonth = String(prevData[i][monthIndex] || "").trim();
+
+    const name = String(prevData[i][nameIndex] || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (rowMonth === prevMonth && name) {
+      prevMap[name] = prevData[i];
+    }
+  }
+
+  /* ================= HEADER MAP ================= */
+  const prevHeaderMap = {};
+  prevHeaders.forEach((h, i) => {
+    prevHeaderMap[normalize(h)] = i;
+  });
+
+  /* ================= SUM ================= */
+  const sums = Array(headers.length).fill(0);
+
+  rows.forEach(tr => {
+    headers.forEach((_, i) => {
+      const val = tr.children[i]?.textContent?.replace(/,/g, "") || "0";
+      if (!isNaN(val)) sums[i] += parseFloat(val) || 0;
+    });
+  });
+
+  /* ================= COLUMN FILTER ================= */
+  const activeCols = headers.map((th, i) => {
+
+    const h = th.textContent.trim();
+    const col = normalize(h);
+
+    if (h === "Employee Name") return true;
+
+    if (["recovery","netit","tarate","daonta","nps","totaldaaonnps"].includes(col)) return false;
+
+    if (type === "GO" && ["npse","npseded","npsc","daaonnpseded","daaonnpse","daaonnpsc"].includes(col)) return false;
+
+    if (type === "NPS" && ["cgeis","gpf"].includes(col)) return false;
+
+    const zeroCols = [
+      "bonus","cea","elencash","uniall",
+      "daa","daaonta","totaldaa",
+      "medicalreimburse","ltareimburse","arrears"
+    ];
+
+    if (type === "NPS" &&
+      ["daaonnpse","daaonnpsc","daaonnpseded"].includes(col)) {
+      return sums[i] !== 0;
+    }
+
+    if (zeroCols.includes(col) && sums[i] === 0) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const colCount = activeCols.filter(Boolean).length + 1;
+
+  /* ================= HTML ================= */
+  let html = `
+    <div class="title">${titleText}</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Sr No.</th>
+  `;
+
+  headers.forEach((th, i) => {
+    if (!activeCols[i]) return;
+
+    let h = th.textContent.trim();
+
+    if (h === "Employee Name") h = "Name / Designation";
+    if (h === "Society") h = "AIR & TV CHE.SOC";
+
+    html += `<th>${h}</th>`;
+  });
+
+  html += `
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="spacer-row">
+          <td colspan="${colCount}"></td>
+        </tr>
+  `;
+
+  let srNo = 1;
+
+  rows.forEach(tr => {
+
+    html += "<tr>";
+
+    const empName = String(tr.children[0]?.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    html += `<td>${srNo++}</td>`;
+
+    headers.forEach((th, i) => {
+      if (!activeCols[i]) return;
+
+      const headerName = th.textContent.trim();
+      const cleanHeader = normalize(headerName);
+
+      let val = tr.children[i]?.textContent?.trim() || "";
+
+      let raw = val.replace(/[^\d.-]/g, "");
+      let currVal = raw !== "" && !isNaN(raw) ? Number(raw) : null;
+
+      let style = "";
+
+      if (empName && prevMap[empName] && currVal !== null) {
+
+        if (!["grossincome","totaldeduction","netincome"].includes(cleanHeader)) {
+
+          const prevColIndex = prevHeaderMap[cleanHeader];
+
+          if (prevColIndex !== undefined) {
+
+            const prevRow = prevMap[empName];
+            const prevVal = parseFloat(
+              String(prevRow[prevColIndex]).replace(/,/g, "")
+            );
+
+            if (!isNaN(prevVal) && prevVal !== currVal) {
+              style = `style="background:#fff59d;font-weight:bold;"`;
+            }
+          }
+        }
+      }
+
+      if (headerName === "Employee Name") {
+        const cleanName = val.replace(/\s+/g, " ").trim();
+        const d = getDesignation(cleanName);
+        val = d ? `${cleanName}, ${d}` : cleanName;
+      }
+
+      if (currVal !== null) val = currVal;
+
+      html += `<td ${style}>${val}</td>`;
+    });
+
+    html += "</tr>";
+  });
+
+  if (totalRow) {
+
+    html += `
+      <tr class="spacer-row">
+        <td colspan="${colCount}"></td>
+      </tr>
+    `;
+
+    html += "<tr style='font-weight:bold;'>";
+
+    html += `<td style="border-right:none;height:22px;"></td>`;
+
+    headers.forEach((th, i) => {
+      if (!activeCols[i]) return;
+
+      let val = totalRow.children[i]?.textContent?.trim() || "";
+
+      let raw = val.replace(/[^\d.-]/g, "");
+      if (raw !== "" && !isNaN(raw)) {
+        val = Number(raw);
+      }
+
+      if (i === 0) {
+        html += `<td style="border-left:none">Total</td>`;
+      } else {
+        html += `<td>${val}</td>`;
+      }
+    });
+
+    html += "</tr>";
+  }
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+  return html;
+}
+    
+       /* =========================
+       DESIGNATION LOGIC
+    ========================= */
+    function getDesignation(empName) {
+
+      const data = sheetCache["EmpDB"];
+      if (!data) return "";
+
+      const headers = data[0];
+      const nameIndex = getColIndex(headers, "Employee Name");
+      const desigIndex = getColIndex(headers, "Designation");
+
+      for (let i = 1; i < data.length; i++) {
+
+        if (String(data[i][nameIndex]).trim() === empName.trim()) {
+
+          let d = String(data[i][desigIndex] || "").toUpperCase();
+
+          if (d === "STECH") return "Sr.Tech";
+          if (d === "TECH") return "Tech";
+          if (d === "MTR DRIVER") return "M Driver";
+          if (d === "HELPER") return "Helper";
+
+          return data[i][desigIndex];
+        }
+      }
+
+      return "";
+    }
+
   </script>
 
 </body>
