@@ -1668,6 +1668,7 @@
       loadSidebarState();
       initMenu();
       renderIcons();
+      disableAllButtons();
 
       // Default page click
       const firstBtn = qs('.menu-btn');
@@ -1681,7 +1682,7 @@
 
       // Indicator AFTER UI ready
       moveIndicator();
-
+      refreshPBView();
 
     });
 
@@ -2428,6 +2429,51 @@
     }
 
 
+    function getCityZone(city) {
+
+      if (!cityZoneData || !cityZoneData.headers || !cityZoneData.rows) return {};
+
+      const rows = cityZoneData.rows;
+
+      const cleanInput = cleanCity(city).replace(/\s+/g, "");
+
+      /* ================= NORMAL MATCH ================= */
+
+      for (let r of rows) {
+
+        const dbCity = cleanCity(r[0]).replace(/\s+/g, "");
+
+        if (
+          dbCity === cleanInput ||
+          dbCity.includes(cleanInput) ||
+          cleanInput.includes(dbCity)
+        ) {
+          return {
+            ta: r[2],   // TA Zone
+            hra: r[1]   // HRA Zone
+          };
+        }
+      }
+
+      /* ================= FALLBACK: OTHER ================= */
+
+      for (let r of rows) {
+
+        const dbCityRaw = String(r[0]).trim().toLowerCase();
+
+        if (dbCityRaw === "other") {
+          return {
+            ta: r[2],
+            hra: r[1]
+          };
+        }
+      }
+
+      /* ================= NOT FOUND ================= */
+
+      return {};
+    }
+
     let empData = {};
     let pbData = {};
 
@@ -2436,10 +2482,55 @@
       let empRes = await fetch("https://office-management-f425.onrender.com/emp");
       let pbRes = await fetch("https://office-management-f425.onrender.com/pb");
       let cpcRes = await fetch("https://office-management-f425.onrender.com/cpc");
+      let qtrsRes = await fetch("https://office-management-f425.onrender.com/qtrs");
+      let cityZoneRes = await fetch("https://office-management-f425.onrender.com/city");
 
       empData = await empRes.json();
       pbData = await pbRes.json();
       cpcData = await cpcRes.json();
+      qtrsData = await qtrsRes.json();
+      cityZoneData = await cityZoneRes.json();
+
+      setupToggleButton("PBeditBtn", {
+        defaultText: "Edit",
+        activeText: "Save",
+        defaultIcon: "edit",
+        activeIcon: "upload",
+        className: "upload-mode"
+      });
+
+      setupToggleButton("PBaddBtn", {
+        defaultText: "Add",
+        activeText: "Save",
+        defaultIcon: "plus",
+        activeIcon: "upload",
+        className: "upload-mode"
+      });
+
+      bindPayBillView(
+        "PayBillPage_Station",
+        "PayBillPage_FY",
+        "PayBillPage_SalMonth"
+      );
+      setTimeout(() => {
+
+        const station = id("PayBillPage_Station")?.value;
+        const fy = id("PayBillPage_FY")?.value;
+        const month = id("PayBillPage_SalMonth")?.value;
+
+        if (station && fy && month) {
+          createPayBillViewTables(station, fy, month);
+          setDAPercent();
+        }
+
+      }, 200);
+
+      /* =========================
+         🔹 DA BINDING
+      ========================= */
+
+      on("PayBillPage_SalMonth", "change", setDAPercent);
+      on("PayBillPage_Station", "change", setDAPercent);
     }
 
     function applyFilters() {
@@ -2852,7 +2943,7 @@
 
 
     function createPayBillViewTables(station, selectedFY, selectedMonth) {
-
+      console.log("VIEW FUNCTION CALLED");
       if (!pbData || !pbData.headers || !pbData.rows) return;
 
       const headers = pbData.headers;
@@ -2884,11 +2975,9 @@
 
         const empName = String(row[nameIndex] || "").trim();
 
-        const dept = String(deptMap[empName] || "")
-          .replace(/\s+/g, "")
-          .toLowerCase();
+        const deptRaw = String(deptMap[empName] || "").toLowerCase();
 
-        if (dept === "go") {
+        if (deptRaw.includes("go")) {
           goRows.push(row);
         } else {
           npsRows.push(row);
@@ -2918,6 +3007,10 @@
         station,
         selectedMonth
       );
+      console.log("Filtered Rows:", filteredRows.length);
+      console.log("GO Rows:", goRows.length);
+      console.log("NPS Rows:", npsRows.length);
+
     }
 
 
@@ -2928,7 +3021,7 @@
       const headers = pbData.headers;
       const rows = pbData.rows;
 
-      const stationIndex = headers.indexOf("Station");
+      const stationIndex = headers.indexOf("Pay Drawn Station");
       const salMonthIndex = headers.indexOf("Salary Month");
 
       return rows.filter(row => {
@@ -3451,6 +3544,1884 @@
     }
 
 
+
+
+    function getQtrsTypes() {
+
+      if (!qtrsData || !qtrsData.headers || !qtrsData.rows) return [];
+
+      const headers = qtrsData.headers;
+      const rows = qtrsData.rows;
+
+      const idx = headers.indexOf("Qtrs Type");
+      if (idx === -1) return [];
+
+      return [...new Set(
+        rows.map(r => r[idx]).filter(v => v !== "" && v != null)
+      )];
+    }
+
+
+    function getPayLevels() {
+
+      if (!cpcData || !cpcData.headers) return [];
+
+      return cpcData.headers.slice(1).map(h => String(h).trim());
+    }
+
+
+    function getCPCIndexByLevel(payLevel) {
+
+      if (!cpcData || !cpcData.headers || !cpcData.rows) return [];
+
+      const headers = cpcData.headers;
+      const rows = cpcData.rows;
+
+      const colIndex = headers.findIndex(h =>
+        String(h).trim() === String(payLevel).trim()
+      );
+
+      if (colIndex === -1) return [];
+
+      const result = [];
+
+      for (let i = 3; i < rows.length; i++) {
+
+        const row = rows[i];
+
+        if (row[colIndex] !== "" && row[colIndex] != null) {
+          result.push(row[0]); // index column
+        }
+      }
+
+      return result;
+    }
+
+
+    function bindPayLevelDependency(tr, originalRow, headers) {
+
+      const levelSelect = tr.querySelector('[data-col="Pay Level"] select');
+      const indexSelect = tr.querySelector('[data-col="7CPC Index"] select');
+
+      if (!levelSelect || !indexSelect) return;
+
+      // 🔥 get original PBDB index value
+      const indexCol = headers.indexOf("7CPC Index");
+      const originalValue = originalRow[indexCol];
+
+      function updateIndex(useOriginal = false) {
+
+        const currentValue = indexSelect.value;
+
+        const levels = getCPCIndexByLevel(levelSelect.value);
+
+        indexSelect.innerHTML = "";
+
+        levels.forEach(v => {
+          indexSelect.appendChild(createEl("option", {
+            text: v,
+            value: v
+          }));
+        });
+
+        let valueToSet;
+
+        // 🔥 FIRST TIME → use PBDB value
+        if (useOriginal) {
+          valueToSet = originalValue;
+        }
+        // 🔥 AFTER CHANGE → use current
+        else {
+          valueToSet = currentValue;
+        }
+
+        // ✅ KEEP if exists
+        if (levels.includes(String(valueToSet))) {
+          indexSelect.value = valueToSet;
+        }
+        // ❌ else fallback to last
+        else if (levels.length > 0) {
+          indexSelect.value = levels[levels.length - 1];
+        }
+      }
+
+      // 🔥 On change
+      levelSelect.addEventListener("change", () => {
+        updateIndex(false);
+        updateBasicPay(tr); // 🔥 ADD THIS
+      });
+
+      indexSelect.addEventListener("change", () => {
+        updateBasicPay(tr);
+      });
+
+      // 🔥 Initial load → use PBDB value
+      updateIndex(true);
+      updateBasicPay(tr);
+    }
+
+
+    function bindDependency({
+      controller,
+      target,
+      child = null,
+      disableWhen = true
+    }) {
+
+      if (!controller || !target) return;
+
+      // 🔥 memory
+      let prevChecked = target.type === "checkbox" ? target.checked : null;
+      let prevValue = target.value;
+      let prevChildValue = child ? child.value : null;
+
+      function update() {
+
+        const shouldDisable = controller.checked === disableWhen;
+
+        if (shouldDisable) {
+
+          // 🔹 store current state
+          if (target.type === "checkbox") {
+            prevChecked = target.checked;
+            target.checked = false;
+          }
+
+          prevValue = target.value;
+
+          if (child) {
+            prevChildValue = child.value;
+          }
+
+          // 🔹 disable target
+          target.disabled = true;
+
+          if (target.tagName === "SELECT") {
+            target.value = "--";
+          }
+
+          // 🔹 disable child
+          if (child) {
+            child.disabled = true;
+            child.value = "--";
+          }
+
+        } else {
+
+          // 🔹 enable target
+          target.disabled = false;
+
+          if (target.type === "checkbox") {
+            target.checked = prevChecked;
+          }
+
+          if (target.tagName === "SELECT") {
+            target.value = prevValue || "--";
+          }
+
+          // 🔹 enable child
+          if (child) {
+
+            child.disabled = target.type === "checkbox"
+              ? !target.checked
+              : false;
+
+            child.value = prevChildValue || "--";
+          }
+        }
+      }
+
+      /* ================= TRACK STATE ================= */
+
+      if (target.type === "checkbox") {
+        target.addEventListener("change", () => {
+          prevChecked = target.checked;
+        });
+      }
+
+      if (target.tagName === "SELECT") {
+        target.addEventListener("change", () => {
+          prevValue = target.value;
+        });
+      }
+
+      if (child) {
+        child.addEventListener("change", () => {
+          prevChildValue = child.value;
+        });
+      }
+
+      /* ================= CONTROLLER ================= */
+
+      controller.addEventListener("change", update);
+
+      /* ================= INIT ================= */
+
+      update();
+    }
+
+    function applyTADependency(tr) {
+
+      const taCheckbox = getCellInput(tr, "TA Entitled");
+
+      bindDependency({
+        controller: taCheckbox,
+        target: getCellInput(tr, "Disability"),
+        child: getCellInput(tr, "Level of Disability", "select"),
+        disableWhen: false
+      });
+
+      // 🔥 ADD THIS (CRITICAL FIX)
+      taCheckbox.addEventListener("change", () => {
+        calculateTA(tr);
+        recalculateAllTotals();
+      });
+    }
+
+    function applyDisabilityDependency(tr) {
+
+      bindDependency({
+        controller: getCellInput(tr, "Disability"),
+        target: getCellInput(tr, "Level of Disability", "select"),
+        disableWhen: false   // disable when unchecked
+      });
+    }
+
+    function applyHRADependency(tr) {
+
+      bindDependency({
+        controller: getCellInput(tr, "HRA Entitled"),
+        target: getCellInput(tr, "Qtrs Type", "select"),
+        disableWhen: true   // disable when checked
+      });
+    }
+
+
+    function createPayBillEditTables() {
+
+      if (!pbData || !pbData.headers || !pbData.rows) return;
+
+      const headers = pbData.headers;
+      const rows = pbData.rows;
+
+      const filteredRows = getFilteredPBData(
+        id("PayBillPage_Station").value,
+        id("PayBillPage_FY").value,
+        id("PayBillPage_SalMonth").value
+      );
+
+      const deptMap = getDeptMap();
+
+      const goRows = [];
+      const npsRows = [];
+
+      const nameIdx = headers.indexOf("Employee Name");
+
+      filteredRows.forEach(row => {
+
+        const name = String(row[nameIdx] || "").trim();
+        const dept = String(deptMap[name] || "").toLowerCase();
+
+        if (dept.includes("go")) goRows.push(row);
+        else npsRows.push(row);
+      });
+
+      const station = id("PayBillPage_Station")?.value || "";
+      const selectedMonth = id("PayBillPage_SalMonth")?.value || "";
+
+      renderPBEditTable("PB_GOEditTbl", headers, goRows, station, selectedMonth);
+      renderPBEditTable("PB_NPSEditTbl", headers, npsRows, station, selectedMonth);
+    }
+
+
+    const READ_ONLY_COLUMNS = [
+      "Basic Pay", "DA", "DA on TA", "HRA", "NPSE", "NPS", "DA%", "NPSE Ded",
+      "Total DAA", "TA Rate", "TA", "NPSC", "DAA", "DAA on TA", "DAA on NPSE ded",
+      "Gross Income", "Total Deduction", "Cess @4%", "Total DAA on NPS",
+      "Net IT", "CGEIS", "W Ch", "L Fee",
+      "Net Income"
+    ];
+
+    const GO_HIDDEN_COLUMNS = [
+      "TA Rate", "DA on TA", "DA%",
+      "NPSE", "NPSC", "DAA on NPSE", "DAA on NPSC",
+      "Total DAA on NPS", "NPS", "DAA on NPSE ded", "NPSE Ded"
+    ];
+
+    const NPS_HIDDEN_COLUMNS = [
+      "TA Rate", "DA on TA", "DA%", "GPF", "CGEIS", "NPS", "Total DAA on NPS"
+    ];
+
+    function normalize(str) {
+      return String(str).trim().toLowerCase();
+    }
+
+    function getHiddenColumns(tableId) {
+      if (tableId.includes("GO")) return GO_HIDDEN_COLUMNS;
+      if (tableId.includes("NPS")) return NPS_HIDDEN_COLUMNS;
+      return [];
+    }
+
+    function isReadOnly(header) {
+      return READ_ONLY_COLUMNS.map(normalize).includes(normalize(header));
+    }
+
+    function applyColumnRules(tr, headers, tableId) {
+
+      const hiddenCols = getHiddenColumns(tableId).map(normalize);
+
+      headers.forEach((header, index) => {
+
+        const cell = tr.children[index];
+        const input = cell?.querySelector("input, select");
+
+        if (!cell) return;
+
+        /* 🔹 SET VALUE = 0 FOR HIDDEN */
+        if (hiddenCols.includes(normalize(header))) {
+          if (input) {
+            input.dataset.raw = 0;   // 🔥 ADD
+            input.value = 0;
+          }
+        }
+
+        /* 🔹 READ ONLY */
+        if (isReadOnly(header)) {
+          if (input) {
+            input.readOnly = true;
+            input.classList.add("readonly-cell");
+
+            input.addEventListener("focus", () => input.blur());
+          }
+        }
+      });
+    }
+
+    function applyTableColumnRules(table, headers, tableId) {
+
+      const hiddenCols = getHiddenColumns(tableId).map(normalize);
+
+      headers.forEach((header, index) => {
+
+        if (!hiddenCols.includes(normalize(header))) return;
+
+        const colIndex = index + 1;
+
+        /* 🔹 HEADER */
+        const th = table.querySelector(`thead th:nth-child(${colIndex})`);
+        if (th) th.style.display = "none";
+
+        /* 🔹 BODY + TOTAL */
+        table.querySelectorAll("tbody tr").forEach(tr => {
+          const td = tr.querySelector(`td:nth-child(${colIndex})`);
+          if (td) td.style.display = "none";
+        });
+      });
+    }
+
+
+    function renderPBEditTable(tableId, headers, rows, station, selectedMonth) {
+      GPF_MESSAGES = [];
+      const table = id(tableId);
+      if (!table) return;
+
+      table.innerHTML = "";
+
+      if (!rows.length) {
+        table.innerHTML = "<tr><td>No Data</td></tr>";
+        return;
+      }
+
+      /* ================= FIXED RANGE ================= */
+
+      const nameIndex = getColIndex(headers, "Employee Name");
+      const startIndex = getColIndex(headers, "Last Increment");
+      const endIndex = getColIndex(headers, "Recovery Details");
+
+      const selectedHeaders = [
+        "Employee Name",
+        ...headers.slice(startIndex, endIndex + 1)
+      ];
+
+      const processedRows = rows.map(row => {
+        return [
+          row[nameIndex],
+          ...row.slice(startIndex, endIndex + 1)
+        ];
+      });
+
+      /* ================= DROPDOWNS ================= */
+
+      const dropdownCols = {
+        "Qtrs Type": () => getQtrsTypes(),
+        "Level of Disability": () => ["--", ">40%", ">80%"],
+        "Pay Level": () => getPayLevels(),
+        "7CPC Index": () => []
+      };
+
+      const checkboxCols = ["TA Entitled", "HRA Entitled", "Disability"];
+
+      /* ================= HEADER ================= */
+
+      // ===== SAFE VALUES =====
+      const safeMonth = selectedMonth ? new Date(selectedMonth) : null;
+
+      const monthLabel = new Date(selectedMonth)
+        .toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric"
+        })
+        .toUpperCase();
+
+      const deptLabel = tableId.includes("GO") ? "GO" : "PRASAR BHARATI";
+
+      const safeStation = station || "N/A";
+
+      const titleText = `MANUAL BILL OF SALARY PAYMENT, DEDUCTIONS / RECOVERIES & NET PAYMENT FOR THE MONTH OF ${monthLabel} IN r/o ALL ${deptLabel} STAFF`;
+
+      // ===== CHECK IF TITLE EXISTS =====
+      const wrapper = table.parentNode;
+      const container = wrapper.parentNode;
+
+      // 🔥 look only for title JUST ABOVE THIS WRAPPER
+      let titleDiv = wrapper.previousElementSibling;
+
+      if (!titleDiv || !titleDiv.classList.contains("pb-title-div")) {
+        titleDiv = createEl("div");
+        titleDiv.classList.add("pb-title-div");
+
+        // 👇 insert before THIS wrapper only
+        container.insertBefore(titleDiv, wrapper);
+      }
+
+      titleDiv.textContent = titleText;
+
+      // ===== TABLE HEADER =====
+      const thead = createEl("thead");
+      const trHead = createEl("tr");
+
+      selectedHeaders.forEach(h => {
+        trHead.appendChild(createEl("th", { text: h }));
+      });
+
+      thead.appendChild(trHead);
+      table.appendChild(thead);
+
+      /* ================= BODY ================= */
+
+      const tbody = createEl("tbody");
+      const rowElements = [];
+
+      processedRows.forEach((row, rIndex) => {
+
+        const tr = createEl("tr");
+
+        row.forEach((val, i) => {
+
+          const colName = selectedHeaders[i];
+          const td = createEl("td");
+
+          td.setAttribute("data-col", colName);
+
+          /* Employee Name */
+          if (i === 0) {
+            td.textContent = val;
+          }
+
+          /* Checkbox */
+          else if (checkboxCols.includes(colName)) {
+
+            const input = createEl("input", { type: "checkbox" });
+
+            const v = String(val).toLowerCase();
+            input.checked = (v === "true" || v === "yes" || val === true);
+
+            td.appendChild(input);
+          }
+
+          /* Dropdown */
+          else if (dropdownCols[colName]) {
+
+            const options = dropdownCols[colName]();
+
+            const select = createEl("select");
+
+            options.forEach(opt => {
+
+              // 🔥 hide "--" from UI but keep value
+              if (opt === "--") {
+                select.appendChild(createEl("option", {
+                  text: opt,
+                  value: opt,
+                  style: "display:none;"
+                }));
+              } else {
+                select.appendChild(createEl("option", {
+                  text: opt,
+                  value: opt
+                }));
+              }
+
+            });
+
+            select.value = val || options[0];
+
+            td.appendChild(select);
+          }
+
+          /* Default input */
+          else if (colName === "Last Increment") {
+
+            const input = createEl("input", {
+              type: "text",
+              value: formatMonthDisplay(formatMonthForInput(val)) // MMM-YYYY
+            });
+
+            input.classList.add("month-toggle-input");
+
+            // 🔥 store actual value
+            input.dataset.value = formatMonthForInput(val); // YYYY-MM
+
+            // 🔥 on focus → switch to month picker
+            input.addEventListener("focus", () => {
+              input.type = "month";
+              input.value = input.dataset.value || "";
+              input.showPicker?.();
+            });
+
+            // 🔥 on change → update value
+            input.addEventListener("change", () => {
+              input.dataset.value = input.value;
+            });
+
+            // 🔥 on blur → switch back to text
+            input.addEventListener("blur", () => {
+              input.type = "text";
+              input.value = formatMonthDisplay(input.dataset.value);
+            });
+
+            td.appendChild(input);
+          }
+          /* 🔥 Textarea for specific columns */
+          else if (colName === "Arrears Details" || colName === "Recovery Details") {
+
+            const textarea = createEl("textarea");
+            textarea.value = val || "";
+
+            td.appendChild(textarea);
+          }
+          /* Default input */
+          else {
+            const input = createEl("input", {
+              type: "text",
+              value: formatCurrency(val)
+            });
+
+            input.dataset.raw = val || 0;
+
+            input.addEventListener("input", () => {
+              input.dataset.raw = num(input.value);
+            });
+
+            input.addEventListener("focus", () => {
+              const raw = input.dataset.raw;
+              input.value = (raw !== undefined && raw !== null) ? raw : "";
+              setTimeout(() => input.select(), 0);
+            });
+
+            input.addEventListener("blur", () => {
+              const raw = num(input.value);
+              input.dataset.raw = raw;
+              input.value = formatCurrency(raw);
+            });
+
+            td.appendChild(input);
+          }
+
+          tr.appendChild(td);
+        });
+
+        tr._cells = Object.fromEntries(
+          [...tr.querySelectorAll("[data-col]")].map(td => [
+            td.dataset.col,
+            td.querySelector("input, select, textarea")
+          ])
+        );
+
+        applyColumnRules(tr, selectedHeaders, tableId);
+
+        const empName = tr.children[0].textContent.trim();
+        applyGPFRule_GO(tr, empName);
+
+
+        tbody.appendChild(tr);
+
+        rowElements.push({ tr, row });
+
+        /* ================= DEPENDENCIES ================= */
+        applyTADependency(tr);
+        applyDisabilityDependency(tr);
+        bindPayLevelDependency(tr, rows[rIndex], headers);
+        applyHRADependency(tr);
+
+        /* 🔥 SINGLE HANDLER */
+        const handler = () => {
+
+          recalculateRow(tr, tableId);
+
+          const empName = tr.children[0].textContent.trim();
+
+          // 🔥 Delay ensures no override happens after
+          setTimeout(() => {
+            applyGPFRule_GO(tr, empName);
+
+            // 🔥 UPDATE MESSAGE AFTER LAST ROW
+            updateGPFMessage();
+          }, 0);
+        };
+
+        /* 🔥 BIND EVENTS */
+        tr.querySelectorAll("input, select").forEach(el => {
+          el.addEventListener("input", handler);
+          el.addEventListener("change", handler);
+        });
+
+        /* 🔥 INITIAL CALCULATION (AFTER EVERYTHING) */
+        setTimeout(() => {
+          handler();
+        }, 0);
+      });
+
+      /* ================= TOTAL ROW ================= */
+      const trTotal = createEl("tr");
+      trTotal.classList.add("total-row");
+
+      selectedHeaders.forEach((_, i) => {
+
+        const td = createEl("td");
+
+        if (i === 0) {
+          td.textContent = "Total";
+        } else {
+          td.textContent = ""; // 🔥 no calculation here
+        }
+
+        td.style.fontWeight = "bold";
+        trTotal.appendChild(td);
+      });
+
+      tbody.appendChild(trTotal);
+
+      table.appendChild(tbody);
+
+      applyTableColumnRules(table, selectedHeaders, tableId);
+      recalculateAllTotals();
+    }
+
+    function getNextMonthStr(str) {
+
+      const [mon, year] = str.split("-");
+
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      let mIndex = months.indexOf(mon);
+      let y = parseInt(year);
+
+      mIndex++;
+
+      if (mIndex > 11) {
+        mIndex = 0;
+        y++;
+      }
+
+      return `${months[mIndex]}-${y}`;
+    }
+
+
+
+    function addNewEmployeesFromEmpDB(nextMonth, station) {
+
+      if (!pbData || !empData) return;
+
+      const pbHeaders = pbData.headers;
+      const pbRows = pbData.rows;
+
+      const empHeaders = empData.headers;
+      const empRows = empData.rows;
+
+      const namePB = getColIndex(pbHeaders, "Employee Name");
+      const stationPB = getColIndex(pbHeaders, "Pay Drawn Station"); // 🔥 FIXED
+      const monthPB = getColIndex(pbHeaders, "Salary Month");
+
+      const nameEmp = getColIndex(empHeaders, "Employee Name");
+      const stationEmp = getColIndex(empHeaders, "Station");
+      const dorEmp = getColIndex(empHeaders, "DOR");
+
+      /* 🔹 PREVIOUS MONTH VALUE */
+      const nextVal = parseMonthYear(nextMonth);
+      const prevMonthVal = nextVal - 1;
+
+      /* 🔹 PREVIOUS MONTH EMPLOYEES */
+      const prevEmployees = new Set();
+
+      pbRows.forEach(r => {
+
+        if (
+          String(r[stationPB]).trim() === String(station).trim() &&
+          parseMonthYear(r[monthPB]) === prevMonthVal
+        ) {
+          prevEmployees.add(String(r[namePB]).trim());
+        }
+      });
+
+      /* 🔹 EXIST CHECK */
+      const exists = name => pbRows.some(r => {
+        return (
+          String(r[stationPB]).trim() === String(station).trim() &&
+          parseMonthYear(r[monthPB]) === nextVal &&
+          String(r[namePB]).trim() === name
+        );
+      });
+
+      /* 🔹 PARSE DOR */
+      function parseDOR(dorStr) {
+
+        if (!dorStr) return 0;
+
+        const months = {
+          Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+          Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+        };
+
+        const parts = String(dorStr).split(",");
+        if (parts.length !== 2) return 0;
+
+        const year = parseInt(parts[1].trim());
+        const mon = parts[0].split("-")[0];
+        const month = months[mon];
+
+        if (!month || !year) return 0;
+
+        return year * 100 + month;
+      }
+
+      let count = 0;
+
+      /* 🔹 ADD EMPLOYEES */
+      empRows.forEach(emp => {
+
+        const empName = String(emp[nameEmp] || "").trim();
+        const empStation = String(emp[stationEmp] || "").trim();
+
+        if (!empName || empStation !== String(station).trim()) return;
+
+        // ✅ MUST EXIST IN PREVIOUS MONTH
+        if (!prevEmployees.has(empName)) return;
+
+        // ❌ ALREADY EXISTS
+        if (exists(empName)) return;
+
+        /* 🔹 DOR CHECK */
+        const dorVal = parseDOR(emp[dorEmp]);
+
+        if (dorVal && dorVal === nextVal) return;
+
+        /* 🔹 CREATE ROW */
+        const row = new Array(pbHeaders.length).fill("");
+
+        row[namePB] = empName;
+        row[stationPB] = station;
+        row[monthPB] = nextMonth;
+
+        const set = (col, val) => {
+          const i = getColIndex(pbHeaders, col);
+          if (i !== -1) row[i] = val;
+        };
+
+        // 🔥 DEFAULT VALUES
+        set("Pay Level", 1);
+        set("7CPC Index", 1);
+        set("HRA Entitled", true);
+        set("TA Entitled", true);
+
+        pbRows.push(row);
+        count++;
+      });
+
+      console.log("✅ Added Employees:", count);
+    }
+
+
+    function refreshPBView() {
+
+      const station = id("PayBillPage_Station")?.value;
+      const fy = id("PayBillPage_FY")?.value;
+      const month = id("PayBillPage_SalMonth")?.value;
+
+      if (!station || !month) return;
+
+      // 🔥 CLEAR TABLES
+      ["PB_GOEditTbl", "PB_NPSEditTbl", "PB_GOViewTbl", "PB_NPSViewTbl"]
+        .forEach(idName => {
+          const el = id(idName);
+          if (el) el.innerHTML = "";
+        });
+
+      const wrapper = document.querySelector(".PB-Table-Wrapper");
+      const isEditMode = wrapper?.classList.contains("edit-mode");
+
+      if (isEditMode) {
+        createPayBillEditTables();
+        recalculateAllRows();
+        recalculateAllTotals();
+      } else {
+        createPayBillViewTables(station, fy, month);
+      }
+
+      setDAPercent();
+    }
+
+
+    function getBasicPay(payLevel, index) {
+
+      if (!cpcData || !cpcData.headers || !cpcData.rows) return 0;
+
+      const headers = cpcData.headers;
+      const rows = cpcData.rows;
+
+      const colIndex = headers.findIndex(h =>
+        String(h).trim() === String(payLevel).trim()
+      );
+
+      if (colIndex === -1) return 0;
+
+      for (let i = 0; i < rows.length; i++) {
+
+        if (String(rows[i][0]).trim() === String(index).trim()) {
+          return num(rows[i][colIndex]) || 0;
+        }
+      }
+
+      return 0;
+    }
+
+
+    function updateDAColumn(value) {
+
+      const tables = [
+        id("PB_GOEditTbl"),
+        id("PB_NPSEditTbl")
+      ];
+
+      tables.forEach(table => {
+        if (!table) return;
+
+        table.querySelectorAll('td[data-col="DA%"] input').forEach(input => {
+          input.value = value;
+        });
+      });
+    }
+
+
+    function updateBasicPay(tr, tableId) {
+
+      const levelSelect = getCellInput(tr, "Pay Level", "select");
+      const indexSelect = getCellInput(tr, "7CPC Index", "select");
+      const basicInput = getCellInput(tr, "Basic Pay");
+
+      if (!levelSelect || !indexSelect || !basicInput) return;
+
+      const payLevel = levelSelect.value;
+      const index = indexSelect.value;
+
+      const basic = getBasicPay(payLevel, index);
+
+      // 🔥 USE HELPER
+      setValue(basicInput, basic);
+
+      // 🔥 pass tableId (important for CGEIS/NPS)
+      recalculateRow(tr, tableId);
+    }
+
+
+    function updateDARow(tr) {
+
+      const daPercentInput = id("PayBillPage_DA%");
+      const basicInput = getCellInput(tr, "Basic Pay");
+      const daInput = getCellInput(tr, "DA");
+
+      if (!daPercentInput || !basicInput || !daInput) return;
+
+      /* =========================
+         🔹 SAFE VALUES
+      ========================= */
+      const rawDA = num(daPercentInput.value);
+
+      // 🔥 LIMIT ONLY FOR CALCULATION
+      const daPercent = Math.min(rawDA, 150);
+
+      const basic = getNum(tr, "Basic Pay");
+
+      /* =========================
+         🔹 CALCULATE
+      ========================= */
+      const daVal = Math.round((daPercent * basic) / 100);
+
+      /* =========================
+         🔹 SET VALUE
+      ========================= */
+      setValue(daInput, daVal);
+
+      /* =========================
+         🔹 DEPENDENT CALCS
+      ========================= */
+      calculateTA(tr);
+      calculateHRA(tr);
+    }
+
+
+
+    function getPBDBHistory(empName) {
+
+      if (!pbData || !pbData.headers || !pbData.rows) return [];
+
+      const headers = pbData.headers;
+      const rows = pbData.rows;
+
+      const nameIndex = headers.indexOf("Employee Name");
+      const monthIndex = headers.indexOf("Salary Month");
+      const daIndex = headers.indexOf("DA%");
+      const basicIndex = headers.indexOf("Basic Pay");
+      const taRateIndex = headers.indexOf("TA Rate");
+
+      return rows
+        .filter(r => String(r[nameIndex]).trim() === String(empName).trim())
+        .map(r => ({
+          month: r[monthIndex],
+          da: num(r[daIndex]),
+          basic: num(r[basicIndex]),
+          ta: num(r[taRateIndex])
+        }));
+    }
+
+
+    function updateDAAFromPBDB(rowElements) {
+
+      const inputDA = Math.min(num(id("PayBillPage_DA%").value), 150);
+      const selectedMonth = id("PayBillPage_SalMonth")?.value;
+
+      if (!selectedMonth) return;
+
+      const [mon, year] = selectedMonth.split("-");
+
+      const monthMap = {
+        Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+        Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+      };
+
+      const selectedNum = monthMap[mon];
+
+      rowElements.forEach(({ tr }) => {
+
+        const empName = tr.children[0]?.innerText?.trim();
+        if (!empName) return;
+
+        const history = getPBDBHistory(empName);
+        if (!history.length) {
+          setValue(tr._cells["DAA"], 0);
+          setValue(tr._cells["DAA on TA"], 0);
+          return;
+        }
+
+        // 🔥 SORT
+        history.sort((a, b) => parseMonthYear(a.month) - parseMonthYear(b.month));
+
+        const selectedIndex = history.findIndex(r => r.month === selectedMonth);
+
+        if (selectedIndex <= 0) {
+          setValue(tr._cells["DAA"], 0);
+          setValue(tr._cells["DAA on TA"], 0);
+          return;
+        }
+
+        const prevDA = history[selectedIndex - 1].da;
+
+        // ❌ NO CHANGE
+        if (inputDA === prevDA) {
+          setValue(tr._cells["DAA"], 0);
+          setValue(tr._cells["DAA on TA"], 0);
+          return;
+        }
+
+        let totalDAA = 0;
+        let totalDAA_TA = 0;
+
+        let startMonth = null;
+        let endMonth = null;
+
+        // 🔥 CHECK BLOCK 1 CHANGE
+        let block1HasChange = false;
+
+        for (let i = 1; i < history.length; i++) {
+          const [m] = history[i].month.split("-");
+          const mNum = monthMap[m];
+
+          if (mNum <= 6 && history[i].da !== history[i - 1].da) {
+            block1HasChange = true;
+            break;
+          }
+        }
+
+        // 🔥 DETERMINE BLOCK
+        let blockStart, blockEnd;
+
+        if (selectedNum <= 6) {
+          blockStart = 1;
+          blockEnd = 6;
+        } else {
+          blockStart = 7;
+          blockEnd = 12;
+        }
+
+        // 🔥 CASE 3 → Jan to previous month
+        const useFullRange = (selectedNum > 6 && !block1HasChange);
+
+        history.forEach(r => {
+
+          const [m] = r.month.split("-");
+          const mNum = monthMap[m];
+
+          // 🔹 RANGE CHECK
+          if (!useFullRange) {
+            if (mNum < blockStart || mNum > blockEnd) return;
+          }
+
+          // 🔹 BEFORE SELECTED MONTH
+          if (parseMonthYear(r.month) >= parseMonthYear(selectedMonth)) return;
+
+          // 🔹 SAME OLD DA BLOCK
+          if (r.da !== prevDA) return;
+
+          // =========================
+          // 🔹 DAA (BASIC PAY)
+          // =========================
+          const basic = num(r.basic);
+
+          const oldAmt = basic * (prevDA / 100);
+          const newAmt = basic * (inputDA / 100);
+
+          const diff = newAmt - oldAmt;
+
+          if (diff > 0) {
+
+            totalDAA += diff;
+
+            const [m] = r.month.split("-");
+
+            if (!startMonth) startMonth = m;
+            endMonth = m;
+          }
+
+          // =========================
+          // 🔹 DAA on TA
+          // =========================
+          const ta = num(r.ta);
+
+          const oldTA = ta * (prevDA / 100);
+          const newTA = ta * (inputDA / 100);
+
+          const diffTA = newTA - oldTA;
+
+          if (diffTA > 0) {
+            totalDAA_TA += diffTA;
+          }
+        });
+
+        // ✅ SET VALUES
+        setValue(tr._cells["DAA"], Math.round(totalDAA) || 0);
+        setValue(tr._cells["DAA on TA"], Math.round(totalDAA_TA) || 0);
+
+        // =========================
+        // 🔹 ARREAR DETAILS (TEXTAREA SAFE)
+        // =========================
+        const arrearInput = tr._cells["Arrears Details"];
+
+        if (arrearInput) {
+
+          if (totalDAA > 0 && startMonth && endMonth) {
+
+            const year = selectedMonth.split("-")[1];
+
+            const text = `DAA (${prevDA}% to ${inputDA}%) ${startMonth} to ${endMonth} ${year}`;
+
+            // 🔥 update ONLY if:
+            // 1. empty OR
+            // 2. previously auto-generated
+            if (
+              !arrearInput.value ||
+              arrearInput.dataset.auto === "true"
+            ) {
+              arrearInput.value = text;
+              arrearInput.dataset.auto = "true"; // mark as auto
+            }
+
+          } else {
+            // ❌ no arrear → clear only if auto
+            if (arrearInput.dataset.auto === "true") {
+              arrearInput.value = "";
+            }
+          }
+        }
+
+        const table = tr.closest("table");
+
+        // =========================
+        // 🔹 GO TABLE → FORCE ZERO
+        // =========================
+        if (table && table.id === "PB_GOEditTbl") {
+
+          const npseInput = tr._cells["DAA on NPSE"];
+          const npscInput = tr._cells["DAA on NPSC"];
+          const npseDedInput = tr._cells["DAA on NPSE ded"];
+
+          setValue(npseInput, 0);
+          setValue(npscInput, 0);
+          setValue(npseDedInput, 0);
+
+          // mark as auto
+          npseInput.dataset.auto = "true";
+          npscInput.dataset.auto = "true";
+
+          setValue(getCellInput(tr, "Total DAA on NPS"), 0);
+
+          // Total DAA without NPS
+          setValue(
+            getCellInput(tr, "Total DAA"),
+            Math.round(totalDAA + totalDAA_TA)
+          );
+
+          return; // 🔥 stop here
+        }
+
+        // =========================
+        // 🔹 NPS TABLE → NORMAL CALC
+        // =========================
+        if (!table || table.id !== "PB_NPSEditTbl") return;
+
+        const daaValue = Math.round(totalDAA) || 0;
+
+        const npseInput = tr._cells["DAA on NPSE"];
+        const npscInput = tr._cells["DAA on NPSC"];
+        const npseDedInput = tr._cells["DAA on NPSE ded"];
+
+        // 🔥 ALWAYS RECALCULATE IF AUTO (fixes stale issue)
+        if (npseInput.dataset.auto !== "false") {
+          setValue(npseInput, Math.round(daaValue * 0.14));
+          setValue(npseDedInput, Math.round(daaValue * 0.14));
+          npseInput.dataset.auto = "true";
+        }
+
+        if (npscInput.dataset.auto !== "false") {
+          setValue(npscInput, Math.round(daaValue * 0.10));
+          npscInput.dataset.auto = "true";
+        }
+
+        // 🔹 FINAL VALUES (manual or auto)
+        const daaNPSE = num(npseInput.value);
+        const daaNPSC = num(npscInput.value);
+
+        // 🔹 TOTALS
+        setValue(
+          getCellInput(tr, "Total DAA on NPS"),
+          Math.round(daaNPSE + daaNPSC)
+        );
+
+        setValue(
+          getCellInput(tr, "Total DAA"),
+          Math.round(totalDAA + totalDAA_TA + daaNPSE)
+        );
+      });
+    }
+
+
+    function applyGPFRule_GO(tr, empName) {
+
+      const tableId = tr.closest("table")?.id || "";
+      if (!tableId.includes("GO")) return;
+
+      const currentMonth = id("PayBillPage_SalMonth")?.value;
+      if (!currentMonth) return;
+
+      const currentVal = parseMonthYear(currentMonth);
+
+      /* 🔹 USE empData (NO sheetCache) */
+      if (!empData || !empData.headers || !empData.rows) return;
+
+      const empHeaders = empData.headers;
+      const empRows = empData.rows;
+
+      const nameIdx = getColIndex(empHeaders, "Employee Name");
+      const dorIdx = getColIndex(empHeaders, "DOR");
+
+      let dor = null;
+
+      for (let i = 0; i < empRows.length; i++) {
+
+        if (String(empRows[i][nameIdx]).trim() === String(empName).trim()) {
+          dor = empRows[i][dorIdx];
+          break;
+        }
+      }
+
+      const dorVal = parseDOR(dor);
+
+      const next1 = addMonths(currentVal, 1);
+      const next2 = addMonths(currentVal, 2);
+
+      const gpfInput = getCellInput(tr, "GPF");
+      if (!gpfInput) return;
+
+      /* 🔥 CONDITION */
+      if (dorVal === currentVal || dorVal === next1 || dorVal === next2) {
+
+        let diff = 0;
+
+        if (dorVal === currentVal) diff = 1;
+        else if (dorVal === next1) diff = 2;
+        else if (dorVal === next2) diff = 3;
+
+        // 🔥 STORE MESSAGE
+        if (typeof GPF_MESSAGES !== "undefined") {
+          GPF_MESSAGES.push(
+            `${empName} retiring in ${diff} month${diff > 1 ? "s" : ""}`
+          );
+        }
+
+        // 🔥 DISABLE GPF
+        gpfInput.value = 0;
+        gpfInput.disabled = true;
+
+        gpfInput.style.backgroundColor = "#ffffff";
+        gpfInput.style.opacity = "1";
+
+      } else {
+
+        gpfInput.disabled = false;
+
+        gpfInput.style.backgroundColor = "";
+        gpfInput.style.opacity = "";
+      }
+    }
+
+
+    function updateGPFMessage() {
+
+      const gpfError = id("GPF_Error");
+      if (!gpfError) return;
+
+      if (GPF_MESSAGES.length > 0) {
+
+        const message =
+          GPF_MESSAGES.join(", ") + ". Hence GPF is disabled.";
+
+        gpfError.textContent = "⚠ " + message;
+
+      } else {
+        gpfError.textContent = "";
+      }
+    }
+
+
+
+    function addMonths(val, n) {
+
+      let y = Math.floor(val / 100);
+      let m = val % 100;
+
+      m += n;
+
+      while (m > 12) {
+        m -= 12;
+        y++;
+      }
+
+      while (m < 1) {
+        m += 12;
+        y--;
+      }
+
+      return y * 100 + m;
+    }
+
+
+    function calculateNPS(tr, tableId) {
+
+      const npseInput = getCellInput(tr, "NPSE");
+      const npseDedInput = getCellInput(tr, "NPSE Ded");
+      const npscInput = getCellInput(tr, "NPSC");
+      const npsInput = getCellInput(tr, "NPS");
+
+      if (!npseInput || !npscInput || !npsInput) return;
+
+      const isNPS = tableId === "PB_NPSEditTbl";
+
+      // 🔥 GO → always 0
+      if (!isNPS) {
+        setValue(npseInput, 0);
+        setValue(npscInput, 0);
+        setValue(npsInput, 0);
+        setValue(npseDedInput, 0);
+        return;
+      }
+
+      // 🔹 Get Basic + DA
+      const basic = getNum(tr, "Basic Pay");
+      const da = getNum(tr, "DA");
+
+      const base = basic + da;
+
+      // 🔹 Calculate
+      const npse = Math.round(base * 0.14);
+      const npsc = Math.round(base * 0.10);
+      const nps = npse + npsc;
+
+      // 🔹 Set values
+      setValue(npseInput, npse);
+      setValue(npseDedInput, npse);
+      setValue(npscInput, npsc);
+      setValue(npsInput, nps);
+
+    }
+
+
+    function calculateTA(tr) {
+
+      const taEntitled = getCellInput(tr, "TA Entitled")?.checked;
+
+      const taRateInput = getCellInput(tr, "TA Rate");
+      const daOnTAInput = getCellInput(tr, "DA on TA");
+      const taInput = getCellInput(tr, "TA");
+
+      if (!taInput) return;
+
+      /* ================= NOT ENTITLED ================= */
+      if (!taEntitled) {
+        setValue(taRateInput, 0);
+        setValue(daOnTAInput, 0);
+        setValue(taInput, 0);
+        return;
+      }
+
+      /* ================= INPUTS ================= */
+
+      const taZone = id("PayBillPage_TAZone")?.value || "";
+      const payLevel = getCellValue(tr, "Pay Level");
+      const qsText = getCellValue(tr, "Qualifying Service");
+      const disability = getCellInput(tr, "Disability")?.checked;
+      const disabilityLevel = getCellValue(tr, "Level of Disability");
+
+      const rawDA = num(id("PayBillPage_DA%")?.value);
+      const daPercent = Math.min(rawDA, 150);
+
+      /* ================= CPC LOOKUP ================= */
+
+      if (!cpcData || !cpcData.headers || !cpcData.rows) return;
+
+      const headers = cpcData.headers;
+      const rows = cpcData.rows;
+
+      const colIndex = headers.indexOf(payLevel);
+      if (colIndex === -1) return;
+
+      let baseTA = 0;
+
+      for (let i = 0; i < rows.length; i++) {
+
+        if (String(rows[i][0]).trim() === String(taZone).trim()) {
+          baseTA = num(rows[i][colIndex]);
+          break;
+        }
+      }
+
+      /* ================= QUALIFYING SERVICE ================= */
+
+      let years = 0;
+      if (qsText) {
+        const match = qsText.match(/(\d+)Y/);
+        if (match) years = parseInt(match[1]);
+      }
+
+      /* ================= MULTIPLIERS ================= */
+
+      let multiplier = 1;
+
+      // Pay Level rule
+      if (["1", "2"].includes(String(payLevel))) {
+        multiplier *= 2;
+      }
+
+      // Disability rule
+      if (disability) {
+        if (disabilityLevel.includes(">80%")) multiplier *= 3;
+        else if (disabilityLevel.includes(">40%")) multiplier *= 2;
+      }
+
+      /* ================= FINAL ================= */
+
+      const taRate = baseTA * multiplier;
+      const daOnTA = (daPercent / 100) * taRate;
+      const ta = taRate + daOnTA;
+
+      setValue(taRateInput, taRate);
+      setValue(daOnTAInput, daOnTA);
+      setValue(taInput, ta);
+
+      recalculateAllTotals();
+    }
+
+
+    function calculateHRA(tr) {
+
+      const hraEntitled = getCellInput(tr, "HRA Entitled")?.checked;
+
+      const hraInput = getCellInput(tr, "HRA");
+      const lfeeInput = getCellInput(tr, "L Fee");
+      const wchInput = getCellInput(tr, "W Ch");
+
+      if (!hraInput || !lfeeInput || !wchInput) return;
+
+      const basic = getNum(tr, "Basic Pay");
+      const rawDA = num(id("PayBillPage_DA%")?.value);
+      const daPercent = Math.min(rawDA, 150);
+
+      /* ================= HRA ENTITLED ================= */
+
+      if (hraEntitled) {
+
+        const zone = id("PayBillPage_HRAZone")?.value || "";
+
+        let percent = 0;
+
+        if (zone === "X") percent = 28;
+        else if (zone === "Y") percent = 18;
+        else percent = 8;
+
+        // 🔥 DA BOOST
+        if (daPercent >= 50) percent += 2;
+        else if (daPercent >= 25) percent += 1;
+
+        const hra = (basic * percent) / 100;
+
+        setValue(hraInput, hra);
+        setValue(lfeeInput, 0);
+        setValue(wchInput, 0);
+
+        return;
+      }
+
+      /* ================= QTRS LOOKUP ================= */
+
+      const qtrsType = getCellValue(tr, "Qtrs Type");
+
+      if (!qtrsData || !qtrsData.headers || !qtrsData.rows) return;
+
+      const rows = qtrsData.rows;
+
+      let lfee = 0;
+      let wch = 0;
+
+      for (let i = 0; i < rows.length; i++) {
+
+        if (String(rows[i][0]).trim() === String(qtrsType).trim()) {
+
+          lfee = num(rows[i][2]);
+          wch = num(rows[i][3]);
+          break;
+        }
+      }
+
+      setValue(hraInput, 0);
+      setValue(lfeeInput, lfee);
+      setValue(wchInput, wch);
+    }
+
+
+    function calculateCGEIS(tr, tableId) {
+
+      const cgeisInput = getCellInput(tr, "CGEIS");
+      if (!cgeisInput) return;
+
+      const isGO = tableId === "PB_GOEditTbl";
+
+      /* =========================
+         🔹 NPS → always 0
+      ========================= */
+      if (!isGO) {
+        setValue(cgeisInput, 0);
+        return;
+      }
+
+      /* =========================
+         🔹 NAME FETCH
+      ========================= */
+      const name = tr.children[0]?.textContent?.trim() || "";
+      if (!name) return;
+
+      const empData = sheetCache["EmpDB"];
+      if (!empData || empData.length < 2) return;
+
+      const headers = empData[0];
+
+      const nameIndex = getColIndex(headers, "Employee Name");
+      const groupIndex = getColIndex(headers, "Group");
+
+      if (nameIndex === -1 || groupIndex === -1) return;
+
+      let amount = 0;
+
+      /* =========================
+         🔹 LOOKUP
+      ========================= */
+      for (let i = 1; i < empData.length; i++) {
+
+        const empName = String(empData[i][nameIndex] || "").trim();
+
+        if (
+          empName.replace(/\s+/g, "").toLowerCase() ===
+          name.replace(/\s+/g, "").toLowerCase()
+        ) {
+
+          const group = String(empData[i][groupIndex] || "").trim();
+          const firstLetter = group.charAt(0).toUpperCase();
+
+          if (firstLetter === "A") amount = 120;
+          else if (firstLetter === "B") amount = 60;
+          else if (firstLetter === "C") amount = 30;
+
+          break;
+        }
+      }
+
+      /* =========================
+         🔹 SET VALUE
+      ========================= */
+      setValue(cgeisInput, amount);
+    }
+
+
+    function calculateITFields(tr) {
+
+      const itInput = getCellInput(tr, "IT");
+      const cessInput = getCellInput(tr, "Cess@4%");
+      const netITInput = getCellInput(tr, "Net IT");
+
+      if (!itInput || !cessInput || !netITInput) return;
+
+      /* =========================
+         🔹 SAFE VALUE (HELPER)
+      ========================= */
+      const it = num(itInput.dataset?.raw ?? itInput.value);
+
+      /* =========================
+         🔹 CALCULATE
+      ========================= */
+      const cess = Math.round(it * 0.04);
+      const netIT = it + cess;
+
+      /* =========================
+         🔹 SET VALUES
+      ========================= */
+      setValue(cessInput, cess);
+      setValue(netITInput, netIT);
+    }
+
+
+    function calculateGross_Ded_Net(tr, tableId) {
+
+      /* =========================
+        🔹 GROSS INCOME
+     ========================= */
+      const gross =
+        getNum(tr, "Basic Pay") +
+        getNum(tr, "DA") +
+        getNum(tr, "TA") +
+        getNum(tr, "HRA") +
+        getNum(tr, "NPSE") +
+        getNum(tr, "Bonus") +
+        getNum(tr, "CEA") +
+        getNum(tr, "EL Encash") +
+        getNum(tr, "Uni All") +
+        getNum(tr, "Total DAA") +
+        getNum(tr, "Medical Reimburse") +
+        getNum(tr, "LTA Reimburse") +
+        getNum(tr, "Arrears");
+
+      setValue(getCellInput(tr, "Gross Income"), gross);
+
+      /* =========================
+         🔹 TOTAL DEDUCTION
+      ========================= */
+      const deduction =
+        getNum(tr, "Net IT") +
+        getNum(tr, "GPF") +
+        getNum(tr, "NPS") +
+        getNum(tr, "Total DAA on NPS") +
+        getNum(tr, "CGEIS") +
+        getNum(tr, "LIC") +
+        getNum(tr, "L Fee") +
+        getNum(tr, "W Ch") +
+        getNum(tr, "C ADV") +
+        getNum(tr, "SC ADV") +
+        getNum(tr, "F ADV") +
+        getNum(tr, "REC P & A") +
+        getNum(tr, "TR CH") +
+        getNum(tr, "AIR & TV CHE SOC") +
+        getNum(tr, "DWR SOCIETY") +
+        getNum(tr, "AKA CLUB") +
+        getNum(tr, "ASSO SUB") +
+        getNum(tr, "Prof Tax") +
+        getNum(tr, "Recovery");
+
+      setValue(getCellInput(tr, "Total Deduction"), deduction);
+
+      /* =========================
+         🔹 NET INCOME
+      ========================= */
+      const net = gross - deduction;
+
+      setValue(getCellInput(tr, "Net Income"), net);
+    }
+
+
+    function recalculateTableTotals(table) {
+
+      if (!table) return;
+
+      const rows = table.querySelectorAll("tbody tr:not(.total-row)");
+      const totalRow = table.querySelector("tr.total-row");
+
+      if (!rows.length || !totalRow) return;
+
+      // 🔥 get headers from DOM (same order as selectedHeaders)
+      const headers = Array.from(table.querySelectorAll("thead th"))
+        .map(th => th.textContent.trim());
+
+      const basicIndex = headers.findIndex(h => h === "Basic Pay");
+      const netIndex = headers.findIndex(h => h === "Net Income");
+
+      if (basicIndex === -1 || netIndex === -1) return;
+
+      const sums = Array(headers.length).fill(0);
+
+      // 🔥 calculate like your logic
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll("td");
+
+        cells.forEach((td, i) => {
+          if (i >= basicIndex && i <= netIndex) {
+
+            const input = td.querySelector("input, select");
+            const val = input ? num(input.value) : num(td.textContent);
+
+            sums[i] += val || 0;
+          }
+        });
+      });
+
+      // 🔥 update total row
+      const totalCells = totalRow.querySelectorAll("td");
+
+      totalCells.forEach((td, i) => {
+
+        if (i === 0) {
+          td.textContent = "Total";
+        }
+        else if (i >= basicIndex && i <= netIndex) {
+          td.textContent = formatCurrency(sums[i] || 0);
+        }
+        else {
+          td.textContent = "";
+        }
+      });
+    }
+
+
+    function recalculateAllTotals() {
+      recalculateTableTotals(id("PB_GOEditTbl"));
+      recalculateTableTotals(id("PB_NPSEditTbl"));
+    }
+
+
+    function recalculateRow(tr, tableId) {
+      updateDARow(tr);
+      calculateTA(tr);
+      calculateHRA(tr);
+      calculateCGEIS(tr, tableId);
+      calculateNPS(tr, tableId);
+      calculateITFields(tr);
+      calculateGross_Ded_Net(tr, tableId);
+    }
+
+
+    function recalculateAllRows() {
+      document.querySelectorAll(
+        "#PB_GOEditTbl tbody tr:not(.total-row), #PB_NPSEditTbl tbody tr:not(.total-row)"
+      ).forEach(tr => {
+        recalculateRow(tr, tr.closest("table")?.id);
+      });
+
+      recalculateAllTotals(); // ✅ only once
+    }
+
+
+    function cleanCity(city) {
+      if (!city) return "";
+
+      return String(city)
+        .replace(/^(AIR|AV|DD|HPT|LRS|CBS|LPT)\s*/i, "") // remove prefix
+        .trim()
+        .toLowerCase();
+    }
+
+    function updateZones() {
+
+      const pbStation = id("PayBillPage_Station").value;
+      const empStation = id("EmpPage_Station").value;
+
+      const pbzone = getCityZone(pbStation);
+      const empzone = getCityZone(empStation);
+
+      id("PayBillPage_TAZone").value = val(pbzone.ta);
+      id("PayBillPage_HRAZone").value = val(pbzone.hra);
+
+      id("EmpPage_TAZone").value = val(empzone.ta);
+      id("EmpPage_HRAZone").value = val(empzone.hra);
+    }
+
+    on("PayBillPage_Station", "change", () => {
+      enableAllButtons();
+      refreshPBView();
+      updateZones();
+    });
+
+    on("EmpPage_Station", "change", () => {
+      //enableAllButtons();
+      //refreshPBView();
+      //updateZones();
+    });
+
+    on("PayBillPage_FY", "change", refreshPBView);
+    on("PayBillPage_SalMonth", "change", refreshPBView);
+    on("PayBillPage_HRAZone", "change", recalculateAllRows);
+    on("PayBillPage_TAZone", "change", recalculateAllRows);
+
+
+    let isAddMode = false;
+    on("PBaddBtn", "click", () => {
+
+      const monthEl = id("PayBillPage_SalMonth");
+      const station = id("PayBillPage_Station")?.value;
+
+      if (!monthEl || !station) return;
+
+      // 🔥 IF ALREADY IN ADD MODE → ONLY SAVE
+      if (isAddMode) {
+        savePBData();   // your upload/save logic
+        console.log("Saved only, no new month added");
+        return;
+      }
+
+      // 🔥 FIRST CLICK → ADD MONTH
+      const nextMonth = getNextMonthStr(monthEl.value);
+
+      copyPreviousMonthData(nextMonth, station);
+      addNewEmployeesFromEmpDB(nextMonth, station);
+
+      // 🔹 Add to dropdown
+      const exists = Array.from(monthEl.options).some(opt => opt.value === nextMonth);
+
+      if (!exists) {
+        const opt = document.createElement("option");
+        opt.value = nextMonth;
+        opt.textContent = nextMonth;
+        monthEl.appendChild(opt);
+      }
+
+      monthEl.value = nextMonth;
+      monthEl.dispatchEvent(new Event("change"));
+
+      // 🔥 SET MODE
+      isAddMode = true;
+
+      console.log("Entered ADD MODE");
+    });
+
+
+    function savePBData() {
+
+      // your existing save logic
+
+      isAddMode = false;   // 🔥 IMPORTANT
+
+      console.log("Exited ADD MODE");
+    }
+
+
+    const daInput = id("PayBillPage_DA%");
+    const errorEl = id("DA_Error");
+
+    daInput.addEventListener("input", () => {
+
+      let value = parseFloat(daInput.value);
+      if (isNaN(value)) value = 0;
+
+      // =========================
+      // 🔹 ERROR DISPLAY
+      // =========================
+      if (value > 150) {
+        errorEl && (errorEl.textContent = "❌ DA exceeded 150% (calculated upto 150%)");
+      }
+      else if (value > 100) {
+        errorEl && (errorEl.textContent = "⚠ DA exceeded 100%");
+      }
+      else {
+        if (errorEl) errorEl.textContent = "";
+      }
+
+      // =========================
+      // 🔥 RESET AUTO FLAGS
+      // =========================
+      document.querySelectorAll("#PB_NPSEditTbl tbody tr").forEach(tr => {
+        const npse = tr._cells?.["DAA on NPSE"];
+        const npsc = tr._cells?.["DAA on NPSC"];
+
+        if (npse) npse.dataset.auto = "true";
+        if (npsc) npsc.dataset.auto = "true";
+      });
+
+      // =========================
+      // 🔥 STEP ORDER (CRITICAL)
+      // =========================
+      recalculateAllRows();   // 1️⃣ updates DA, TA, HRA, etc.
+
+      // 🔥 DAA MUST COME AFTER ROW CALC
+      ["PB_GOEditTbl", "PB_NPSEditTbl"].forEach(tableId => {
+
+        const table = id(tableId);
+        if (!table) return;
+
+        const rows = [...table.querySelectorAll("tbody tr:not(.total-row)")];
+        const rowElements = rows.map(tr => ({ tr }));
+
+        updateDAAFromPBDB(rowElements);
+      });
+
+      recalculateAllTotals(); // 3️⃣ FINAL totals
+
+    });
+
+
+
     /* ==================================================================
     🔥🔥🔥🔥 HELPERS 🔥🔥🔥🔥
     =====================================================================*/
@@ -3546,6 +5517,104 @@
       return num(el?.dataset?.raw ?? el?.value);
     }
 
+    function parseMonthYear(str) {
+
+      if (!str || typeof str !== "string") return 0;
+
+      const parts = str.split("-");
+      if (parts.length !== 2) return 0;
+
+      const [mon, year] = parts;
+
+      const months = {
+        Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+        Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+      };
+
+      return parseInt(year) * 100 + (months[mon] || 0);
+    }
+
+    function formatMonthDisplay(val) {
+      if (!val) return "";
+
+      const [year, month] = val.split("-");
+      const d = new Date(year, month - 1);
+
+      const monthStr = d.toLocaleString("en-US", { month: "short" });
+
+      return `${monthStr}-${year}`; // ✅ MMM-YYYY
+    }
+
+    function formatMonthForInput(val) {
+      if (!val) return "";
+
+      const d = new Date(val);
+      if (isNaN(d)) return "";
+
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+
+      return `${year}-${month}`; // ✅ correct YYYY-MM
+    }
+
+
+    function parseDOR(dorStr) {
+
+      if (!dorStr) return 0;
+
+      const months = {
+        Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+        Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+      };
+
+      const parts = String(dorStr).split(",");
+      if (parts.length !== 2) return 0;
+
+      const year = parseInt(parts[1].trim());
+      const monPart = parts[0].split("-")[0];
+      const month = months[monPart];
+
+      return year * 100 + month;
+    }
+
+
+    function getCellInput(tr, colName, type = null) {
+
+      const normalize = str => String(str).replace(/\s+/g, "").toLowerCase();
+
+      const cells = tr.querySelectorAll("td");
+
+      for (let td of cells) {
+        const col = td.getAttribute("data-col");
+
+        if (normalize(col) === normalize(colName)) {
+
+          // 🔥 auto detect input/select
+          if (!type) {
+            return td.querySelector("input, select");
+          }
+
+          return td.querySelector(type);
+        }
+      }
+
+      return null;
+    }
+
+
+    function getCellValue(tr, colName) {
+
+      const input = getCellInput(tr, colName);
+
+      if (!input) return "";
+
+      // 🔥 ALWAYS prefer raw value
+      if (input.dataset && input.dataset.raw !== undefined) {
+        return input.dataset.raw;
+      }
+
+      return input.value;
+    }
     /* =========================
        SAFE VALUE HELPERS
     ========================= */
