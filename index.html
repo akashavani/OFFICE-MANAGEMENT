@@ -1923,126 +1923,126 @@
 
       return latest;
     }
-    
+
 
     function getPayBandAndGradePay(level) {
 
-  let headers = cpcData.headers;
-  let rows = cpcData.rows;
+      let headers = cpcData.headers;
+      let rows = cpcData.rows;
 
-  // 🔹 find column for level
-  let col = headers.findIndex(h => String(h).trim() === String(level).trim());
+      // 🔹 find column for level
+      let col = headers.findIndex(h => String(h).trim() === String(level).trim());
 
-  if (col === -1) {
-    console.warn("Level not found in CPC:", level);
-    return { payBand: "", gradePay: "" };
-  }
+      if (col === -1) {
+        console.warn("Level not found in CPC:", level);
+        return { payBand: "", gradePay: "" };
+      }
 
-  // 🔹 row index (based on your structure)
-  let payBand = rows[0] ? rows[0][col] : "";
-  let gradePay = rows[1] ? rows[1][col] : "";
+      // 🔹 row index (based on your structure)
+      let payBand = rows[0] ? rows[0][col] : "";
+      let gradePay = rows[1] ? rows[1][col] : "";
 
-  return {
-    payBand: payBand ?? "",
-    gradePay: gradePay ?? ""
-  };
-}
+      return {
+        payBand: payBand ?? "",
+        gradePay: gradePay ?? ""
+      };
+    }
 
 
     /* ========🔥 BUILD EMPDB WITH CALC============ */
 
     function buildEmpDBWithCalc() {
 
-  if (!empData.headers || !pbData.headers) return;
+      if (!empData.headers || !pbData.headers) return;
 
-  let eHeaders = [...empData.headers];
-  let eRows = empData.rows;
+      let eHeaders = [...empData.headers];
+      let eRows = empData.rows;
 
-  let newCols = [
-    "Superannuation",
-    "Last Drawn Salary Month",
-    "Last Increment",
-    "Last Drawn Pay Level",
-    "Last Increment Index",
-    "Last Drawn Pay Band",
-    "Last Drawn Grade Pay",
-    "Last Drawn Basic Pay",
-    "Last Drawn DA",
-    "Qualifying Service",
-    "Completed 6 Monthly Period",
-    "Last 10 Month Emoluments"
-  ];
+      let newCols = [
+        "Superannuation",
+        "Last Drawn Salary Month",
+        "Last Increment",
+        "Last Drawn Pay Level",
+        "Last Increment Index",
+        "Last Drawn Pay Band",
+        "Last Drawn Grade Pay",
+        "Last Drawn Basic Pay",
+        "Last Drawn DA",
+        "Qualifying Service",
+        "Completed 6 Monthly Period",
+        "Last 10 Month Emoluments"
+      ];
 
-  let finalHeaders = [...eHeaders, ...newCols];
+      let finalHeaders = [...eHeaders, ...newCols];
 
-  let latest = getLatestPBMap();
+      let latest = getLatestPBMap();
 
-  let finalRows = [];
+      let finalRows = [];
 
-  let empIdx = eHeaders.indexOf("Employee Name");
-  let dobIdx = eHeaders.indexOf("DOB");
-  let dojIdx = eHeaders.indexOf("DOJ");
+      let empIdx = eHeaders.indexOf("Employee Name");
+      let dobIdx = eHeaders.indexOf("DOB");
+      let dojIdx = eHeaders.indexOf("DOJ");
 
-  let pHeaders = pbData.headers;
+      let pHeaders = pbData.headers;
 
-  let monthIdx = pHeaders.indexOf("Salary Month");
-  let lastincIdx = pHeaders.indexOf("Last Increment");
-  let basicIdx = pHeaders.indexOf("Basic Pay");
-  let daIdx = pHeaders.indexOf("DA");
-  let payLevelIdx = pHeaders.indexOf("Pay Level");
-  let indexIdx = pHeaders.indexOf("7CPC Index");
+      let monthIdx = pHeaders.indexOf("Salary Month");
+      let lastincIdx = pHeaders.indexOf("Last Increment");
+      let basicIdx = pHeaders.indexOf("Basic Pay");
+      let daIdx = pHeaders.indexOf("DA");
+      let payLevelIdx = pHeaders.indexOf("Pay Level");
+      let indexIdx = pHeaders.indexOf("7CPC Index");
 
-  eRows.forEach(r => {
+      eRows.forEach(r => {
 
-    let emp = r[empIdx];
-    let dob = r[dobIdx];
-    let doj = r[dojIdx];
+        let emp = r[empIdx];
+        let dob = r[dobIdx];
+        let doj = r[dojIdx];
 
-    let pb = latest[emp] || [];
+        let pb = latest[emp] || [];
 
-    let lastMonth = pb[monthIdx] || "";
-    let lastinc = pb[lastincIdx] || "";
-    let basic = pb[basicIdx] || "";
-    let da = pb[daIdx] || "";
-    let payLevel = pb[payLevelIdx] || "";
-    let cpcindex = pb[indexIdx] || "";
+        let lastMonth = pb[monthIdx] || "";
+        let lastinc = pb[lastincIdx] || "";
+        let basic = pb[basicIdx] || "";
+        let da = pb[daIdx] || "";
+        let payLevel = pb[payLevelIdx] || "";
+        let cpcindex = pb[indexIdx] || "";
 
-    // 🔥 Pay Matrix Lookup
-    let pg = getPayBandAndGradePay(payLevel);
-    let payBand = pg.payBand;
-    let gradePay = pg.gradePay;
+        // 🔥 Pay Matrix Lookup
+        let pg = getPayBandAndGradePay(payLevel);
+        let payBand = pg.payBand;
+        let gradePay = pg.gradePay;
 
-    // existing calculations
-    let superDate = calcSuperannuation(dob);
-    let service = calcService(doj);
-    let sixMonth = calcSixMonth(doj);
+        // existing calculations
+        let superDate = calcSuperannuation(dob);
+        let service = calcService(doj);
+        let sixMonth = calcSixMonth(doj);
 
-    let emoluments = calcLast10MonthsEmoluments(pb);
+        let emoluments = calcLast10MonthsEmoluments(pb);
 
-    finalRows.push([
-      ...r,
-      superDate,
-      lastMonth,
-      lastinc,
-      payLevel,
-      cpcindex,
-      payBand,
-      gradePay,
-      basic,
-      da,
-      service,
-      sixMonth,
-      emoluments
-    ]);
+        finalRows.push([
+          ...r,
+          superDate,
+          lastMonth,
+          lastinc,
+          payLevel,
+          cpcindex,
+          payBand,
+          gradePay,
+          basic,
+          da,
+          service,
+          sixMonth,
+          emoluments
+        ]);
 
-  });
+      });
 
-  // 🔥 store globally (for reuse in detail table)
-  window.empCalcHeaders = finalHeaders;
-  window.empCalcRows = finalRows;
+      // 🔥 store globally (for reuse in detail table)
+      window.empCalcHeaders = finalHeaders;
+      window.empCalcRows = finalRows;
 
-  renderTable("EmpDB", finalHeaders, finalRows);
-}
+      renderTable("EmpDB", finalHeaders, finalRows);
+    }
 
     /* ==========🔥 RENDER TABLE============ */
 
@@ -2820,635 +2820,635 @@
     =====================================================================*/
 
     /* ============DEPARTMENT MAP (EmpDB)============= */
-function getDeptMap() {
+    function getDeptMap() {
 
-  if (!empData || !empData.headers || !empData.rows) return {};
+      if (!empData || !empData.headers || !empData.rows) return {};
 
-  const headers = empData.headers;
+      const headers = empData.headers;
 
-  const nameIndex = headers.indexOf("Employee Name");
-  const deptIndex = headers.indexOf("Department");
+      const nameIndex = headers.indexOf("Employee Name");
+      const deptIndex = headers.indexOf("Department");
 
-  if (nameIndex === -1 || deptIndex === -1) {
-    console.warn("Required columns not found in EmpDB");
-    return {};
-  }
+      if (nameIndex === -1 || deptIndex === -1) {
+        console.warn("Required columns not found in EmpDB");
+        return {};
+      }
 
-  const map = {};
+      const map = {};
 
-  empData.rows.forEach(row => {
+      empData.rows.forEach(row => {
 
-    const name = String(row[nameIndex] || "").trim();
-    const dept = String(row[deptIndex] || "").trim();
+        const name = String(row[nameIndex] || "").trim();
+        const dept = String(row[deptIndex] || "").trim();
 
-    if (name) {
-      map[name] = dept;
+        if (name) {
+          map[name] = dept;
+        }
+
+      });
+
+      return map;
     }
 
-  });
 
-  return map;
-}
+    function createPayBillViewTables(station, selectedFY, selectedMonth) {
 
+      if (!pbData || !pbData.headers || !pbData.rows) return;
 
-function createPayBillViewTables(station, selectedFY, selectedMonth) {
+      const headers = pbData.headers;
+      const rows = pbData.rows;
 
-  if (!pbData || !pbData.headers || !pbData.rows) return;
+      const nameIndex = headers.indexOf("Employee Name");
+      const startIndex = headers.indexOf("Basic Pay");
+      const endIndex = headers.indexOf("Net Income");
 
-  const headers = pbData.headers;
-  const rows = pbData.rows;
-
-  const nameIndex  = headers.indexOf("Employee Name");
-  const startIndex = headers.indexOf("Basic Pay");
-  const endIndex   = headers.indexOf("Net Income");
-
-  if (nameIndex === -1 || startIndex === -1 || endIndex === -1) {
-    console.error("Column mismatch");
-    return;
-  }
-
-  // 🔥 Department Map (from empData)
-  const deptMap = getDeptMap();
-
-  // 🔥 Use your existing filter logic
-  const filteredRows = getFilteredPBData(
-    station,
-    selectedFY,
-    selectedMonth
-  );
-
-  const goRows = [];
-  const npsRows = [];
-
-  filteredRows.forEach(row => {
-
-    const empName = String(row[nameIndex] || "").trim();
-
-    const dept = String(deptMap[empName] || "")
-      .replace(/\s+/g, "")
-      .toLowerCase();
-
-    if (dept === "go") {
-      goRows.push(row);
-    } else {
-      npsRows.push(row);
-    }
-
-  });
-
-  // 🔥 Render tables
-  renderPBTable(
-    "PB_GOViewTbl",
-    headers,
-    goRows,
-    nameIndex,
-    startIndex,
-    endIndex,
-    station,
-    selectedMonth
-  );
-
-  renderPBTable(
-    "PB_NPSViewTbl",
-    headers,
-    npsRows,
-    nameIndex,
-    startIndex,
-    endIndex,
-    station,
-    selectedMonth
-  );
-}
-
-
-function getFilteredPBData(station, selectedFY, selectedMonth) {
-
-  if (!pbData || !pbData.headers || !pbData.rows) return [];
-
-  const headers = pbData.headers;
-  const rows = pbData.rows;
-
-  const stationIndex  = headers.indexOf("Station");
-  const salMonthIndex = headers.indexOf("Salary Month");
-
-  return rows.filter(row => {
-
-    // 🔹 Station filter
-    if (station && stationIndex !== -1 && row[stationIndex] !== station) {
-      return false;
-    }
-
-    // 🔹 Month filter
-    if (selectedMonth && salMonthIndex !== -1) {
-
-      const r = parseMonthYear(row[salMonthIndex]);
-      const s = parseMonthYear(selectedMonth);
-
-      if (r !== s) return false;
-    }
-
-    // 🔹 Financial Year filter
-    if (selectedFY && salMonthIndex !== -1) {
-
-      const val = parseMonthYear(row[salMonthIndex]);
-
-      const y = Math.floor(val / 100);
-      const m = val % 100;
-
-      const fy = (m >= 3)
-        ? `${y}-${String(y + 1).slice(2)}`
-        : `${y - 1}-${String(y).slice(2)}`;
-
-      if (String(selectedFY).trim() !== fy) return false;
-    }
-
-    return true;
-  });
-}
-
-
-function copyPreviousMonthData(nextMonth, station) {
-
-  if (!pbData || !empData) return;
-
-  const headers = pbData.headers;
-  const rows = pbData.rows;
-
-  const empHeaders = empData.headers;
-  const empRows = empData.rows;
-
-  const nameIdx = headers.indexOf("Employee Name");
-  const stationIdx = headers.indexOf("Pay Drawn Station");
-  const monthIdx = headers.indexOf("Salary Month");
-
-  const nameEmpIdx = empHeaders.indexOf("Employee Name");
-  const dorEmpIdx = empHeaders.indexOf("DOR");
-
-  const nextVal = parseMonthYear(nextMonth);
-  const prevVal = nextVal - 1;
-
-  // 🔥 Check duplicate
-  const exists = (name) => {
-    return rows.some(r =>
-      String(r[stationIdx]).trim() === String(station).trim() &&
-      parseMonthYear(r[monthIdx]) === nextVal &&
-      String(r[nameIdx]).trim() === String(name).trim()
-    );
-  };
-
-  // 🔥 Get DOR
-  const getDOR = (name) => {
-    let row = empRows.find(r =>
-      String(r[nameEmpIdx]).trim() === String(name).trim()
-    );
-    return row ? row[dorEmpIdx] : null;
-  };
-
-  // 🔥 Parse DOR → YYYYMM
-  function parseDOR(dorStr) {
-
-    if (!dorStr) return 0;
-
-    const months = {
-      Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6,
-      Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12
-    };
-
-    const parts = String(dorStr).split(",");
-    if (parts.length !== 2) return 0;
-
-    const year = parseInt(parts[1].trim());
-    const monPart = parts[0].split("-")[0];
-    const month = months[monPart];
-
-    if (!month || !year) return 0;
-
-    return year * 100 + month;
-  }
-
-  let count = 0;
-
-  rows.forEach(row => {
-
-    const rowStation = String(row[stationIdx]).trim();
-    const selStation = String(station).trim();
-    const rowMonth = parseMonthYear(row[monthIdx]);
-
-    // 🔹 Only previous month rows
-    if (rowStation === selStation && rowMonth === prevVal) {
-
-      const empName = String(row[nameIdx]).trim();
-
-      // ❌ Skip duplicate
-      if (exists(empName)) return;
-
-      // 🔥 Check DOR
-      const dor = getDOR(empName);
-      const dorVal = parseDOR(dor);
-
-      if (dorVal && dorVal < nextVal) {
-        console.log("❌ Skipped (Retired):", empName);
+      if (nameIndex === -1 || startIndex === -1 || endIndex === -1) {
+        console.error("Column mismatch");
         return;
       }
 
-      // ✅ Copy row
-      const newRow = [...row];
-      newRow[monthIdx] = nextMonth;
+      // 🔥 Department Map (from empData)
+      const deptMap = getDeptMap();
 
-      rows.push(newRow);
-      count++;
-    }
-  });
+      // 🔥 Use your existing filter logic
+      const filteredRows = getFilteredPBData(
+        station,
+        selectedFY,
+        selectedMonth
+      );
 
-  console.log("✅ Copied rows:", count);
-}
+      const goRows = [];
+      const npsRows = [];
 
+      filteredRows.forEach(row => {
 
-function renderPBTable(tableId, headers, rows, nameIndex, start, end, station, selectedMonth) {
+        const empName = String(row[nameIndex] || "").trim();
 
-  const table = id(tableId);
-  if (!table) return;
+        const dept = String(deptMap[empName] || "")
+          .replace(/\s+/g, "")
+          .toLowerCase();
 
-  table.innerHTML = "";
+        if (dept === "go") {
+          goRows.push(row);
+        } else {
+          npsRows.push(row);
+        }
 
-  if (!rows.length) {
-    table.innerHTML = "<tr><td>No Data</td></tr>";
-    return;
-  }
+      });
 
-  /* ================= HEADERS ================= */
-  const selectedHeaders = [
-    "Employee Name",
-    ...headers.slice(start, end + 1)
-  ];
+      // 🔥 Render tables
+      renderPBTable(
+        "PB_GOViewTbl",
+        headers,
+        goRows,
+        nameIndex,
+        startIndex,
+        endIndex,
+        station,
+        selectedMonth
+      );
 
-  const colCount = selectedHeaders.length;
-  const sums = Array(colCount).fill(0);
-
-  /* ================= PROCESS DATA ================= */
-  const processedRows = rows.map(row => {
-
-    const rowData = [];
-
-    rowData.push(row[nameIndex]);
-
-    const values = row.slice(start, end + 1).map((val, i) => {
-      const n = num(val);
-      sums[i + 1] += n;
-      return n;
-    });
-
-    return [...rowData, ...values];
-  });
-
-  /* ================= COLUMN FILTER ================= */
-  const activeCols = selectedHeaders.map((h, i) => {
-
-    if (i === 0) return true;
-
-    const col = String(h).toLowerCase().replace(/\s+/g, "");
-
-    if (
-      col === "tarate" ||
-      col === "daa" ||
-      col.includes("onta") ||
-      col.includes("onnpse") ||
-      col.includes("onnpsc") ||
-      col === "it" ||
-      col.includes("cess") ||
-      col === "nps" ||
-      col === "totaldaaonnps"
-    ) {
-      return false;
+      renderPBTable(
+        "PB_NPSViewTbl",
+        headers,
+        npsRows,
+        nameIndex,
+        startIndex,
+        endIndex,
+        station,
+        selectedMonth
+      );
     }
 
-    return sums[i] !== 0 || processedRows.some(r => r[i] !== 0);
-  });
 
-  /* ================= TITLE ================= */
+    function getFilteredPBData(station, selectedFY, selectedMonth) {
 
-  // 🔥 FIX: handle Apr-2025 format properly
-  let monthLabel = selectedMonth;
+      if (!pbData || !pbData.headers || !pbData.rows) return [];
 
-  try {
-    const parsed = DateUtil.parseMonth(selectedMonth);
-    monthLabel = parsed.toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric"
-    }).toUpperCase();
-  } catch (e) {}
+      const headers = pbData.headers;
+      const rows = pbData.rows;
 
-  const deptLabel = tableId.includes("GO") ? "GO" : "PRASAR BHARATI";
+      const stationIndex = headers.indexOf("Station");
+      const salMonthIndex = headers.indexOf("Salary Month");
 
-  const titleText = `MANUAL BILL OF SALARY PAYMENT, DEDUCTIONS / RECOVERIES & NET PAYMENT FOR THE MONTH OF ${monthLabel} IN r/o ALL ${deptLabel} STAFF`;
+      return rows.filter(row => {
 
-  const wrapper = table.parentNode;
-  const container = wrapper.parentNode;
+        // 🔹 Station filter
+        if (station && stationIndex !== -1 && row[stationIndex] !== station) {
+          return false;
+        }
 
-  let titleDiv = wrapper.previousElementSibling;
+        // 🔹 Month filter
+        if (selectedMonth && salMonthIndex !== -1) {
 
-  if (!titleDiv || !titleDiv.classList.contains("pb-title-div")) {
-    titleDiv = createEl("div");
-    titleDiv.classList.add("pb-title-div");
-    container.insertBefore(titleDiv, wrapper);
-  }
+          const r = parseMonthYear(row[salMonthIndex]);
+          const s = parseMonthYear(selectedMonth);
 
-  titleDiv.textContent = titleText;
+          if (r !== s) return false;
+        }
 
-  /* ================= HEADER ================= */
-  const thead = createEl("thead");
-  const trHead = createEl("tr");
+        // 🔹 Financial Year filter
+        if (selectedFY && salMonthIndex !== -1) {
 
-  selectedHeaders.forEach((h, i) => {
+          const val = parseMonthYear(row[salMonthIndex]);
 
-    const th = createEl("th", { text: h });
+          const y = Math.floor(val / 100);
+          const m = val % 100;
 
-    if (!activeCols[i]) {
-      th.classList.add("hidden-col");
+          const fy = (m >= 3)
+            ? `${y}-${String(y + 1).slice(2)}`
+            : `${y - 1}-${String(y).slice(2)}`;
+
+          if (String(selectedFY).trim() !== fy) return false;
+        }
+
+        return true;
+      });
     }
 
-    trHead.appendChild(th);
-  });
 
-  thead.appendChild(trHead);
-  table.appendChild(thead);
+    function copyPreviousMonthData(nextMonth, station) {
 
-  /* ================= BODY ================= */
-  const tbody = createEl("tbody");
+      if (!pbData || !empData) return;
 
-  processedRows.forEach(row => {
+      const headers = pbData.headers;
+      const rows = pbData.rows;
 
-    const tr = createEl("tr");
-    tr.dataset.tableId = tableId;
+      const empHeaders = empData.headers;
+      const empRows = empData.rows;
 
-    row.forEach((val, i) => {
+      const nameIdx = headers.indexOf("Employee Name");
+      const stationIdx = headers.indexOf("Pay Drawn Station");
+      const monthIdx = headers.indexOf("Salary Month");
 
-      const td = createEl("td");
+      const nameEmpIdx = empHeaders.indexOf("Employee Name");
+      const dorEmpIdx = empHeaders.indexOf("DOR");
 
-      if (i === 0) {
-        td.textContent = val;
-      } else {
-        td.textContent = formatCurrency(val);
-        td.classList.add("currency");
+      const nextVal = parseMonthYear(nextMonth);
+      const prevVal = nextVal - 1;
+
+      // 🔥 Check duplicate
+      const exists = (name) => {
+        return rows.some(r =>
+          String(r[stationIdx]).trim() === String(station).trim() &&
+          parseMonthYear(r[monthIdx]) === nextVal &&
+          String(r[nameIdx]).trim() === String(name).trim()
+        );
+      };
+
+      // 🔥 Get DOR
+      const getDOR = (name) => {
+        let row = empRows.find(r =>
+          String(r[nameEmpIdx]).trim() === String(name).trim()
+        );
+        return row ? row[dorEmpIdx] : null;
+      };
+
+      // 🔥 Parse DOR → YYYYMM
+      function parseDOR(dorStr) {
+
+        if (!dorStr) return 0;
+
+        const months = {
+          Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+          Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+        };
+
+        const parts = String(dorStr).split(",");
+        if (parts.length !== 2) return 0;
+
+        const year = parseInt(parts[1].trim());
+        const monPart = parts[0].split("-")[0];
+        const month = months[monPart];
+
+        if (!month || !year) return 0;
+
+        return year * 100 + month;
       }
 
-      if (!activeCols[i]) {
-        td.classList.add("hidden-col");
-      }
+      let count = 0;
 
-      tr.appendChild(td);
-    });
+      rows.forEach(row => {
 
-    tbody.appendChild(tr);
-  });
+        const rowStation = String(row[stationIdx]).trim();
+        const selStation = String(station).trim();
+        const rowMonth = parseMonthYear(row[monthIdx]);
 
-  /* ================= TOTAL ================= */
-  const trTotal = createEl("tr");
-  trTotal.classList.add("total-row");
+        // 🔹 Only previous month rows
+        if (rowStation === selStation && rowMonth === prevVal) {
 
-  selectedHeaders.forEach((_, i) => {
+          const empName = String(row[nameIdx]).trim();
 
-    const td = createEl("td");
+          // ❌ Skip duplicate
+          if (exists(empName)) return;
 
-    if (i === 0) {
-      td.textContent = "Total";
-    } else {
-      td.textContent = formatCurrency(sums[i]);
+          // 🔥 Check DOR
+          const dor = getDOR(empName);
+          const dorVal = parseDOR(dor);
+
+          if (dorVal && dorVal < nextVal) {
+            console.log("❌ Skipped (Retired):", empName);
+            return;
+          }
+
+          // ✅ Copy row
+          const newRow = [...row];
+          newRow[monthIdx] = nextMonth;
+
+          rows.push(newRow);
+          count++;
+        }
+      });
+
+      console.log("✅ Copied rows:", count);
     }
 
-    if (!activeCols[i]) {
-      td.classList.add("hidden-col");
-    }
 
-    td.style.fontWeight = "bold";
-    trTotal.appendChild(td);
-  });
+    function renderPBTable(tableId, headers, rows, nameIndex, start, end, station, selectedMonth) {
 
-  tbody.appendChild(trTotal);
-  table.appendChild(tbody);
-}
+      const table = id(tableId);
+      if (!table) return;
 
+      table.innerHTML = "";
 
-function bindPayBillView(stationId, fyId, monthId) {
-
-  const stationEl = id(stationId);
-  const fyEl = id(fyId);
-  const monthEl = id(monthId);
-
-  if (!stationEl || !fyEl || !monthEl) return;
-
-  function updateTable() {
-
-    if (!stationEl.value || !fyEl.value || !monthEl.value) return;
-
-    createPayBillViewTables(
-      stationEl.value,
-      fyEl.value,
-      monthEl.value
-    );
-
-    setDAPercent();
-  }
-
-  on(stationEl, "change", updateTable);
-  on(fyEl, "change", updateTable);
-  on(monthEl, "change", updateTable);
-}
-
-
-function getDAPercentage(selectedMonth) {
-
-  if (!pbData || !pbData.headers || !pbData.rows) return 0;
-
-  const headers = pbData.headers;
-  const rows = pbData.rows;
-
-  const daIndex = headers.indexOf("DA%");
-  const monthIndex = headers.indexOf("Salary Month");
-
-  if (daIndex === -1 || monthIndex === -1) return 0;
-
-  const clean = v =>
-    String(v || "").trim().replace(/\s+/g, "").toLowerCase();
-
-  const selected = clean(selectedMonth);
-
-  for (let i = 0; i < rows.length; i++) {
-
-    const row = rows[i];
-    const rowMonth = clean(row[monthIndex]);
-
-    if (rowMonth === selected) {
-      return num(row[daIndex]);
-    }
-  }
-
-  console.warn("❌ No DA% match for:", selectedMonth);
-  return 0;
-}
-
-
-function setDAPercent() {
-
-  const month = id("PayBillPage_SalMonth").value;
-
-  if (!month) return;
-
-  const da = getDAPercentage(month);
-
-  id("PayBillPage_DA%").value = da ? da : "";
-}
-
-
-function setupToggleButton(btnId, config) {
-
-  const btn = id(btnId);
-  if (!btn) return;
-
-  let isEditMode = false;
-  let isProcessing = false; // 🔥 prevent double click
-
-  on(btn, "click", async () => {
-
-    if (isProcessing) return;
-    isProcessing = true;
-
-    const printBtn = id("PBprintBtn");
-    const excelBtn = id("PBexcelBtn");
-    const wrapper = document.querySelector(".PB-Table-Wrapper");
-
-    try {
-
-      // =========================
-      // 🔹 ENTER EDIT MODE
-      // =========================
-      if (!isEditMode) {
-
-        isEditMode = true;
-
-        btn.classList.add(config.className);
-
-        deactivateOthers(btn);
-        toggleFilters(true);
-
-        if (printBtn) printBtn.disabled = true;
-        if (excelBtn) excelBtn.disabled = true;
-
-        wrapper?.classList.add("edit-mode");
-
-        // 🔹 Text
-        const textEl = btn.querySelector("span");
-        if (textEl) textEl.textContent = config.activeText;
-
-        // 🔹 Icon
-        updateIcon(btn, config.activeIcon);
-
-        refreshPBView();
-
+      if (!rows.length) {
+        table.innerHTML = "<tr><td>No Data</td></tr>";
         return;
       }
 
-      // =========================
-      // 🔹 SAVE / EXIT
-      // =========================
-      if (isEditMode) {
+      /* ================= HEADERS ================= */
+      const selectedHeaders = [
+        "Employee Name",
+        ...headers.slice(start, end + 1)
+      ];
 
-        await savePBData(); // 🔥 async safe
+      const colCount = selectedHeaders.length;
+      const sums = Array(colCount).fill(0);
 
-        isEditMode = false;
+      /* ================= PROCESS DATA ================= */
+      const processedRows = rows.map(row => {
 
-        btn.classList.remove(config.className);
+        const rowData = [];
 
-        enableAllButtons();
-        toggleFilters(false);
+        rowData.push(row[nameIndex]);
 
-        wrapper?.classList.remove("edit-mode");
+        const values = row.slice(start, end + 1).map((val, i) => {
+          const n = num(val);
+          sums[i + 1] += n;
+          return n;
+        });
 
-        if (printBtn) printBtn.disabled = false;
-        if (excelBtn) excelBtn.disabled = false;
+        return [...rowData, ...values];
+      });
 
-        // 🔹 Reset text
-        const textEl = btn.querySelector("span");
-        if (textEl) textEl.textContent = config.defaultText;
+      /* ================= COLUMN FILTER ================= */
+      const activeCols = selectedHeaders.map((h, i) => {
 
-        // 🔹 Reset icon
-        updateIcon(btn, config.defaultIcon);
+        if (i === 0) return true;
 
-        refreshPBView();
+        const col = String(h).toLowerCase().replace(/\s+/g, "");
+
+        if (
+          col === "tarate" ||
+          col === "daa" ||
+          col.includes("onta") ||
+          col.includes("onnpse") ||
+          col.includes("onnpsc") ||
+          col === "it" ||
+          col.includes("cess") ||
+          col === "nps" ||
+          col === "totaldaaonnps"
+        ) {
+          return false;
+        }
+
+        return sums[i] !== 0 || processedRows.some(r => r[i] !== 0);
+      });
+
+      /* ================= TITLE ================= */
+
+      // 🔥 FIX: handle Apr-2025 format properly
+      let monthLabel = selectedMonth;
+
+      try {
+        const parsed = DateUtil.parseMonth(selectedMonth);
+        monthLabel = parsed.toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric"
+        }).toUpperCase();
+      } catch (e) { }
+
+      const deptLabel = tableId.includes("GO") ? "GO" : "PRASAR BHARATI";
+
+      const titleText = `MANUAL BILL OF SALARY PAYMENT, DEDUCTIONS / RECOVERIES & NET PAYMENT FOR THE MONTH OF ${monthLabel} IN r/o ALL ${deptLabel} STAFF`;
+
+      const wrapper = table.parentNode;
+      const container = wrapper.parentNode;
+
+      let titleDiv = wrapper.previousElementSibling;
+
+      if (!titleDiv || !titleDiv.classList.contains("pb-title-div")) {
+        titleDiv = createEl("div");
+        titleDiv.classList.add("pb-title-div");
+        container.insertBefore(titleDiv, wrapper);
       }
 
-    } catch (err) {
-      console.error("❌ Error in toggle:", err);
-    } finally {
-      isProcessing = false;
+      titleDiv.textContent = titleText;
+
+      /* ================= HEADER ================= */
+      const thead = createEl("thead");
+      const trHead = createEl("tr");
+
+      selectedHeaders.forEach((h, i) => {
+
+        const th = createEl("th", { text: h });
+
+        if (!activeCols[i]) {
+          th.classList.add("hidden-col");
+        }
+
+        trHead.appendChild(th);
+      });
+
+      thead.appendChild(trHead);
+      table.appendChild(thead);
+
+      /* ================= BODY ================= */
+      const tbody = createEl("tbody");
+
+      processedRows.forEach(row => {
+
+        const tr = createEl("tr");
+        tr.dataset.tableId = tableId;
+
+        row.forEach((val, i) => {
+
+          const td = createEl("td");
+
+          if (i === 0) {
+            td.textContent = val;
+          } else {
+            td.textContent = formatCurrency(val);
+            td.classList.add("currency");
+          }
+
+          if (!activeCols[i]) {
+            td.classList.add("hidden-col");
+          }
+
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      /* ================= TOTAL ================= */
+      const trTotal = createEl("tr");
+      trTotal.classList.add("total-row");
+
+      selectedHeaders.forEach((_, i) => {
+
+        const td = createEl("td");
+
+        if (i === 0) {
+          td.textContent = "Total";
+        } else {
+          td.textContent = formatCurrency(sums[i]);
+        }
+
+        if (!activeCols[i]) {
+          td.classList.add("hidden-col");
+        }
+
+        td.style.fontWeight = "bold";
+        trTotal.appendChild(td);
+      });
+
+      tbody.appendChild(trTotal);
+      table.appendChild(tbody);
     }
 
-  });
-}
 
+    function bindPayBillView(stationId, fyId, monthId) {
 
-function updateIcon(btn, iconName) {
+      const stationEl = id(stationId);
+      const fyEl = id(fyId);
+      const monthEl = id(monthId);
 
-  const iconEl = btn.querySelector("svg") || btn.querySelector("i");
+      if (!stationEl || !fyEl || !monthEl) return;
 
-  if (!iconEl) return;
+      function updateTable() {
 
-  iconEl.setAttribute("data-lucide", iconName);
+        if (!stationEl.value || !fyEl.value || !monthEl.value) return;
 
-  renderIcons(); // 🔥 always refresh
-}
+        createPayBillViewTables(
+          stationEl.value,
+          fyEl.value,
+          monthEl.value
+        );
 
+        setDAPercent();
+      }
 
-function deactivateOthers(currentBtn) {
-
-  document.querySelectorAll(".action-group button").forEach(btn => {
-
-    if (btn === currentBtn) return;
-
-    btn.disabled = true;
-
-    // 🔒 Skip print/excel reset
-    if (btn.id === "PBprintBtn" || btn.id === "PBexcelBtn") return;
-
-    btn.classList.remove("upload-mode", "add-mode");
-
-    const span = btn.querySelector("span");
-    if (span) {
-      span.textContent = btn.id === "PBeditBtn" ? "Edit" : "Add";
+      on(stationEl, "change", updateTable);
+      on(fyEl, "change", updateTable);
+      on(monthEl, "change", updateTable);
     }
 
-    updateIcon(btn, btn.id === "PBeditBtn" ? "edit" : "plus");
-  });
-}
+
+    function getDAPercentage(selectedMonth) {
+
+      if (!pbData || !pbData.headers || !pbData.rows) return 0;
+
+      const headers = pbData.headers;
+      const rows = pbData.rows;
+
+      const daIndex = headers.indexOf("DA%");
+      const monthIndex = headers.indexOf("Salary Month");
+
+      if (daIndex === -1 || monthIndex === -1) return 0;
+
+      const clean = v =>
+        String(v || "").trim().replace(/\s+/g, "").toLowerCase();
+
+      const selected = clean(selectedMonth);
+
+      for (let i = 0; i < rows.length; i++) {
+
+        const row = rows[i];
+        const rowMonth = clean(row[monthIndex]);
+
+        if (rowMonth === selected) {
+          return num(row[daIndex]);
+        }
+      }
+
+      console.warn("❌ No DA% match for:", selectedMonth);
+      return 0;
+    }
 
 
-function toggleFilters(disable) {
+    function setDAPercent() {
 
-  const station = id("PayBillPage_Station");
-  const fy = id("PayBillPage_FY");
-  const month = id("PayBillPage_SalMonth");
-  const daPercent = id("PayBillPage_DA%");
+      const month = id("PayBillPage_SalMonth").value;
 
-  if (station) station.disabled = disable;
-  if (fy) fy.disabled = disable;
-  if (month) month.disabled = disable;
+      if (!month) return;
 
-  // 🔥 opposite logic
-  if (daPercent) daPercent.disabled = !disable;
-}
+      const da = getDAPercentage(month);
+
+      id("PayBillPage_DA%").value = da ? da : "";
+    }
 
 
-function enableAllButtons() {
-  document.querySelectorAll(".action-group button").forEach(btn => {
-    btn.disabled = false;
-  });
-}
+    function setupToggleButton(btnId, config) {
 
-function disableAllButtons() {
-  document.querySelectorAll(".action-group button").forEach(btn => {
-    btn.disabled = true;
-  });
-}
+      const btn = id(btnId);
+      if (!btn) return;
+
+      let isEditMode = false;
+      let isProcessing = false; // 🔥 prevent double click
+
+      on(btn, "click", async () => {
+
+        if (isProcessing) return;
+        isProcessing = true;
+
+        const printBtn = id("PBprintBtn");
+        const excelBtn = id("PBexcelBtn");
+        const wrapper = document.querySelector(".PB-Table-Wrapper");
+
+        try {
+
+          // =========================
+          // 🔹 ENTER EDIT MODE
+          // =========================
+          if (!isEditMode) {
+
+            isEditMode = true;
+
+            btn.classList.add(config.className);
+
+            deactivateOthers(btn);
+            toggleFilters(true);
+
+            if (printBtn) printBtn.disabled = true;
+            if (excelBtn) excelBtn.disabled = true;
+
+            wrapper?.classList.add("edit-mode");
+
+            // 🔹 Text
+            const textEl = btn.querySelector("span");
+            if (textEl) textEl.textContent = config.activeText;
+
+            // 🔹 Icon
+            updateIcon(btn, config.activeIcon);
+
+            refreshPBView();
+
+            return;
+          }
+
+          // =========================
+          // 🔹 SAVE / EXIT
+          // =========================
+          if (isEditMode) {
+
+            await savePBData(); // 🔥 async safe
+
+            isEditMode = false;
+
+            btn.classList.remove(config.className);
+
+            enableAllButtons();
+            toggleFilters(false);
+
+            wrapper?.classList.remove("edit-mode");
+
+            if (printBtn) printBtn.disabled = false;
+            if (excelBtn) excelBtn.disabled = false;
+
+            // 🔹 Reset text
+            const textEl = btn.querySelector("span");
+            if (textEl) textEl.textContent = config.defaultText;
+
+            // 🔹 Reset icon
+            updateIcon(btn, config.defaultIcon);
+
+            refreshPBView();
+          }
+
+        } catch (err) {
+          console.error("❌ Error in toggle:", err);
+        } finally {
+          isProcessing = false;
+        }
+
+      });
+    }
+
+
+    function updateIcon(btn, iconName) {
+
+      const iconEl = btn.querySelector("svg") || btn.querySelector("i");
+
+      if (!iconEl) return;
+
+      iconEl.setAttribute("data-lucide", iconName);
+
+      renderIcons(); // 🔥 always refresh
+    }
+
+
+    function deactivateOthers(currentBtn) {
+
+      document.querySelectorAll(".action-group button").forEach(btn => {
+
+        if (btn === currentBtn) return;
+
+        btn.disabled = true;
+
+        // 🔒 Skip print/excel reset
+        if (btn.id === "PBprintBtn" || btn.id === "PBexcelBtn") return;
+
+        btn.classList.remove("upload-mode", "add-mode");
+
+        const span = btn.querySelector("span");
+        if (span) {
+          span.textContent = btn.id === "PBeditBtn" ? "Edit" : "Add";
+        }
+
+        updateIcon(btn, btn.id === "PBeditBtn" ? "edit" : "plus");
+      });
+    }
+
+
+    function toggleFilters(disable) {
+
+      const station = id("PayBillPage_Station");
+      const fy = id("PayBillPage_FY");
+      const month = id("PayBillPage_SalMonth");
+      const daPercent = id("PayBillPage_DA%");
+
+      if (station) station.disabled = disable;
+      if (fy) fy.disabled = disable;
+      if (month) month.disabled = disable;
+
+      // 🔥 opposite logic
+      if (daPercent) daPercent.disabled = !disable;
+    }
+
+
+    function enableAllButtons() {
+      document.querySelectorAll(".action-group button").forEach(btn => {
+        btn.disabled = false;
+      });
+    }
+
+    function disableAllButtons() {
+      document.querySelectorAll(".action-group button").forEach(btn => {
+        btn.disabled = true;
+      });
+    }
 
 
     /* ==================================================================
