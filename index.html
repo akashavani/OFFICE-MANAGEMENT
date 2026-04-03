@@ -3107,27 +3107,6 @@
         return row ? row[dorEmpIdx] : null;
       };
 
-      // 🔥 Parse DOR → YYYYMM
-      function parseDOR(dorStr) {
-
-        if (!dorStr) return 0;
-
-        const months = {
-          Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
-          Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
-        };
-
-        const parts = String(dorStr).split(",");
-        if (parts.length !== 2) return 0;
-
-        const year = parseInt(parts[1].trim());
-        const monPart = parts[0].split("-")[0];
-        const month = months[monPart];
-
-        if (!month || !year) return 0;
-
-        return year * 100 + month;
-      }
 
       let count = 0;
 
@@ -4295,7 +4274,6 @@
 
       /* 🔹 PARSE DOR */
       function parseDOR(dorStr) {
-
         if (!dorStr) return 0;
 
         const months = {
@@ -4307,10 +4285,8 @@
         if (parts.length !== 2) return 0;
 
         const year = parseInt(parts[1].trim());
-        const mon = parts[0].split("-")[0];
-        const month = months[mon];
-
-        if (!month || !year) return 0;
+        const monPart = parts[0].split("-")[0];
+        const month = months[monPart];
 
         return year * 100 + month;
       }
@@ -5653,382 +5629,371 @@
     function log(...args) {
       console.log(...args);
     }
-    
+
 
     id("PBprintBtn").addEventListener("click", function () {
 
-  const goTable = id("PB_GOViewTbl");
+      var goHTML = buildPrintTable("GO");
+      var npsHTML = buildPrintTable("NPS");
 
-  if (!goTable || !goTable.querySelector("tbody tr")) {
-    alert("No data to print");
-    return;
-  }
+      if (!goHTML) {
+        alert("No data to print");
+        return;
+      }
 
-  const month = id("PayBillPage_SalMonth")?.value || "";
+      var html = buildPrintHTML(goHTML, npsHTML);
 
-  const goHTML = buildPrintTable("GO");
-  const npsHTML = buildPrintTable("NPS");
+      var win = window.open("", "_blank");
 
-  // 🔥 CRITICAL FIX — REMOVE SCRIPT TAGS
-  let fullHTML = buildPrintHTML(goHTML, npsHTML);
-  fullHTML = fullHTML.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
+      if (!win) {
+        alert("Popup blocked");
+        return;
+      }
 
-  const win = window.open("", "_blank");
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
 
-  if (!win) {
-    alert("Popup blocked. Allow popups.");
-    return;
-  }
-
-  win.document.open();
-
-  win.document.write(fullHTML);
-
-  win.document.close();
-
-  // 🔥 SAFE PRINT
-  setTimeout(() => {
-    win.focus();
-    win.print();
-  }, 500);
-
-  win.onafterprint = function () {
-    win.close();
-  };
-
-});
-
-
-
-id("PBexcelBtn").addEventListener("click", async () => {
-
-  const month = id("PayBillPage_SalMonth")?.value || "";
-  const station = id("PayBillPage_Station")?.value || "";
-  const today = new Date().toLocaleDateString("en-GB");
-
-  const goHTML = buildPrintTable("GO");
-  const npsHTML = buildPrintTable("NPS");
-
-  const workbook = new ExcelJS.Workbook();
-
-  /* ===== COLUMN LETTER FIX (A → Z → AA...) ===== */
-  function getExcelCol(n) {
-    let s = "";
-    while (n > 0) {
-      let m = (n - 1) % 26;
-      s = String.fromCharCode(65 + m) + s;
-      n = Math.floor((n - m) / 26);
-    }
-    return s;
-  }
-
-  async function createSheet(html, name) {
-
-    const sheet = workbook.addWorksheet(`PayBill-${name}`);
-
-    /* ===== LOGO ===== */
-    const response = await fetch("https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l");
-    const blob = await response.blob();
-    const buffer = await blob.arrayBuffer();
-
-    const imageId = workbook.addImage({
-      buffer,
-      extension: "png"
+      setTimeout(function () {
+        win.print();
+      }, 100);
     });
 
-    sheet.addImage(imageId, {
-      tl: { col: 1, row: 0 },
-      ext: { width: 75, height: 75}
+    id("PBexcelBtn").addEventListener("click", async () => {
+
+      const month = id("PayBillPage_SalMonth")?.value || "";
+      const station = id("PayBillPage_Station")?.value || "";
+      const today = new Date().toLocaleDateString("en-GB");
+
+      const goHTML = buildPrintTable("GO");
+      const npsHTML = buildPrintTable("NPS");
+
+      const workbook = new ExcelJS.Workbook();
+
+      /* ===== COLUMN LETTER FIX (A → Z → AA...) ===== */
+      function getExcelCol(n) {
+        let s = "";
+        while (n > 0) {
+          let m = (n - 1) % 26;
+          s = String.fromCharCode(65 + m) + s;
+          n = Math.floor((n - m) / 26);
+        }
+        return s;
+      }
+
+      async function createSheet(html, name) {
+
+        const sheet = workbook.addWorksheet(`PayBill-${name}`);
+
+        /* ===== LOGO ===== */
+        const response = await fetch("https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l");
+        const blob = await response.blob();
+        const buffer = await blob.arrayBuffer();
+
+        const imageId = workbook.addImage({
+          buffer,
+          extension: "png"
+        });
+
+        sheet.addImage(imageId, {
+          tl: { col: 1, row: 0 },
+          ext: { width: 75, height: 75 }
+        });
+
+        /* ===== EXTRACT TABLE ===== */
+        const temp = document.createElement("div");
+        temp.innerHTML = html;
+        const table = temp.querySelector("table");
+
+        const rows = Array.from(table.rows);
+
+        /* 🔥 FIX: get MAX column count (important for NPS) */
+        let colCount = 0;
+        rows.forEach(r => {
+          colCount = Math.max(colCount, r.cells.length);
+        });
+
+        const lastColLetter = getExcelCol(colCount);
+
+        /* ===== HEADER ===== */
+        const titleText = `MANUAL BILL OF SALARY PAYMENT, DEDUCTIONS / RECOVERIES & NET PAYMENT FOR THE MONTH OF ${month.toUpperCase()} IN r/o ALL ${name} STAFF`;
+
+        sheet.mergeCells(`A1:${lastColLetter}1`);
+        sheet.getCell("A1").value = "PRASAR BHARATI";
+        sheet.getCell("A1").alignment = { horizontal: "center" };
+        sheet.getCell("A1").font = { bold: true, size: 13 };
+
+        sheet.mergeCells(`A2:${lastColLetter}2`);
+        sheet.getCell("A2").value = "INDIA'S PUBLIC SERVICE BROADCASTER";
+        sheet.getCell("A2").alignment = { horizontal: "center" };
+
+        sheet.mergeCells(`A4:${lastColLetter}4`);
+        const cellA4 = sheet.getCell("A4");
+        cellA4.value = "AKASHAVANI KARWAR";
+        cellA4.alignment = { horizontal: "center" };
+        cellA4.font = { bold: true, size: 12 };
+        cellA4.border = { bottom: { style: "medium" } };
+
+        sheet.mergeCells(`A6:${lastColLetter}6`);
+        sheet.getCell("A6").value = titleText;
+        sheet.getCell("A6").alignment = { horizontal: "center", wrapText: true };
+        sheet.getCell("A6").font = { bold: true, size: 12 };
+
+        /* ===== TABLE ===== */
+        let startRow = 8;
+
+        rows.forEach((tr, i) => {
+
+          const excelRow = sheet.getRow(startRow + i);
+
+          /* 🔥 FIX: force equal columns */
+          for (let j = 0; j < colCount; j++) {
+
+            const td = tr.cells[j];
+            const cell = excelRow.getCell(j + 1);
+
+            let val = td ? td.innerText.trim() : "";
+
+            // 🔥 GET STYLE FROM HTML
+            const styleAttr = td?.getAttribute("style") || "";
+
+            // Check highlight
+            const isYellow = styleAttr.includes("background");
+            const isBold = styleAttr.includes("font-weight");
+
+            const num = parseFloat(val.replace(/,/g, ""));
+            cell.value = isNaN(num) ? val : num;
+
+            /* ===== STYLE ===== */
+            if (val !== "") {
+              cell.border = {
+                top: { style: "thin" },
+                bottom: { style: "thin" },
+                left: { style: "thin" },
+                right: { style: "thin" }
+              };
+            }
+
+            cell.font = { size: 11 };
+
+            if (i === 0) {
+              cell.font = { bold: true, size: 10 };
+              cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+            }
+
+            if (i === rows.length - 1) {
+              cell.font = { bold: true };
+            }
+
+            if (!isNaN(num)) {
+              cell.alignment = { horizontal: "right", vertical: "middle" };
+            }
+
+            // 🔥 APPLY HTML STYLE TO EXCEL
+
+            if (isYellow) {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFFFF59D" }
+              };
+            }
+
+            if (isBold) {
+              cell.font = { ...cell.font, bold: true };
+            }
+          }
+        });
+
+        /* ===== AUTO WIDTH ===== */
+        sheet.columns.forEach((col, colIndex) => {
+
+          let max = 3;
+
+          col.eachCell({ includeEmpty: false }, (cell, rowNumber) => {
+
+            if (rowNumber < startRow + 1) return;
+
+            if (cell.value) {
+              max = Math.max(max, cell.value.toString().length);
+            }
+          });
+
+          // 🔥 LIMIT WIDTH
+          if (colIndex === 1) {
+            col.width = Math.min(max + 2, 33); // Employee column max 30
+          } else {
+            col.width = max + 2; // Other columns max 15
+          }
+        });
+
+        /* ===== FOOTER ===== */
+        let footerStartRow = startRow + rows.length + 5;
+
+        sheet.mergeCells(`A${footerStartRow}:${lastColLetter}${footerStartRow}`);
+        sheet.getCell(`A${footerStartRow}`).value = "Programme Executive";
+        sheet.getCell(`A${footerStartRow}`).alignment = { horizontal: "right" };
+        sheet.getCell(`A${footerStartRow}`).font = { bold: true };
+
+        sheet.mergeCells(`A${footerStartRow + 1}:${lastColLetter}${footerStartRow + 1}`);
+        sheet.getCell(`A${footerStartRow + 1}`).value = "Akashavani Karwar";
+        sheet.getCell(`A${footerStartRow + 1}`).alignment = { horizontal: "right" };
+        sheet.getCell(`A${footerStartRow + 1}`).font = { bold: true };
+
+        sheet.mergeCells(`A${footerStartRow + 2}:${lastColLetter}${footerStartRow + 2}`);
+        sheet.getCell(`A${footerStartRow + 2}`).value = `Date: ${today}`;
+        sheet.getCell(`A${footerStartRow + 2}`).alignment = { horizontal: "right" };
+        sheet.getCell(`A${footerStartRow + 2}`).font = { bold: true };
+
+        const lastUsedRow = footerStartRow + 2;
+
+        /* ===== PAGE SETUP ===== */
+        sheet.pageSetup = {
+          paperSize: 9,
+          orientation: "landscape",
+          fitToPage: true,
+          fitToWidth: 1,
+          fitToHeight: false,
+          horizontalCentered: true,  // Center on page
+          verticalCentered: false,
+          margins: {
+            left: 0.3,
+            right: 0.3,
+            top: 0.5,
+            bottom: 0.5,
+            header: 0.2,
+            footer: 0.2
+          }
+        };
+
+        /* 🔥 FIX: NO INVALID FREEZE */
+        sheet.views = [{ showGridLines: false }];
+
+        sheet.pageSetup.printArea = `A1:${lastColLetter}${lastUsedRow}`;
+      }
+
+      await createSheet(goHTML, "GO");
+      await createSheet(npsHTML, "NPS");
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `${station}_PayBill_${month}.xlsx`);
     });
 
-    /* ===== EXTRACT TABLE ===== */
-    const temp = document.createElement("div");
-    temp.innerHTML = html;
-    const table = temp.querySelector("table");
 
-    const rows = Array.from(table.rows);
+    /* ================= PRINT TABLE ================= */
+    function buildPrintTable(type) {
 
-    /* 🔥 FIX: get MAX column count (important for NPS) */
-    let colCount = 0;
-    rows.forEach(r => {
-      colCount = Math.max(colCount, r.cells.length);
-    });
+      const table = id(type === "GO" ? "PB_GOViewTbl" : "PB_NPSViewTbl");
+      if (!table) return "";
 
-    const lastColLetter = getExcelCol(colCount);
+      const headers = Array.from(table.querySelectorAll("thead th"));
+      const rows = Array.from(table.querySelectorAll("tbody tr:not(.total-row)"));
+      const totalRow = table.querySelector("tbody tr.total-row");
 
-    /* ===== HEADER ===== */
-    const titleText = `MANUAL BILL OF SALARY PAYMENT, DEDUCTIONS / RECOVERIES & NET PAYMENT FOR THE MONTH OF ${month.toUpperCase()} IN r/o ALL ${name} STAFF`;
+      const wrapper = table.parentNode;
+      const titleDiv = wrapper.previousElementSibling;
+      const titleText = titleDiv?.textContent || "";
 
-    sheet.mergeCells(`A1:${lastColLetter}1`);
-    sheet.getCell("A1").value = "PRASAR BHARATI";
-    sheet.getCell("A1").alignment = { horizontal: "center" };
-    sheet.getCell("A1").font = { bold: true, size: 13 };
+      if (!rows.length) return "";
 
-    sheet.mergeCells(`A2:${lastColLetter}2`);
-    sheet.getCell("A2").value = "INDIA'S PUBLIC SERVICE BROADCASTER";
-    sheet.getCell("A2").alignment = { horizontal: "center" };
+      /* ================= NORMALIZE ================= */
+      function normalize(h) {
+        return String(h).toLowerCase().replace(/[^a-z0-9]/g, "");
+      }
 
-    sheet.mergeCells(`A4:${lastColLetter}4`);
-    const cellA4 = sheet.getCell("A4");
-    cellA4.value = "AKASHAVANI KARWAR";
-    cellA4.alignment = { horizontal: "center" };
-    cellA4.font = { bold: true, size: 12 };
-    cellA4.border = { bottom: { style: "medium" } };
+      /* ================= PREVIOUS MONTH ================= */
+      function getPrevMonthFormatted(monthStr) {
+        const d = new Date(monthStr);
+        d.setMonth(d.getMonth() - 1);
 
-    sheet.mergeCells(`A6:${lastColLetter}6`);
-    sheet.getCell("A6").value = titleText;
-    sheet.getCell("A6").alignment = { horizontal: "center", wrapText: true };
-    sheet.getCell("A6").font = { bold: true, size: 12 };
+        return d.toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric"
+        }).replace(" ", "-"); // Apr-2025
+      }
 
-    /* ===== TABLE ===== */
-    let startRow = 8;
+      const currentMonth = id("PayBillPage_SalMonth")?.value;
+      const prevMonth = getPrevMonthFormatted(currentMonth);
 
-    rows.forEach((tr, i) => {
+      console.log("Current Month:", currentMonth);
+      console.log("Previous Month:", prevMonth);
 
-      const excelRow = sheet.getRow(startRow + i);
+      /* ================= PREVIOUS DATA ================= */
+      const prevHeaders = pbData.headers || [];
+      const prevRows = pbData.rows || [];
 
-      /* 🔥 FIX: force equal columns */
-      for (let j = 0; j < colCount; j++) {
+      const nameIndex = getColIndex(prevHeaders, "Employee Name");
+      const monthIndex = getColIndex(prevHeaders, "Salary Month");
 
-        const td = tr.cells[j];
-        const cell = excelRow.getCell(j + 1);
+      const prevMap = {};
 
-        let val = td ? td.innerText.trim() : "";
+      for (let i = 0; i < prevRows.length; i++) {
 
-        // 🔥 GET STYLE FROM HTML
-        const styleAttr = td?.getAttribute("style") || "";
+        const rowMonth = String(prevRows[i][monthIndex] || "").trim();
 
-        // Check highlight
-        const isYellow = styleAttr.includes("background");
-        const isBold = styleAttr.includes("font-weight");
+        const name = String(prevRows[i][nameIndex] || "")
+          .replace(/\s+/g, "")
+          .toLowerCase();
 
-        const num = parseFloat(val.replace(/,/g, ""));
-        cell.value = isNaN(num) ? val : num;
-
-        /* ===== STYLE ===== */
-        if (val !== "") {
-          cell.border = {
-            top: { style: "thin" },
-            bottom: { style: "thin" },
-            left: { style: "thin" },
-            right: { style: "thin" }
-          };
-        }
-
-        cell.font = { size: 11 };
-
-        if (i === 0) {
-          cell.font = { bold: true, size: 10 };
-          cell.alignment = {horizontal: "center",vertical: "middle", wrapText: true};
-        }
-
-        if (i === rows.length - 1) {
-          cell.font = { bold: true };
-        }
-
-        if (!isNaN(num)) {
-          cell.alignment = {horizontal: "right", vertical: "middle"};
-        }
-
-        // 🔥 APPLY HTML STYLE TO EXCEL
-
-        if (isYellow) {
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FFFFF59D" }
-          };
-        }
-
-        if (isBold) {
-          cell.font = { ...cell.font, bold: true };
+        if (rowMonth === prevMonth && name) {
+          prevMap[name] = prevRows[i];
         }
       }
-    });
 
-    /* ===== AUTO WIDTH ===== */
-    sheet.columns.forEach((col, colIndex) => {
+      console.log("PrevMap:", prevMap);
 
-      let max = 3;
-
-      col.eachCell({ includeEmpty: false }, (cell, rowNumber) => {
-
-        if (rowNumber < startRow + 1) return;
-
-        if (cell.value) {
-          max = Math.max(max, cell.value.toString().length);
-        }
+      /* ================= HEADER MAP ================= */
+      const prevHeaderMap = {};
+      prevHeaders.forEach((h, i) => {
+        prevHeaderMap[normalize(h)] = i;
       });
 
-      // 🔥 LIMIT WIDTH
-      if (colIndex === 1) {
-        col.width = Math.min(max + 2, 33); // Employee column max 30
-      } else {
-        col.width = max + 2; // Other columns max 15
-      }
-    });
+      /* ================= SUM ================= */
+      const sums = Array(headers.length).fill(0);
 
-    /* ===== FOOTER ===== */
-    let footerStartRow = startRow + rows.length + 5;
+      rows.forEach(tr => {
+        headers.forEach((_, i) => {
+          const val = tr.children[i]?.textContent?.replace(/,/g, "") || "0";
+          if (!isNaN(val)) sums[i] += parseFloat(val) || 0;
+        });
+      });
 
-    sheet.mergeCells(`A${footerStartRow}:${lastColLetter}${footerStartRow}`);
-    sheet.getCell(`A${footerStartRow}`).value = "Programme Executive";
-    sheet.getCell(`A${footerStartRow}`).alignment = { horizontal: "right" };
-    sheet.getCell(`A${footerStartRow}`).font = { bold: true };
+      /* ================= COLUMN FILTER ================= */
+      const activeCols = headers.map((th, i) => {
 
-    sheet.mergeCells(`A${footerStartRow + 1}:${lastColLetter}${footerStartRow + 1}`);
-    sheet.getCell(`A${footerStartRow + 1}`).value = "Akashavani Karwar";
-    sheet.getCell(`A${footerStartRow + 1}`).alignment = { horizontal: "right" };
-    sheet.getCell(`A${footerStartRow + 1}`).font = { bold: true };
+        const h = th.textContent.trim();
+        const col = normalize(h);
 
-    sheet.mergeCells(`A${footerStartRow + 2}:${lastColLetter}${footerStartRow + 2}`);
-    sheet.getCell(`A${footerStartRow + 2}`).value = `Date: ${today}`;
-    sheet.getCell(`A${footerStartRow + 2}`).alignment = { horizontal: "right" };
-    sheet.getCell(`A${footerStartRow + 2}`).font = { bold: true };
+        if (h === "Employee Name") return true;
 
-    const lastUsedRow = footerStartRow + 2;
+        if (["recovery", "netit", "tarate", "daonta", "nps", "totaldaaonnps"].includes(col)) return false;
 
-    /* ===== PAGE SETUP ===== */
-    sheet.pageSetup = {
-      paperSize: 9,
-      orientation: "landscape",
-      fitToPage: true,
-      fitToWidth: 1,
-      fitToHeight: false,
-      horizontalCentered: true,  // Center on page
-      verticalCentered: false,
-      margins: {
-        left: 0.3,
-        right: 0.3,
-        top: 0.5,
-        bottom: 0.5,
-        header: 0.2,
-        footer: 0.2
-      }
-    };
+        if (type === "GO" && ["npse", "npseded", "npsc", "daaonnpseded", "daaonnpse", "daaonnpsc"].includes(col)) return false;
 
-    /* 🔥 FIX: NO INVALID FREEZE */
-    sheet.views = [{ showGridLines: false }];
+        if (type === "NPS" && ["cgeis", "gpf"].includes(col)) return false;
 
-    sheet.pageSetup.printArea = `A1:${lastColLetter}${lastUsedRow}`;
-  }
+        const zeroCols = [
+          "bonus", "cea", "elencash", "uniall",
+          "daa", "daaonta", "totaldaa",
+          "medicalreimburse", "ltareimburse", "arrears"
+        ];
 
-  await createSheet(goHTML, "GO");
-  await createSheet(npsHTML, "NPS");
+        if (type === "NPS" &&
+          ["daaonnpse", "daaonnpsc", "daaonnpseded"].includes(col)) {
+          return sums[i] !== 0;
+        }
 
-  const buffer = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buffer]), `${station}_PayBill_${month}.xlsx`);
-});
+        if (zeroCols.includes(col) && sums[i] === 0) {
+          return false;
+        }
 
+        return true;
+      });
 
-function buildPrintTable(type) {
+      const colCount = activeCols.filter(Boolean).length + 1;
 
-  const table = id(type === "GO" ? "PB_GOViewTbl" : "PB_NPSViewTbl");
-  if (!table) return "";
-
-  const headers = Array.from(table.querySelectorAll("thead th"));
-  const rows = Array.from(table.querySelectorAll("tbody tr:not(.total-row)"));
-  const totalRow = table.querySelector("tbody tr.total-row");
-
-  const wrapper = table.parentNode;
-  const titleDiv = wrapper.previousElementSibling;
-  const titleText = titleDiv?.textContent || "";
-
-  if (!rows.length) return "";
-
-  /* ================= NORMALIZE ================= */
-  function normalize(h) {
-    return String(h).toLowerCase().replace(/[^a-z0-9]/g, "");
-  }
-
-  /* ================= PREVIOUS MONTH ================= */
-  function getPrevMonthFormatted(monthStr) {
-    const d = new Date(monthStr);
-    d.setMonth(d.getMonth() - 1);
-
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      year: "numeric"
-    }).replace(" ", "-");
-  }
-
-  const currentMonth = id("PayBillPage_SalMonth")?.value;
-  const prevMonth = getPrevMonthFormatted(currentMonth);
-
-  /* ================= 🔥 FIXED DATA SOURCE ================= */
-  const prevHeaders = pbData.headers || [];
-  const prevData = pbData.rows || [];
-
-  const nameIndex = getColIndex(prevHeaders, "Employee Name");
-  const monthIndex = getColIndex(prevHeaders, "Salary Month");
-
-  const prevMap = {};
-
-  for (let i = 0; i < prevData.length; i++) {
-
-    const rowMonth = String(prevData[i][monthIndex] || "").trim();
-
-    const name = String(prevData[i][nameIndex] || "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    if (rowMonth === prevMonth && name) {
-      prevMap[name] = prevData[i];
-    }
-  }
-
-  /* ================= HEADER MAP ================= */
-  const prevHeaderMap = {};
-  prevHeaders.forEach((h, i) => {
-    prevHeaderMap[normalize(h)] = i;
-  });
-
-  /* ================= SUM ================= */
-  const sums = Array(headers.length).fill(0);
-
-  rows.forEach(tr => {
-    headers.forEach((_, i) => {
-      const val = tr.children[i]?.textContent?.replace(/,/g, "") || "0";
-      if (!isNaN(val)) sums[i] += parseFloat(val) || 0;
-    });
-  });
-
-  /* ================= COLUMN FILTER ================= */
-  const activeCols = headers.map((th, i) => {
-
-    const h = th.textContent.trim();
-    const col = normalize(h);
-
-    if (h === "Employee Name") return true;
-
-    if (["recovery","netit","tarate","daonta","nps","totaldaaonnps"].includes(col)) return false;
-
-    if (type === "GO" && ["npse","npseded","npsc","daaonnpseded","daaonnpse","daaonnpsc"].includes(col)) return false;
-
-    if (type === "NPS" && ["cgeis","gpf"].includes(col)) return false;
-
-    const zeroCols = [
-      "bonus","cea","elencash","uniall",
-      "daa","daaonta","totaldaa",
-      "medicalreimburse","ltareimburse","arrears"
-    ];
-
-    if (type === "NPS" &&
-      ["daaonnpse","daaonnpsc","daaonnpseded"].includes(col)) {
-      return sums[i] !== 0;
-    }
-
-    if (zeroCols.includes(col) && sums[i] === 0) {
-      return false;
-    }
-
-    return true;
-  });
-
-  const colCount = activeCols.filter(Boolean).length + 1;
-
-  /* ================= HTML ================= */
-  let html = `
+      /* ================= HTML ================= */
+      let html = `
     <div class="title">${titleText}</div>
     <table>
       <thead>
@@ -6036,18 +6001,18 @@ function buildPrintTable(type) {
           <th>Sr No.</th>
   `;
 
-  headers.forEach((th, i) => {
-    if (!activeCols[i]) return;
+      headers.forEach((th, i) => {
+        if (!activeCols[i]) return;
 
-    let h = th.textContent.trim();
+        let h = th.textContent.trim();
 
-    if (h === "Employee Name") h = "Name / Designation";
-    if (h === "Society") h = "AIR & TV CHE.SOC";
+        if (h === "Employee Name") h = "Name / Designation";
+        if (h === "Society") h = "AIR & TV CHE.SOC";
 
-    html += `<th>${h}</th>`;
-  });
+        html += `<th>${h}</th>`;
+      });
 
-  html += `
+      html += `
         </tr>
       </thead>
       <tbody>
@@ -6056,135 +6021,357 @@ function buildPrintTable(type) {
         </tr>
   `;
 
-  let srNo = 1;
+      /* ================= ROWS ================= */
+      let srNo = 1;
 
-  rows.forEach(tr => {
+      rows.forEach(tr => {
 
-    html += "<tr>";
+        html += "<tr>";
 
-    const empName = String(tr.children[0]?.textContent || "")
-      .replace(/\s+/g, " ")
-      .trim();
+        const empName = String(tr.children[0]?.textContent || "")
+        .replace(/\s+/g, "")
+        .toLowerCase();
 
-    html += `<td>${srNo++}</td>`;
+        html += `<td>${srNo++}</td>`;
 
-    headers.forEach((th, i) => {
-      if (!activeCols[i]) return;
+        headers.forEach((th, i) => {
+          if (!activeCols[i]) return;
 
-      const headerName = th.textContent.trim();
-      const cleanHeader = normalize(headerName);
+          const headerName = th.textContent.trim();
+          const cleanHeader = normalize(headerName);
 
-      let val = tr.children[i]?.textContent?.trim() || "";
+          let val = tr.children[i]?.textContent?.trim() || "";
 
-      let raw = val.replace(/[^\d.-]/g, "");
-      let currVal = raw !== "" && !isNaN(raw) ? Number(raw) : null;
+          let raw = val.replace(/[^\d.-]/g, "");
+          let currVal = raw !== "" && !isNaN(raw) ? Number(raw) : null;
 
-      let style = "";
+          let style = "";
 
-      if (empName && prevMap[empName] && currVal !== null) {
+          /* 🔥 COMPARE */
+if (empName && prevMap[empName] && currVal !== null) {
 
-        if (!["grossincome","totaldeduction","netincome"].includes(cleanHeader)) {
+  if (!["grossincome","totaldeduction","netincome"].includes(cleanHeader)) {
 
-          const prevColIndex = prevHeaderMap[cleanHeader];
+    const prevColIndex = prevHeaderMap[cleanHeader];
 
-          if (prevColIndex !== undefined) {
+    if (prevColIndex !== undefined) {
 
-            const prevRow = prevMap[empName];
-            const prevVal = parseFloat(
-              String(prevRow[prevColIndex]).replace(/,/g, "")
-            );
+      const prevRow = prevMap[empName];
 
-            if (!isNaN(prevVal) && prevVal !== currVal) {
-              style = `style="background:#fff59d;font-weight:bold;"`;
-            }
+      const prevVal = parseFloat(
+        String(prevRow[prevColIndex]).replace(/[^\d.-]/g, "")
+      );
+
+      if (!isNaN(prevVal) && prevVal !== currVal) {
+        style = `style="background:#fff59d;font-weight:bold;"`;
+      }
+    }
+  }
+}
+          if (headerName === "Employee Name") {
+            const cleanName = val.replace(/\s+/g, " ").trim();
+            const d = getDesignation(cleanName);
+            val = d ? `${cleanName}, ${d}` : cleanName;
           }
-        }
-      }
 
-      if (headerName === "Employee Name") {
-        const cleanName = val.replace(/\s+/g, " ").trim();
-        const d = getDesignation(cleanName);
-        val = d ? `${cleanName}, ${d}` : cleanName;
-      }
+          if (currVal !== null) val = currVal;
 
-      if (currVal !== null) val = currVal;
+          html += `<td ${style}>${val}</td>`;
+        });
 
-      html += `<td ${style}>${val}</td>`;
-    });
+        html += "</tr>";
+      });
 
-    html += "</tr>";
-  });
+      /* ================= TOTAL ================= */
+      if (totalRow) {
 
-  if (totalRow) {
-
-    html += `
+        html += `
       <tr class="spacer-row">
         <td colspan="${colCount}"></td>
       </tr>
     `;
 
-    html += "<tr style='font-weight:bold;'>";
+        html += "<tr style='font-weight:bold;'>";
 
-    html += `<td style="border-right:none;height:22px;"></td>`;
+        html += `<td style="border-right:none;height:22px;"></td>`;
 
-    headers.forEach((th, i) => {
-      if (!activeCols[i]) return;
+        headers.forEach((th, i) => {
+          if (!activeCols[i]) return;
 
-      let val = totalRow.children[i]?.textContent?.trim() || "";
+          let val = totalRow.children[i]?.textContent?.trim() || "";
 
-      let raw = val.replace(/[^\d.-]/g, "");
-      if (raw !== "" && !isNaN(raw)) {
-        val = Number(raw);
+          let raw = val.replace(/[^\d.-]/g, "");
+          if (raw !== "" && !isNaN(raw)) {
+            val = Number(raw);
+          }
+
+          if (i === 0) {
+            html += `<td style="border-left:none">Total</td>`;
+          } else {
+            html += `<td>${val}</td>`;
+          }
+        });
+
+        html += "</tr>";
       }
 
-      if (i === 0) {
-        html += `<td style="border-left:none">Total</td>`;
-      } else {
-        html += `<td>${val}</td>`;
-      }
-    });
-
-    html += "</tr>";
-  }
-
-  html += `
+      html += `
       </tbody>
     </table>
   `;
 
-  return html;
-}
-    
-       /* =========================
-       DESIGNATION LOGIC
-    ========================= */
-    function getDesignation(empName) {
-
-      const data = sheetCache["EmpDB"];
-      if (!data) return "";
-
-      const headers = data[0];
-      const nameIndex = getColIndex(headers, "Employee Name");
-      const desigIndex = getColIndex(headers, "Designation");
-
-      for (let i = 1; i < data.length; i++) {
-
-        if (String(data[i][nameIndex]).trim() === empName.trim()) {
-
-          let d = String(data[i][desigIndex] || "").toUpperCase();
-
-          if (d === "STECH") return "Sr.Tech";
-          if (d === "TECH") return "Tech";
-          if (d === "MTR DRIVER") return "M Driver";
-          if (d === "HELPER") return "Helper";
-
-          return data[i][desigIndex];
-        }
-      }
-
-      return "";
+      return html;
     }
 
+
+    /* ================= PRINT HTML ================= */
+    function buildPrintHTML(goHTML, npsHTML) {
+
+      const doc = document.implementation.createHTMLDocument("Pay Bill");
+
+      // ===== STYLE =====
+      const style = doc.createElement("style");
+      style.textContent = `
+    @page { size: A4 landscape; margin: 5mm; }
+
+      * { font-family: "Roboto Condensed", "Inter", sans-serif; font-size: 11px;padding:0;margin:0}
+
+      body{padding:5px 5px;}
+
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin:10px 0px;
+        border-bottom:solid 1px black;
+        height:90px;
+      }
+
+      .footer {
+        text-align: right;
+        margin-top: 80px;
+        margin-right: 20px;
+        font-size: 12px;
+        line-height: 1.6;
+        font-weight:bold;
+      }
+
+      .header img { height: 60px; }
+
+      .header-text {
+        text-align: center;
+        flex: 1;
+      }
+
+      .header-text h1 { margin: 0; font-size: 12px;font-family:"Arial" }
+      .header-text h2 { margin: 0; font-size: 12px;font-family:"Arial"  }
+      .header-text h3 { margin: 0; font-size: 12px;border:solid 2px black;padding:4px 8px;width:max-content;margin:auto;font-family:"Arial"  }
+
+      table {
+        width: 100%;               /* 🔥 content-based width */
+        table-layout: auto;        /* 🔥 natural sizing */
+        border-collapse: collapse;
+        margin: 0 auto;
+      }
+
+      td:nth-child(2) {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      td:nth-child(1) {
+        max-width: 15px;
+      }
+
+      th {
+        white-space: normal;        /* ✅ allow wrapping */
+        word-break: break-word;     /* ✅ break long words */
+        text-align: center;
+        background: #f1f5f9;
+        border:solid 1px black;
+        padding:2px 4px;
+        font-size:10px;
+      }
+
+      td {
+        white-space: nowrap;        /* ✅ keep compact */
+        width: auto;
+        min-width:25px;
+        border:solid 1px black;
+        padding:2px 4px;
+      }
+      .title{
+        text-align:center;
+        width:100%;
+        height:20px;
+        font-size:11px;
+        font-weight:bold;
+        padding:10px 5px;
+      }
+
+      .spacer-row td {
+        padding:10px;
+        border: none !important;
+      }
+
+      /* SCREEN VIEW (default) */
+      .page-break {
+        height: 50px; /* BIG GAP on screen */
+      }
+
+      /* PRINT VIEW */
+      @media print {
+        .page-break {
+          height: 10px;              /* SMALL GAP in print */
+          page-break-before: always; /* force new page */
+        }
+        
+        body{padding:2px;}
+
+        .header {margin:0px;}
+
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        td[style*="background"] {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        td {
+          background-clip: padding-box;
+        }
+      }
+  `;
+      doc.head.appendChild(style);
+
+      // ===== PAGE 1 =====
+      const div1 = doc.createElement("div");
+      div1.innerHTML =
+        buildHeader() +
+        goHTML +
+        buildFooter();
+
+      // ===== PAGE BREAK =====
+      const br = doc.createElement("div");
+      br.className = "page-break";
+
+      // ===== PAGE 2 =====
+      const div2 = doc.createElement("div");
+      div2.innerHTML =
+        buildHeader() +
+        npsHTML +
+        buildFooter();
+
+      doc.body.appendChild(div1);
+      doc.body.appendChild(br);
+      doc.body.appendChild(div2);
+
+      return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+    }
+
+    /* ================= HEADER ================= */
+    function buildHeader() {
+
+      var month = id("PayBillPage_SalMonth")?.value || "";
+      var station = id("PayBillPage_Station")?.value || "";
+      var da = id("PayBillPage_DA%")?.value || "";
+      const hrazone = id("PayBillPage_HRAZone")?.value || "";
+
+      const rawDA = num(id("PayBillPage_DA%")?.value);
+      const daPercent = Math.min(rawDA, 150);
+      let hrapercent = 0;
+
+      if (hrazone === "X") hrapercent = 28;
+      else if (hrazone === "Y") hrapercent = 18;
+      else if (hrazone === "Z") hrapercent = 8;
+
+      // 🔥 DA BOOST
+      if (daPercent >= 50) hrapercent += 2;
+      else if (daPercent >= 25) hrapercent += 1;
+
+      const hra = hrapercent;
+
+      return [
+        "<div class='header'>",
+
+          "<img src='https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l'>",
+
+          "<div class='header-text'>",
+            "<h1>PRASAR BHARATI</h1>",
+            "<h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>",
+            "<h3>", station, "</h3>",
+          "</div>",
+
+           "<table style='position:absolute; top:30px; right:10px; width:150px;font-size:10px;'>",
+            "<colgroup>",
+              "<col style='width:60%'>",
+              "<col style='width:40%'>",
+            "</colgroup>",
+              "<tr><td>Salary Month</td><td>", month ,"</td></tr>",
+              "<tr><td>DA</td><td>",daPercent +"%","</td></tr>",
+              "<tr><td>HRA</td><td>",hra +"%","</td></tr>",      
+            "</table>",
+        "</div>"       
+      ].join("");
+    }
+
+
+    /* ================= FOOTER ================= */
+    function buildFooter() {
+
+      var today = new Date().toLocaleDateString();
+      var station = id("PayBillPage_Station")?.value || "";
+      return [
+        "<div class='footer'>",
+        "Programme Executive<br>",
+        station, "<br>",
+        "Date: ", today,
+        "</div>"
+      ].join("");
+    }
+
+    function getDesignation(empName) {
+
+  if (!empData || !empData.headers || !empData.rows) return "";
+
+  const headers = empData.headers;
+  const rows = empData.rows;
+
+  const nameIndex = getColIndex(headers, "Employee Name");
+  const desigIndex = getColIndex(headers, "Designation");
+
+  if (nameIndex === -1 || desigIndex === -1) return "";
+
+  const cleanInput = String(empName)
+    .replace(/\s+/g, "")
+    .toLowerCase();
+
+  for (let i = 0; i < rows.length; i++) {
+
+    const name = String(rows[i][nameIndex] || "")
+      .replace(/\s+/g, "")
+      .toLowerCase();
+
+    if (name === cleanInput) {
+
+      let d = String(rows[i][desigIndex] || "").toUpperCase();
+
+      // 🔥 SHORT NAMES
+      if (d === "STECH") return "Sr.Tech";
+      if (d === "TECH") return "Tech";
+      if (d === "MTR DRIVER") return "M Driver";
+      if (d === "HELPER") return "Helper";
+
+      return rows[i][desigIndex];
+    }
+  }
+
+  return "";
+}
   </script>
 
 </body>
