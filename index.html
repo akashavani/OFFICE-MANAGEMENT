@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-  <title>PayBill Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <base target="_top">
-  <!-- font style -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <!-- Icon -->
-  <script defer src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+  <head>
+    <title>PayBill Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
+    <!-- font style -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet">
+    <!-- Icon -->
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 
-  <style>
+    <style>
     /* =========================
       RESET
       ========================= */
@@ -1273,376 +1280,390 @@
     }
   </style>
 
-</head>
+  </head>
 
-<body>
+  <body>
 
-  <div class="app">
+    <div class="app">
 
-    <div class="left-panel collapsed" id="sidebar">
+      <div class="left-panel collapsed" id="sidebar">
 
-      <!-- Toggle button -->
-      <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+        <!-- Toggle button -->
+        <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-      <div class="menu-list">
+        <div class="menu-list">
 
-        <button class="menu-btn active" data-tooltip="Dashboard" data-page="DashBoard">
-          <i data-lucide="layout-dashboard"></i>
-          <span>Dashboard</span>
-        </button>
+          <button class="menu-btn active" data-tooltip="Dashboard"
+            data-page="DashBoard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Employee Details" data-page="EmpPage">
-          <i data-lucide="user"></i>
-          <span>Employee Details</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Employee Details"
+            data-page="EmpPage">
+            <i data-lucide="user"></i>
+            <span>Employee Details</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Pay Bill" data-page="PayBillPage">
-          <i data-lucide="file-text"></i>
-          <span>Pay Bill</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Pay Bill"
+            data-page="PayBillPage">
+            <i data-lucide="file-text"></i>
+            <span>Pay Bill</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Salary Slip" data-page="SalarySlipPage">
-          <i data-lucide="receipt"></i>
-          <span>Salary Slip</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Salary Slip"
+            data-page="SalarySlipPage">
+            <i data-lucide="receipt"></i>
+            <span>Salary Slip</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
-          <i data-lucide="calculator"></i>
-          <span>Income Tax</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
+            <i data-lucide="calculator"></i>
+            <span>Income Tax</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Pensions" data-page="PensionPage">
-          <i data-lucide="landmark"></i>
-          <span>Pensions</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Pensions"
+            data-page="PensionPage">
+            <i data-lucide="landmark"></i>
+            <span>Pensions</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
-          <i data-lucide="pie-chart"></i>
-          <span>Budgets</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Budgets"
+            data-page="BudgetPage">
+            <i data-lucide="pie-chart"></i>
+            <span>Budgets</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Database" data-page="DatabasePage">
-          <i data-lucide="database"></i>
-          <span>Database</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Database"
+            data-page="DatabasePage">
+            <i data-lucide="database"></i>
+            <span>Database</span>
+          </button>
+
+        </div>
+
+        <div class="menu-footer">
+          <button class="logout-btn" data-tooltip="Logout">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </button>
+        </div>
 
       </div>
 
-      <div class="menu-footer">
-        <button class="logout-btn" data-tooltip="Logout">
-          <i data-lucide="log-out"></i>
-          <span>Logout</span>
-        </button>
-      </div>
+      <div class="right-panel">
 
-    </div>
+        <img class="watermark"
+          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
 
-    <div class="right-panel">
-
-      <img class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-
-      <div class="SectionPage" id="DashBoard">
-        <div class="header">
-          <h2>Office Management</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="EmpPage" style="display:none">
-        <div class="header">
-          <h2>Employee Profile Details</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:100px">
-              <col style="width:300px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:60px">
-              <col style="width:100px">
-              <col style="width:0px">
-              <col style="width:70px">
-              <col style="width:50px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:80px">
-              <col style="width:90px">
-              <col style="width:30px">
-            </colgroup>
-            <tr>
-              <td><label for="EmpPage_Station">Station :</label></td>
-              <td><select id="EmpPage_Station"></select></td>
-              <td><label for="EmpPage_Emp">Employee :</label></td>
-              <td><select id="EmpPage_Emp"></select></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><label>TA Zone :</label></td>
-              <td><input disabled id="EmpPage_TAZone"></td>
-              <td><label>HRA Zone :</label></td>
-              <td><input disabled id="EmpPage_HRAZone"></td>
-              <td></td>
-            </tr>
-          </table>
-          <div class="action-group"></div>
-        </div>
-        <div class="Emp-Table-Wrapper">
-          <table id="EmpDetailTbl">
-            <tr>
-              <th colspan="2">Personal Details</th>
-            </tr>
-            <tr>
-              <td>Name</td>
-              <td id="Employee Name"></td>
-            </tr>
-            <tr>
-              <td>Department</td>
-              <td id="Department"></td>
-            </tr>
-            <tr>
-              <td>HRIS</td>
-              <td id="HRIS"></td>
-            </tr>
-            <tr>
-              <td>Designation</td>
-              <td id="Designation"></td>
-            </tr>
-            <tr>
-              <td>Section</td>
-              <td id="Section"></td>
-            </tr>
-            <tr>
-              <td>Group</td>
-              <td id="Group"></td>
-            </tr>
-            <tr>
-              <td>PAN</td>
-              <td id="PAN"></td>
-            </tr>
-            <tr>
-              <td>Aadhaar</td>
-              <td id="Aadhaar"></td>
-            </tr>
-            <tr>
-              <td>PFMS</td>
-              <td id="PFMS"></td>
-            </tr>
-            <tr>
-              <td>PRAN</td>
-              <td id="PRAN"></td>
-            </tr>
-            <tr>
-              <td>GPF</td>
-              <td id="GPF"></td>
-            </tr>
-            <tr>
-              <td>Salary Account</td>
-              <td id="Account"></td>
-            </tr>
-            <tr>
-              <td>Mobile</td>
-              <td id="Mobile"></td>
-            </tr>
-            <tr>
-              <td>Address</td>
-              <td id="Address"></td>
-            </tr>
-          </table>
-          <table>
-            <tr>
-              <th colspan="2">Pay Details</th>
-            </tr>
-            <tr>
-              <td>Date of Birth</td>
-              <td id="DOB"></td>
-            </tr>
-            <tr>
-              <td>Date of Joining</td>
-              <td id="DOJ"></td>
-            </tr>
-            <tr>
-              <td>Superannuation</td>
-              <td id="Superannuation"></td>
-            </tr>
-            <tr>
-              <td>Last Increment Date</td>
-              <td id="Last Increment"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Salary Month</td>
-              <td id="Last Drawn Salary Month"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Pay Level</td>
-              <td id="Last Drawn Pay Level"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Grade Pay</td>
-              <td id="Last Drawn Grade Pay"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Pay Band</td>
-              <td id="Last Drawn Pay Band"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Basic Pay</td>
-              <td id="Last Drawn Basic Pay"></td>
-            </tr>
-            <tr>
-              <td>Last DA Drawn</td>
-              <td id="Last Drawn DA"></td>
-            </tr>
-            <tr>
-              <td>Qualifying Service as on Today</td>
-              <td id="Qualifying Service"></td>
-            </tr>
-            <tr>
-              <td>Completed 6 Monthly Period as on Today</td>
-              <td id="Completed 6 Monthly Period"></td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="PayBillPage" style="display:none">
-        <div class="header">
-          <h2>Pay Bill Generation</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:100px">
-              <col style="width:300px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:60px">
-              <col style="width:100px">
-              <col style="width:0px">
-              <col style="width:70px">
-              <col style="width:50px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:80px">
-              <col style="width:90px">
-              <col style="width:30px">
-            </colgroup>
-            <tr>
-              <td><label for="PayBillPage_Station">Station :</label></td>
-              <td><select id="PayBillPage_Station"></select></td>
-              <td></td>
-              <td></td>
-              <td style="display:none"><label for="PayBillPage_Emp">Employee
-                  :</label></td>
-              <td style="display:none"><select id="PayBillPage_Emp"></select></td>
-              <td><label for="PayBillPage_FY">FY :</label></td>
-              <td><select id="PayBillPage_FY"></select></td>
-              <td><label for="PayBillPage_SalMonth">Month :</label></td>
-              <td><select id="PayBillPage_SalMonth"></select></td>
-              <td></td>
-              <td><span class="status paid">PAID</span></td>
-              <td><label>DA(%) :</td>
-              <td><input style="max-width:40px;" disabled id="PayBillPage_DA%" type="text"></td>
-              <td><label>TA Zone :</label></td>
-              <td><input disabled id="PayBillPage_TAZone"></td>
-              <td><label>HRA Zone :</label></td>
-              <td><input disabled id="PayBillPage_HRAZone"></td>
-              <td></td>
-            </tr>
-          </table>
-          <div class="action-group">
-            <button id="PBeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
-            <button id="PBaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
-            <button id="PBprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
-            <button id="PBexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+        <div class="SectionPage" id="DashBoard">
+          <div class="header">
+            <h2>Office Management</h2>
           </div>
         </div>
-        <div class="PB-Table-Wrapper">
-          <div class="PB-Table-WrapperGO">
-            <table id="PB_GOViewTbl"></table>
-            <table id="PB_GOEditTbl"></table>
+
+        <div class="SectionPage" id="EmpPage" style="display:none">
+          <div class="header">
+            <h2>Employee Profile Details</h2>
           </div>
-          <div class="PB-Table-WrapperNPS">
-            <table id="PB_NPSViewTbl"></table>
-            <table id="PB_NPSEditTbl"></table>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:100px">
+                <col style="width:300px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:60px">
+                <col style="width:100px">
+                <col style="width:0px">
+                <col style="width:70px">
+                <col style="width:50px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:90px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="EmpPage_Station">Station :</label></td>
+                <td><select id="EmpPage_Station"></select></td>
+                <td><label for="EmpPage_Emp">Employee :</label></td>
+                <td><select id="EmpPage_Emp"></select></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><label>TA Zone :</label></td>
+                <td><input disabled id="EmpPage_TAZone"></td>
+                <td><label>HRA Zone :</label></td>
+                <td><input disabled id="EmpPage_HRAZone"></td>
+                <td></td>
+              </tr>
+            </table>
+            <div class="action-group"></div>
+          </div>
+          <div class="Emp-Table-Wrapper">
+            <table id="EmpDetailTbl">
+              <tr>
+                <th colspan="2">Personal Details</th>
+              </tr>
+              <tr>
+                <td>Name</td>
+                <td id="Employee Name"></td>
+              </tr>
+              <tr>
+                <td>Department</td>
+                <td id="Department"></td>
+              </tr>
+              <tr>
+                <td>HRIS</td>
+                <td id="HRIS"></td>
+              </tr>
+              <tr>
+                <td>Designation</td>
+                <td id="Designation"></td>
+              </tr>
+              <tr>
+                <td>Section</td>
+                <td id="Section"></td>
+              </tr>
+              <tr>
+                <td>Group</td>
+                <td id="Group"></td>
+              </tr>
+              <tr>
+                <td>PAN</td>
+                <td id="PAN"></td>
+              </tr>
+              <tr>
+                <td>Aadhaar</td>
+                <td id="Aadhaar"></td>
+              </tr>
+              <tr>
+                <td>PFMS</td>
+                <td id="PFMS"></td>
+              </tr>
+              <tr>
+                <td>PRAN</td>
+                <td id="PRAN"></td>
+              </tr>
+              <tr>
+                <td>GPF</td>
+                <td id="GPF"></td>
+              </tr>
+              <tr>
+                <td>Salary Account</td>
+                <td id="Account"></td>
+              </tr>
+              <tr>
+                <td>Mobile</td>
+                <td id="Mobile"></td>
+              </tr>
+              <tr>
+                <td>Address</td>
+                <td id="Address"></td>
+              </tr>
+            </table>
+            <table>
+              <tr>
+                <th colspan="2">Pay Details</th>
+              </tr>
+              <tr>
+                <td>Date of Birth</td>
+                <td id="DOB"></td>
+              </tr>
+              <tr>
+                <td>Date of Joining</td>
+                <td id="DOJ"></td>
+              </tr>
+              <tr>
+                <td>Superannuation</td>
+                <td id="Superannuation"></td>
+              </tr>
+              <tr>
+                <td>Last Increment Date</td>
+                <td id="Last Increment"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Salary Month</td>
+                <td id="Last Drawn Salary Month"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Pay Level</td>
+                <td id="Last Drawn Pay Level"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Grade Pay</td>
+                <td id="Last Drawn Grade Pay"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Pay Band</td>
+                <td id="Last Drawn Pay Band"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Basic Pay</td>
+                <td id="Last Drawn Basic Pay"></td>
+              </tr>
+              <tr>
+                <td>Last DA Drawn</td>
+                <td id="Last Drawn DA"></td>
+              </tr>
+              <tr>
+                <td>Qualifying Service as on Today</td>
+                <td id="Qualifying Service"></td>
+              </tr>
+              <tr>
+                <td>Completed 6 Monthly Period as on Today</td>
+                <td id="Completed 6 Monthly Period"></td>
+              </tr>
+            </table>
           </div>
         </div>
-        <div class="Error_Note">
-          <span id="DA_Error" class="PB-error"></span>
-          <span id="GPF_Error" class="PB-error"></span>
+
+        <div class="SectionPage" id="PayBillPage" style="display:none">
+          <div class="header">
+            <h2>Pay Bill Generation</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:100px">
+                <col style="width:300px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:60px">
+                <col style="width:100px">
+                <col style="width:0px">
+                <col style="width:70px">
+                <col style="width:50px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:90px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="PayBillPage_Station">Station :</label></td>
+                <td><select id="PayBillPage_Station"></select></td>
+                <td></td>
+                <td></td>
+                <td style="display:none"><label for="PayBillPage_Emp">Employee
+                    :</label></td>
+                <td style="display:none"><select
+                    id="PayBillPage_Emp"></select></td>
+                <td><label for="PayBillPage_FY">FY :</label></td>
+                <td><select id="PayBillPage_FY"></select></td>
+                <td><label for="PayBillPage_SalMonth">Month :</label></td>
+                <td><select id="PayBillPage_SalMonth"></select></td>
+                <td></td>
+                <td><span class="status paid">PAID</span></td>
+                <td><label>DA(%) :</td>
+                  <td><input style="max-width:40px;" disabled
+                      id="PayBillPage_DA%" type="text"></td>
+                  <td><label>TA Zone :</label></td>
+                  <td><input disabled id="PayBillPage_TAZone"></td>
+                  <td><label>HRA Zone :</label></td>
+                  <td><input disabled id="PayBillPage_HRAZone"></td>
+                  <td></td>
+                </tr>
+              </table>
+              <div class="action-group">
+                <button id="PBeditBtn"><i
+                    data-lucide="edit"></i><span>Edit</span></button>
+                <button id="PBaddBtn"><i
+                    data-lucide="plus"></i><span>Add</span></button>
+                <button id="PBprintBtn"><i
+                    data-lucide="printer"></i><span>Print</span></button>
+                <button id="PBexcelBtn"><i
+                    data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+              </div>
+            </div>
+            <div class="PB-Table-Wrapper">
+              <div class="PB-Table-WrapperGO">
+                <table id="PB_GOViewTbl"></table>
+                <table id="PB_GOEditTbl"></table>
+              </div>
+              <div class="PB-Table-WrapperNPS">
+                <table id="PB_NPSViewTbl"></table>
+                <table id="PB_NPSEditTbl"></table>
+              </div>
+            </div>
+            <div class="Error_Note">
+              <span id="DA_Error" class="PB-error"></span>
+              <span id="GPF_Error" class="PB-error"></span>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="SalarySlipPage" style="display:none">
+            <div class="header">
+              <h2>Salary Slip</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="ITPage" style="display:none">
+            <div class="header">
+              <h2>Income Tax Calculation</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="PensionPage" style="display:none">
+            <div class="header">
+              <h2>Pension Benifits & Calculations</h2>
+              <table id="EmolumentTbl" border="1"></table>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="BudgetPage" style="display:none">
+            <div class="header">
+              <h2>Budgets</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="DatabasePage" style="display:none">
+            <div class="header">
+              <h2>Database</h2>
+            </div>
+
+            <div class="button-bar">
+              <button onclick="showSheet('EmpDB',this)" class="active">Employee
+                Database</button>
+              <button onclick="showSheet('PBDB',this)">Pay Bill
+                Database</button>
+              <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
+                CPC</button>
+              <button onclick="showSheet('QtrsRateDB',this)">Quarters
+                Rate</button>
+              <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
+              <button onclick="showSheet('CommFactDB',this)">Commutation
+                Factors</button>
+              <button onclick="showSheet('ITDB',this)">IT Database</button>
+            </div>
+
+            <div class="DB-Table-Wrapper">
+              <table id="EmpDB"></table>
+              <table id="EmpDBCalc"></table>
+              <table id="PBDB" style="display:none;"></table>
+              <table id="CPC7DB" style="display:none;"></table>
+              <table id="QtrsRateDB" style="display:none;"></table>
+              <table id="CityZoneDB" style="display:none;"></table>
+              <table id="CommFactDB" style="display:none;"></table>
+              <table id="ITDB" style="display:none;"></table>
+            </div>
+          </div>
+
         </div>
+
       </div>
 
-      <div class="SectionPage" id="SalarySlipPage" style="display:none">
-        <div class="header">
-          <h2>Salary Slip</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="ITPage" style="display:none">
-        <div class="header">
-          <h2>Income Tax Calculation</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="PensionPage" style="display:none">
-        <div class="header">
-          <h2>Pension Benifits & Calculations</h2>
-          <table id="EmolumentTbl" border="1"></table>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="BudgetPage" style="display:none">
-        <div class="header">
-          <h2>Budgets</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="DatabasePage" style="display:none">
-        <div class="header">
-          <h2>Database</h2>
-        </div>
-
-        <div class="button-bar">
-          <button onclick="showSheet('EmpDB',this)" class="active">Employee
-            Database</button>
-          <button onclick="showSheet('PBDB',this)">Pay Bill
-            Database</button>
-          <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
-            CPC</button>
-          <button onclick="showSheet('QtrsRateDB',this)">Quarters
-            Rate</button>
-          <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
-          <button onclick="showSheet('CommFactDB',this)">Commutation
-            Factors</button>
-          <button onclick="showSheet('ITDB',this)">IT Database</button>
-        </div>
-
-        <div class="DB-Table-Wrapper">
-          <table id="EmpDB"></table>
-          <table id="EmpDBCalc"></table>
-          <table id="PBDB" style="display:none;"></table>
-          <table id="CPC7DB" style="display:none;"></table>
-          <table id="QtrsRateDB" style="display:none;"></table>
-          <table id="CityZoneDB" style="display:none;"></table>
-          <table id="CommFactDB" style="display:none;"></table>
-          <table id="ITDB" style="display:none;"></table>
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <script>
+      <script>
 
 
     /* =========================
@@ -5259,40 +5280,44 @@
       recalculateAllTotals(); // ✅ only once
     }
 
+    function handleStationChange(sourceId) {
+      enableAllButtons();
 
+      const station = id(sourceId).value;
+      if (!station) return;
 
-    function updateZones() {
+      // 🔁 Sync both dropdowns
+      id("PayBillPage_Station").value = station;
+      id("EmpPage_Station").value = station;
 
-      const pbStation = id("PayBillPage_Station").value;
-      const empStation = id("EmpPage_Station").value;
+      // 🔄 Update filters
+      filters.station = station;
+      applyFilters();
 
-      const pbzone = getCityZone(pbStation);
-      const empzone = getCityZone(empStation);
+      // 🌆 Update Zones (both pages)
+      const zone = getCityZone(station) || {};
 
-      id("PayBillPage_TAZone").value = val(pbzone.ta);
-      id("PayBillPage_HRAZone").value = val(pbzone.hra);
+      id("PayBillPage_TAZone").value = val(zone.ta);
+      id("PayBillPage_HRAZone").value = val(zone.hra);
 
-      id("EmpPage_TAZone").value = val(empzone.ta);
-      id("EmpPage_HRAZone").value = val(empzone.hra);
+      id("EmpPage_TAZone").value = val(zone.ta);
+      id("EmpPage_HRAZone").value = val(zone.hra);
+
+      // 🔢 Recalculate + Refresh
+      recalculateAllRows();
+      refreshPBView();
     }
 
-
-    on("PayBillPage_Station", "change", () => {
-      enableAllButtons();
-      refreshPBView();
-      updateZones();
+    on("EmpPage_Station", "change", () => {
+      handleStationChange("EmpPage_Station");
     });
 
-    on("EmpPage_Station", "change", () => {
-      enableAllButtons();
-      refreshPBView();
-      updateZones();
+    on("PayBillPage_Station", "change", () => {
+      handleStationChange("PayBillPage_Station");
     });
 
     on("PayBillPage_FY", "change", refreshPBView);
     on("PayBillPage_SalMonth", "change", refreshPBView);
-    on("PayBillPage_HRAZone", "change", recalculateAllRows);
-    on("PayBillPage_TAZone", "change", recalculateAllRows);
 
 
     let isAddMode = false;
@@ -5336,12 +5361,72 @@
     });
 
 
-    function savePBData() {
+    async function savePBData() {
 
-      // your existing save logic
+      function getTableData(tableId, type) {
+        const table = document.getElementById(tableId);
+        if (!table) return [];
 
-      isAddMode = false;   // 🔥 IMPORTANT
+        const headers = Array.from(
+          table.querySelectorAll("thead th")
+        ).map(th => th.innerText.trim());
 
+        const rows = table.querySelectorAll("tbody tr");
+
+        let data = [];
+
+        rows.forEach(tr => {
+          let cells = tr.querySelectorAll("td");
+          let rowObj = {};
+
+          headers.forEach((h, i) => {
+            let input = cells[i]?.querySelector("input");
+            rowObj[h] = input ? input.value : cells[i]?.innerText.trim() || "";
+          });
+
+          // ✅ Add type (VERY IMPORTANT)
+          rowObj["Category"] = type;
+
+          data.push(rowObj);
+        });
+
+        return data;
+      }
+
+      const goData = getTableData("PB_GOEditTbl", "GO");
+      const npsData = getTableData("PB_NPSEditTbl", "NPS");
+
+      const data = [...goData, ...npsData];
+
+      if (!data.length) {
+        alert("No data to save");
+        return;
+      }
+
+      try {
+        const res = await fetch("/pb/update", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ data })
+        });
+
+        const result = await res.json();
+
+        if (result.status === "success") {
+          alert(`✅ Updated: ${result.updated}, Added: ${result.added}`);
+        } else {
+          alert("❌ " + result.message);
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert("❌ Server error");
+      }
+
+      // 🔥 Exit add mode
+      isAddMode = false;
       console.log("Exited ADD MODE");
     }
 
@@ -5652,11 +5737,23 @@
 
       win.document.open();
       win.document.write(html);
-      win.document.close();
 
-      setTimeout(function () {
-        win.print();
-      }, 100);
+      // 🔥 ADD THIS SCRIPT INTO PRINT WINDOW
+      win.document.write(`
+        <script>
+          window.onafterprint = function() {
+            window.close();
+          };
+
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 100);
+          };
+        <\/script>
+      `);
+
+      win.document.close();
     });
 
     id("PBexcelBtn").addEventListener("click", async () => {
@@ -5667,6 +5764,19 @@
 
       const goHTML = buildPrintTable("GO");
       const npsHTML = buildPrintTable("NPS");
+
+      const da = id("PayBillPage_DA%")?.value || "";
+      const hrazone = id("PayBillPage_HRAZone")?.value || "";
+
+      const daPercent = Math.min(num(da), 150);
+
+      let hrapercent = 0;
+      if (hrazone === "X") hrapercent = 28;
+      else if (hrazone === "Y") hrapercent = 18;
+      else if (hrazone === "Z") hrapercent = 8;
+
+      if (daPercent >= 50) hrapercent += 2;
+      else if (daPercent >= 25) hrapercent += 1;
 
       const workbook = new ExcelJS.Workbook();
 
@@ -5715,34 +5825,91 @@
 
         const lastColLetter = getExcelCol(colCount);
 
+        // 🔥 Header Info Table (Right Side)
+        const labelStartCol = colCount - 3;  // 2 cols before last 2
+        const valueStartCol = colCount - 1;  // last 2 cols
+        const mergeLastCol = colCount - 4;   // remaining left side        
+
+        // 🔥 ROW 1 → MONTH
+        sheet.mergeCells(1, labelStartCol, 1, labelStartCol + 1);
+        sheet.mergeCells(1, valueStartCol, 1, valueStartCol + 1);
+
+        sheet.getCell(1, labelStartCol).value = "Month";
+        sheet.getCell(1, valueStartCol).value = month;
+
+        // 🔥 ROW 2 → DA
+        sheet.mergeCells(2, labelStartCol, 2, labelStartCol + 1);
+        sheet.mergeCells(2, valueStartCol, 2, valueStartCol + 1);
+
+        sheet.getCell(2, labelStartCol).value = "DA";
+        sheet.getCell(2, valueStartCol).value = da + "%";
+
+        // 🔥 ROW 3 → HRA
+        sheet.mergeCells(3, labelStartCol, 3, labelStartCol + 1);
+        sheet.mergeCells(3, valueStartCol, 3, valueStartCol + 1);
+
+        sheet.getCell(3, labelStartCol).value = "HRA";
+        sheet.getCell(3, valueStartCol).value = hrapercent + "%";
+
+        for (let r = 1; r <= 3; r++) {
+
+          // Label (2 merged cols)
+          let labelCell = sheet.getCell(r, labelStartCol);
+          labelCell.font = { bold: true };
+          labelCell.alignment = { horizontal: "center", vertical: "middle" };
+
+          // Value (2 merged cols)
+          let valueCell = sheet.getCell(r, valueStartCol);
+          valueCell.alignment = { horizontal: "center", vertical: "middle" };
+
+          // Apply border across full 4-column block
+          for (let c = labelStartCol; c <= valueStartCol + 1; c++) {
+            const cell = sheet.getCell(r, c);
+
+            cell.border = {
+              top: { style: "thin" },
+              bottom: { style: "thin" },
+              left: { style: "thin" },
+              right: { style: "thin" }
+            };
+          }
+        }
+
         /* ===== HEADER ===== */
         const titleText = `MANUAL BILL OF SALARY PAYMENT, DEDUCTIONS / RECOVERIES & NET PAYMENT FOR THE MONTH OF ${month.toUpperCase()} IN r/o ALL ${name} STAFF`;
+        const safeLastColLetter = getExcelCol(mergeLastCol);
 
-        sheet.mergeCells(`A1:${lastColLetter}1`);
+        sheet.mergeCells(`A1:${safeLastColLetter}1`);
         sheet.getCell("A1").value = "PRASAR BHARATI";
         sheet.getCell("A1").alignment = { horizontal: "center" };
-        sheet.getCell("A1").font = { bold: true, size: 13 };
+        sheet.getCell("A1").font = { bold: true, size: 12 };
 
-        sheet.mergeCells(`A2:${lastColLetter}2`);
+        sheet.mergeCells(`A2:${safeLastColLetter}2`);
         sheet.getCell("A2").value = "INDIA'S PUBLIC SERVICE BROADCASTER";
         sheet.getCell("A2").alignment = { horizontal: "center" };
 
-        sheet.mergeCells(`A4:${lastColLetter}4`);
+        sheet.mergeCells(`A4:${safeLastColLetter}4`);
         const cellA4 = sheet.getCell("A4");
         cellA4.value = "AKASHAVANI KARWAR";
         cellA4.alignment = { horizontal: "center" };
-        cellA4.font = { bold: true, size: 12 };
-        cellA4.border = { bottom: { style: "medium" } };
+        cellA4.font = { bold: true, size: 11 };
+
+        sheet.mergeCells(`A5:${lastColLetter}5`);
+        sheet.getCell("A5").border = { top: { style: "medium" } };
+        sheet.getRow(5).height = 5;
 
         sheet.mergeCells(`A6:${lastColLetter}6`);
         sheet.getCell("A6").value = titleText;
         sheet.getCell("A6").alignment = { horizontal: "center", wrapText: true };
-        sheet.getCell("A6").font = { bold: true, size: 12 };
+        sheet.getCell("A6").font = { bold: true, size: 11 };
+
+        sheet.mergeCells(`A7:${lastColLetter}7`);
+        sheet.getRow(7).height = 5;
 
         /* ===== TABLE ===== */
         let startRow = 8;
 
-        rows.forEach((tr, i) => {
+        rows.forEach((tr, i) => { 
 
           const excelRow = sheet.getRow(startRow + i);
 
@@ -5774,7 +5941,7 @@
               };
             }
 
-            cell.font = { size: 11 };
+            cell.font = { size: 10};
 
             if (i === 0) {
               cell.font = { bold: true, size: 10 };
@@ -5821,7 +5988,7 @@
 
           // 🔥 LIMIT WIDTH
           if (colIndex === 1) {
-            col.width = Math.min(max + 2, 33); // Employee column max 30
+            col.width = Math.min(max + 2, 36); // Employee column max 30
           } else {
             col.width = max + 2; // Other columns max 15
           }
@@ -6029,8 +6196,8 @@
         html += "<tr>";
 
         const empName = String(tr.children[0]?.textContent || "")
-        .replace(/\s+/g, "")
-        .toLowerCase();
+          .replace(/\s+/g, "")
+          .toLowerCase();
 
         html += `<td>${srNo++}</td>`;
 
@@ -6048,26 +6215,27 @@
           let style = "";
 
           /* 🔥 COMPARE */
-if (empName && prevMap[empName] && currVal !== null) {
+          if (empName && prevMap[empName] && currVal !== null) {
 
-  if (!["grossincome","totaldeduction","netincome"].includes(cleanHeader)) {
+            if (!["grossincome", "totaldeduction", "netincome"].includes(cleanHeader)) {
 
-    const prevColIndex = prevHeaderMap[cleanHeader];
+              const prevColIndex = prevHeaderMap[cleanHeader];
 
-    if (prevColIndex !== undefined) {
+              if (prevColIndex !== undefined) {
 
-      const prevRow = prevMap[empName];
+                const prevRow = prevMap[empName];
 
-      const prevVal = parseFloat(
-        String(prevRow[prevColIndex]).replace(/[^\d.-]/g, "")
-      );
+                const prevVal = parseFloat(
+                  String(prevRow[prevColIndex]).replace(/[^\d.-]/g, "")
+                );
 
-      if (!isNaN(prevVal) && prevVal !== currVal) {
-        style = `style="background:#fff59d;font-weight:bold;"`;
-      }
-    }
-  }
-}
+                if (!isNaN(prevVal) && prevVal !== currVal) {
+                  style = `style="background:yellow;font-weight:bold;"`;
+                }
+              }
+            }
+          }
+
           if (headerName === "Employee Name") {
             const cleanName = val.replace(/\s+/g, " ").trim();
             const d = getDesignation(cleanName);
@@ -6142,9 +6310,10 @@ if (empName && prevMap[empName] && currVal !== null) {
         display: flex;
         align-items: center;
         gap: 15px;
-        margin:10px 0px;
+        margin:5px 0px;
         border-bottom:solid 1px black;
-        height:90px;
+        justify-content: space-between;
+        position: relative;
       }
 
       .footer {
@@ -6161,6 +6330,21 @@ if (empName && prevMap[empName] && currVal !== null) {
       .header-text {
         text-align: center;
         flex: 1;
+      }
+
+      .header-right {
+        width: 100px;
+        font-size: 10px;
+        text-align: right;
+      }
+
+      .header-right td{
+        border:none;
+      }
+
+      .header-right td:nth-child(2) {
+        font-weight: bold;
+        background: #f1f5f9;
       }
 
       .header-text h1 { margin: 0; font-size: 12px;font-family:"Arial" }
@@ -6207,7 +6391,7 @@ if (empName && prevMap[empName] && currVal !== null) {
         height:20px;
         font-size:11px;
         font-weight:bold;
-        padding:10px 5px;
+        padding:5px 5px;
       }
 
       .spacer-row td {
@@ -6279,44 +6463,48 @@ if (empName && prevMap[empName] && currVal !== null) {
       var month = id("PayBillPage_SalMonth")?.value || "";
       var station = id("PayBillPage_Station")?.value || "";
       var da = id("PayBillPage_DA%")?.value || "";
-      const hrazone = id("PayBillPage_HRAZone")?.value || "";
+      var hrazone = id("PayBillPage_HRAZone")?.value || "";
 
-      const rawDA = num(id("PayBillPage_DA%")?.value);
-      const daPercent = Math.min(rawDA, 150);
+      var daPercent = Math.min(num(da), 150);
       let hrapercent = 0;
 
       if (hrazone === "X") hrapercent = 28;
       else if (hrazone === "Y") hrapercent = 18;
       else if (hrazone === "Z") hrapercent = 8;
 
-      // 🔥 DA BOOST
       if (daPercent >= 50) hrapercent += 2;
       else if (daPercent >= 25) hrapercent += 1;
 
-      const hra = hrapercent;
+      return `
+        <div class="header">
 
-      return [
-        "<div class='header'>",
+          <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
 
-          "<img src='https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l'>",
+          <div class="header-text">
+            <h1>PRASAR BHARATI</h1>
+            <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
+            <h3>${station}</h3>
+          </div>
 
-          "<div class='header-text'>",
-            "<h1>PRASAR BHARATI</h1>",
-            "<h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>",
-            "<h3>", station, "</h3>",
-          "</div>",
+          <div class="header-right">
+            <table class="header-table">
+              <tr>
+                <td>Month</td>
+                <td>${month}</td>
+              </tr>
+              <tr>
+                <td>DA</td>
+                <td>${da}%</td>
+              </tr>
+              <tr>
+                <td>HRA</td>
+                <td>${hrapercent}%</td>
+              </tr>
+            </table>
+          </div>
 
-           "<table style='position:absolute; top:30px; right:10px; width:150px;font-size:10px;'>",
-            "<colgroup>",
-              "<col style='width:60%'>",
-              "<col style='width:40%'>",
-            "</colgroup>",
-              "<tr><td>Salary Month</td><td>", month ,"</td></tr>",
-              "<tr><td>DA</td><td>",daPercent +"%","</td></tr>",
-              "<tr><td>HRA</td><td>",hra +"%","</td></tr>",      
-            "</table>",
-        "</div>"       
-      ].join("");
+        </div>
+      `;
     }
 
 
@@ -6336,44 +6524,44 @@ if (empName && prevMap[empName] && currVal !== null) {
 
     function getDesignation(empName) {
 
-  if (!empData || !empData.headers || !empData.rows) return "";
+      if (!empData || !empData.headers || !empData.rows) return "";
 
-  const headers = empData.headers;
-  const rows = empData.rows;
+      const headers = empData.headers;
+      const rows = empData.rows;
 
-  const nameIndex = getColIndex(headers, "Employee Name");
-  const desigIndex = getColIndex(headers, "Designation");
+      const nameIndex = getColIndex(headers, "Employee Name");
+      const desigIndex = getColIndex(headers, "Designation");
 
-  if (nameIndex === -1 || desigIndex === -1) return "";
+      if (nameIndex === -1 || desigIndex === -1) return "";
 
-  const cleanInput = String(empName)
-    .replace(/\s+/g, "")
-    .toLowerCase();
+      const cleanInput = String(empName)
+        .replace(/\s+/g, "")
+        .toLowerCase();
 
-  for (let i = 0; i < rows.length; i++) {
+      for (let i = 0; i < rows.length; i++) {
 
-    const name = String(rows[i][nameIndex] || "")
-      .replace(/\s+/g, "")
-      .toLowerCase();
+        const name = String(rows[i][nameIndex] || "")
+          .replace(/\s+/g, "")
+          .toLowerCase();
 
-    if (name === cleanInput) {
+        if (name === cleanInput) {
 
-      let d = String(rows[i][desigIndex] || "").toUpperCase();
+          let d = String(rows[i][desigIndex] || "").toUpperCase();
 
-      // 🔥 SHORT NAMES
-      if (d === "STECH") return "Sr.Tech";
-      if (d === "TECH") return "Tech";
-      if (d === "MTR DRIVER") return "M Driver";
-      if (d === "HELPER") return "Helper";
+          // 🔥 SHORT NAMES
+          if (d === "STECH") return "Sr.Tech";
+          if (d === "TECH") return "Tech";
+          if (d === "MTR DRIVER") return "M Driver";
+          if (d === "HELPER") return "Helper";
 
-      return rows[i][desigIndex];
+          return rows[i][desigIndex];
+        }
+      }
+
+      return "";
     }
-  }
-
-  return "";
-}
   </script>
 
-</body>
+    </body>
 
-</html>
+  </html>
