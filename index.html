@@ -1654,7 +1654,9 @@
 
     let financialYears = [];
     let GPF_MESSAGES = [];
-    let isProcessing = false;
+    let isAddMode = false;
+    let isEditMode = false;
+    let isPBProcessing = false;
 
     /* ============================================================
     🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
@@ -2545,8 +2547,9 @@
       cityData = await cityRes.json();
     }
 
-    function applyFilters() {
 
+    function applyFilters() {
+      console.log("FILTER isAddMode:", isAddMode);
       if (!pbData.headers) return;
 
       let headers = pbData.headers;
@@ -2560,7 +2563,7 @@
       let empSet = new Set();
       let fySet = new Set();
 
-      // ================= BUILD FULL DATA (NO FILTER LOSS) =================
+      // ================= BUILD FULL DATA =================
       rows.forEach(r => {
         let station = r[stationIndex];
         let emp = r[empIndex];
@@ -2572,7 +2575,7 @@
         fySet.add(fy);
       });
 
-      // ================= STATION CHANGE LOGIC =================
+      // ================= STATION CHANGE =================
       if (filters.station) {
 
         let validFY = new Set();
@@ -2590,44 +2593,51 @@
           validEmp.add(emp);
         });
 
-        // 🔥 SMART FY SELECTION
         let sortedFY = [...validFY].sort((a, b) => {
           let [a1] = a.split("-");
           let [b1] = b.split("-");
           return parseInt(a1) - parseInt(b1);
         });
 
-        if (filters.fy && validFY.has(filters.fy)) {
-          // keep existing
-        } else {
+        if (!filters.fy || !validFY.has(filters.fy)) {
           filters.fy = sortedFY.length ? sortedFY[sortedFY.length - 1] : "";
         }
 
-        // 🔥 EMPLOYEE FIX
         if (filters.employee && !validEmp.has(filters.employee)) {
           filters.employee = [...validEmp].sort().pop() || "";
         }
       }
 
-      // ================= FY CHANGE → MONTH LOGIC =================
+      // ================= MONTH LOGIC =================
       if (filters.fy || isAddMode) {
 
         let validMonths = new Set();
 
+        // 🔹 1. Collect from rows
         rows.forEach(r => {
           let month = r[monthIndex];
           let fy = getFinancialYear(month);
 
           if (isAddMode) {
-            validMonths.add(month);
-          } else if (fy === filters.fy) {
-            validMonths.add(month);
-          }
-
-          if (isAddMode && filters.month) {
-            validMonths.add(filters.month);
+            if (getFinancialYear(filters.month || month) === fy) {
+              validMonths.add(month);
+            }
+          } else {
+            if (fy === filters.fy) {
+              validMonths.add(month);
+            }
           }
         });
+
+        console.log("VALID MONTHS:", [...validMonths]);
+        console.log("FILTER MONTH:", filters.month);
+        console.log("ADD MODE:", isAddMode);
+
+        // 🔥 2. FORCE ADD AFTER LOOP (THIS IS THE KEY FIX)
+        if (isAddMode && filters.month) {
+          validMonths.add(String(filters.month).trim());
+        }
+
 
         const order = ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"];
 
@@ -2643,20 +2653,16 @@
           return order.indexOf(ma) - order.indexOf(mb);
         });
 
-        // 🔥 KEEP OR SELECT LAST MONTH
-        if (isAddMode) {
-          // 🔥 DO NOT OVERRIDE MONTH IN ADD MODE
-        } else {
-          if (filters.month && validMonths.has(filters.month)) {
-            // keep
-          } else {
+        // 🔹 Keep selection logic
+        if (!isAddMode) {
+          if (!filters.month || !validMonths.has(filters.month)) {
             filters.month = sortedMonths.length
               ? sortedMonths[sortedMonths.length - 1]
               : "";
           }
         }
 
-        // 🔥 BUILD MONTH DROPDOWN (NO OPTION LOSS)
+        // 🔹 Build dropdown
         selectMap.month.forEach(eid => {
 
           let select = id(eid);
@@ -2669,12 +2675,9 @@
             select.innerHTML += `<option value="${val}" ${sel}>${val}</option>`;
           });
 
-          // 🔥 IMPORTANT FIX (NO AUTO "ALL")
-          if (!isAddMode) {
-            select.value = filters.month;
-          }
+          // 🔥 FORCE SELECT (important)
+          select.value = filters.month;
         });
-
       }
 
       // ================= FINAL DROPDOWNS =================
@@ -2685,7 +2688,6 @@
       const hasStation = !!filters.station;
       const hasFY = !!filters.fy;
 
-      // ===== FY (depends on Station) =====
       selectMap.fy.forEach(eid => {
         let el = id(eid);
         if (el) {
@@ -2694,7 +2696,6 @@
         }
       });
 
-      // ===== Employee (depends on Station) =====
       selectMap.employee.forEach(eid => {
         let el = id(eid);
         if (el) {
@@ -2703,7 +2704,6 @@
         }
       });
 
-      // ===== Month (depends on FY) =====
       selectMap.month.forEach(eid => {
         let el = id(eid);
         if (el) {
@@ -3092,21 +3092,54 @@
       const headers = pbData.headers;
       const rows = pbData.rows;
 
-      const empHeaders = empData.headers;
-      const empRows = empData.rows;
-
       const nameIdx = headers.indexOf("Employee Name");
       const stationIdx = headers.indexOf("Pay Drawn Station");
       const monthIdx = headers.indexOf("Salary Month");
 
-      const nameEmpIdx = empHeaders.indexOf("Employee Name");
-      const dorEmpIdx = empHeaders.indexOf("DOR");
+      const calcHeaders = window.empCalcHeaders || [];
+      const calcRows = window.empCalcRows || [];
 
-      // 🔥 SAFE MONTH HANDLING (FIXED)
+      const nameCalc = getColIndex(calcHeaders, "Employee Name");
+      const stationCalc = getColIndex(calcHeaders, "Station");
+      const dorIdx = getColIndex(calcHeaders, "Superannuation");
+
       const prevMonth = getPreviousMonthStr(nextMonth);
       const nextVal = parseMonthYear(nextMonth);
+      const prevMonthVal = nextVal - 1;
 
-      // 🔥 Duplicate check
+      /* 🔹 PARSE DOR */
+      function parseDOR(dorStr) {
+        if (!dorStr) return 0;
+
+        const months = {
+          Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+          Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+        };
+
+        const parts = String(dorStr).split(",");
+        if (parts.length !== 2) return 0;
+
+        const year = parseInt(parts[1].trim());
+        const monPart = parts[0].split("-")[0];
+        const month = months[monPart];
+
+        return year * 100 + month;
+      }
+
+      /* 🔹 GET DOR FROM CALCULATED DATA */
+      function getEmpDOR(empName, station) {
+
+        const row = calcRows.find(r =>
+          String(r[nameCalc]).trim() === String(empName).trim() &&
+          String(r[stationCalc]).trim() === String(station).trim()
+        );
+
+        if (!row) return 0;
+
+        return parseDOR(row[dorIdx]);
+      }
+
+      /* 🔹 DUPLICATE CHECK */
       const exists = (name) => {
         return rows.some(r =>
           String(r[stationIdx]).trim() === String(station).trim() &&
@@ -3115,40 +3148,29 @@
         );
       };
 
-      // 🔥 Get DOR
-      const getDOR = (name) => {
-        let row = empRows.find(r =>
-          String(r[nameEmpIdx]).trim() === String(name).trim()
-        );
-        return row ? row[dorEmpIdx] : null;
-      };
-
-      let newRows = []; // ✅ IMPORTANT FIX
+      let newRows = [];
 
       rows.forEach(row => {
 
         const rowStation = String(row[stationIdx]).trim();
-        const selStation = String(station).trim();
         const rowMonth = String(row[monthIdx]).trim();
 
         // 🔹 Only previous month rows
-        if (rowStation === selStation && rowMonth === prevMonth) {
+        if (rowStation === String(station).trim() && rowMonth === prevMonth) {
 
           const empName = String(row[nameIdx]).trim();
 
           // ❌ Skip duplicate
           if (exists(empName)) return;
 
-          // 🔥 Check DOR
-          const dor = getDOR(empName);
-          const dorVal = parseDOR(dor);
+          const dorVal = getEmpDOR(empName, station);
 
-          if (dorVal && dorVal < nextVal) {
-            //console.log("❌ Skipped (Retired):", empName);
+          // ❌ Skip if retired in CURRENT month
+          if (dorVal && dorVal === prevMonthVal) {
             return;
           }
 
-          // ✅ Copy row safely
+          // ✅ Copy row
           const newRow = [...row];
           newRow[monthIdx] = nextMonth;
 
@@ -3156,15 +3178,10 @@
         }
       });
 
-      // 🔥 PUSH AFTER LOOP (CRITICAL FIX)
+      // 🔥 PUSH AFTER LOOP
       rows.push(...newRows);
 
       //console.log("✅ Copied rows:", newRows.length);
-
-      // 🔥 DEBUG (VERY USEFUL)
-      if (newRows.length === 0) {
-        //console.warn("⚠ No previous data found for:", prevMonth, station);
-      }
     }
 
 
@@ -3404,78 +3421,71 @@
     }
 
 
+    function setupToggleButton(btnId, config) {
 
-    let isPBProcessing = false;
+      let btn = id(btnId);
+      if (!btn) return;
 
-function setupToggleButton(btnId, config) {
+      let isEditMode = false;
 
-  let btn = id(btnId);
-  if (!btn) return;
+      btn.onclick = async () => {   // ✅ overwrite instead of clone
 
-  // 🔥 remove old listeners
-  btn.replaceWith(btn.cloneNode(true));
-  btn = id(btnId);
+        if (isPBProcessing) return;
+        isPBProcessing = true;
 
-  let isEditMode = false;
+        const printBtn = id("PBprintBtn");
+        const excelBtn = id("PBexcelBtn");
+        const wrapper = document.querySelector(".PB-Table-Wrapper");
 
-  on(btn, "click", async () => {
+        try {
 
-    if (isPBProcessing) return;
-    isPBProcessing = true;
+          if (!isEditMode) {
 
-    const printBtn = id("PBprintBtn");
-    const excelBtn = id("PBexcelBtn");
-    const wrapper = document.querySelector(".PB-Table-Wrapper");
+            isEditMode = true;
 
-    try {
+            btn.classList.add(config.className);
+            deactivateOthers(btn);
+            toggleFilters(true);
 
-      if (!isEditMode) {
+            if (printBtn) printBtn.disabled = true;
+            if (excelBtn) excelBtn.disabled = true;
 
-        isEditMode = true;
+            wrapper?.classList.add("edit-mode");
 
-        btn.classList.add(config.className);
-        deactivateOthers(btn);
-        toggleFilters(true);
+            btn.querySelector("span").textContent = config.activeText;
+            updateIcon(btn, config.activeIcon);
 
-        if (printBtn) printBtn.disabled = true;
-        if (excelBtn) excelBtn.disabled = true;
+            refreshPBView();
+            return;
+          }
 
-        wrapper?.classList.add("edit-mode");
+          // 🔥 SAVE
+          await savePBData();
 
-        btn.querySelector("span").textContent = config.activeText;
-        updateIcon(btn, config.activeIcon);
+          isEditMode = false;
 
-        refreshPBView();
-        return;
-      }
+          btn.classList.remove(config.className);
+          enableAllButtons();
+          toggleFilters(false);
 
-      // 🔥 SAVE
-      await savePBData();
+          wrapper?.classList.remove("edit-mode");
 
-      isEditMode = false;
+          if (printBtn) printBtn.disabled = false;
+          if (excelBtn) excelBtn.disabled = false;
 
-      btn.classList.remove(config.className);
-      enableAllButtons();
-      toggleFilters(false);
+          btn.querySelector("span").textContent = config.defaultText;
+          updateIcon(btn, config.defaultIcon);
 
-      wrapper?.classList.remove("edit-mode");
+          refreshPBView();
 
-      if (printBtn) printBtn.disabled = false;
-      if (excelBtn) excelBtn.disabled = false;
+        } catch (err) {
+          console.error("❌ Error:", err);
+        } finally {
+          isPBProcessing = false;
+        }
 
-      btn.querySelector("span").textContent = config.defaultText;
-      updateIcon(btn, config.defaultIcon);
-
-      refreshPBView();
-
-    } catch (err) {
-      console.error("❌ Error:", err);
-    } finally {
-      isPBProcessing = false;
+      };
     }
-
-  });
-}
 
 
     function updateIcon(btn, iconName) {
@@ -4592,26 +4602,31 @@ function setupToggleButton(btnId, config) {
 
       const currentVal = parseMonthYear(currentMonth);
 
-      /* 🔹 USE empData (NO sheetCache) */
-      if (!empData || !empData.headers || !empData.rows) return;
+      /* 🔹 USE CALCULATED DATA (NOT empData) */
+      const calcHeaders = window.empCalcHeaders || [];
+      const calcRows = window.empCalcRows || [];
 
-      const empHeaders = empData.headers;
-      const empRows = empData.rows;
+      const nameIdx = getColIndex(calcHeaders, "Employee Name");
+      const stationIdx = getColIndex(calcHeaders, "Station");
+      const dorIdx = getColIndex(calcHeaders, "Superannuation");
 
-      const nameIdx = getColIndex(empHeaders, "Employee Name");
-      const dorIdx = getColIndex(empHeaders, "DOR");
+      const station = id("PayBillPage_Station")?.value;
 
-      let dor = null;
+      /* 🔹 FIND EMP ROW */
+      let dorStr = null;
 
-      for (let i = 0; i < empRows.length; i++) {
+      for (let i = 0; i < calcRows.length; i++) {
 
-        if (String(empRows[i][nameIdx]).trim() === String(empName).trim()) {
-          dor = empRows[i][dorIdx];
+        if (
+          String(calcRows[i][nameIdx]).trim() === String(empName).trim() &&
+          String(calcRows[i][stationIdx]).trim() === String(station).trim()
+        ) {
+          dorStr = calcRows[i][dorIdx];
           break;
         }
       }
 
-      const dorVal = parseDOR(dor);
+      const dorVal = parseDOR(dorStr);
 
       const next1 = addMonths(currentVal, 1);
       const next2 = addMonths(currentVal, 2);
@@ -4619,7 +4634,7 @@ function setupToggleButton(btnId, config) {
       const gpfInput = getCellInput(tr, "GPF");
       if (!gpfInput) return;
 
-      /* 🔥 CONDITION */
+      /* 🔥 FINAL CONDITION (UNCHANGED LOGIC) */
       if (dorVal === currentVal || dorVal === next1 || dorVal === next2) {
 
         let diff = 0;
@@ -4636,7 +4651,7 @@ function setupToggleButton(btnId, config) {
         }
 
         // 🔥 DISABLE GPF
-        gpfInput.value = 0;
+        gpfInput.value = formatCurrency(0);
         gpfInput.disabled = true;
 
         gpfInput.style.backgroundColor = "#ffffff";
@@ -4660,7 +4675,7 @@ function setupToggleButton(btnId, config) {
       if (GPF_MESSAGES.length > 0) {
 
         const message =
-          GPF_MESSAGES.join(", ") + ". Hence GPF is disabled.";
+          GPF_MESSAGES.join(", ") + ". Hence GPF is 0 (disabled).";
 
         gpfError.textContent = "⚠ " + message;
 
@@ -5154,8 +5169,7 @@ function setupToggleButton(btnId, config) {
     on("PayBillPage_SalMonth", "change", refreshPBView);
 
 
-    let isAddMode = false;
-    let isEditMode = false;
+
 
     function getNextMonthStr(current) {
 
@@ -5249,7 +5263,6 @@ function setupToggleButton(btnId, config) {
       fyEl.value = fy;
     }
 
-
     function addNewEmployeesFromEmpDB(nextMonth, station) {
 
       if (!pbData || !empData) return;
@@ -5261,38 +5274,21 @@ function setupToggleButton(btnId, config) {
       const empRows = empData.rows;
 
       const namePB = getColIndex(pbHeaders, "Employee Name");
-      const stationPB = getColIndex(pbHeaders, "Pay Drawn Station"); // 🔥 FIXED
+      const stationPB = getColIndex(pbHeaders, "Pay Drawn Station");
       const monthPB = getColIndex(pbHeaders, "Salary Month");
 
       const nameEmp = getColIndex(empHeaders, "Employee Name");
       const stationEmp = getColIndex(empHeaders, "Station");
-      const dorEmp = getColIndex(empHeaders, "DOR");
 
-      /* 🔹 PREVIOUS MONTH VALUE */
+      const calcHeaders = window.empCalcHeaders || [];
+      const calcRows = window.empCalcRows || [];
+
+      const nameCalc = getColIndex(calcHeaders, "Employee Name");
+      const stationCalc = getColIndex(calcHeaders, "Station");
+      const dorIdx = getColIndex(calcHeaders, "Superannuation");
+
       const nextVal = parseMonthYear(nextMonth);
       const prevMonthVal = nextVal - 1;
-
-      /* 🔹 PREVIOUS MONTH EMPLOYEES */
-      const prevEmployees = new Set();
-
-      pbRows.forEach(r => {
-
-        if (
-          String(r[stationPB]).trim() === String(station).trim() &&
-          parseMonthYear(r[monthPB]) === prevMonthVal
-        ) {
-          prevEmployees.add(String(r[namePB]).trim());
-        }
-      });
-
-      /* 🔹 EXIST CHECK */
-      const exists = name => pbRows.some(r => {
-        return (
-          String(r[stationPB]).trim() === String(station).trim() &&
-          parseMonthYear(r[monthPB]) === nextVal &&
-          String(r[namePB]).trim() === name
-        );
-      });
 
       /* 🔹 PARSE DOR */
       function parseDOR(dorStr) {
@@ -5313,6 +5309,60 @@ function setupToggleButton(btnId, config) {
         return year * 100 + month;
       }
 
+      /* 🔹 GET DOR FROM CALCULATED DATA */
+      function getEmpDOR(empName, station) {
+
+        const row = calcRows.find(r =>
+          String(r[nameCalc]).trim() === String(empName).trim() &&
+          String(r[stationCalc]).trim() === String(station).trim()
+        );
+
+        if (!row) return 0;
+
+        return parseDOR(row[dorIdx]);
+      }
+
+      /* 🔥 STEP 1: REMOVE employees retiring THIS month */
+      for (let i = pbRows.length - 1; i >= 0; i--) {
+
+        const r = pbRows[i];
+
+        if (
+          String(r[stationPB]).trim() === String(station).trim() &&
+          parseMonthYear(r[monthPB]) === nextVal
+        ) {
+
+          const empName = String(r[namePB]).trim();
+          const dorVal = getEmpDOR(empName, station);
+
+          // ❌ DELETE if retired in CURRENT month
+          if (dorVal && dorVal === prevMonthVal) {
+            pbRows.splice(i, 1);
+          }
+        }
+      }
+
+      /* 🔹 PREVIOUS MONTH EMPLOYEES */
+      const prevEmployees = new Set();
+
+      pbRows.forEach(r => {
+        if (
+          String(r[stationPB]).trim() === String(station).trim() &&
+          parseMonthYear(r[monthPB]) === prevMonthVal
+        ) {
+          prevEmployees.add(String(r[namePB]).trim());
+        }
+      });
+
+      /* 🔹 EXIST CHECK */
+      const exists = name => pbRows.some(r => {
+        return (
+          String(r[stationPB]).trim() === String(station).trim() &&
+          parseMonthYear(r[monthPB]) === nextVal &&
+          String(r[namePB]).trim() === name
+        );
+      });
+
       let count = 0;
 
       /* 🔹 ADD EMPLOYEES */
@@ -5329,10 +5379,10 @@ function setupToggleButton(btnId, config) {
         // ❌ ALREADY EXISTS
         if (exists(empName)) return;
 
-        /* 🔹 DOR CHECK */
-        const dorVal = parseDOR(emp[dorEmp]);
+        const dorVal = getEmpDOR(empName, station);
 
-        if (dorVal && dorVal === nextVal) return;
+        // ❌ DO NOT ADD if retiring THIS month
+        if (dorVal && dorVal === prevMonthVal) return;
 
         /* 🔹 CREATE ROW */
         const row = new Array(pbHeaders.length).fill("");
@@ -5358,6 +5408,8 @@ function setupToggleButton(btnId, config) {
 
       //console.log("✅ Added Employees:", count);
     }
+
+
 
 
     function refreshPBView() {
@@ -5389,57 +5441,51 @@ function setupToggleButton(btnId, config) {
       setDAPercent();
     }
 
-
     on("PBaddBtn", "click", () => {
-
+      console.log("BTN isAddMode:", isAddMode);
       const monthEl = id("PayBillPage_SalMonth");
       const station = id("PayBillPage_Station")?.value;
 
       if (!monthEl || !station) return;
 
-      if (isAddMode) {
+      if (!isAddMode) {
+
+        // 🔥 FIRST CLICK → ENTER ADD MODE
+        isEditMode = false;
+        isAddMode = true;
+
+        console.log("ADD MODE ACTIVATED");
+
+        const currentMonth = String(monthEl.value || "").trim();
+        const nextMonth = getNextMonthStr(currentMonth);
+
+        copyPreviousMonthData(nextMonth, station);
+        addNewEmployeesFromEmpDB(nextMonth, station);
+
+        filters.station = String(station).trim();
+        filters.month = String(nextMonth).trim();
+        filters.fy = getFinancialYear(nextMonth);
+
+        applyFilters();
+        refreshPBView();
+
+        const el = id("PayBillPage_SalMonth");
+        if (el) {
+          el.value = nextMonth;
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        updateFYDropdown(nextMonth);
+
+      } else {
+
+        // 🔥 SECOND CLICK → SAVE
+        console.log("SAVE MODE");
         savePBData("ADD");
+
         isAddMode = false;
-        return;
       }
 
-      isEditMode = false;
-      isAddMode = true;
-
-      console.log("ADD MODE ACTIVE");
-
-      const currentMonth = String(monthEl.value || "").trim();
-      const nextMonth = getNextMonthStr(currentMonth);
-
-      //console.log("Next Month:", nextMonth);
-
-      // 🔥 STEP 1: COPY DATA FIRST
-      copyPreviousMonthData(nextMonth, station);
-      addNewEmployeesFromEmpDB(nextMonth, station);
-
-
-      // 🔥 STEP 3: SET FILTERS AFTER DATA EXISTS
-      filters.station = String(station).trim();
-      filters.month = String(nextMonth).trim();
-      filters.fy = getFinancialYear(nextMonth);
-
-      //console.log("Filters:", filters);
-
-      // 🔥 STEP 4: REBUILD UI
-      applyFilters();
-      refreshPBView();
-
-      // 🔥 STEP 5: FORCE SELECT (NO TIMEOUT NEEDED)
-      const el = id("PayBillPage_SalMonth");
-      if (el) {
-        el.value = nextMonth;
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-      }
-
-      // 🔥 STEP 6: UPDATE FY DROPDOWN
-      updateFYDropdown(nextMonth);
-
-      //console.log("🚀 ADD MODE ACTIVE");
     });
 
 
@@ -5456,8 +5502,6 @@ function setupToggleButton(btnId, config) {
         return;
       }
 
-      // 🔥 VERY IMPORTANT
-      isAddMode = false;
       isEditMode = true;
 
       console.log("EDIT MODE ACTIVE");
@@ -5657,8 +5701,8 @@ function setupToggleButton(btnId, config) {
       /* =========================
         🔹 RESET MODES
       ========================= */
-      isAddMode = false;
-      isEditMode = false;
+      //isAddMode = false;
+      //isEditMode = false;
 
       //console.log("Exited Modes");
     }
