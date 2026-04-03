@@ -1741,17 +1741,19 @@
 
         let result = await res.json();
 
-        console.log("API:", api, result); // debug
+        console.log("API:", api, result);
+
+        // 🔥 ADD THIS HERE (IMPORTANT)
+        if (api === "pb") pbData = result;
+        if (api === "emp") empData = result;
 
         let headers, data;
 
-        // 🔥 HANDLE BOTH API FORMATS
+        // 🔥 HANDLE BOTH FORMATS
         if (Array.isArray(result)) {
-          // OLD FORMAT (get_all_records)
           headers = Object.keys(result[0]);
           data = result.map(obj => headers.map(h => obj[h]));
         } else if (result.headers && result.rows) {
-          // NEW FORMAT (get_all_values)
           headers = result.headers;
           data = result.rows;
         } else {
@@ -1769,21 +1771,21 @@
 
         if (!data || data.length === 0) return;
 
-        // ==============HEADER=========================
+        // 🔹 HEADER
         let thead = "<thead><tr>";
         headers.forEach(h => {
           thead += `<th>${h}</th>`;
         });
         thead += "</tr></thead>";
 
-        // =============BODY=========================
+        // 🔹 BODY
         let tbody = "<tbody>";
 
         data.forEach(row => {
           let tr = "<tr>";
 
           row.forEach(val => {
-            tr += `<td>${number(val) ?? ""}</td>`;
+            tr += `<td>${val ?? ""}</td>`;
           });
 
           tr += "</tr>";
@@ -1792,13 +1794,14 @@
 
         tbody += "</tbody>";
 
-        // ===========FINAL TABLE========================
+        // 🔹 FINAL TABLE
         table.innerHTML = thead + tbody;
 
       } catch (err) {
         console.error("Error loading table:", api, err);
       }
     }
+
 
     async function loadAllData() {
       await Promise.all([
@@ -2607,7 +2610,7 @@
       }
 
       // ================= FY CHANGE → MONTH LOGIC =================
-      if (filters.fy) {
+      if (filters.fy || isAddMode) {
 
         let validMonths = new Set();
 
@@ -2615,8 +2618,14 @@
           let month = r[monthIndex];
           let fy = getFinancialYear(month);
 
-          if (fy === filters.fy) {
+          if (isAddMode) {
             validMonths.add(month);
+          } else if (fy === filters.fy) {
+            validMonths.add(month);
+          }
+
+          if (isAddMode && filters.month) {
+            validMonths.add(filters.month);
           }
         });
 
@@ -2635,12 +2644,16 @@
         });
 
         // 🔥 KEEP OR SELECT LAST MONTH
-        if (filters.month && validMonths.has(filters.month)) {
-          // keep
+        if (isAddMode) {
+          // 🔥 DO NOT OVERRIDE MONTH IN ADD MODE
         } else {
-          filters.month = sortedMonths.length
-            ? sortedMonths[sortedMonths.length - 1]
-            : "";
+          if (filters.month && validMonths.has(filters.month)) {
+            // keep
+          } else {
+            filters.month = sortedMonths.length
+              ? sortedMonths[sortedMonths.length - 1]
+              : "";
+          }
         }
 
         // 🔥 BUILD MONTH DROPDOWN (NO OPTION LOSS)
@@ -2657,7 +2670,9 @@
           });
 
           // 🔥 IMPORTANT FIX (NO AUTO "ALL")
-          select.value = filters.month;
+          if (!isAddMode) {
+            select.value = filters.month;
+          }
         });
 
       }
@@ -2697,6 +2712,7 @@
         }
       });
     }
+
 
     function initGlobalEvents() {
 
@@ -2952,7 +2968,7 @@
 
 
     function createPayBillViewTables(station, selectedFY, selectedMonth) {
-      console.log("VIEW FUNCTION CALLED");
+      //console.log("VIEW FUNCTION CALLED");
       if (!pbData || !pbData.headers || !pbData.rows) return;
 
       const headers = pbData.headers;
@@ -3016,9 +3032,9 @@
         station,
         selectedMonth
       );
-      console.log("Filtered Rows:", filteredRows.length);
-      console.log("GO Rows:", goRows.length);
-      console.log("NPS Rows:", npsRows.length);
+      //console.log("Filtered Rows:", filteredRows.length);
+      //console.log("GO Rows:", goRows.length);
+      //console.log("NPS Rows:", npsRows.length);
 
     }
 
@@ -3086,14 +3102,15 @@
       const nameEmpIdx = empHeaders.indexOf("Employee Name");
       const dorEmpIdx = empHeaders.indexOf("DOR");
 
+      // 🔥 SAFE MONTH HANDLING (FIXED)
+      const prevMonth = getPreviousMonthStr(nextMonth);
       const nextVal = parseMonthYear(nextMonth);
-      const prevVal = nextVal - 1;
 
-      // 🔥 Check duplicate
+      // 🔥 Duplicate check
       const exists = (name) => {
         return rows.some(r =>
           String(r[stationIdx]).trim() === String(station).trim() &&
-          parseMonthYear(r[monthIdx]) === nextVal &&
+          String(r[monthIdx]).trim() === String(nextMonth).trim() &&
           String(r[nameIdx]).trim() === String(name).trim()
         );
       };
@@ -3106,17 +3123,16 @@
         return row ? row[dorEmpIdx] : null;
       };
 
-
-      let count = 0;
+      let newRows = []; // ✅ IMPORTANT FIX
 
       rows.forEach(row => {
 
         const rowStation = String(row[stationIdx]).trim();
         const selStation = String(station).trim();
-        const rowMonth = parseMonthYear(row[monthIdx]);
+        const rowMonth = String(row[monthIdx]).trim();
 
         // 🔹 Only previous month rows
-        if (rowStation === selStation && rowMonth === prevVal) {
+        if (rowStation === selStation && rowMonth === prevMonth) {
 
           const empName = String(row[nameIdx]).trim();
 
@@ -3128,20 +3144,27 @@
           const dorVal = parseDOR(dor);
 
           if (dorVal && dorVal < nextVal) {
-            console.log("❌ Skipped (Retired):", empName);
+            //console.log("❌ Skipped (Retired):", empName);
             return;
           }
 
-          // ✅ Copy row
+          // ✅ Copy row safely
           const newRow = [...row];
           newRow[monthIdx] = nextMonth;
 
-          rows.push(newRow);
-          count++;
+          newRows.push(newRow);
         }
       });
 
-      console.log("✅ Copied rows:", count);
+      // 🔥 PUSH AFTER LOOP (CRITICAL FIX)
+      rows.push(...newRows);
+
+      //console.log("✅ Copied rows:", newRows.length);
+
+      // 🔥 DEBUG (VERY USEFUL)
+      if (newRows.length === 0) {
+        //console.warn("⚠ No previous data found for:", prevMonth, station);
+      }
     }
 
 
@@ -3381,91 +3404,78 @@
     }
 
 
-    function setupToggleButton(btnId, config) {
 
-      const btn = id(btnId);
-      if (!btn) return;
+    let isPBProcessing = false;
 
-      let isEditMode = false;
-      let isProcessing = false; // 🔥 prevent double click
+function setupToggleButton(btnId, config) {
 
-      on(btn, "click", async () => {
+  let btn = id(btnId);
+  if (!btn) return;
 
-        if (isProcessing) return;
-        isProcessing = true;
+  // 🔥 remove old listeners
+  btn.replaceWith(btn.cloneNode(true));
+  btn = id(btnId);
 
-        const printBtn = id("PBprintBtn");
-        const excelBtn = id("PBexcelBtn");
-        const wrapper = document.querySelector(".PB-Table-Wrapper");
+  let isEditMode = false;
 
-        try {
+  on(btn, "click", async () => {
 
-          // =========================
-          // 🔹 ENTER EDIT MODE
-          // =========================
-          if (!isEditMode) {
+    if (isPBProcessing) return;
+    isPBProcessing = true;
 
-            isEditMode = true;
+    const printBtn = id("PBprintBtn");
+    const excelBtn = id("PBexcelBtn");
+    const wrapper = document.querySelector(".PB-Table-Wrapper");
 
-            btn.classList.add(config.className);
+    try {
 
-            deactivateOthers(btn);
-            toggleFilters(true);
+      if (!isEditMode) {
 
-            if (printBtn) printBtn.disabled = true;
-            if (excelBtn) excelBtn.disabled = true;
+        isEditMode = true;
 
-            wrapper?.classList.add("edit-mode");
+        btn.classList.add(config.className);
+        deactivateOthers(btn);
+        toggleFilters(true);
 
-            // 🔹 Text
-            const textEl = btn.querySelector("span");
-            if (textEl) textEl.textContent = config.activeText;
+        if (printBtn) printBtn.disabled = true;
+        if (excelBtn) excelBtn.disabled = true;
 
-            // 🔹 Icon
-            updateIcon(btn, config.activeIcon);
+        wrapper?.classList.add("edit-mode");
 
-            refreshPBView();
+        btn.querySelector("span").textContent = config.activeText;
+        updateIcon(btn, config.activeIcon);
 
-            return;
-          }
+        refreshPBView();
+        return;
+      }
 
-          // =========================
-          // 🔹 SAVE / EXIT
-          // =========================
-          if (isEditMode) {
+      // 🔥 SAVE
+      await savePBData();
 
-            await savePBData(); // 🔥 async safe
+      isEditMode = false;
 
-            isEditMode = false;
+      btn.classList.remove(config.className);
+      enableAllButtons();
+      toggleFilters(false);
 
-            btn.classList.remove(config.className);
+      wrapper?.classList.remove("edit-mode");
 
-            enableAllButtons();
-            toggleFilters(false);
+      if (printBtn) printBtn.disabled = false;
+      if (excelBtn) excelBtn.disabled = false;
 
-            wrapper?.classList.remove("edit-mode");
+      btn.querySelector("span").textContent = config.defaultText;
+      updateIcon(btn, config.defaultIcon);
 
-            if (printBtn) printBtn.disabled = false;
-            if (excelBtn) excelBtn.disabled = false;
+      refreshPBView();
 
-            // 🔹 Reset text
-            const textEl = btn.querySelector("span");
-            if (textEl) textEl.textContent = config.defaultText;
-
-            // 🔹 Reset icon
-            updateIcon(btn, config.defaultIcon);
-
-            refreshPBView();
-          }
-
-        } catch (err) {
-          console.error("❌ Error in toggle:", err);
-        } finally {
-          isProcessing = false;
-        }
-
-      });
+    } catch (err) {
+      console.error("❌ Error:", err);
+    } finally {
+      isPBProcessing = false;
     }
+
+  });
+}
 
 
     function updateIcon(btn, iconName) {
@@ -3525,13 +3535,12 @@
       });
     }
 
+
     function disableAllButtons() {
       document.querySelectorAll(".action-group button").forEach(btn => {
         btn.disabled = true;
       });
     }
-
-
 
 
     function getQtrsTypes() {
@@ -3748,6 +3757,7 @@
       update();
     }
 
+
     function applyTADependency(tr) {
 
       const taCheckbox = getCellInput(tr, "TA Entitled");
@@ -3766,6 +3776,7 @@
       });
     }
 
+
     function applyDisabilityDependency(tr) {
 
       bindDependency({
@@ -3774,6 +3785,7 @@
         disableWhen: false   // disable when unchecked
       });
     }
+
 
     function applyHRADependency(tr) {
 
@@ -3884,6 +3896,7 @@
         }
       });
     }
+
 
     function applyTableColumnRules(table, headers, tableId) {
 
@@ -4204,166 +4217,6 @@
 
       applyTableColumnRules(table, selectedHeaders, tableId);
       recalculateAllTotals();
-    }
-
-    function getNextMonthStr(str) {
-
-      const [mon, year] = str.split("-");
-
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-      let mIndex = months.indexOf(mon);
-      let y = parseInt(year);
-
-      mIndex++;
-
-      if (mIndex > 11) {
-        mIndex = 0;
-        y++;
-      }
-
-      return `${months[mIndex]}-${y}`;
-    }
-
-
-
-    function addNewEmployeesFromEmpDB(nextMonth, station) {
-
-      if (!pbData || !empData) return;
-
-      const pbHeaders = pbData.headers;
-      const pbRows = pbData.rows;
-
-      const empHeaders = empData.headers;
-      const empRows = empData.rows;
-
-      const namePB = getColIndex(pbHeaders, "Employee Name");
-      const stationPB = getColIndex(pbHeaders, "Pay Drawn Station"); // 🔥 FIXED
-      const monthPB = getColIndex(pbHeaders, "Salary Month");
-
-      const nameEmp = getColIndex(empHeaders, "Employee Name");
-      const stationEmp = getColIndex(empHeaders, "Station");
-      const dorEmp = getColIndex(empHeaders, "DOR");
-
-      /* 🔹 PREVIOUS MONTH VALUE */
-      const nextVal = parseMonthYear(nextMonth);
-      const prevMonthVal = nextVal - 1;
-
-      /* 🔹 PREVIOUS MONTH EMPLOYEES */
-      const prevEmployees = new Set();
-
-      pbRows.forEach(r => {
-
-        if (
-          String(r[stationPB]).trim() === String(station).trim() &&
-          parseMonthYear(r[monthPB]) === prevMonthVal
-        ) {
-          prevEmployees.add(String(r[namePB]).trim());
-        }
-      });
-
-      /* 🔹 EXIST CHECK */
-      const exists = name => pbRows.some(r => {
-        return (
-          String(r[stationPB]).trim() === String(station).trim() &&
-          parseMonthYear(r[monthPB]) === nextVal &&
-          String(r[namePB]).trim() === name
-        );
-      });
-
-      /* 🔹 PARSE DOR */
-      function parseDOR(dorStr) {
-        if (!dorStr) return 0;
-
-        const months = {
-          Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
-          Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
-        };
-
-        const parts = String(dorStr).split(",");
-        if (parts.length !== 2) return 0;
-
-        const year = parseInt(parts[1].trim());
-        const monPart = parts[0].split("-")[0];
-        const month = months[monPart];
-
-        return year * 100 + month;
-      }
-
-      let count = 0;
-
-      /* 🔹 ADD EMPLOYEES */
-      empRows.forEach(emp => {
-
-        const empName = String(emp[nameEmp] || "").trim();
-        const empStation = String(emp[stationEmp] || "").trim();
-
-        if (!empName || empStation !== String(station).trim()) return;
-
-        // ✅ MUST EXIST IN PREVIOUS MONTH
-        if (!prevEmployees.has(empName)) return;
-
-        // ❌ ALREADY EXISTS
-        if (exists(empName)) return;
-
-        /* 🔹 DOR CHECK */
-        const dorVal = parseDOR(emp[dorEmp]);
-
-        if (dorVal && dorVal === nextVal) return;
-
-        /* 🔹 CREATE ROW */
-        const row = new Array(pbHeaders.length).fill("");
-
-        row[namePB] = empName;
-        row[stationPB] = station;
-        row[monthPB] = nextMonth;
-
-        const set = (col, val) => {
-          const i = getColIndex(pbHeaders, col);
-          if (i !== -1) row[i] = val;
-        };
-
-        // 🔥 DEFAULT VALUES
-        set("Pay Level", 1);
-        set("7CPC Index", 1);
-        set("HRA Entitled", true);
-        set("TA Entitled", true);
-
-        pbRows.push(row);
-        count++;
-      });
-
-      console.log("✅ Added Employees:", count);
-    }
-
-
-    function refreshPBView() {
-
-      const station = id("PayBillPage_Station")?.value;
-      const fy = id("PayBillPage_FY")?.value;
-      const month = id("PayBillPage_SalMonth")?.value;
-
-      if (!station || !month) return;
-
-      // 🔥 CLEAR TABLES
-      ["PB_GOEditTbl", "PB_NPSEditTbl", "PB_GOViewTbl", "PB_NPSViewTbl"]
-        .forEach(idName => {
-          const el = id(idName);
-          if (el) el.innerHTML = "";
-        });
-
-      const wrapper = document.querySelector(".PB-Table-Wrapper");
-      const isEditMode = wrapper?.classList.contains("edit-mode");
-
-      if (isEditMode) {
-        createPayBillEditTables();
-        recalculateAllRows();
-        recalculateAllTotals();
-      } else {
-        createPayBillViewTables(station, fy, month);
-      }
-
-      setDAPercent();
     }
 
 
@@ -5033,68 +4886,68 @@
 
     function calculateCGEIS(tr, tableId) {
 
-  const cgeisInput = getCellInput(tr, "CGEIS");
-  if (!cgeisInput) return;
+      const cgeisInput = getCellInput(tr, "CGEIS");
+      if (!cgeisInput) return;
 
-  const isGO = tableId === "PB_GOEditTbl";
+      const isGO = tableId === "PB_GOEditTbl";
 
-  /* =========================
-     🔹 NPS → always 0
-  ========================= */
-  if (!isGO) {
-    setValue(cgeisInput, 0);
-    return;
-  }
+      /* =========================
+         🔹 NPS → always 0
+      ========================= */
+      if (!isGO) {
+        setValue(cgeisInput, 0);
+        return;
+      }
 
-  /* =========================
-     🔹 NAME FETCH
-  ========================= */
-  const name = tr.children[0]?.textContent?.trim() || "";
-  if (!name) return;
+      /* =========================
+         🔹 NAME FETCH
+      ========================= */
+      const name = tr.children[0]?.textContent?.trim() || "";
+      if (!name) return;
 
-  /* =========================
-     🔹 VALIDATE empData
-  ========================= */
-  if (!empData || !empData.headers || !empData.rows) return;
+      /* =========================
+         🔹 VALIDATE empData
+      ========================= */
+      if (!empData || !empData.headers || !empData.rows) return;
 
-  const headers = empData.headers;
-  const rows = empData.rows;
+      const headers = empData.headers;
+      const rows = empData.rows;
 
-  const nameIndex = getColIndex(headers, "Employee Name");
-  const groupIndex = getColIndex(headers, "Group");
+      const nameIndex = getColIndex(headers, "Employee Name");
+      const groupIndex = getColIndex(headers, "Group");
 
-  if (nameIndex === -1 || groupIndex === -1) return;
+      if (nameIndex === -1 || groupIndex === -1) return;
 
-  let amount = 0;
+      let amount = 0;
 
-  /* =========================
-     🔹 LOOKUP (FIXED)
-  ========================= */
-  for (let i = 0; i < rows.length; i++) {
+      /* =========================
+         🔹 LOOKUP (FIXED)
+      ========================= */
+      for (let i = 0; i < rows.length; i++) {
 
-    const empName = String(rows[i][nameIndex] || "").trim();
+        const empName = String(rows[i][nameIndex] || "").trim();
 
-    if (
-      empName.replace(/\s+/g, "").toLowerCase() ===
-      name.replace(/\s+/g, "").toLowerCase()
-    ) {
+        if (
+          empName.replace(/\s+/g, "").toLowerCase() ===
+          name.replace(/\s+/g, "").toLowerCase()
+        ) {
 
-      const group = String(rows[i][groupIndex] || "").trim();
-      const firstLetter = group.charAt(0).toUpperCase();
+          const group = String(rows[i][groupIndex] || "").trim();
+          const firstLetter = group.charAt(0).toUpperCase();
 
-      if (firstLetter === "A") amount = 120;
-      else if (firstLetter === "B") amount = 60;
-      else if (firstLetter === "C") amount = 30;
+          if (firstLetter === "A") amount = 120;
+          else if (firstLetter === "B") amount = 60;
+          else if (firstLetter === "C") amount = 30;
 
-      break;
+          break;
+        }
+      }
+
+      /* =========================
+         🔹 SET VALUE
+      ========================= */
+      setValue(cgeisInput, amount);
     }
-  }
-
-  /* =========================
-     🔹 SET VALUE
-  ========================= */
-  setValue(cgeisInput, amount);
-}
 
 
     function calculateITFields(tr) {
@@ -5302,6 +5155,241 @@
 
 
     let isAddMode = false;
+    let isEditMode = false;
+
+    function getNextMonthStr(current) {
+
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
+
+      const [mon, yearStr] = current.split("-");
+      let year = Number(yearStr);
+
+      let idx = months.indexOf(mon);
+      if (idx === -1) return current;
+
+      // Feb → Mar (same year)
+      if (mon === "Feb") return `Mar-${year}`;
+
+      idx++;
+
+      if (idx >= 12) {
+        idx = 0;
+        year++;
+      }
+
+      return `${months[idx]}-${year}`;
+    }
+
+    function getPreviousMonthStr(current) {
+
+      if (typeof current !== "string") {
+        current = String(current?.value || current || "");
+      }
+
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
+
+      const [mon, yearStr] = current.split("-");
+      let year = Number(yearStr);
+
+      let idx = months.indexOf(mon);
+      if (idx === -1) return current;
+
+      idx--;
+
+      if (idx < 0) {
+        idx = 11;
+        year--;
+      }
+
+      return `${months[idx]}-${year}`;
+    }
+
+
+    function updateFYDropdown(monthStr) {
+
+      const fyEl = id("PayBillPage_FY");
+      if (!fyEl || !monthStr) return;
+
+      const [mon, yearStr] = monthStr.split("-");
+      const year = Number(yearStr);
+
+      let fyStart, fyEnd;
+
+      // 🔥 FY: Mar → Feb
+      if (["Jan", "Feb"].includes(mon)) {
+        fyStart = year - 1;
+        fyEnd = year;
+      } else {
+        fyStart = year;
+        fyEnd = year + 1;
+      }
+
+      // 🔥 FORMAT → YYYY-YY
+      const fy = `${fyStart}-${String(fyEnd).slice(-2)}`;
+
+      // 🔥 CHECK EXISTING
+      let exists = Array.from(fyEl.options)
+        .some(opt => opt.value === fy);
+
+      if (!exists) {
+        const opt = document.createElement("option");
+        opt.value = fy;
+        opt.textContent = fy;
+        fyEl.appendChild(opt);
+
+        //console.log("Added FY:", fy);
+      }
+
+      fyEl.value = fy;
+    }
+
+
+    function addNewEmployeesFromEmpDB(nextMonth, station) {
+
+      if (!pbData || !empData) return;
+
+      const pbHeaders = pbData.headers;
+      const pbRows = pbData.rows;
+
+      const empHeaders = empData.headers;
+      const empRows = empData.rows;
+
+      const namePB = getColIndex(pbHeaders, "Employee Name");
+      const stationPB = getColIndex(pbHeaders, "Pay Drawn Station"); // 🔥 FIXED
+      const monthPB = getColIndex(pbHeaders, "Salary Month");
+
+      const nameEmp = getColIndex(empHeaders, "Employee Name");
+      const stationEmp = getColIndex(empHeaders, "Station");
+      const dorEmp = getColIndex(empHeaders, "DOR");
+
+      /* 🔹 PREVIOUS MONTH VALUE */
+      const nextVal = parseMonthYear(nextMonth);
+      const prevMonthVal = nextVal - 1;
+
+      /* 🔹 PREVIOUS MONTH EMPLOYEES */
+      const prevEmployees = new Set();
+
+      pbRows.forEach(r => {
+
+        if (
+          String(r[stationPB]).trim() === String(station).trim() &&
+          parseMonthYear(r[monthPB]) === prevMonthVal
+        ) {
+          prevEmployees.add(String(r[namePB]).trim());
+        }
+      });
+
+      /* 🔹 EXIST CHECK */
+      const exists = name => pbRows.some(r => {
+        return (
+          String(r[stationPB]).trim() === String(station).trim() &&
+          parseMonthYear(r[monthPB]) === nextVal &&
+          String(r[namePB]).trim() === name
+        );
+      });
+
+      /* 🔹 PARSE DOR */
+      function parseDOR(dorStr) {
+        if (!dorStr) return 0;
+
+        const months = {
+          Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+          Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+        };
+
+        const parts = String(dorStr).split(",");
+        if (parts.length !== 2) return 0;
+
+        const year = parseInt(parts[1].trim());
+        const monPart = parts[0].split("-")[0];
+        const month = months[monPart];
+
+        return year * 100 + month;
+      }
+
+      let count = 0;
+
+      /* 🔹 ADD EMPLOYEES */
+      empRows.forEach(emp => {
+
+        const empName = String(emp[nameEmp] || "").trim();
+        const empStation = String(emp[stationEmp] || "").trim();
+
+        if (!empName || empStation !== String(station).trim()) return;
+
+        // ✅ MUST EXIST IN PREVIOUS MONTH
+        if (!prevEmployees.has(empName)) return;
+
+        // ❌ ALREADY EXISTS
+        if (exists(empName)) return;
+
+        /* 🔹 DOR CHECK */
+        const dorVal = parseDOR(emp[dorEmp]);
+
+        if (dorVal && dorVal === nextVal) return;
+
+        /* 🔹 CREATE ROW */
+        const row = new Array(pbHeaders.length).fill("");
+
+        row[namePB] = empName;
+        row[stationPB] = station;
+        row[monthPB] = nextMonth;
+
+        const set = (col, val) => {
+          const i = getColIndex(pbHeaders, col);
+          if (i !== -1) row[i] = val;
+        };
+
+        // 🔥 DEFAULT VALUES
+        set("Pay Level", 1);
+        set("7CPC Index", 1);
+        set("HRA Entitled", true);
+        set("TA Entitled", true);
+
+        pbRows.push(row);
+        count++;
+      });
+
+      //console.log("✅ Added Employees:", count);
+    }
+
+
+    function refreshPBView() {
+
+      const station = id("PayBillPage_Station")?.value;
+      const fy = id("PayBillPage_FY")?.value;
+      const month = id("PayBillPage_SalMonth")?.value;
+
+      if (!station || !month) return;
+
+      // 🔥 CLEAR TABLES
+      ["PB_GOEditTbl", "PB_NPSEditTbl", "PB_GOViewTbl", "PB_NPSViewTbl"]
+        .forEach(idName => {
+          const el = id(idName);
+          if (el) el.innerHTML = "";
+        });
+
+      const wrapper = document.querySelector(".PB-Table-Wrapper");
+      const isEditMode = wrapper?.classList.contains("edit-mode");
+
+      if (isEditMode) {
+        createPayBillEditTables();
+        recalculateAllRows();
+        recalculateAllTotals();
+      } else {
+        createPayBillViewTables(station, fy, month);
+      }
+
+      setDAPercent();
+    }
+
+
     on("PBaddBtn", "click", () => {
 
       const monthEl = id("PayBillPage_SalMonth");
@@ -5309,88 +5397,149 @@
 
       if (!monthEl || !station) return;
 
-      // 🔥 IF ALREADY IN ADD MODE → ONLY SAVE
       if (isAddMode) {
-        savePBData();   // your upload/save logic
-        console.log("Saved only, no new month added");
+        savePBData("ADD");
+        isAddMode = false;
         return;
       }
 
-      // 🔥 FIRST CLICK → ADD MONTH
-      const nextMonth = getNextMonthStr(monthEl.value);
+      isEditMode = false;
+      isAddMode = true;
 
+      console.log("ADD MODE ACTIVE");
+
+      const currentMonth = String(monthEl.value || "").trim();
+      const nextMonth = getNextMonthStr(currentMonth);
+
+      //console.log("Next Month:", nextMonth);
+
+      // 🔥 STEP 1: COPY DATA FIRST
       copyPreviousMonthData(nextMonth, station);
       addNewEmployeesFromEmpDB(nextMonth, station);
 
-      // 🔹 Add to dropdown
-      const exists = Array.from(monthEl.options).some(opt => opt.value === nextMonth);
 
-      if (!exists) {
-        const opt = document.createElement("option");
-        opt.value = nextMonth;
-        opt.textContent = nextMonth;
-        monthEl.appendChild(opt);
+      // 🔥 STEP 3: SET FILTERS AFTER DATA EXISTS
+      filters.station = String(station).trim();
+      filters.month = String(nextMonth).trim();
+      filters.fy = getFinancialYear(nextMonth);
+
+      //console.log("Filters:", filters);
+
+      // 🔥 STEP 4: REBUILD UI
+      applyFilters();
+      refreshPBView();
+
+      // 🔥 STEP 5: FORCE SELECT (NO TIMEOUT NEEDED)
+      const el = id("PayBillPage_SalMonth");
+      if (el) {
+        el.value = nextMonth;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
       }
 
-      monthEl.value = nextMonth;
-      monthEl.dispatchEvent(new Event("change"));
+      // 🔥 STEP 6: UPDATE FY DROPDOWN
+      updateFYDropdown(nextMonth);
 
-      // 🔥 SET MODE
-      isAddMode = true;
-
-      console.log("Entered ADD MODE");
+      //console.log("🚀 ADD MODE ACTIVE");
     });
 
 
-    async function savePBData() {
+    on("PBeditBtn", "click", () => {
 
+      const monthEl = id("PayBillPage_SalMonth");
+      const station = id("PayBillPage_Station")?.value;
+
+      if (!monthEl || !station) return;
+
+      if (isEditMode) {
+        savePBData("EDIT");
+        isEditMode = false;
+        return;
+      }
+
+      // 🔥 VERY IMPORTANT
+      isAddMode = false;
+      isEditMode = true;
+
+      console.log("EDIT MODE ACTIVE");
+    });
+
+
+    async function savePBData(mode = "ADD") {
+      console.trace("SAVE CALLED");
       const salaryMonth = id("PayBillPage_SalMonth").value;
       const station = id("PayBillPage_Station").value;
       const daPercent = id("PayBillPage_DA%").value;
 
+      if (!salaryMonth || !station) {
+        alert("Month or Station missing");
+        return;
+      }
+
+      /* =========================
+        🔹 EMP LOOKUP (HRIS)
+      ========================= */
       const empHeaders = empData.headers;
       const empRows = empData.rows;
 
-      // 🔥 EmpDB lookup (must already be loaded)
       const empNameIdx = empHeaders.indexOf("Employee Name");
       const hrisIdx = empHeaders.indexOf("HRIS");
 
       function getHRIS(empName) {
         for (let r of empRows) {
-          if (r[empNameIdx] === empName) {
+          if (String(r[empNameIdx]).trim() === String(empName).trim()) {
             return r[hrisIdx] || "";
           }
         }
         return "";
       }
 
-      function getCellValue(cell) {        
+      /* =========================
+        🔹 CLEAN NUMBER
+      ========================= */
+      function cleanNumber(val) {
+        return String(val || "")
+          .replace(/[₹,]/g, "")
+          .trim();
+      }
 
-        // 🔹 CHECKBOX (UPDATED)
-        let checkbox = cell.querySelector("input[type='checkbox']");
+      /* =========================
+        🔹 CELL VALUE READER
+      ========================= */
+      function getCellValue(cell) {
+
+        if (!cell) return "";
+
+        // 🔹 CHECKBOX
+        const checkbox = cell.querySelector("input[type='checkbox']");
         if (checkbox) {
-          return checkbox.checked ? "TRUE" : "FALSE";  // ✅ NOT 1/0
+          return checkbox.checked;
         }
 
-        let textarea = cell.querySelector("textarea");
+        // 🔹 TEXTAREA
+        const textarea = cell.querySelector("textarea");
         if (textarea) {
-          return textarea.value ? textarea.value.trim() : "";
+          return textarea.value?.trim() || "";
         }
 
         // 🔹 INPUT
-        let input = cell.querySelector("input:not([type='checkbox'])");
+        const input = cell.querySelector("input:not([type='checkbox'])");
         if (input) {
-          return input.value ? number(input.value) : "";
+          return cleanNumber(input.value);
         }
 
         // 🔹 SELECT
-        let select = cell.querySelector("select");
-        if (select) return select.value;
+        const select = cell.querySelector("select");
+        if (select) {
+          return select.value || "";
+        }
 
-        // 🔹 HIDDEN COLUMN FIX
-        return cell.textContent.trim();
+        // 🔹 DEFAULT / HIDDEN
+        return cleanNumber(cell.textContent || "");
       }
 
+      /* =========================
+        🔹 TABLE DATA EXTRACTOR
+      ========================= */
       function getTableData(tableId, type) {
 
         const table = document.getElementById(tableId);
@@ -5406,26 +5555,39 @@
 
         rows.forEach(tr => {
 
-          // ❌ SKIP TOTAL ROW
+          // ❌ Skip TOTAL row
           if (tr.innerText.toLowerCase().includes("total")) return;
 
-          let cells = tr.querySelectorAll("td");
+          const cells = tr.querySelectorAll("td");
           let rowObj = {};
 
           headers.forEach((h, i) => {
-            rowObj[h] = getCellValue(cells[i]);
+
+            const cell = cells[i];
+
+            if (!cell) {
+              rowObj[h] = "";
+              return;
+            }
+
+            try {
+              rowObj[h] = getCellValue(cell);
+            } catch (err) {
+              console.warn("Cell error:", h, err);
+              rowObj[h] = "";
+            }
           });
 
-          // 🔥 OVERRIDE VALUES
+          // 🔥 FORCE VALUES
           rowObj["Salary Month"] = salaryMonth;
           rowObj["Pay Drawn Station"] = station;
           rowObj["DA%"] = daPercent;
 
-          // 🔥 HRIS LOOKUP
+          // 🔥 HRIS
           const empName = rowObj["Employee Name"];
           rowObj["HRIS"] = getHRIS(empName);
 
-          // 🔥 Category
+          // 🔥 CATEGORY
           rowObj["Category"] = type;
 
           data.push(rowObj);
@@ -5434,6 +5596,9 @@
         return data;
       }
 
+      /* =========================
+        🔹 COLLECT DATA
+      ========================= */
       const goData = getTableData("PB_GOEditTbl", "GO");
       const npsData = getTableData("PB_NPSEditTbl", "NPS");
 
@@ -5444,21 +5609,42 @@
         return;
       }
 
-      console.log("Final Data:", data);
+      //console.log("Saving Mode:", mode, data);
 
+      /* =========================
+        🔹 SEND TO BACKEND
+      ========================= */
       try {
         const res = await fetch("https://office-management-f425.onrender.com/pb/update", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ data })
+          body: JSON.stringify({
+            data,
+            mode   // 🔥 ADD / EDIT
+          })
         });
 
         const result = await res.json();
 
         if (result.status === "success") {
-          alert(`✅ Saved! Updated: ${result.updated}, Added: ${result.added}`);
+
+          //alert(`✅ ${mode} Success!\nUpdated: ${result.updated}, Added: ${result.added}`);
+          if (mode === "ADD") {
+            alert(`✅ Month Created\nAdded: ${result.added}`);
+          } else {
+            alert(`✅ Changes Saved\nUpdated: ${result.updated}`);
+          }
+
+          // 🔥 STEP 1: reload PBDB (data + table)
+          await loadTable("pb", "PBDB");
+
+          // 🔥 STEP 2: refresh UI
+          applyFilters();
+          refreshPBView();
+
+          console.log("✅ Full UI refreshed");
         } else {
           alert("❌ Error: " + result.message);
         }
@@ -5468,8 +5654,13 @@
         alert("❌ Server error");
       }
 
+      /* =========================
+        🔹 RESET MODES
+      ========================= */
       isAddMode = false;
-      console.log("Exited ADD MODE");
+      isEditMode = false;
+
+      //console.log("Exited Modes");
     }
 
 
@@ -6121,8 +6312,8 @@
       const currentMonth = id("PayBillPage_SalMonth")?.value;
       const prevMonth = getPrevMonthFormatted(currentMonth);
 
-      console.log("Current Month:", currentMonth);
-      console.log("Previous Month:", prevMonth);
+      //console.log("Current Month:", currentMonth);
+      //console.log("Previous Month:", prevMonth);
 
       /* ================= PREVIOUS DATA ================= */
       const prevHeaders = pbData.headers || [];
@@ -6146,7 +6337,7 @@
         }
       }
 
-      console.log("PrevMap:", prevMap);
+      //console.log("PrevMap:", prevMap);
 
       /* ================= HEADER MAP ================= */
       const prevHeaderMap = {};
