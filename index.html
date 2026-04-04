@@ -5288,7 +5288,7 @@ function calculateFYGrossFinal(empName, selectedFY) {
 
       if (String(row[eEmpIndex]).trim() === String(empName).trim()) {
 
-        superMonth = row[supIndex];
+        superMonth = normalizeMonthFormat(row[supIndex]);
         department = row[deptIndex] || "";
 
         if (empName === DEBUG_EMP) {
