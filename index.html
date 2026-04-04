@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-  <title>PayBill Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <base target="_top">
-  <!-- font style -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <!-- Icon -->
-  <script defer src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+  <head>
+    <title>PayBill Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
+    <!-- font style -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet">
+    <!-- Icon -->
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 
-  <style>
+    <style>
     /* =========================
       RESET
       ========================= */
@@ -746,10 +753,10 @@
 
     #PB_GOITCalc,
     #PB_NPSITCalc {
-      flex: 0 0 60px !important;
-      width: 60px !important;
-      min-width: 60px !important;
-      max-width: 60px !important;
+      flex: 0 0 180px !important;
+      width: 180px !important;
+      min-width: 180px !important;
+      max-width: 180px !important;
       border-collapse: separate;
       border-spacing: 0;
       table-layout: auto;
@@ -762,16 +769,47 @@
       z-index: 300;
     }
 
+    .daaArrearsTbl{
+      border-collapse: collapse;
+      border: solid 1.5px black;
+    }
+
+    .daaArrearsTbl th{
+      border-bottom: 1.5px solid black;
+    }
+
+    .daaArrearsTbl th,
+    .daaArrearsTbl td{
+      padding: 2px 4px;
+      text-align: left;
+      border-right: 1px dotted #9ca3af;
+    }
+
+    /* 🔹 inner rows */
+    .daa-row td {
+      border-bottom: 1px dotted #9ca3af;
+    }
+
+    /* 🔹 last row (employee end) */
+    .daa-last-row td {
+      border-bottom: 1.5px solid #000;
+    }
+
+    /* 🔥 force merged cells */
+    .daaArrearsTbl td[rowspan] {
+      border-bottom: 1.5px solid black !important;
+    }
+
     #PB_GOITCalc th,
-#PB_GOITCalc td,
-#PB_NPSITCalc th,
-#PB_NPSITCalc td {
-  width: 100px !important;
-  max-width: 100px !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+    #PB_GOITCalc td,
+    #PB_NPSITCalc th,
+    #PB_NPSITCalc td {
+      width: 180px !important;
+      max-width: 180px !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     #PB_GOITCalc td:first-child,#PB_NPSITCalc td:first-child {
       padding: 0 6px;
@@ -886,7 +924,7 @@
     #PB_GOEditTbl td:first-child,
     #PB_NPSEditTbl td:first-child {
       position: sticky;
-      left: 100px;
+      left: 180px;
       z-index: 8;
       white-space: nowrap;
 
@@ -1227,31 +1265,6 @@
       background: #15803d !important;
     }
 
-    .status {
-      display: inline-block;
-      padding: 3px 8px;
-      font-size: 10px;
-      font-weight: 600;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      margin-left: 10px;
-    }
-
-    /*===== Paid → Green======= */
-    .status.paid {
-      color: #166534;
-      background: #dcfce7;
-      border: 1px solid #86efac;
-    }
-
-    /*===== Unpaid → Red============= */
-    .status.unpaid {
-      color: #991b1b;
-      background: #fee2e2;
-      border: 1px solid #fca5a5;
-    }
-
     /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
   =================================================== */
@@ -1334,388 +1347,486 @@
         width: 140px;
       }
 
-      .status {
-        padding: 3px 8px;
-        font-size: 11px;
-      }
-
-
     }
   </style>
 
-</head>
+  </head>
 
-<body>
+  <body>
 
-  <div class="app">
+    <div class="app">
 
-    <div class="left-panel collapsed" id="sidebar">
+      <div class="left-panel collapsed" id="sidebar">
 
-      <!-- Toggle button -->
-      <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+        <!-- Toggle button -->
+        <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-      <div class="menu-list">
+        <div class="menu-list">
 
-        <button class="menu-btn active" data-tooltip="Dashboard" data-page="DashBoard">
-          <i data-lucide="layout-dashboard"></i>
-          <span>Dashboard</span>
-        </button>
+          <button class="menu-btn active" data-tooltip="Dashboard"
+            data-page="DashBoard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Employee Details" data-page="EmpPage">
-          <i data-lucide="user"></i>
-          <span>Employee Details</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Employee Details"
+            data-page="EmpPage">
+            <i data-lucide="user"></i>
+            <span>Employee Details</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Pay Bill" data-page="PayBillPage">
-          <i data-lucide="file-text"></i>
-          <span>Pay Bill</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Pay Bill"
+            data-page="PayBillPage">
+            <i data-lucide="file-text"></i>
+            <span>Pay Bill</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Salary Slip" data-page="SalarySlipPage">
-          <i data-lucide="receipt"></i>
-          <span>Salary Slip</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Salary Slip"
+            data-page="SalarySlipPage">
+            <i data-lucide="receipt"></i>
+            <span>Salary Slip</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
-          <i data-lucide="calculator"></i>
-          <span>Income Tax</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
+            <i data-lucide="calculator"></i>
+            <span>Income Tax</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Pensions" data-page="PensionPage">
-          <i data-lucide="landmark"></i>
-          <span>Pensions</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Pensions"
+            data-page="PensionPage">
+            <i data-lucide="landmark"></i>
+            <span>Pensions</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
-          <i data-lucide="pie-chart"></i>
-          <span>Budgets</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Budgets"
+            data-page="BudgetPage">
+            <i data-lucide="pie-chart"></i>
+            <span>Budgets</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Database" data-page="DatabasePage">
-          <i data-lucide="database"></i>
-          <span>Database</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Database"
+            data-page="DatabasePage">
+            <i data-lucide="database"></i>
+            <span>Database</span>
+          </button>
+
+        </div>
+
+        <div class="menu-footer">
+          <button class="logout-btn" data-tooltip="Logout">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </button>
+        </div>
 
       </div>
 
-      <div class="menu-footer">
-        <button class="logout-btn" data-tooltip="Logout">
-          <i data-lucide="log-out"></i>
-          <span>Logout</span>
-        </button>
-      </div>
+      <div class="right-panel">
 
-    </div>
+        <img class="watermark"
+          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
 
-    <div class="right-panel">
-
-      <img class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-
-      <div class="SectionPage" id="DashBoard">
-        <div class="header">
-          <h2>Office Management</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="EmpPage" style="display:none">
-        <div class="header">
-          <h2>Employee Profile Details</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:100px">
-              <col style="width:300px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:60px">
-              <col style="width:100px">
-              <col style="width:0px">
-              <col style="width:70px">
-              <col style="width:50px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:80px">
-              <col style="width:90px">
-              <col style="width:30px">
-            </colgroup>
-            <tr>
-              <td><label for="EmpPage_Station">Station :</label></td>
-              <td><select id="EmpPage_Station"></select></td>
-              <td><label for="EmpPage_Emp">Employee :</label></td>
-              <td><select id="EmpPage_Emp"></select></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><label>TA Zone :</label></td>
-              <td><input disabled id="EmpPage_TAZone"></td>
-              <td><label>HRA Zone :</label></td>
-              <td><input disabled id="EmpPage_HRAZone"></td>
-              <td></td>
-            </tr>
-          </table>
-          <div class="action-group"></div>
-        </div>
-        <div class="Emp-Table-Wrapper">
-          <table id="EmpDetailTbl">
-            <tr>
-              <th colspan="2">Personal Details</th>
-            </tr>
-            <tr>
-              <td>Name</td>
-              <td id="Employee Name"></td>
-            </tr>
-            <tr>
-              <td>Department</td>
-              <td id="Department"></td>
-            </tr>
-            <tr>
-              <td>HRIS</td>
-              <td id="HRIS"></td>
-            </tr>
-            <tr>
-              <td>Designation</td>
-              <td id="Designation"></td>
-            </tr>
-            <tr>
-              <td>Section</td>
-              <td id="Section"></td>
-            </tr>
-            <tr>
-              <td>Group</td>
-              <td id="Group"></td>
-            </tr>
-            <tr>
-              <td>PAN</td>
-              <td id="PAN"></td>
-            </tr>
-            <tr>
-              <td>Aadhaar</td>
-              <td id="Aadhaar"></td>
-            </tr>
-            <tr>
-              <td>PFMS</td>
-              <td id="PFMS"></td>
-            </tr>
-            <tr>
-              <td>PRAN</td>
-              <td id="PRAN"></td>
-            </tr>
-            <tr>
-              <td>GPF</td>
-              <td id="GPF"></td>
-            </tr>
-            <tr>
-              <td>Salary Account</td>
-              <td id="Account"></td>
-            </tr>
-            <tr>
-              <td>Mobile</td>
-              <td id="Mobile"></td>
-            </tr>
-            <tr>
-              <td>Address</td>
-              <td id="Address"></td>
-            </tr>
-          </table>
-          <table>
-            <tr>
-              <th colspan="2">Pay Details</th>
-            </tr>
-            <tr>
-              <td>Date of Birth</td>
-              <td id="DOB"></td>
-            </tr>
-            <tr>
-              <td>Date of Joining</td>
-              <td id="DOJ"></td>
-            </tr>
-            <tr>
-              <td>Superannuation</td>
-              <td id="Superannuation"></td>
-            </tr>
-            <tr>
-              <td>Last Increment Date</td>
-              <td id="Last Increment"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Salary Month</td>
-              <td id="Last Drawn Salary Month"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Pay Level</td>
-              <td id="Last Drawn Pay Level"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Grade Pay</td>
-              <td id="Last Drawn Grade Pay"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Pay Band</td>
-              <td id="Last Drawn Pay Band"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Basic Pay</td>
-              <td id="Last Drawn Basic Pay"></td>
-            </tr>
-            <tr>
-              <td>Last DA Drawn</td>
-              <td id="Last Drawn DA"></td>
-            </tr>
-            <tr>
-              <td>Qualifying Service as on Today</td>
-              <td id="Qualifying Service"></td>
-            </tr>
-            <tr>
-              <td>Completed 6 Monthly Period as on Today</td>
-              <td id="Completed 6 Monthly Period"></td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="PayBillPage" style="display:none">
-        <div class="header">
-          <h2>Pay Bill Generation</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:100px">
-              <col style="width:300px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:60px">
-              <col style="width:100px">
-              <col style="width:0px">
-              <col style="width:70px">
-              <col style="width:50px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:80px">
-              <col style="width:90px">
-              <col style="width:30px">
-            </colgroup>
-            <tr>
-              <td><label for="PayBillPage_Station">Station :</label></td>
-              <td><select id="PayBillPage_Station"></select></td>
-              <td></td>
-              <td></td>
-              <td style="display:none"><label for="PayBillPage_Emp">Employee
-                  :</label></td>
-              <td style="display:none"><select id="PayBillPage_Emp"></select></td>
-              <td><label for="PayBillPage_FY">FY :</label></td>
-              <td><select id="PayBillPage_FY"></select></td>
-              <td><label for="PayBillPage_SalMonth">Month :</label></td>
-              <td><select id="PayBillPage_SalMonth"></select></td>
-              <td></td>
-              <td><span class="status paid">PAID</span></td>
-              <td><label>DA(%) :</td>
-              <td><input style="max-width:40px;" disabled id="PayBillPage_DA%" type="text"></td>
-              <td><label>TA Zone :</label></td>
-              <td><input disabled id="PayBillPage_TAZone"></td>
-              <td><label>HRA Zone :</label></td>
-              <td><input disabled id="PayBillPage_HRAZone"></td>
-              <td></td>
-            </tr>
-          </table>
-          <div class="action-group">
-            <button id="PBeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
-            <button id="PBaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
-            <button id="PBprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
-            <button id="PBexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+        <div class="SectionPage" id="DashBoard">
+          <div class="header">
+            <h2>Office Management</h2>
           </div>
         </div>
-        <div class="PB-Table-Wrapper">
-          <div class="PB-Table-WrapperGO">
-            <table id="PB_GOViewTbl"></table>
-            <table id="PB_GOITCalc"></table>
-            <table id="PB_GOEditTbl"></table>
-            
+
+        <div class="SectionPage" id="EmpPage" style="display:none">
+          <div class="header">
+            <h2>Employee Profile Details</h2>
           </div>
-          <div class="PB-Table-WrapperNPS">
-            <table id="PB_NPSViewTbl"></table>
-            <table id="PB_NPSITCalc"></table>
-            <table id="PB_NPSEditTbl"></table>            
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:100px">
+                <col style="width:300px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:60px">
+                <col style="width:100px">
+                <col style="width:50px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:90px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="EmpPage_Station">Station :</label></td>
+                <td><select id="EmpPage_Station"></select></td>
+                <td><label for="EmpPage_Emp">Employee :</label></td>
+                <td><select id="EmpPage_Emp"></select></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><label>TA Zone :</label></td>
+                <td><input disabled id="EmpPage_TAZone"></td>
+                <td><label>HRA Zone :</label></td>
+                <td><input disabled id="EmpPage_HRAZone"></td>
+                <td></td>
+              </tr>
+            </table>
+            <div class="action-group"></div>
+          </div>
+          <div class="Emp-Table-Wrapper">
+            <table id="EmpDetailTbl">
+              <tr>
+                <th colspan="2">Personal Details</th>
+              </tr>
+              <tr>
+                <td>Name</td>
+                <td id="Employee Name"></td>
+              </tr>
+              <tr>
+                <td>Department</td>
+                <td id="Department"></td>
+              </tr>
+              <tr>
+                <td>HRIS</td>
+                <td id="HRIS"></td>
+              </tr>
+              <tr>
+                <td>Designation</td>
+                <td id="Designation"></td>
+              </tr>
+              <tr>
+                <td>Section</td>
+                <td id="Section"></td>
+              </tr>
+              <tr>
+                <td>Group</td>
+                <td id="Group"></td>
+              </tr>
+              <tr>
+                <td>PAN</td>
+                <td id="PAN"></td>
+              </tr>
+              <tr>
+                <td>Aadhaar</td>
+                <td id="Aadhaar"></td>
+              </tr>
+              <tr>
+                <td>PFMS</td>
+                <td id="PFMS"></td>
+              </tr>
+              <tr>
+                <td>PRAN</td>
+                <td id="PRAN"></td>
+              </tr>
+              <tr>
+                <td>GPF</td>
+                <td id="GPF"></td>
+              </tr>
+              <tr>
+                <td>Salary Account</td>
+                <td id="Account"></td>
+              </tr>
+              <tr>
+                <td>Mobile</td>
+                <td id="Mobile"></td>
+              </tr>
+              <tr>
+                <td>Address</td>
+                <td id="Address"></td>
+              </tr>
+            </table>
+            <table>
+              <tr>
+                <th colspan="2">Pay Details</th>
+              </tr>
+              <tr>
+                <td>Date of Birth</td>
+                <td id="DOB"></td>
+              </tr>
+              <tr>
+                <td>Date of Joining</td>
+                <td id="DOJ"></td>
+              </tr>
+              <tr>
+                <td>Superannuation</td>
+                <td id="Superannuation"></td>
+              </tr>
+              <tr>
+                <td>Last Increment Date</td>
+                <td id="Last Increment"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Salary Month</td>
+                <td id="Last Drawn Salary Month"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Pay Level</td>
+                <td id="Last Drawn Pay Level"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Grade Pay</td>
+                <td id="Last Drawn Grade Pay"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Pay Band</td>
+                <td id="Last Drawn Pay Band"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Basic Pay</td>
+                <td id="Last Drawn Basic Pay"></td>
+              </tr>
+              <tr>
+                <td>Last DA Drawn</td>
+                <td id="Last Drawn DA"></td>
+              </tr>
+              <tr>
+                <td>Qualifying Service as on Today</td>
+                <td id="Qualifying Service"></td>
+              </tr>
+              <tr>
+                <td>Completed 6 Monthly Period as on Today</td>
+                <td id="Completed 6 Monthly Period"></td>
+              </tr>
+            </table>
           </div>
         </div>
-        <div class="Error_Note">
-          <span id="DA_Error" class="PB-error"></span>
-          <span id="GPF_Error" class="PB-error"></span>
+
+        <div class="SectionPage" id="PayBillPage" style="display:none">
+          <div class="header">
+            <h2>Pay Bill Generation</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:100px">
+                <col style="width:300px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:60px">
+                <col style="width:100px">
+                <col style="width:50px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:90px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="PayBillPage_Station">Station :</label></td>
+                <td><select id="PayBillPage_Station"></select></td>
+                <td></td>
+                <td></td>
+                <td style="display:none"><label for="PayBillPage_Emp">Employee
+                    :</label></td>
+                <td style="display:none"><select
+                    id="PayBillPage_Emp"></select></td>
+                <td><label for="PayBillPage_FY">FY :</label></td>
+                <td><select id="PayBillPage_FY"></select></td>
+                <td><label for="PayBillPage_SalMonth">Month :</label></td>
+                <td><select id="PayBillPage_SalMonth"></select></td>
+                <td><label>DA(%) :</td>
+                  <td><input style="max-width:40px;" disabled
+                      id="PayBillPage_DA%" type="text"></td>
+                  <td><label>TA Zone :</label></td>
+                  <td><input disabled id="PayBillPage_TAZone"></td>
+                  <td><label>HRA Zone :</label></td>
+                  <td><input disabled id="PayBillPage_HRAZone"></td>
+                  <td></td>
+                </tr>
+              </table>
+              <div class="action-group">
+                <button id="PBeditBtn"><i
+                    data-lucide="edit"></i><span>Edit</span></button>
+                <button id="PBaddBtn"><i
+                    data-lucide="plus"></i><span>Add</span></button>
+                <button id="PBprintBtn"><i
+                    data-lucide="printer"></i><span>Print</span></button>
+                <button id="PBexcelBtn"><i
+                    data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+              </div>
+            </div>
+            <div class="PB-Table-Wrapper">
+
+              <div class="PB-Table-WrapperGO">
+                <table id="PB_GOViewTbl"></table>
+                <table id="PB_GOITCalc"></table>
+                <table id="PB_GOEditTbl"></table>
+
+              </div>
+              <div class="PB-Table-WrapperNPS">
+                <table id="PB_NPSViewTbl"></table>
+                <table id="PB_NPSITCalc"></table>
+                <table id="PB_NPSEditTbl"></table>
+              </div>
+            </div>
+            <div class="Error_Note">
+              <span id="DA_Error" class="PB-error"></span>
+              <span id="GPF_Error" class="PB-error"></span>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="SalarySlipPage" style="display:none">
+            <div class="header">
+              <h2>Salary Slip</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="ITPage" style="display:none">
+            <div class="header">
+              <h2>Income Tax Calculation</h2>
+              <table class="daaArrearsTbl" id="daaGOTableCalculation">
+                <colgroup>
+                  <col style="width:180px">
+                  <col style="width:70px">
+                  <col style="width:70px"> 
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th rowspan="2">Name / Designation</th>
+                    <th rowspan="2">Month</th>
+                    <th rowspan="2">Basic Pay</th>
+                    <th rowspan="2">TA</th>
+                    <th colspan="2">Drawn Salary</th>
+                    <th colspan="2">New DA% Salary</th>
+                    <th colspan="2">Difference</th>
+                    <th colspan="2">Total</th>
+                    <th rowspan="2">Total DAA</th>
+                  </tr>
+                  <tr>
+                    <th>DA</th>
+                    <th>TA</th>
+                    <th>New DA</th>
+                    <th>New TA</th>
+                    <th>Diff DA</th>
+                    <th>Diff TA</th>
+                    <th>Total DAA</th>
+                    <th>Total DAA on TA</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody> <!-- 🔥 REQUIRED -->
+              </table>
+              <table class="daaArrearsTbl" id="daaNPSTableCalculation">
+                <colgroup>
+                  <col style="width:180px">
+                  <col style="width:70px">
+                  <col style="width:70px"> 
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                  <col style="width:70px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th rowspan="2">Name / Designation</th>
+                    <th rowspan="2">Month</th>
+                    <th rowspan="2">Basic Pay</th>
+                    <th rowspan="2">TA</th>
+                    <th colspan="4">Drawn Salary</th>
+                    <th colspan="4">New DA% Salary</th>
+                    <th colspan="4">Difference</th>
+                    <th colspan="2">Total</th>
+                    <th rowspan="2">Total DAA</th>
+                    <th rowspan="2">Total DAA on NPS</th>
+                  </tr>
+                  <tr>
+                    <th>DA</th>
+                    <th>TA</th>
+                    <th>NPSE</th>
+                    <th>NPSC</th>
+                    <th>New DA</th>
+                    <th>New TA</th>
+                    <th>New NPSE</th>
+                    <th>New NPSC</th>
+                    <th>Diff DA</th>
+                    <th>Diff TA</th>
+                    <th>Diff NPSE</th>
+                    <th>Diff NPSC</th>
+                    <th>Total DAA</th>
+                    <th>Total DAA on TA</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody> <!-- 🔥 REQUIRED -->
+              </table>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="PensionPage" style="display:none">
+            <div class="header">
+              <h2>Pension Benifits & Calculations</h2>
+              <table id="EmolumentTbl" border="1"></table>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="BudgetPage" style="display:none">
+            <div class="header">
+              <h2>Budgets</h2>
+            </div>
+          </div>
+
+          <div class="SectionPage" id="DatabasePage" style="display:none">
+            <div class="header">
+              <h2>Database</h2>
+            </div>
+
+            <div class="button-bar">
+              <button onclick="showSheet('EmpDB',this)" class="active">Employee
+                Database</button>
+              <button onclick="showSheet('PBDB',this)">Pay Bill
+                Database</button>
+              <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
+                CPC</button>
+              <button onclick="showSheet('QtrsRateDB',this)">Quarters
+                Rate</button>
+              <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
+              <button onclick="showSheet('CommFactDB',this)">Commutation
+                Factors</button>
+              <button onclick="showSheet('ITDB',this)">IT Database</button>
+            </div>
+
+            <div class="DB-Table-Wrapper">
+              <table id="EmpDB"></table>
+              <table id="EmpDBCalc"></table>
+              <table id="PBDB" style="display:none;"></table>
+              <table id="CPC7DB" style="display:none;"></table>
+              <table id="QtrsRateDB" style="display:none;"></table>
+              <table id="CityZoneDB" style="display:none;"></table>
+              <table id="CommFactDB" style="display:none;"></table>
+              <table id="ITDB" style="display:none;"></table>
+            </div>
+          </div>
+
         </div>
+
       </div>
 
-      <div class="SectionPage" id="SalarySlipPage" style="display:none">
-        <div class="header">
-          <h2>Salary Slip</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="ITPage" style="display:none">
-        <div class="header">
-          <h2>Income Tax Calculation</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="PensionPage" style="display:none">
-        <div class="header">
-          <h2>Pension Benifits & Calculations</h2>
-          <table id="EmolumentTbl" border="1"></table>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="BudgetPage" style="display:none">
-        <div class="header">
-          <h2>Budgets</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="DatabasePage" style="display:none">
-        <div class="header">
-          <h2>Database</h2>
-        </div>
-
-        <div class="button-bar">
-          <button onclick="showSheet('EmpDB',this)" class="active">Employee
-            Database</button>
-          <button onclick="showSheet('PBDB',this)">Pay Bill
-            Database</button>
-          <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
-            CPC</button>
-          <button onclick="showSheet('QtrsRateDB',this)">Quarters
-            Rate</button>
-          <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
-          <button onclick="showSheet('CommFactDB',this)">Commutation
-            Factors</button>
-          <button onclick="showSheet('ITDB',this)">IT Database</button>
-        </div>
-
-        <div class="DB-Table-Wrapper">
-          <table id="EmpDB"></table>
-          <table id="EmpDBCalc"></table>
-          <table id="PBDB" style="display:none;"></table>
-          <table id="CPC7DB" style="display:none;"></table>
-          <table id="QtrsRateDB" style="display:none;"></table>
-          <table id="CityZoneDB" style="display:none;"></table>
-          <table id="CommFactDB" style="display:none;"></table>
-          <table id="ITDB" style="display:none;"></table>
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <script>
+      <script>
 
 
     /* =========================
@@ -3501,7 +3612,8 @@
       let btn = id(btnId);
       if (!btn) return;
 
-      let isEditMode = false;
+      let isFullEdit = false;
+      
 
       btn.onclick = async () => {   // ✅ overwrite instead of clone
 
@@ -3514,9 +3626,9 @@
 
         try {
 
-          if (!isEditMode) {
+          if (!isFullEdit) {
 
-            isEditMode = true;
+            isFullEdit = true;
 
             btn.classList.add(config.className);
             deactivateOthers(btn);
@@ -3534,10 +3646,7 @@
             return;
           }
 
-          // 🔥 SAVE
-          await savePBData();
-
-          isEditMode = false;
+          isFullEdit = false;
 
           btn.classList.remove(config.className);
           enableAllButtons();
@@ -4426,7 +4535,46 @@
           ta: num(r[taRateIndex])
         }));
     }
+    
 
+    function resetDAAInEditTables() {
+
+  ["PB_GOEditTbl", "PB_NPSEditTbl"].forEach(tableId => {
+
+    const table = id(tableId);
+    if (!table) return;
+
+    const rows = table.querySelectorAll("tbody tr");
+
+    rows.forEach(tr => {
+
+      // 🔥 find all numeric editable cells
+      tr.querySelectorAll("input, td").forEach(el => {
+
+        const label = el.getAttribute("data-col") || el.className || "";
+
+        // 🔥 match DAA related fields
+        if (
+          label.includes("DAA") ||
+          label.includes("Arrears") ||
+          label.includes("Recovery") ||
+          label.includes("Reimburse")
+        ) {
+
+          if (el.tagName === "INPUT") {
+            el.value = 0;
+          } else {
+            el.innerText = "0";
+          }
+        }
+
+      });
+
+    });
+
+  });
+
+}
 
     function updateDAAFromPBDB(rowElements) {
 
@@ -4442,9 +4590,13 @@
         Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
       };
 
-      const selectedNum = monthMap[mon];
+      const selectedNum = monthMap[mon];      
 
       rowElements.forEach(({ tr }) => {
+
+        const table = tr.closest("table");
+        const isGO = table?.id === "PB_GOEditTbl";
+        const isNPS = table?.id === "PB_NPSEditTbl";  
 
         const empName = tr.children[0]?.innerText?.trim();
         if (!empName) return;
@@ -4508,7 +4660,7 @@
 
         // 🔥 CASE 3 → Jan to previous month
         const useFullRange = (selectedNum > 6 && !block1HasChange);
-
+        let calcDetails = [];
         history.forEach(r => {
 
           const [m] = r.month.split("-");
@@ -4535,16 +4687,6 @@
 
           const diff = newAmt - oldAmt;
 
-          if (diff > 0) {
-
-            totalDAA += diff;
-
-            const [m] = r.month.split("-");
-
-            if (!startMonth) startMonth = m;
-            endMonth = m;
-          }
-
           // =========================
           // 🔹 DAA on TA
           // =========================
@@ -4555,15 +4697,85 @@
 
           const diffTA = newTA - oldTA;
 
-          if (diffTA > 0) {
+          if (diff > 0) {
+
+            totalDAA += diff;
             totalDAA_TA += diffTA;
+
+            const daaRounded = Math.round(diff);
+            const daaTArounded = Math.round(diffTA);
+
+            // 🔥 DEFAULT
+            let oldnpse = 0;
+            let newnpse = 0;
+            let oldnpsc = 0;
+            let newnpsc = 0;
+            let totalDAAnpse = 0;
+            let totalDAAnpsc = 0;
+            let totalDAAnps = 0;
+            let diffDAAnpse = 0;
+            let diffDAAnpsc = 0;
+            let diffDAAnps = 0;
+
+
+            // 🔥 ONLY FOR NPS TABLE
+            if (isNPS) {
+
+              const daaTotal = daaRounded + daaTArounded;
+
+              oldnpse = Math.round((oldAmt + basic) * 0.14);
+              newnpse = Math.round((newAmt + basic) * 0.14);
+              oldnpsc = Math.round((oldAmt + basic) * 0.10);
+              newnpsc = Math.round((newAmt + basic) * 0.10);
+              diffDAAnpse = newnpse - oldnpse;
+              diffDAAnpsc = newnpsc - oldnpsc;
+              diffDAAnps = diffDAAnpse + diffDAAnpsc;
+            }
+
+            calcDetails.push({
+              emp: empName,
+              month: r.month,
+
+              basic: basic,
+              ta: ta,
+
+              oldDA: Math.round(oldAmt),
+              newDA: Math.round(newAmt),
+
+              oldTA: Math.round(oldTA),
+              newTA: Math.round(newTA),
+
+              diffDA: Math.round(daaRounded),
+              diffTA: Math.round(daaTArounded),
+
+              totalDA: Math.round(totalDAA),
+              totalTA: Math.round(totalDAA_TA),
+
+              totalDAArrears: Math.round(totalDAA + totalDAA_TA),
+              
+
+              // 🔥 CONDITIONAL
+              oldNPSE: oldnpse,
+              newNPSE: newnpse,
+              oldNPSC: oldnpsc,
+              newNPSC: newnpsc,
+              diffDAANPSE: diffDAAnpse,
+              diffDAANPSC: diffDAAnpsc,
+              diffDAANPS: diffDAAnps ,
+
+              type: isGO ? "GO" : "NPS" // 🔥 useful for render
+            });
+
+            const [m] = r.month.split("-");
+            if (!startMonth) startMonth = m;
+            endMonth = m;
           }
         });
-
+        
         // ✅ SET VALUES
         setValue(tr._cells["DAA"], Math.round(totalDAA) || 0);
         setValue(tr._cells["DAA on TA"], Math.round(totalDAA_TA) || 0);
-
+        tr._daaDetails = calcDetails;
         // =========================
         // 🔹 ARREAR DETAILS (TEXTAREA SAFE)
         // =========================
@@ -4594,9 +4806,7 @@
               arrearInput.value = "";
             }
           }
-        }
-
-        const table = tr.closest("table");
+        }              
 
         // =========================
         // 🔹 GO TABLE → FORCE ZERO
@@ -4663,8 +4873,170 @@
           getCellInput(tr, "Total DAA"),
           Math.round(totalDAA + totalDAA_TA + daaNPSE)
         );
-      });
+      }); 
+
+      //To Create DAA Calculation Table
+      const allRows = getDAAallRowElements();
+      renderDAACalcTables(allRows);     
     }
+  
+    // 🔥============== TO GET DA ARREARS TABLE===========================
+
+    function getDAAallRowElements() {
+
+      const goTable = id("PB_GOEditTbl");
+      const npsTable = id("PB_NPSEditTbl");
+
+      let all = [];
+
+      if (goTable) {
+        goTable.querySelectorAll("tbody tr").forEach(tr => {
+          all.push({ tr });
+        });
+      }
+
+      if (npsTable) {
+        npsTable.querySelectorAll("tbody tr").forEach(tr => {
+          all.push({ tr });
+        });
+      }
+
+      return all;
+    }
+
+
+    function ensureTbody(table) {
+      if (!table) return null;
+
+      let tbody = table.querySelector("tbody");
+
+      if (!tbody) {
+        tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+      }
+
+      return tbody;
+    }
+
+    function renderDAACalcTables(allRows) {
+
+  const goTable = id("daaGOTableCalculation");
+  const npsTable = id("daaNPSTableCalculation");
+
+  const goBody = ensureTbody(goTable);
+  const npsBody = ensureTbody(npsTable);
+
+  goBody.innerHTML = "";
+  npsBody.innerHTML = "";
+
+  // 🔥 GROUP DATA
+  const grouped = {};
+
+  allRows.forEach(({ tr }) => {
+    const details = tr._daaDetails || [];
+
+    details.forEach(d => {
+
+      if (!grouped[d.emp]) {
+        grouped[d.emp] = [];
+      }
+
+      grouped[d.emp].push(d);
+    });
+  });
+
+  
+  // 🔥 LOOP EMPLOYEE-WISE
+  Object.keys(grouped).forEach(emp => {
+
+    const rows = grouped[emp];
+
+    rows.forEach((d, index) => {
+
+      const row = document.createElement("tr");
+
+      if (index === rows.length - 1) {
+        // 🔥 LAST ROW → SOLID
+        row.classList.add("daa-last-row");
+      } else {
+        // 🔥 INNER ROW → DOTTED
+        row.classList.add("daa-row");
+      }
+
+      let totalDA = 0;
+      let totalTA = 0;
+      let totalNPSE = 0;
+      let totalNPSC = 0;
+
+      const designation = getDesignation(emp);
+
+      // 🔥 FIRST LOOP → CALCULATE TOTALS
+      rows.forEach(d => {
+        totalDA += d.diffDA || 0;
+        totalTA += d.diffTA || 0;
+        totalNPSE += d.diffDAANPSE || 0;
+        totalNPSC += d.diffDAANPSC || 0;
+      });
+
+      const totalDAA = totalDA + totalTA;
+      const totalNPS = totalNPSE + totalNPSC;
+      // ================= GO =================
+      if (d.type === "GO") {
+
+        row.innerHTML = `
+         ${index === 0 ? `<td rowspan="${rows.length}" >${emp}<br><span>${designation}</span></td>` : ""}
+          <td>${d.month}</td>
+          <td>${d.basic}</td>
+          <td>${d.ta}</td>
+          <td>${d.oldDA}</td>
+          <td>${d.oldTA}</td>
+          <td>${d.newDA}</td>
+          <td>${d.newTA}</td>
+          <td>${d.diffDA}</td>
+          <td>${d.diffTA}</td>
+         <!-- 🔥 ONLY LAST ROW -->
+          ${index === 0 ? `<td rowspan="${rows.length}">${totalDA}</td>` : ""}
+          ${index === 0 ? `<td rowspan="${rows.length}">${totalTA}</td>` : ""}
+          ${index === 0 ? `<td rowspan="${rows.length}">${totalDAA}</td>` : ""}
+        `;
+
+        goBody.appendChild(row);
+      }
+
+      // ================= NPS =================
+      if (d.type === "NPS") {
+
+        row.innerHTML = `
+          ${index === 0 ? `<td rowspan="${rows.length}" >${emp}<br><span>${designation}</span></td>` : ""}
+          <td>${d.month}</td>
+          <td>${d.basic}</td>
+          <td>${d.ta}</td>
+          <td>${d.oldDA}</td>
+          <td>${d.oldTA}</td>
+          <td>${d.oldNPSE}</td>
+          <td>${d.oldNPSC}</td>
+          <td>${d.newDA}</td>              
+          <td>${d.newTA}</td>
+          <td>${d.newNPSE}</td>
+          <td>${d.newNPSC}</td> 
+          <td>${d.diffDA}</td>
+          <td>${d.diffTA}</td>
+          <td>${d.diffDAANPSE}</td>
+          <td>${d.diffDAANPSC}</td>
+          <!-- 🔥 ONLY LAST ROW -->
+          ${index === 0 ? `<td rowspan="${rows.length}">${totalDA}</td>` : ""}
+          ${index === 0 ? `<td rowspan="${rows.length}">${totalTA}</td>` : ""}
+          ${index === 0 ? `<td rowspan="${rows.length}">${totalDAA}</td>` : ""}
+          ${index === 0 ? `<td rowspan="${rows.length}">${totalNPS}</td>` : ""}
+        `;
+
+        npsBody.appendChild(row);
+      }
+
+    });
+
+  });
+}
 
     function applyGPFRule_GO(tr, empName) {
 
@@ -5037,16 +5409,23 @@
 
 
     function monthToNumber(monthStr) {
-      if (!monthStr || !monthStr.includes("-")) return Infinity;
 
-      const [mon, year] = monthStr.split("-");
-      const map = {
-        Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6,
-        Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12
-      };
+  if (!monthStr) return Infinity;
 
-      return parseInt(year) * 12 + (map[mon] || 0);
-    }
+  // 🔥 convert to string always
+  monthStr = String(monthStr);
+
+  if (!monthStr.includes("-")) return Infinity;
+
+  const [mon, year] = monthStr.split("-");
+
+  const map = {
+    Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6,
+    Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12
+  };
+
+  return parseInt(year) * 12 + (map[mon] || 0);
+}
 
     function normalizeMonthFormat(dateStr) {
 
@@ -5064,7 +5443,8 @@
       return dateStr; // already correct
     }
 
-    const DEBUG_EMP = "T. Shyama Prasad"; // 🔥 change anytime
+    const DEBUG_EMP = "Abhijin P. R."; // 🔥 change anytime
+    
     function calculateTaxFromSlabs(income, slabs) {
 
       let tax = 0;
@@ -5100,27 +5480,27 @@
         r[itData.headers.indexOf("Regime")] === regime
       );
 
-      if (DEBUG_EMP && window.currentDebugEmp === DEBUG_EMP) {
-        console.log("---- SLAB BREAKDOWN ----");
-      }
+      //if (DEBUG_EMP && window.currentDebugEmp === DEBUG_EMP) {
+      //  console.log("---- SLAB BREAKDOWN ----");
+      //}
 
-      if (income > lower) {
+      //if (income > lower) {
 
-        let taxable = Math.min(income, upper) - lower;
-        let slabTax = taxable * rate / 100;
+      //  let taxable = Math.min(income, upper) - lower;
+      //  let slabTax = taxable * rate / 100;
 
-        if (DEBUG_EMP && window.currentDebugEmp === DEBUG_EMP) {
-          console.log({
-            lower,
-            upper,
-            rate,
-            taxable,
-            slabTax
-          });
-        }
+      //  if (DEBUG_EMP && window.currentDebugEmp === DEBUG_EMP) {
+      //    console.log({
+      //      lower,
+      //      upper,
+      //      rate,
+      //      taxable,
+      //      slabTax
+      //    });
+      //  }
 
-        tax += slabTax;
-      }
+      //  tax += slabTax;
+      //}
     }
 
 
@@ -5163,32 +5543,64 @@ function calculateEmployeeIT(empName, selectedFY, regime) {
 
   finalTax += cess;
   
-  window.currentDebugEmp = empName;
-    if (empName === DEBUG_EMP) {
+  //window.currentDebugEmp = empName;
+    //if (empName === DEBUG_EMP) {
 
-    console.log("---- TAX CALC ----");
+      //console.log("---- TAX CALC ----");
 
-    console.log("Net Gross:", netGross);
-    console.log("Std Deduction:", stdDeduction);
+      //console.log("Net Gross:", netGross);
+      //console.log("Std Deduction:", stdDeduction);
 
-    console.log("Taxable Income:", taxableIncome);
+      //console.log("Taxable Income:", taxableIncome);
 
-    console.log("Slabs Used:", slabs);
+      //console.log("Slabs Used:", slabs);
 
-    console.log("Tax Before Rebate:", tax);
+      //console.log("Tax Before Rebate:", tax);
 
-    if (taxableIncome <= rebateLimit) {
-      console.log("Rebate Applied:", rebateAmount);
-    } else {
-      console.log("Rebate NOT Applied");
-    }
+      //if (taxableIncome <= rebateLimit) {
+      //  console.log("Rebate Applied:", rebateAmount);
+      //} else {
+      //  console.log("Rebate NOT Applied");
+      //}
 
-    console.log("Final Tax:", finalTax);
-  }
+      //console.log("Final Tax:", finalTax);
+    //}
 
   return finalTax;
     
 }
+
+function getPaidITTillMonth(empName, selectedFY, currentMonth) {
+
+  const headers = pbData.headers;
+  const rows = pbData.rows;
+
+  const empIndex = headers.indexOf("Employee Name");
+  const monthIndex = headers.indexOf("Salary Month");
+
+  // 🔥 CHANGE THIS TO YOUR ACTUAL COLUMN
+  const itIndex = headers.indexOf("Net IT"); // ⚠️ verify this
+
+  let total = 0;
+
+  rows.forEach(row => {
+
+    if (String(row[empIndex]).trim() !== String(empName).trim()) return;
+
+    const m = row[monthIndex];
+    if (!m) return; 
+    const fy = getFinancialYear(m);
+
+    if (fy !== selectedFY) return;
+
+    if (monthToNumber(m) > monthToNumber(currentMonth)) return;
+
+    total += parseFloat(row[itIndex]) || 0;
+  });
+
+  return total;
+}
+
 
 function getRemainingMonths(selectedFY, currentMonth, superMonth) {
 
@@ -5201,27 +5613,45 @@ function getRemainingMonths(selectedFY, currentMonth, superMonth) {
     `Jan-${startYear+1}`, `Feb-${startYear+1}`
   ];
 
+  const currentNum = monthToNumber(currentMonth);
+  const superNum = superMonth ? monthToNumber(superMonth) : Infinity;
+
   let count = 0;
+  //console.log("DEBUG MONTH NUMBERS");
+  //console.log("currentMonth:", currentMonth, "=>", currentNum);
+  //console.log("superMonth:", superMonth, "=>", superNum);
 
   fyMonths.forEach(m => {
+    //console.log(m, "=>", monthToNumber(m));
+    const mNum = monthToNumber(m);
 
-    if (monthToNumber(m) < monthToNumber(currentMonth)) return;
+    // 🔥 STRICTLY future months only
+    if (mNum <= currentNum) return;
 
-    if (superMonth && monthToNumber(m) > monthToNumber(superMonth)) return;
+    // 🔥 stop after retirement
+    if (mNum > superNum) return;
 
     count++;
-  });
+  }); 
 
   return count || 1;
 }
 
 
-function calculateMonthlyIT(empName, selectedFY, regime, paidIT, currentMonth) {
+function calculateMonthlyIT(empName, selectedFY, regime, currentMonth) {
+
+  // 🔥 FIX MONTH INPUT
+  if (!isNaN(currentMonth)) {
+    const el = id("PayBillPage_SalMonth");
+    currentMonth = el.options[el.selectedIndex]?.text;
+  }
 
   const result = calculateFYGrossFinal(empName, selectedFY);
+  if (!result.isActive) {
+    return { it: 0, cess: 0, total: 0 };
+  }
 
-  if (!result.isActive) return 0;
-
+  // 🔹 Total tax (before cess)
   const totalTax = calculateEmployeeIT(empName, selectedFY, regime);
 
   const remainingMonths = getRemainingMonths(
@@ -5230,91 +5660,119 @@ function calculateMonthlyIT(empName, selectedFY, regime, paidIT, currentMonth) {
     result.superMonth
   );
 
+  const paidIT = getPaidITTillMonth(empName, selectedFY, currentMonth);
+
   const balanceTax = Math.max(0, totalTax - (paidIT || 0));
 
-  if (empName === DEBUG_EMP) {
+  // 🔥 MONTHLY IT (before cess)
+  const monthlyIT = Math.round(balanceTax / (remainingMonths * 1.04));
 
-    console.log("---- MONTHLY IT ----");
+  // 🔥 CESS (4%)
+  const monthlyCess = Math.round(monthlyIT * 0.04);
 
-    console.log("Total Tax:", totalTax);
-    console.log("Paid IT:", paidIT);
+  // 🔥 TOTAL
+  const monthlyTotal = monthlyIT + monthlyCess;
 
-    console.log("Remaining Months:", remainingMonths);
+  // 🔥 DEBUG
+  //if (empName === DEBUG_EMP) {
+  //  console.log("---- MONTHLY TAX BREAKUP ----");
+ //   console.log({
+  //    totalTax,
+  //    paidIT,
+  //    remainingMonths,
+  //    balanceTax,
+  //    monthlyIT,
+  //    monthlyCess,
+  //    monthlyTotal
+  //  });
+  //}
 
-    console.log("Balance Tax:", balanceTax);
-
-    console.log("Monthly IT (Rounded):", Math.round(balanceTax / remainingMonths));
-  }
-
-  return Math.round(balanceTax / remainingMonths);
-  
+  return {
+    it: monthlyIT,
+    cess: monthlyCess,
+    total: monthlyTotal
+  };
 }
 
 
+function calculateFYGrossFinal(empName, selectedFY, regime) {
 
-function calculateFYGrossFinal(empName, selectedFY) {
-
-  if (!pbData || !pbData.headers || !pbData.rows) return { total: 0, department: "", isActive: false };
+  if (!pbData || !pbData.headers || !pbData.rows) {
+    return { total: 0, department: "", isActive: false };
+  }
 
   const headers = pbData.headers;
   const rows = pbData.rows;
 
-  const empIndex = headers.indexOf("Employee Name");
-  const monthIndex = headers.indexOf("Salary Month");
-  const grossIndex = headers.indexOf("Gross Income");
-  const medIndex = headers.indexOf("Medical Reimbursement");
-  const ltaIndex = headers.indexOf("LTA Reimbursement");
+  const getIdx = (name) => headers.indexOf(name);
+
+  const empIndex = getIdx("Employee Name");
+  const monthIndex = getIdx("Salary Month");
+
+  // 🔥 Earnings
+  const basicIdx = getIdx("Basic Pay");
+  const daIdx = getIdx("DA");
+  const hraIdx = getIdx("HRA");
+  const taIdx = getIdx("TA");
+  const npseIdx = getIdx("NPSE");
+
+  const bonusIdx = getIdx("Bonus");
+  const daaIdx = getIdx("Total DAA");
+  const arrearsIdx = getIdx("Arrears");
+  const ceaIdx = getIdx("CEA");
+  const elIdx = getIdx("EL Encash");
+  const uniIdx = getIdx("UniAll");
+
+  // 🔥 Deductions
+  const npseDedIdx = getIdx("NPSE Deduction");
+  const daaNpseIdx = getIdx("DAA on NPSE");
+
+  const npscIdx = getIdx("NPSC");
+  const gpfIdx = getIdx("GPF");
+  const cgeisIdx = getIdx("CGEIS");
+  const ptIdx = getIdx("Prof Tax");
 
   let superMonth = null;
   let department = "";
 
+  // 🔥 GET SUPERANNUATION
   if (window.empCalcHeaders && window.empCalcRows) {
 
-  const eHeaders = window.empCalcHeaders;
-  const eRows = window.empCalcRows;
+    const eHeaders = window.empCalcHeaders;
+    const eRows = window.empCalcRows;
 
-  const eEmpIndex = getColIndex(eHeaders, "Employee Name");
-  const supIndex = getColIndex(eHeaders, "Superannuation"); // ✅ correct column
-  const deptIndex = getColIndex(eHeaders, "Department");
+    const eEmpIndex = getColIndex(eHeaders, "Employee Name");
+    const supIndex = getColIndex(eHeaders, "Superannuation");
+    const deptIndex = getColIndex(eHeaders, "Department");
 
-  if (empName === DEBUG_EMP) {
-    console.log("EmpCalc Headers:", eHeaders);
-    console.log("Indexes:", { eEmpIndex, supIndex, deptIndex });
-  }
+    if (eEmpIndex !== -1 && supIndex !== -1 && deptIndex !== -1) {
 
-  if (eEmpIndex !== -1 && supIndex !== -1 && deptIndex !== -1) {
-
-    for (let row of eRows) {
-
-      if (String(row[eEmpIndex]).trim() === String(empName).trim()) {
-
-        superMonth = normalizeMonthFormat(row[supIndex]);
-        department = row[deptIndex] || "";
-
-        if (empName === DEBUG_EMP) {
-          console.log("Matched Row:", row);
-          console.log("SuperMonth:", superMonth);
-          console.log("Department:", department);
+      for (let r of eRows) {
+        if (String(r[eEmpIndex]).trim() === String(empName).trim()) {
+          superMonth = normalizeMonthFormat(r[supIndex]);
+          department = r[deptIndex] || "";
+          break;
         }
-
-        break;
       }
     }
-
-  } else {
-    console.warn("Missing column in empCalcHeaders");
   }
-}
 
-  // 🔥 NEW: Exclude already retired employees
   const startYear = parseInt(selectedFY.split("-")[0]);
   const fyStart = `Mar-${startYear}`;
 
   if (superMonth && monthToNumber(superMonth) < monthToNumber(fyStart)) {
-    return { total: 0, department, isActive: false }; // ❌ skip
+    return { total: 0, department, isActive: false };
   }
 
   let monthData = {};
+
+  // 🔥 SUMMARY OBJECT
+  let sum = {
+    basic: 0, da: 0, hra: 0, ta: 0, npse: 0,
+    bonus: 0, daa: 0, arrears: 0, cea: 0, el: 0, uni: 0,
+    npseDed: 0, daaNpse: 0, npsc: 0, gpf: 0, cgeis: 0, pt: 0,
+    gross: 0, deductions: 0, net: 0
+  };
 
   rows.forEach(row => {
 
@@ -5325,15 +5783,83 @@ function calculateFYGrossFinal(empName, selectedFY) {
 
     if (fy !== selectedFY) return;
 
-    const gross = parseFloat(row[grossIndex]) || 0;
+    // 🔥 Earnings
+    const basic = parseFloat(row[basicIdx]) || 0;
+    const da = parseFloat(row[daIdx]) || 0;
+    const hra = parseFloat(row[hraIdx]) || 0;
+    const ta = parseFloat(row[taIdx]) || 0;
+    const npse = parseFloat(row[npseIdx]) || 0;
 
-    const med = medIndex !== -1 ? (parseFloat(row[medIndex]) || 0) : 0;
-    const lta = ltaIndex !== -1 ? (parseFloat(row[ltaIndex]) || 0) : 0;
+    const bonus = parseFloat(row[bonusIdx]) || 0;
+    const totalDAA = parseFloat(row[daaIdx]) || 0;
+    const arrears = parseFloat(row[arrearsIdx]) || 0;
+    const cea = parseFloat(row[ceaIdx]) || 0;
+    const el = parseFloat(row[elIdx]) || 0;
+    const uni = parseFloat(row[uniIdx]) || 0;
 
-    // 🔥 Net taxable gross
-    const netGross = gross - med - lta;
+    // 🔥 Deductions
+    const npseDed = parseFloat(row[npseDedIdx]) || 0;
+    const daaOnNpse = parseFloat(row[daaNpseIdx]) || 0;
 
-    monthData[monthStr] = netGross;
+    const npsc = parseFloat(row[npscIdx]) || 0;
+    const gpf = parseFloat(row[gpfIdx]) || 0;
+    const cgeis = parseFloat(row[cgeisIdx]) || 0;
+    const pt = parseFloat(row[ptIdx]) || 0;
+
+    // 🔥 GROSS
+    const grossIncome =
+      (basic + da + hra + ta + npse) +
+      bonus + totalDAA + arrears + cea + el + uni;
+
+    let netTaxable = 0;
+    let deductionsUsed = 0;
+
+    if (regime === "Old Regime") {
+
+      deductionsUsed =
+        npseDed +
+        daaOnNpse +
+        Math.min(150000, (npsc + gpf + cgeis)) +
+        pt +
+        uni;
+
+      netTaxable = grossIncome - deductionsUsed;
+
+    } else {
+
+      deductionsUsed =
+        npseDed +
+        daaOnNpse;
+
+      netTaxable = grossIncome - deductionsUsed;
+    }
+
+    // 🔥 ACCUMULATION
+    sum.basic += basic;
+    sum.da += da;
+    sum.hra += hra;
+    sum.ta += ta;
+    sum.npse += npse;
+
+    sum.bonus += bonus;
+    sum.daa += totalDAA;
+    sum.arrears += arrears;
+    sum.cea += cea;
+    sum.el += el;
+    sum.uni += uni;
+
+    sum.npseDed += npseDed;
+    sum.daaNpse += daaOnNpse;
+    sum.npsc += npsc;
+    sum.gpf += gpf;
+    sum.cgeis += cgeis;
+    sum.pt += pt;
+
+    sum.gross += grossIncome;
+    sum.deductions += deductionsUsed;
+    sum.net += netTaxable;
+
+    monthData[monthStr] = netTaxable;
   });
 
   if (Object.keys(monthData).length === 0) {
@@ -5369,13 +5895,45 @@ function calculateFYGrossFinal(empName, selectedFY) {
     total += value;
   });
 
+  // 🔥 FINAL DEBUG OUTPUT
   if (empName === DEBUG_EMP) {
-    console.log("---- FY GROSS ----");
-    console.log({ empName, total, superMonth });
+
+    console.log("==== FY COMPONENT SUMMARY ====");
+    console.table({
+      Basic: sum.basic,
+      DA: sum.da,
+      HRA: sum.hra,
+      TA: sum.ta,
+      NPSE: sum.npse,
+
+      Bonus: sum.bonus,
+      "Total DAA": sum.daa,
+      Arrears: sum.arrears,
+      CEA: sum.cea,
+      "EL Encash": sum.el,
+      "UniAll": sum.uni,
+
+      "Gross Income": sum.gross,
+
+      "NPSE Ded": sum.npseDed,
+      "DAA on NPSE": sum.daaNpse,
+      NPSC: sum.npsc,
+      GPF: sum.gpf,
+      CGEIS: sum.cgeis,
+      "Prof Tax": sum.pt,
+
+      "Total Deductions": sum.deductions,
+      "Net Taxable": sum.net,
+      "FY Total (Projected)": total
+    });
   }
-  
-  return { total, department, isActive: true, superMonth };
-  
+
+  return {
+    total: Math.round(total),
+    department,
+    isActive: true,
+    superMonth
+  };
 }
 
 
@@ -5388,19 +5946,26 @@ function renderGOITTable() {
   let tbody = table.querySelector("tbody") || table.appendChild(document.createElement("tbody"));
 
   const selectedFY = id("PayBillPage_FY").value;
-  const paidITIndex = pbData.headers.indexOf("Net IT"); // 🔥 or your IT column
   const empIndex = pbData.headers.indexOf("Employee Name");
 
   let processed = new Set();
-  let grandTotal = 0; // 🔥 TOTAL
+  let grandTotal = 0;
 
+  // 🔥 Header
   thead.innerHTML = `
     <tr>
-      <th>Income Tax (FY)</th>
+      <th>
+        Next Month IT Deduction <br>
+        [Regime] ( IT + Cess = Net IT )
+      </th>
     </tr>
   `;
 
   tbody.innerHTML = "";
+
+  // 🔥 Get current month correctly
+  const el = id("PayBillPage_SalMonth");
+  const currentMonth = el.options[el.selectedIndex]?.text;
 
   pbData.rows.forEach(row => {
 
@@ -5408,44 +5973,64 @@ function renderGOITTable() {
     if (processed.has(empName)) return;
     processed.add(empName);
 
-    const result = calculateFYGrossFinal(empName, selectedFY);
+    // 🔥 STEP 1: Calculate BOTH regimes
+    const oldTax = calculateMonthlyIT(empName, selectedFY, "Old Regime", currentMonth);
+    const newTax = calculateMonthlyIT(empName, selectedFY, "New Regime", currentMonth);
+
+    // 🔥 STEP 2: Select BEST regime
+    let tax, regime;
+
+    // 🔥 Handle edge cases first
+    if (oldTax.total === 0 && newTax.total === 0) {
+      tax = oldTax;
+      regime = "Old Regime";
+    }
+    else {
+      // 🔥 NORMAL CASE → pick minimum
+      if (oldTax.total <= newTax.total) {
+        tax = oldTax;
+        regime = "Old Regime";
+      } else {
+        tax = newTax;
+        regime = "New Regime";
+      }
+    }
+
+    // 🔥 STEP 3: Validate employee
+    const result = calculateFYGrossFinal(empName, selectedFY, regime);
 
     if (!result.isActive) return;
     if (!String(result.department).toUpperCase().includes("GO")) return;
 
-    const currentMonth = id("PayBillPage_SalMonth").value;
+    grandTotal += tax.total;
 
-    const paidIT = paidITIndex !== -1
-      ? (parseFloat(row[paidITIndex]) || 0)
-      : 0;
-
-    // 🔥 Choose regime
-    const regime = "New Regime"; // or dynamic later
-
-    const monthlyIT = calculateMonthlyIT(
-      empName,
-      selectedFY,
-      regime,
-      paidIT,
-      currentMonth
-    );
-
-    grandTotal += monthlyIT;
+    // 🔥 Optional color highlight
+    const color = regime === "Old Regime" ? "#2563eb" : "#16a34a";
+    const shortRegime = regime === "Old Regime" ? "Old" : "New";
 
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
-      <td class="total-row">${formatCurrency(monthlyIT)}</td>
+      <td>
+        <span style="background:${color};font-size:9px;color:white;padding:4px 4px;border-radius:4px;">${shortRegime}</span>
+        ${tax.it} + 
+        ${tax.cess} = 
+        ${formatCurrency(tax.total)}        
+      </td>
     `;
 
     tbody.appendChild(tr);
   });
 
   // 🔥 TOTAL ROW
-  const totalRow = document.createElement("tr");
+ const totalRow = document.createElement("tr");
   totalRow.classList.add("total-row");
   totalRow.innerHTML = `
-    <td style="font-weight:bold;">${formatCurrency(grandTotal)}</td>
+    <td style="background:white;box-shadow:none;"></td>
   `;
+  //totalRow.innerHTML = `
+  //  <td style="font-weight:bold;">${formatCurrency(grandTotal)}</td>
+  //`;
 
   tbody.appendChild(totalRow);
 }
@@ -5460,19 +6045,26 @@ function renderNPSITTable() {
   let tbody = table.querySelector("tbody") || table.appendChild(document.createElement("tbody"));
 
   const selectedFY = id("PayBillPage_FY").value;
-  const paidITIndex = pbData.headers.indexOf("Net IT"); // 🔥 or your IT column
   const empIndex = pbData.headers.indexOf("Employee Name");
 
   let processed = new Set();
-  let grandTotal = 0; // 🔥 TOTAL
+  let grandTotal = 0;
 
+  // 🔥 Header
   thead.innerHTML = `
     <tr>
-      <th>Income Tax (FY)</th>
+      <th>
+        Next Month IT Deduction <br>
+        [Regime]( IT + Cess = Net IT )
+      </th>
     </tr>
   `;
 
   tbody.innerHTML = "";
+
+  // 🔥 Get current month correctly
+  const el = id("PayBillPage_SalMonth");
+  const currentMonth = el.options[el.selectedIndex]?.text;
 
   pbData.rows.forEach(row => {
 
@@ -5480,46 +6072,67 @@ function renderNPSITTable() {
     if (processed.has(empName)) return;
     processed.add(empName);
 
-    const result = calculateFYGrossFinal(empName, selectedFY);
+    // 🔥 STEP 1: Calculate BOTH regimes
+    const oldTax = calculateMonthlyIT(empName, selectedFY, "Old Regime", currentMonth);
+    const newTax = calculateMonthlyIT(empName, selectedFY, "New Regime", currentMonth);
+
+    // 🔥 STEP 2: Select BEST regime
+    let tax, regime;
+
+    if (oldTax.total === 0 && newTax.total === 0) {
+      tax = oldTax;
+      regime = "Old Regime";
+    }
+    else {
+      // 🔥 NORMAL CASE → pick minimum
+      if (oldTax.total <= newTax.total) {
+        tax = oldTax;
+        regime = "Old Regime";
+      } else {
+        tax = newTax;
+        regime = "New Regime";
+      }
+    }
+
+    // 🔥 STEP 3: Validate employee
+    const result = calculateFYGrossFinal(empName, selectedFY, regime);
 
     if (!result.isActive) return;
     if (String(result.department).toUpperCase().includes("GO")) return;
 
-    const currentMonth = id("PayBillPage_SalMonth").value;
+    grandTotal += tax.total;
 
-    const paidIT = paidITIndex !== -1
-      ? (parseFloat(row[paidITIndex]) || 0)
-      : 0;
-
-    const regime = "New Regime"; // 🔥 NPS → New Regime usually
-
-    const monthlyIT = calculateMonthlyIT(
-      empName,
-      selectedFY,
-      regime,
-      paidIT,
-      currentMonth
-    );
-
-    grandTotal += monthlyIT;
+    // 🔥 Optional color highlight
+    const color = regime === "Old Regime" ? "#2563eb" : "#16a34a";
+    const shortRegime = regime === "Old Regime" ? "Old" : "New";
 
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
-      <td>${formatCurrency(monthlyIT)}</td>
+      <td>
+        <span style="background:${color};font-size:9px;color:white;padding:4px 4px;border-radius:4px;">${shortRegime}</span>
+        ${tax.it} + 
+        ${tax.cess} = 
+        ${formatCurrency(tax.total)}        
+      </td>
     `;
 
     tbody.appendChild(tr);
   });
 
   // 🔥 TOTAL ROW
-  const totalRow = document.createElement("tr");
+ const totalRow = document.createElement("tr");
   totalRow.classList.add("total-row");
   totalRow.innerHTML = `
-    <td >${formatCurrency(grandTotal)}</td>
+    <td style="background:white;box-shadow:none;"></td>
   `;
+  //totalRow.innerHTML = `
+  //  <td style="font-weight:bold;">${formatCurrency(grandTotal)}</td>
+  //`;
 
   tbody.appendChild(totalRow);
 }
+
 
     function calculateITFields(tr) {
 
@@ -6014,16 +6627,15 @@ function renderNPSITTable() {
     }
 
     on("PBaddBtn", "click", () => {
+      resetDAAInEditTables();
       //console.log("BTN isAddMode:", isAddMode);
       const monthEl = id("PayBillPage_SalMonth");
       const station = id("PayBillPage_Station")?.value;
 
       if (!monthEl || !station) return;
-
+      isEditMode = false;
       if (!isAddMode) {
-
-        // 🔥 FIRST CLICK → ENTER ADD MODE
-        isEditMode = false;
+        // 🔥 FIRST CLICK → ENTER ADD MODE        
         isAddMode = true;
 
         //console.log("ADD MODE ACTIVATED");
@@ -6040,6 +6652,7 @@ function renderNPSITTable() {
 
         applyFilters();
         refreshPBView();
+        
 
         const el = id("PayBillPage_SalMonth");
         if (el) {
@@ -6053,8 +6666,7 @@ function renderNPSITTable() {
 
         // 🔥 SECOND CLICK → SAVE
         //console.log("SAVE MODE");
-        savePBData("ADD");
-
+        savePBData("ADD");        
         isAddMode = false;
       }
 
@@ -6067,7 +6679,7 @@ function renderNPSITTable() {
       const station = id("PayBillPage_Station")?.value;
 
       if (!monthEl || !station) return;
-
+      isAddMode = false;
       if (isEditMode) {
         savePBData("EDIT");
         isEditMode = false;
@@ -6246,12 +6858,12 @@ function renderNPSITTable() {
 
         if (result.status === "success") {
 
-          //alert(`✅ ${mode} Success!\nUpdated: ${result.updated}, Added: ${result.added}`);
-          if (mode === "ADD") {
-            alert(`✅ Month Created\nAdded: ${result.added}`);
-          } else {
-            alert(`✅ Changes Saved\nUpdated: ${result.updated}`);
-          }
+          alert(`✅ ${mode} Success!\nUpdated: ${result.updated} \n Added: ${result.added}`);
+          //if (mode === "ADD") {
+          //  alert(`✅ Month Created\nAdded: ${result.added}`);
+          //} else {
+          //  alert(`✅ Changes Saved\nUpdated: ${result.updated}`);
+          //}
 
           // 🔥 STEP 1: reload PBDB (data + table)
           await loadTable("pb", "PBDB");
@@ -7405,8 +8017,10 @@ function renderNPSITTable() {
 
       return "";
     }
+
+
   </script>
 
-</body>
+    </body>
 
-</html>
+  </html>
