@@ -23,7 +23,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-size: 11px;
+      font-size: 10px;
       font-family: "Roboto Condensed", "Inter", sans-serif;
       background: transparent;
     }
@@ -151,8 +151,8 @@
 
     /* =============APP LAYOUT=========== */
     .watermark {
-      width: 40vw;
-      height: 80vh;
+      width: calc(100vw - 60%);
+      height: calc(100vh - 20%);
       opacity: 0.06;
       position: absolute;
       left: 50%;
@@ -727,25 +727,59 @@
       overflow: auto;
       width: 100%;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 0;
       margin: 0 3px;
     }
 
     /* ================= TABLE ================= */
-    .PB-Table-WrapperGO table,
-    .PB-Table-WrapperNPS table {
+    .PB-Table-WrapperGO table:not(#PB_GOITCalc),
+    .PB-Table-WrapperNPS table:not(#PB_NPSITCalc) {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
       table-layout: auto;
       background: #ffffff;
       border-radius: 10px;
+      height: max-content;
+    }
+
+    #PB_GOITCalc,
+    #PB_NPSITCalc {
+      flex: 0 0 60px !important;
+      width: 60px !important;
+      min-width: 60px !important;
+      max-width: 60px !important;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: auto;
+      background: #ffffff;
+      border-radius: 10px;
+      height: max-content;
+      table-layout: fixed !important;
+      position: sticky;
+      left: 0;
+      z-index: 300;
+    }
+
+    #PB_GOITCalc th,
+#PB_GOITCalc td,
+#PB_NPSITCalc th,
+#PB_NPSITCalc td {
+  width: 100px !important;
+  max-width: 100px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+    #PB_GOITCalc td:first-child,#PB_NPSITCalc td:first-child {
+      padding: 0 6px;
     }
 
     /* ================= TOGGLE ================= */
     /* safer than absolute */
-    #PB_GOEditTbl,
+    #PB_GOEditTbl,#PB_GOITCalc,#PB_NPSITCalc,
     #PB_NPSEditTbl {
       display: none;
     }
@@ -765,7 +799,9 @@
     }
 
     .edit-mode #PB_GOEditTbl,
-    .edit-mode #PB_NPSEditTbl {
+    .edit-mode #PB_NPSEditTbl,
+    .edit-mode #PB_GOITCalc,
+    .edit-mode #PB_NPSITCalc {
       display: table;
     }
 
@@ -775,15 +811,24 @@
     }
 
     #PB_GOEditTbl td,
-    #PB_NPSEditTbl td {
-      height: 20px;
+    #PB_NPSEditTbl td,#PB_NPSITCalc td,#PB_GOITCalc td {
+      height: 22px;
     }
 
     #PB_GOEditTbl td *,
-    #PB_NPSEditTbl td * {
+    #PB_NPSEditTbl td *,
+    #PB_NPSITCalc td *,
+    #PB_GOITCalc td * {
       line-height: 1 !important;
     }
 
+    /* 🔹 MAIN TABLES TAKE REMAINING SPACE */
+    #PB_GOViewTbl,
+    #PB_GOEditTbl,
+    #PB_NPSViewTbl,
+    #PB_NPSEditTbl {
+      flex: 1;
+    }
     /* ================= CELLS ================= */
     .PB-Table-WrapperGO th,
     .PB-Table-WrapperGO td,
@@ -836,8 +881,25 @@
 
 
     /* ================= STICKY FIRST COLUMN ================= */
-    .PB-Table-Wrapper table th:first-child,
-    .PB-Table-Wrapper table td:first-child {
+    #PB_GOEditTbl th:first-child,
+    #PB_NPSEditTbl th:first-child,
+    #PB_GOEditTbl td:first-child,
+    #PB_NPSEditTbl td:first-child {
+      position: sticky;
+      left: 100px;
+      z-index: 8;
+      white-space: nowrap;
+
+      /* 🔥 IMPORTANT FIX */
+      background: white;
+      min-width: 210px;
+      width: 210px;
+    }
+
+    #PB_GOViewTbl th:first-child,
+    #PB_GOViewTbl td:first-child,
+    #PB_NPSViewTbl th:first-child,
+    #PB_NPSViewTbl td:first-child  {
       position: sticky;
       left: 0;
       z-index: 8;
@@ -850,15 +912,21 @@
     }
 
     /* header row first column */
-    .PB-Table-Wrapper thead tr th:first-child {
+    #PB_GOViewTbl thead tr th:first-child,#PB_NPSViewTbl thead tr th:first-child,
+    #PB_GOEditTbl thead tr th:first-child,#PB_NPSEditTbl thead tr th:first-child,
+    #PB_GOITCalc thead tr th:first-child,#PB_NPSITCalc thead tr th:first-child   {
       z-index: 50;
       background: #1f4e79;
       color: #ffffff;
     }
 
     /* ================= SEPARATOR ================= */
-    .PB-Table-Wrapper table td:first-child,
-    .PB-Table-Wrapper table th:first-child {
+    #PB_GOViewTbl td:first-child,#PB_NPSViewTbl td:first-child,
+    #PB_GOEditTbl td:first-child,#PB_NPSEditTbl td:first-child,
+    #PB_GOITCalc td:first-child,#PB_NPSITCalc td:first-child,
+    #PB_GOViewTbl th:first-child,#PB_NPSViewTbl th:first-child,
+    #PB_GOEditTbl th:first-child,#PB_NPSEditTbl th:first-child,
+    #PB_GOITCalc th:first-child,#PB_NPSITCalc th:first-child {
       box-shadow: 2px 0 0 #e5e7eb;
     }
 
@@ -873,7 +941,9 @@
       padding: 6px 4px !important;
     }
 
-    .PB-Table-Wrapper table tr:last-child td:first-child {
+    #PB_GOViewTbl tr:last-child td:first-child, #PB_NPSViewTbl tr:last-child td:first-child,
+    #PB_GOEditTbl tr:last-child td:first-child, #PB_NPSEditTbl tr:last-child td:first-child,
+    #PB_GOITCalc tr:last-child td:first-child, #PB_NPSITCalc tr:last-child td:first-child {
       box-shadow: 0 -2px 0 #f59e0b;
       background: #fef3c7;
     }
@@ -1568,11 +1638,14 @@
         <div class="PB-Table-Wrapper">
           <div class="PB-Table-WrapperGO">
             <table id="PB_GOViewTbl"></table>
+            <table id="PB_GOITCalc"></table>
             <table id="PB_GOEditTbl"></table>
+            
           </div>
           <div class="PB-Table-WrapperNPS">
             <table id="PB_NPSViewTbl"></table>
-            <table id="PB_NPSEditTbl"></table>
+            <table id="PB_NPSITCalc"></table>
+            <table id="PB_NPSEditTbl"></table>            
           </div>
         </div>
         <div class="Error_Note">
@@ -2539,17 +2612,19 @@
       let cpcRes = await fetch("https://office-management-f425.onrender.com/cpc");
       let qtrsRes = await fetch("https://office-management-f425.onrender.com/qtrs");
       let cityRes = await fetch("https://office-management-f425.onrender.com/city");
+      let itRes = await fetch("https://office-management-f425.onrender.com/it");
 
       empData = await empRes.json();
       pbData = await pbRes.json();
       cpcData = await cpcRes.json();
       qtrsData = await qtrsRes.json();
       cityData = await cityRes.json();
+      itData = await itRes.json();
     }
 
 
     function applyFilters() {
-      console.log("FILTER isAddMode:", isAddMode);
+      //console.log("FILTER isAddMode:", isAddMode);
       if (!pbData.headers) return;
 
       let headers = pbData.headers;
@@ -2629,9 +2704,9 @@
           }
         });
 
-        console.log("VALID MONTHS:", [...validMonths]);
-        console.log("FILTER MONTH:", filters.month);
-        console.log("ADD MODE:", isAddMode);
+        //console.log("VALID MONTHS:", [...validMonths]);
+        //console.log("FILTER MONTH:", filters.month);
+        //console.log("ADD MODE:", isAddMode);
 
         // 🔥 2. FORCE ADD AFTER LOOP (THIS IS THE KEY FIX)
         if (isAddMode && filters.month) {
@@ -4591,7 +4666,6 @@
       });
     }
 
-
     function applyGPFRule_GO(tr, empName) {
 
       const tableId = tr.closest("table")?.id || "";
@@ -4666,7 +4740,6 @@
       }
     }
 
-
     function updateGPFMessage() {
 
       const gpfError = id("GPF_Error");
@@ -4683,8 +4756,6 @@
         gpfError.textContent = "";
       }
     }
-
-
 
     function addMonths(val, n) {
 
@@ -4964,6 +5035,491 @@
       setValue(cgeisInput, amount);
     }
 
+
+    function monthToNumber(monthStr) {
+      if (!monthStr || !monthStr.includes("-")) return Infinity;
+
+      const [mon, year] = monthStr.split("-");
+      const map = {
+        Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6,
+        Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12
+      };
+
+      return parseInt(year) * 12 + (map[mon] || 0);
+    }
+
+    function normalizeMonthFormat(dateStr) {
+
+      if (!dateStr) return null;
+
+      // Example: May-31,2027 → May-2027
+      const parts = dateStr.split(",");
+
+      if (parts.length === 2) {
+        const year = parts[1].trim();
+        const month = parts[0].split("-")[0].trim();
+        return `${month}-${year}`;
+      }
+
+      return dateStr; // already correct
+    }
+
+    const DEBUG_EMP = "T. Shyama Prasad"; // 🔥 change anytime
+    function calculateTaxFromSlabs(income, slabs) {
+
+      let tax = 0;
+
+      const headers = itData.headers;
+
+      const lowerIdx = headers.indexOf("Lower Limit");
+      const upperIdx = headers.indexOf("Upper Limit");
+      const rateIdx = headers.indexOf("Rate");
+
+      slabs.forEach(s => {
+
+        let lower = parseFloat(s[lowerIdx]) || 0;
+        let upper = s[upperIdx] ? parseFloat(s[upperIdx]) : Infinity;
+        let rate = parseFloat(s[rateIdx]) || 0;
+
+        if (income > lower) {
+          let taxable = Math.min(income, upper) - lower;
+          tax += taxable * rate / 100;
+        }
+      });
+
+      return tax;
+    }
+
+
+    function getSlabs(fy, regime) {
+
+      if (!itData || !itData.headers || !itData.rows) return [];
+
+      return itData.rows.filter(r =>
+        r[itData.headers.indexOf("Financial Year")] === fy &&
+        r[itData.headers.indexOf("Regime")] === regime
+      );
+
+      if (DEBUG_EMP && window.currentDebugEmp === DEBUG_EMP) {
+        console.log("---- SLAB BREAKDOWN ----");
+      }
+
+      if (income > lower) {
+
+        let taxable = Math.min(income, upper) - lower;
+        let slabTax = taxable * rate / 100;
+
+        if (DEBUG_EMP && window.currentDebugEmp === DEBUG_EMP) {
+          console.log({
+            lower,
+            upper,
+            rate,
+            taxable,
+            slabTax
+          });
+        }
+
+        tax += slabTax;
+      }
+    }
+
+
+function calculateEmployeeIT(empName, selectedFY, regime) {
+
+  const result = calculateFYGrossFinal(empName, selectedFY);
+
+  if (!result.isActive) return 0;
+
+  let netGross = result.total;
+
+  const slabs = getSlabs(selectedFY, regime);
+  if (slabs.length === 0) return 0;
+
+  const headers = itData.headers;
+
+  const stdIdx = headers.indexOf("Standard Deduction");
+  const rebateLimitIdx = headers.indexOf("Rebate Upto");
+  const rebateIdx = headers.indexOf("Rebate");
+
+  const stdDeduction = parseFloat(slabs[0][stdIdx]) || 0;
+  const rebateLimit = parseFloat(slabs[0][rebateLimitIdx]) || 0;
+  const rebateAmount = parseFloat(slabs[0][rebateIdx]) || 0;
+
+  // 🔹 Step 1: Taxable Income
+  let taxableIncome = Math.max(0, netGross - stdDeduction);
+
+  // 🔹 Step 2: Slab Tax
+  let tax = calculateTaxFromSlabs(taxableIncome, slabs);
+
+  // 🔥 Step 3: Rebate Logic (FINAL CORRECT)
+  let finalTax = tax;
+  let cess = 0;
+
+  if (taxableIncome <= rebateLimit) {
+    finalTax = Math.max(0, tax - rebateAmount);
+  }
+
+  cess = finalTax * 0.04; // 4% cess on final tax
+
+  finalTax += cess;
+  
+  window.currentDebugEmp = empName;
+    if (empName === DEBUG_EMP) {
+
+    console.log("---- TAX CALC ----");
+
+    console.log("Net Gross:", netGross);
+    console.log("Std Deduction:", stdDeduction);
+
+    console.log("Taxable Income:", taxableIncome);
+
+    console.log("Slabs Used:", slabs);
+
+    console.log("Tax Before Rebate:", tax);
+
+    if (taxableIncome <= rebateLimit) {
+      console.log("Rebate Applied:", rebateAmount);
+    } else {
+      console.log("Rebate NOT Applied");
+    }
+
+    console.log("Final Tax:", finalTax);
+  }
+
+  return finalTax;
+    
+}
+
+function getRemainingMonths(selectedFY, currentMonth, superMonth) {
+
+  const startYear = parseInt(selectedFY.split("-")[0]);
+
+  const fyMonths = [
+    `Mar-${startYear}`, `Apr-${startYear}`, `May-${startYear}`, `Jun-${startYear}`,
+    `Jul-${startYear}`, `Aug-${startYear}`, `Sep-${startYear}`, `Oct-${startYear}`,
+    `Nov-${startYear}`, `Dec-${startYear}`,
+    `Jan-${startYear+1}`, `Feb-${startYear+1}`
+  ];
+
+  let count = 0;
+
+  fyMonths.forEach(m => {
+
+    if (monthToNumber(m) < monthToNumber(currentMonth)) return;
+
+    if (superMonth && monthToNumber(m) > monthToNumber(superMonth)) return;
+
+    count++;
+  });
+
+  return count || 1;
+}
+
+
+function calculateMonthlyIT(empName, selectedFY, regime, paidIT, currentMonth) {
+
+  const result = calculateFYGrossFinal(empName, selectedFY);
+
+  if (!result.isActive) return 0;
+
+  const totalTax = calculateEmployeeIT(empName, selectedFY, regime);
+
+  const remainingMonths = getRemainingMonths(
+    selectedFY,
+    currentMonth,
+    result.superMonth
+  );
+
+  const balanceTax = Math.max(0, totalTax - (paidIT || 0));
+
+  if (empName === DEBUG_EMP) {
+
+    console.log("---- MONTHLY IT ----");
+
+    console.log("Total Tax:", totalTax);
+    console.log("Paid IT:", paidIT);
+
+    console.log("Remaining Months:", remainingMonths);
+
+    console.log("Balance Tax:", balanceTax);
+
+    console.log("Monthly IT (Rounded):", Math.round(balanceTax / remainingMonths));
+  }
+
+  return Math.round(balanceTax / remainingMonths);
+  
+}
+
+
+
+function calculateFYGrossFinal(empName, selectedFY) {
+
+  if (!pbData || !pbData.headers || !pbData.rows) return { total: 0, department: "", isActive: false };
+
+  const headers = pbData.headers;
+  const rows = pbData.rows;
+
+  const empIndex = headers.indexOf("Employee Name");
+  const monthIndex = headers.indexOf("Salary Month");
+  const grossIndex = headers.indexOf("Gross Income");
+  const medIndex = headers.indexOf("Medical Reimbursement");
+  const ltaIndex = headers.indexOf("LTA Reimbursement");
+
+  let superMonth = null;
+  let department = "";
+
+  if (window.empCalcHeaders && window.empCalcRows) {
+
+  const eHeaders = window.empCalcHeaders;
+  const eRows = window.empCalcRows;
+
+  const eEmpIndex = getColIndex(eHeaders, "Employee Name");
+  const supIndex = getColIndex(eHeaders, "Superannuation"); // ✅ correct column
+  const deptIndex = getColIndex(eHeaders, "Department");
+
+  if (empName === DEBUG_EMP) {
+    console.log("EmpCalc Headers:", eHeaders);
+    console.log("Indexes:", { eEmpIndex, supIndex, deptIndex });
+  }
+
+  if (eEmpIndex !== -1 && supIndex !== -1 && deptIndex !== -1) {
+
+    for (let row of eRows) {
+
+      if (String(row[eEmpIndex]).trim() === String(empName).trim()) {
+
+        superMonth = row[supIndex];
+        department = row[deptIndex] || "";
+
+        if (empName === DEBUG_EMP) {
+          console.log("Matched Row:", row);
+          console.log("SuperMonth:", superMonth);
+          console.log("Department:", department);
+        }
+
+        break;
+      }
+    }
+
+  } else {
+    console.warn("Missing column in empCalcHeaders");
+  }
+}
+
+  // 🔥 NEW: Exclude already retired employees
+  const startYear = parseInt(selectedFY.split("-")[0]);
+  const fyStart = `Mar-${startYear}`;
+
+  if (superMonth && monthToNumber(superMonth) < monthToNumber(fyStart)) {
+    return { total: 0, department, isActive: false }; // ❌ skip
+  }
+
+  let monthData = {};
+
+  rows.forEach(row => {
+
+    if (String(row[empIndex]).trim() !== String(empName).trim()) return;
+
+    const monthStr = row[monthIndex];
+    const fy = getFinancialYear(monthStr);
+
+    if (fy !== selectedFY) return;
+
+    const gross = parseFloat(row[grossIndex]) || 0;
+
+    const med = medIndex !== -1 ? (parseFloat(row[medIndex]) || 0) : 0;
+    const lta = ltaIndex !== -1 ? (parseFloat(row[ltaIndex]) || 0) : 0;
+
+    // 🔥 Net taxable gross
+    const netGross = gross - med - lta;
+
+    monthData[monthStr] = netGross;
+  });
+
+  if (Object.keys(monthData).length === 0) {
+    return { total: 0, department, isActive: false };
+  }
+
+  const fyMonths = [
+    `Mar-${startYear}`, `Apr-${startYear}`, `May-${startYear}`, `Jun-${startYear}`,
+    `Jul-${startYear}`, `Aug-${startYear}`, `Sep-${startYear}`, `Oct-${startYear}`,
+    `Nov-${startYear}`, `Dec-${startYear}`,
+    `Jan-${startYear+1}`, `Feb-${startYear+1}`
+  ];
+
+  let lastValue =
+    monthData[`Mar-${startYear}`] ??
+    Object.values(monthData)[0];
+
+  let total = 0;
+
+  fyMonths.forEach(m => {
+
+    if (superMonth && monthToNumber(m) > monthToNumber(superMonth)) return;
+
+    let value;
+
+    if (monthData[m] !== undefined) {
+      value = monthData[m];
+      lastValue = value;
+    } else {
+      value = lastValue;
+    }
+
+    total += value;
+  });
+
+  if (empName === DEBUG_EMP) {
+    console.log("---- FY GROSS ----");
+    console.log({ empName, total, superMonth });
+  }
+  
+  return { total, department, isActive: true, superMonth };
+  
+}
+
+
+function renderGOITTable() {
+
+  const table = id("PB_GOITCalc");
+  if (!table) return;
+
+  let thead = table.querySelector("thead") || table.appendChild(document.createElement("thead"));
+  let tbody = table.querySelector("tbody") || table.appendChild(document.createElement("tbody"));
+
+  const selectedFY = id("PayBillPage_FY").value;
+  const paidITIndex = pbData.headers.indexOf("Net IT"); // 🔥 or your IT column
+  const empIndex = pbData.headers.indexOf("Employee Name");
+
+  let processed = new Set();
+  let grandTotal = 0; // 🔥 TOTAL
+
+  thead.innerHTML = `
+    <tr>
+      <th>Income Tax (FY)</th>
+    </tr>
+  `;
+
+  tbody.innerHTML = "";
+
+  pbData.rows.forEach(row => {
+
+    const empName = row[empIndex];
+    if (processed.has(empName)) return;
+    processed.add(empName);
+
+    const result = calculateFYGrossFinal(empName, selectedFY);
+
+    if (!result.isActive) return;
+    if (!String(result.department).toUpperCase().includes("GO")) return;
+
+    const currentMonth = id("PayBillPage_SalMonth").value;
+
+    const paidIT = paidITIndex !== -1
+      ? (parseFloat(row[paidITIndex]) || 0)
+      : 0;
+
+    // 🔥 Choose regime
+    const regime = "New Regime"; // or dynamic later
+
+    const monthlyIT = calculateMonthlyIT(
+      empName,
+      selectedFY,
+      regime,
+      paidIT,
+      currentMonth
+    );
+
+    grandTotal += monthlyIT;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="total-row">${formatCurrency(monthlyIT)}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  // 🔥 TOTAL ROW
+  const totalRow = document.createElement("tr");
+  totalRow.classList.add("total-row");
+  totalRow.innerHTML = `
+    <td style="font-weight:bold;">${formatCurrency(grandTotal)}</td>
+  `;
+
+  tbody.appendChild(totalRow);
+}
+
+
+function renderNPSITTable() {
+
+  const table = id("PB_NPSITCalc");
+  if (!table) return;
+
+  let thead = table.querySelector("thead") || table.appendChild(document.createElement("thead"));
+  let tbody = table.querySelector("tbody") || table.appendChild(document.createElement("tbody"));
+
+  const selectedFY = id("PayBillPage_FY").value;
+  const paidITIndex = pbData.headers.indexOf("Net IT"); // 🔥 or your IT column
+  const empIndex = pbData.headers.indexOf("Employee Name");
+
+  let processed = new Set();
+  let grandTotal = 0; // 🔥 TOTAL
+
+  thead.innerHTML = `
+    <tr>
+      <th>Income Tax (FY)</th>
+    </tr>
+  `;
+
+  tbody.innerHTML = "";
+
+  pbData.rows.forEach(row => {
+
+    const empName = row[empIndex];
+    if (processed.has(empName)) return;
+    processed.add(empName);
+
+    const result = calculateFYGrossFinal(empName, selectedFY);
+
+    if (!result.isActive) return;
+    if (String(result.department).toUpperCase().includes("GO")) return;
+
+    const currentMonth = id("PayBillPage_SalMonth").value;
+
+    const paidIT = paidITIndex !== -1
+      ? (parseFloat(row[paidITIndex]) || 0)
+      : 0;
+
+    const regime = "New Regime"; // 🔥 NPS → New Regime usually
+
+    const monthlyIT = calculateMonthlyIT(
+      empName,
+      selectedFY,
+      regime,
+      paidIT,
+      currentMonth
+    );
+
+    grandTotal += monthlyIT;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatCurrency(monthlyIT)}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  // 🔥 TOTAL ROW
+  const totalRow = document.createElement("tr");
+  totalRow.classList.add("total-row");
+  totalRow.innerHTML = `
+    <td >${formatCurrency(grandTotal)}</td>
+  `;
+
+  tbody.appendChild(totalRow);
+}
 
     function calculateITFields(tr) {
 
@@ -5421,28 +5977,44 @@
       if (!station || !month) return;
 
       // 🔥 CLEAR TABLES
-      ["PB_GOEditTbl", "PB_NPSEditTbl", "PB_GOViewTbl", "PB_NPSViewTbl"]
+      ["PB_GOEditTbl", "PB_NPSEditTbl", "PB_GOViewTbl", "PB_NPSViewTbl","PB_NPSITCalc", "PB_GOITCalc"]
         .forEach(idName => {
           const el = id(idName);
           if (el) el.innerHTML = "";
+          if (el) el.style.display = "none";
         });
 
       const wrapper = document.querySelector(".PB-Table-Wrapper");
       const isEditMode = wrapper?.classList.contains("edit-mode");
 
       if (isEditMode) {
+        ["PB_GOEditTbl", "PB_NPSEditTbl","PB_NPSITCalc", "PB_GOITCalc"]
+        .forEach(idName => {
+          const el = id(idName);
+          if (el) el.style.display = "table";
+        });
         createPayBillEditTables();
+        
         recalculateAllRows();
         recalculateAllTotals();
+
+        renderNPSITTable();
+        renderGOITTable();
+
       } else {
+        ["PB_GOViewTbl", "PB_NPSViewTbl"]
+        .forEach(idName => {
+          const el = id(idName);
+          if (el) el.style.display = "table";
+        });
         createPayBillViewTables(station, fy, month);
       }
 
-      setDAPercent();
+      setDAPercent();      
     }
 
     on("PBaddBtn", "click", () => {
-      console.log("BTN isAddMode:", isAddMode);
+      //console.log("BTN isAddMode:", isAddMode);
       const monthEl = id("PayBillPage_SalMonth");
       const station = id("PayBillPage_Station")?.value;
 
@@ -5454,7 +6026,7 @@
         isEditMode = false;
         isAddMode = true;
 
-        console.log("ADD MODE ACTIVATED");
+        //console.log("ADD MODE ACTIVATED");
 
         const currentMonth = String(monthEl.value || "").trim();
         const nextMonth = getNextMonthStr(currentMonth);
@@ -5480,7 +6052,7 @@
       } else {
 
         // 🔥 SECOND CLICK → SAVE
-        console.log("SAVE MODE");
+        //console.log("SAVE MODE");
         savePBData("ADD");
 
         isAddMode = false;
@@ -5504,12 +6076,12 @@
 
       isEditMode = true;
 
-      console.log("EDIT MODE ACTIVE");
+      //console.log("EDIT MODE ACTIVE");
     });
 
 
     async function savePBData(mode = "ADD") {
-      console.trace("SAVE CALLED");
+      //console.trace("SAVE CALLED");
       const salaryMonth = id("PayBillPage_SalMonth").value;
       const station = id("PayBillPage_Station").value;
       const daPercent = id("PayBillPage_DA%").value;
@@ -6575,7 +7147,7 @@
       style.textContent = `
     @page { size: A4 landscape; margin: 5mm; }
 
-      * { font-family: "Roboto Condensed", "Inter", sans-serif; font-size: 11px;padding:0;margin:0}
+      * { font-family: "Roboto Condensed", "Inter", sans-serif; font-size: 10px;padding:0;margin:0}
 
       body{padding:5px 5px;}
 
