@@ -1949,6 +1949,8 @@
             Database</button>
           <button onclick="showSheet('BudgetDB',this)">Budget
             Database</button>
+          <button onclick="showSheet('SBGexpenditureDB',this)">Budget Expenditures
+            Database</button>
           <button onclick="showSheet('PBDB',this)">Pay Bill
             Database</button>
           <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
@@ -1965,6 +1967,7 @@
           <table id="EmpDB"></table>
           <table id="EmpDBCalc"></table>
           <table id="BudgetDB" style="display:none;"></table>
+          <table id="SBGexpenditureDB" style="display:none;"></table>
           <table id="PBDB" style="display:none;"></table>
           <table id="CPC7DB" style="display:none;"></table>
           <table id="QtrsRateDB" style="display:none;"></table>
@@ -2150,6 +2153,7 @@
       await Promise.all([
         loadTable("emp", "EmpDB"),
         loadTable("sbg", "BudgetDB"),
+        loadTable("sbgexp", "SBGexpenditureDB"),
         loadTable("pb", "PBDB"),
         loadTable("cpc", "CPC7DB"),
         loadTable("qtrs", "QtrsRateDB"),
@@ -2882,6 +2886,7 @@
       let qtrsRes = await fetch("https://office-management-f425.onrender.com/qtrs");
       let cityRes = await fetch("https://office-management-f425.onrender.com/city");
       let sbgRes = await fetch("https://office-management-f425.onrender.com/sbg");
+      let sbgExpRes = await fetch("https://office-management-f425.onrender.com/sbgexp");
       let itRes = await fetch("https://office-management-f425.onrender.com/it");
       let commRes = await fetch("https://office-management-f425.onrender.com/comm");
 
@@ -2891,6 +2896,7 @@
       qtrsData = await qtrsRes.json();
       cityData = await cityRes.json();
       sbgData = await sbgRes.json();
+      sbgExpData = await sbgExpRes.json();
       itData = await itRes.json();
       commData = await commRes.json();
     }
