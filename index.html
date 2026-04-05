@@ -1937,6 +1937,8 @@
             <div class="button-bar">
               <button onclick="showSheet('EmpDB',this)" class="active">Employee
                 Database</button>
+              <button onclick="showSheet('BudgetDB',this)">Budget
+                Database</button>
               <button onclick="showSheet('PBDB',this)">Pay Bill
                 Database</button>
               <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
@@ -1952,6 +1954,7 @@
             <div class="DB-Table-Wrapper">
               <table id="EmpDB"></table>
               <table id="EmpDBCalc"></table>
+              <table id="BudgetDB" style="display:none;"></table>
               <table id="PBDB" style="display:none;"></table>
               <table id="CPC7DB" style="display:none;"></table>
               <table id="QtrsRateDB" style="display:none;"></table>
@@ -2136,6 +2139,7 @@
     async function loadAllData() {
       await Promise.all([
         loadTable("emp", "EmpDB"),
+        loadTable("sbg", "BudgetDB"),
         loadTable("pb", "PBDB"),
         loadTable("cpc", "CPC7DB"),
         loadTable("qtrs", "QtrsRateDB"),
@@ -2867,14 +2871,18 @@
       let cpcRes = await fetch("https://office-management-f425.onrender.com/cpc");
       let qtrsRes = await fetch("https://office-management-f425.onrender.com/qtrs");
       let cityRes = await fetch("https://office-management-f425.onrender.com/city");
+      let sbgRes = await fetch("https://office-management-f425.onrender.com/sbg");
       let itRes = await fetch("https://office-management-f425.onrender.com/it");
+      let commRes = await fetch("https://office-management-f425.onrender.com/comm");
 
       empData = await empRes.json();
       pbData = await pbRes.json();
       cpcData = await cpcRes.json();
       qtrsData = await qtrsRes.json();
       cityData = await cityRes.json();
+      sbgData = await sbgRes.json();
       itData = await itRes.json();
+      commData = await commRes.json();
     }
 
     function applyFilters() {
