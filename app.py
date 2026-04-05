@@ -27,6 +27,7 @@ client = gspread.authorize(creds)
 spreadsheet = client.open("AKASHAVANI")
 
 emp_sheet = spreadsheet.worksheet("EmpDB")
+sbg_sheet = spreadsheet.worksheet("BudgetDB")
 pb_sheet = spreadsheet.worksheet("PBDB")
 cpc_sheet = spreadsheet.worksheet("CPC7DB")
 city_sheet = spreadsheet.worksheet("CityZoneDB")
@@ -54,6 +55,11 @@ def sheet_to_json(sheet):
 @app.route("/emp", methods=["GET"])
 def get_emp():
     return jsonify(sheet_to_json(emp_sheet))
+
+
+@app.route("/sbg", methods=["GET"])
+def get_sbg():
+    return jsonify(sheet_to_json(sbg_sheet))
 
 
 @app.route("/pb", methods=["GET"])
