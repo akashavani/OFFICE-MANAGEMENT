@@ -28,6 +28,7 @@ spreadsheet = client.open("AKASHAVANI")
 
 emp_sheet = spreadsheet.worksheet("EmpDB")
 sbg_sheet = spreadsheet.worksheet("BudgetDB")
+sbgexp_sheet = spreadsheet.worksheet("SBGexpenditure")
 pb_sheet = spreadsheet.worksheet("PBDB")
 cpc_sheet = spreadsheet.worksheet("CPC7DB")
 city_sheet = spreadsheet.worksheet("CityZoneDB")
@@ -60,6 +61,11 @@ def get_emp():
 @app.route("/sbg", methods=["GET"])
 def get_sbg():
     return jsonify(sheet_to_json(sbg_sheet))
+
+
+@app.route("/sbgexp", methods=["GET"])
+def get_sbg():
+    return jsonify(sheet_to_json(sbgexp_sheet))
 
 
 @app.route("/pb", methods=["GET"])
