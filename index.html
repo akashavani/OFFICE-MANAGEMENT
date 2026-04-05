@@ -150,6 +150,17 @@
       scrollbar-width: thin;
       scrollbar-color: #3b82f6 #f1f5f9;
     }
+    optgroup{
+      font-size: 12px;
+      color: #d3fc58;
+      font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+      font-weight: 700;
+    }
+    option{
+      color: white;
+      font-weight: 100;
+      font-family: "Roboto Condensed", "Inter", sans-serif;;
+    }
 
     /* =============APP LAYOUT=========== */
     .watermark {
@@ -721,7 +732,8 @@
 
     /* ================= CHILD TABLE WRAPPERS ================= */
     .PB-Table-WrapperGO,
-    .PB-Table-WrapperNPS {
+    .PB-Table-WrapperNPS,
+    .BudgetTableWrapper {
       flex: 1;
       /* 🔥 equal height */
       min-height: 0;
@@ -736,7 +748,8 @@
 
     /* ================= TABLE ================= */
     .PB-Table-WrapperGO table:not(#PB_GOITCalc),
-    .PB-Table-WrapperNPS table:not(#PB_NPSITCalc) {
+    .PB-Table-WrapperNPS table:not(#PB_NPSITCalc),
+    .budget-table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
@@ -887,7 +900,9 @@
     .PB-Table-WrapperGO th,
     .PB-Table-WrapperGO td,
     .PB-Table-WrapperNPS th,
-    .PB-Table-WrapperNPS td {
+    .PB-Table-WrapperNPS td,
+    .budget-table th,
+    .budget-table td {
       padding: 5px 8px;
       border-bottom: 1px solid #e5e7eb;
       border-right: dotted 1px #d7dae0;
@@ -917,7 +932,8 @@
     }
 
     /* ================= HEADER ROW ================= */
-    .PB-Table-Wrapper thead tr th {
+    .PB-Table-Wrapper thead tr th,
+    .budget-table thead tr th {
       position: sticky;
       top: 0;
       z-index: 9;
@@ -953,7 +969,8 @@
     #PB_GOViewTbl th:first-child,
     #PB_GOViewTbl td:first-child,
     #PB_NPSViewTbl th:first-child,
-    #PB_NPSViewTbl td:first-child {
+    #PB_NPSViewTbl td:first-child,
+    .budget-table td:first-child {
       position: sticky;
       left: 0;
       z-index: 8;
@@ -1381,6 +1398,9 @@
       color: #5a5f7cc0;
       pointer-events: none;
     }
+
+    /*============================Budget CSS =====================*/
+   
 
     /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
@@ -1937,6 +1957,50 @@
         <div class="header">
           <h2>Budgets</h2>
         </div>
+        <div class="Selection-bar">
+          <table>
+            <colgroup>
+              <col style="width:80px">
+              <col style="width:170px">
+              <col style="width:70px">
+              <col style="width:100px">
+              <col style="width:120px">
+              <col style="width:400px">
+            </colgroup>
+            <tr>
+              <td><label for="BudgetPage_Station">Station :</label></td>
+              <td><select id="BudgetPage_Station"></select></td>
+              <td><label for="BudgetPage_FY">FY :</label></td>
+              <td><select id="BudgetPage_FY"></select></td>
+              <td><label>Budget under</label></td>
+              <td><select id="BudgetUnderSelect" style="width: 400px;"></select></td>
+            </tr>
+          </table>
+
+          <div class="action-group">
+            <button id="SBGeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
+            <button id="SBGaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
+
+            <button id="SGGprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
+            <button id="SBGexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+          </div>
+        </div>
+        <table style="width: 100%;padding: 4px;margin: 5px;border-radius: 8px;border:solid 1px rgb(189, 189, 189);font-weight: bold;">
+          <tr>
+            <td>Sanctioned SBG</td>
+            <td><input disabled id="SBGsanctioned" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+            <td>SBG Utilised</td>
+            <td><input disabled id="SBGutilised" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+            <td>Available SBG</td>
+            <td><input disabled id="SBGavailable" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+            <td>Calculated SBG</td>
+            <td><input disabled id="SBGcalculated" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+            <td>Revised SBG</td>
+            <td><input disabled id="SBGrevised" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+          </tr>
+        </table>
+        <div class="BudgetTableWrapper" id="BudgetTableWrapper">
+        </div>
       </div>
 
       <div class="SectionPage" id="DatabasePage" style="display:none">
@@ -2010,6 +2074,7 @@
       renderIcons();
       disableAllButtons();
       updateAndRenderDAA();
+      
 
       // Default page click
       const firstBtn = qs('.menu-btn');
@@ -2070,6 +2135,9 @@
       });
       on("PayBillPage_Station", "change", setDAPercent);
 
+      loadBudgetDropdown();
+      loadBudgetStationDropdown();
+      loadBudgetFYDropdown();
     });
 
 
@@ -8826,7 +8894,319 @@
       saveAs(new Blob([buffer]), `${station}_PayBill_${month}.xlsx`);
     };
 
+    //===========================Budget Page Script =================== //
 
+    function loadBudgetDropdown() {
+
+  if (!sbgData || !sbgData.headers || !sbgData.rows) return;
+
+  const headers = sbgData.headers;
+  const rows = sbgData.rows;
+
+  const budgetIdx = headers.findIndex(h =>
+    String(h).toLowerCase().includes("budget")
+  );
+
+  if (budgetIdx === -1) return;
+
+  const select = id("BudgetUnderSelect");
+  if (!select) return;
+
+  select.innerHTML = `<option value="" hidden >Select Budget</option>`;
+
+  // 🔥 DEFINE GROUPS
+  const groups = [
+    { name: "Salaries - GO", start: 0, end: 2 },
+    { name: "Salaries - PB", start: 3, end: 7 },
+    { name: "Admin Expenditure - IEBR", start: 8, end: 28 },
+    { name: "Programme Expenses", start: 29, end: 35 }
+  ];
+
+  // 🔥 CREATE GROUPS
+  groups.forEach(g => {
+
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = g.name;
+
+    for (let i = g.start; i <= g.end && i < rows.length; i++) {
+
+      const val = String(rows[i][budgetIdx] || "").trim();
+      if (!val) continue;
+
+      const opt = document.createElement("option");
+      opt.value = val;
+      opt.textContent = val;
+
+      optgroup.appendChild(opt);
+    }
+
+    if (optgroup.children.length) {
+      select.appendChild(optgroup);
+    }
+
+  });
+
+  // 🔥 LAST ROW (AS IS)
+  const lastRow = rows[rows.length - 1];
+  if (lastRow) {
+    const val = String(lastRow[budgetIdx] || "").trim();
+
+    if (val) {
+      const opt = document.createElement("option");
+      opt.value = val;
+      opt.textContent = val;
+
+      select.appendChild(opt);
+    }
+  }
+
+}
+
+function loadBudgetStationDropdown() {
+
+  const headers = sbgExpData.headers;
+  const rows = sbgExpData.rows;
+
+  const stationIdx = headers.findIndex(h =>
+    h.toLowerCase().includes("station")
+  );
+
+  if (stationIdx === -1) return;
+
+  const stations = [...new Set(
+    rows.map(r => String(r[stationIdx] || "").trim()).filter(Boolean)
+  )];
+
+  const select = id("BudgetPage_Station");
+  select.innerHTML = `<option value="" hidden >Select Station</option>`;
+
+  stations.forEach(st => {
+    const opt = document.createElement("option");
+    opt.value = st;
+    opt.textContent = st;
+    select.appendChild(opt);
+  });
+}
+
+
+function getBudgetFY(dateStr) {
+
+  if (!dateStr) return "";
+
+  // 🔥 SAFE PARSE DD-MM-YYYY
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return "";
+
+  const dd = parts[0];
+  const mm = parts[1];
+  const yyyy = parts[2];
+
+  const month = parseInt(mm, 10);
+  const year = parseInt(yyyy, 10);
+
+  if (!month || !year) return "";
+
+  if (month >= 3) {
+    return `${year}-${String(year + 1).slice(-2)}`;
+  } else {
+    return `${year - 1}-${String(year).slice(-2)}`;
+  }
+}
+
+function loadBudgetFYDropdown() {
+  
+  const headers = sbgExpData.headers;
+  const rows = sbgExpData.rows;
+
+  const dateIdx = headers.findIndex(h =>
+    h.toLowerCase().includes("date")
+  );
+
+  if (dateIdx === -1) return;
+
+  const fyList = [...new Set(
+    rows.map(r => getBudgetFY(r[dateIdx])).filter(Boolean)
+  )];
+
+  const select = id("BudgetPage_FY");
+  select.innerHTML = `<option value="" hidden>Select FY</option>`;
+
+  fyList.forEach(fy => {
+    const opt = document.createElement("option");
+    opt.value = fy;
+    opt.textContent = fy;
+    select.appendChild(opt);
+  });
+}
+
+
+function renderBudgetTable() {
+
+  const budgetVal = id("BudgetUnderSelect")?.value;
+  const stationVal = id("BudgetPage_Station")?.value;
+  const fyVal = id("BudgetPage_FY")?.value;
+
+  
+
+  if (!budgetVal || !stationVal || !fyVal) return;
+
+  const headers = sbgExpData.headers;
+  const rows = sbgExpData.rows;
+
+  //console.log({ budgetVal, stationVal,fyVal,sampleRow: rows[0]});
+
+
+  const budgetIdx = headers.findIndex(h =>
+    h.toLowerCase().includes("sbg expenditure under")
+  );
+
+  const stationIdx = headers.findIndex(h =>
+    h.toLowerCase().includes("station")
+  );
+
+  const dateIdx = headers.findIndex(h =>
+    h.toLowerCase().includes("date")
+  );
+
+  console.log("Row FY:", getBudgetFY(rows[0][dateIdx]));
+console.log("Selected FY:", fyVal);
+
+  // 🔥 FILTER DATA
+  const filtered = rows.filter(r => {
+
+    const budget = String(r[budgetIdx] || "").trim();
+    const station = String(r[stationIdx] || "").trim();
+    const fy = getBudgetFY(r[dateIdx]);
+
+    return (
+      budget === budgetVal &&
+      station === stationVal &&
+      fy === fyVal
+    );
+  });
+  console.log("Filtered:", filtered.length);
+  // 🔥 CREATE TABLE
+  const container = id("BudgetTableWrapper");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const table = document.createElement("table");
+  table.className = "budget-table";
+
+// 🔥 ADD COLGROUP HERE
+const colgroup = document.createElement("colgroup");
+
+// Example widths (adjust as needed)
+const colWidths = [
+  "100px", // Date
+  "150px", // Station
+  "370px", // SBG Expenditure Under
+  "750px", // Details
+  "200px", // Expenditure Amount
+  "200px", // Cumulative Sum
+];
+
+headers.forEach((_, i) => {
+  const col = document.createElement("col");
+  col.style.width = colWidths[i] || "120px"; // fallback
+  colgroup.appendChild(col);
+});
+
+table.appendChild(colgroup);
+
+  // 🔹 HEADER
+  const thead = document.createElement("thead");
+  const trHead = document.createElement("tr");
+
+  headers.forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h;
+    trHead.appendChild(th);
+  });
+
+  thead.appendChild(trHead);
+  table.appendChild(thead);
+
+  // 🔹 BODY
+  const tbody = document.createElement("tbody");
+
+  filtered.forEach(row => {
+    const tr = document.createElement("tr");
+
+    row.forEach(cell => {
+      const td = document.createElement("td");
+      td.textContent = cell;
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+
+}
+
+function getSBGMultiValues() {
+
+  const budgetVal = id("BudgetUnderSelect")?.value;
+  const fyVal = id("BudgetPage_FY")?.value;
+
+  if (!budgetVal || !fyVal) return;
+
+  const headers = sbgData.headers;
+  const rows = sbgData.rows;
+
+  // 🔥 FIND ALL FY MATCHING COLUMNS
+  const fyCols = [];
+
+  headers.forEach((h, i) => {
+    const cleanFY = String(h).match(/\d{4}-\d{2}/)?.[0];
+    if (cleanFY === fyVal) {
+      fyCols.push(i);
+    }
+  });
+
+  if (!fyCols.length) {
+    console.warn("No FY columns found");
+    return;
+  }
+
+  // 🔥 FIND BUDGET ROW
+  const row = rows.find(r =>
+    String(r[0]).trim().toLowerCase() === budgetVal.trim().toLowerCase()
+  );
+
+  if (!row) {
+    console.warn("Budget row not found");
+    return;
+  }
+
+  // 🔥 MAP VALUES TO INPUTS
+  const values = fyCols.map(i => row[i]);
+
+  console.log("FY Columns:", fyCols);
+  console.log("Values:", values);
+
+  // 🔥 SET VALUES (SAFE)
+  id("SBGsanctioned").value = values[0] || "";
+  id("SBGutilised").value = values[1] || "";
+  id("SBGavailable").value = values[2] || "";
+  id("SBGcalculated").value = values[3] || "";
+  id("SBGrevised").value = values[4] || "";
+}
+
+
+["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
+  .forEach(idName => {
+
+    id(idName)?.addEventListener("change", () => {
+      renderBudgetTable();
+      getSBGMultiValues();
+    });
+
+  });
   </script>
 
 </body>
