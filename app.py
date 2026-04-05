@@ -64,7 +64,7 @@ def get_sbg():
 
 
 @app.route("/sbgexp", methods=["GET"])
-def get_sbg():
+def get_sbgexp():
     return jsonify(sheet_to_json(sbgexp_sheet))
 
 
