@@ -244,8 +244,12 @@ def update_sbgexp():
             sbgexp_sheet.batch_update(update_cells)
 
         # ➕ INSERT NEW ROWS
+        # 🔥 FIND LAST ROW INSIDE TABLE
+        last_row = len(rows) + 1  # +1 for header
+
+        # Insert new rows BELOW LAST DATA ROW (inside table)
         if inserts:
-            sbgexp_sheet.append_rows(inserts)
+            sbgexp_sheet.insert_rows(inserts, row=last_row + 1)
 
         return jsonify({
             "status": "success",
