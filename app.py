@@ -179,6 +179,83 @@ def update_pb():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     
+    
+    
+@app.route("/sbgexp/update", methods=["POST"])
+def update_sbgexp():
+    try:
+        req_data = request.get_json()
+
+        inserts = req_data.get("inserts", [])
+        updates = req_data.get("updates", [])
+
+        if not inserts and not updates:
+            return jsonify({"status": "no_changes"})
+
+        # 📥 Existing data
+        data = sbgexp_sheet.get_all_values()
+        headers = data[0]
+        rows = data[1:]
+
+        # 🔍 Column indexes
+        date_idx = headers.index("Date")
+        station_idx = headers.index("Station")
+        budget_idx = headers.index("SBG Expenditure Under")
+        details_idx = headers.index("Expenditure Details")
+        amount_idx = next(i for i,h in enumerate(headers) if "amount" in h.lower())
+        cum_idx = next(i for i,h in enumerate(headers) if "cumulative" in h.lower())
+
+        def clean(val):
+            return str(val).strip().lower()
+
+        # 🔥 Build lookup map
+        row_map = {}
+        for i, r in enumerate(rows):
+            key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
+            row_map[key] = i + 2  # sheet row number
+
+        update_cells = []
+        updated_count = 0
+
+        # 🔄 HANDLE UPDATES
+        for upd in updates:
+
+            key = "|".join([clean(x) for x in upd["key"]])
+
+            if key in row_map:
+                row_num = row_map[key]
+                values = upd["values"]
+
+                # update only amount + cumulative
+                update_cells.append({
+                    "range": gspread.utils.rowcol_to_a1(row_num, amount_idx+1),
+                    "values": [[values[4]]]
+                })
+
+                update_cells.append({
+                    "range": gspread.utils.rowcol_to_a1(row_num, cum_idx+1),
+                    "values": [[values[5]]]
+                })
+
+                updated_count += 1
+
+        # ⚡ BULK UPDATE
+        if update_cells:
+            sbgexp_sheet.batch_update(update_cells)
+
+        # ➕ INSERT NEW ROWS
+        if inserts:
+            sbgexp_sheet.append_rows(inserts)
+
+        return jsonify({
+            "status": "success",
+            "updated": updated_count,
+            "inserted": len(inserts)
+        })
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
     # =========================
 # RUN SERVER
 # =========================
