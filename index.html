@@ -9099,7 +9099,7 @@ function getFYFromDateStr(dateStr) {
 //}
 
 
-function renderBudgetTable() {
+function renderFilterMainBudgetExpTable() {
 
   const budgetVal = id("BudgetUnderSelect")?.value;
   const stationVal = id("BudgetPage_Station")?.value;
@@ -9150,7 +9150,7 @@ function renderBudgetTable() {
 
   container.innerHTML = "";
 
-  renderBudgetSummaryTable();
+  renderPBusedBudgetSummaryTable();
   syncPBtoSBGSheet(); // ✅ ADD THIS
 
   const table = document.createElement("table");
@@ -9211,7 +9211,7 @@ table.appendChild(colgroup);
 }
 
 
-function getSBGMultiValues() {
+function getBudgetFYColumns() {
 
   const budgetVal = id("BudgetUnderSelect")?.value;
   const fyVal = id("BudgetPage_FY")?.value;
@@ -9265,72 +9265,14 @@ function getSBGMultiValues() {
   .forEach(idName => {
 
     id(idName)?.addEventListener("change", () => {
-      renderBudgetTable();
-      getSBGMultiValues();
+      renderFilterMainBudgetExpTable();
+      getBudgetFYColumns();
     });
 
   });
 
   
-function buildBudgetSummary() {
-
-  if (!pbData || !pbData.headers || !pbData.rows) return {};
-
-  const headers = pbData.headers;
-  const rows = pbData.rows;
-
-  const deptMap = getDeptMap();
-
-  const empIdx = headers.indexOf("Employee Name");
-  const monthIdx = headers.indexOf("Salary Month");
-  const netIdx = headers.indexOf("Net Income");
-  const npsIdx = headers.indexOf("NPS");
-  const daaIdx = headers.indexOf("DAA on NPS");
-
-  const summary = {};
-
-  rows.forEach(r => {
-
-    const emp = String(r[empIdx] || "").trim();
-    const monthStr = String(r[monthIdx] || "").trim();
-
-    if (!emp || !monthStr) return;
-
-    const date = convertMonthToDate(monthStr);
-
-    if (!date) return;
-
-    if (!summary[date]) {
-      summary[date] = {
-        go: 0,
-        nps: 0,
-        npsIncome: 0,
-        monthStr
-      };
-    }
-
-    const dept = deptMap[emp] || "";
-
-    const net = +r[netIdx] || 0;
-    const nps = +r[npsIdx] || 0;
-    const daa = +r[daaIdx] || 0;
-
-    // 🔥 GO vs NON-GO
-    if (dept === "GO") {
-      summary[date].go += net;
-    } else {
-      summary[date].nps += net;
-    }
-
-    // 🔥 NPS Contribution
-    summary[date].npsIncome += (nps + daa);
-
-  });
-
-  return summary;
-}
-
-function buildSummaryRowsForSBG() {
+function buildPBBudgetSummary() {
 
   const data = buildBudgetSummary(); 
   const station = id("BudgetPage_Station")?.value || "";
@@ -9398,11 +9340,11 @@ function buildSummaryRowsForSBG() {
 // 🔥 RENDER SUMMARY TABLE
 // ===============================
 
-function renderBudgetSummaryTable() {
+function renderPBusedBudgetSummaryTable() {
 
   const data = buildBudgetSummary();
 
-  const container = id("BudgetTableWrapper");
+  const container = id("BudgetTablefromPBWrapper");
   if (!container) return;
 
   const table = document.createElement("table");
@@ -9491,11 +9433,70 @@ function renderBudgetSummaryTable() {
   container.prepend(table);
 }
 
+function buildBudgetSummary() {
+
+  if (!pbData || !pbData.headers || !pbData.rows) return {};
+
+  const headers = pbData.headers;
+  const rows = pbData.rows;
+
+  const deptMap = getDeptMap();
+
+  const empIdx = headers.indexOf("Employee Name");
+  const monthIdx = headers.indexOf("Salary Month");
+  const netIdx = headers.indexOf("Net Income");
+  const npsIdx = headers.indexOf("NPS");
+  const daaIdx = headers.indexOf("DAA on NPS");
+
+  const summary = {};
+
+  rows.forEach(r => {
+
+    const emp = String(r[empIdx] || "").trim();
+    const monthStr = String(r[monthIdx] || "").trim();
+
+    if (!emp || !monthStr) return;
+
+    const date = convertMonthToDate(monthStr);
+
+    if (!date) return;
+
+    if (!summary[date]) {
+      summary[date] = {
+        go: 0,
+        nps: 0,
+        npsIncome: 0,
+        monthStr
+      };
+    }
+
+    const dept = deptMap[emp] || "";
+
+    const net = +r[netIdx] || 0;
+    const nps = +r[npsIdx] || 0;
+    const daa = +r[daaIdx] || 0;
+
+    // 🔥 GO vs NON-GO
+    if (dept === "GO") {
+      summary[date].go += net;
+    } else {
+      summary[date].nps += net;
+    }
+
+    // 🔥 NPS Contribution
+    summary[date].npsIncome += (nps + daa);
+
+  });
+
+  return summary;
+}
+
+
 async function syncPBtoSBGSheet() {
 
   if (!sbgExpData || !sbgExpData.headers) return;
 
-  const newRows = buildSummaryRowsForSBG();
+  const newRows = buildPBBudgetSummary();
   const headers = sbgExpData.headers;
   const existing = sbgExpData.rows;
 
@@ -9545,15 +9546,17 @@ async function syncPBtoSBGSheet() {
   console.log("Inserts:", inserts.length);
   console.log("Updates:", updates.length);
 
-  // 🔥 CALL YOUR BACKEND
   await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ inserts, updates })
+    body: JSON.stringify({
+      data: rowsArray // 👈 NOT inserts/updates anymore
+    })
   });
 
   console.log("✅ SBG synced");
 }
+  
   </script>
 
 </body>
