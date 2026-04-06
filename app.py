@@ -185,12 +185,10 @@ def update_pb():
 def update_sbgexp():
     try:
         req_data = request.get_json()
+        edit_rows = req_data.get("data", [])
 
-        inserts = req_data.get("inserts", [])
-        updates = req_data.get("updates", [])
-
-        if not inserts and not updates:
-            return jsonify({"status": "no_changes"})
+        if not edit_rows:
+            return jsonify({"status": "error", "message": "No data received"}), 400
 
         # 📥 Existing data
         data = sbgexp_sheet.get_all_values()
@@ -202,59 +200,57 @@ def update_sbgexp():
         station_idx = headers.index("Station")
         budget_idx = headers.index("SBG Expenditure Under")
         details_idx = headers.index("Expenditure Details")
-        amount_idx = next(i for i,h in enumerate(headers) if "amount" in h.lower())
-        cum_idx = next(i for i,h in enumerate(headers) if "cumulative" in h.lower())
 
         def clean(val):
             return str(val).strip().lower()
 
-        # 🔥 Build lookup map
+        # ⚡ Create lookup map (LIKE PB)
         row_map = {}
         for i, r in enumerate(rows):
+
             key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
             row_map[key] = i + 2  # sheet row number
 
+        updates = []
         update_cells = []
-        updated_count = 0
+        new_rows = []
 
-        # 🔄 HANDLE UPDATES
-        for upd in updates:
+        # 🔄 Process incoming
+        for row_obj in edit_rows:
 
-            key = "|".join([clean(x) for x in upd["key"]])
+            key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
+
+            # 🔥 build row in header order
+            new_row = [row_obj.get(h, "") for h in headers]
 
             if key in row_map:
+
                 row_num = row_map[key]
-                values = upd["values"]
 
-                # update only amount + cumulative
-                update_cells.append({
-                    "range": gspread.utils.rowcol_to_a1(row_num, amount_idx+1),
-                    "values": [[values[4]]]
-                })
+                # 🔥 batch update (FULL ROW like PB)
+                for col_idx, val in enumerate(new_row):
+                    update_cells.append({
+                        "range": gspread.utils.rowcol_to_a1(row_num, col_idx+1),
+                        "values": [[val]]
+                    })
 
-                update_cells.append({
-                    "range": gspread.utils.rowcol_to_a1(row_num, cum_idx+1),
-                    "values": [[values[5]]]
-                })
+                updates.append(row_num)
 
-                updated_count += 1
+            else:
+                new_rows.append(new_row)
 
         # ⚡ BULK UPDATE
         if update_cells:
             sbgexp_sheet.batch_update(update_cells)
 
-        # ➕ INSERT NEW ROWS
-        # 🔥 FIND LAST ROW INSIDE TABLE
-        last_row = len(rows) + 1  # +1 for header
-
-        # Insert new rows BELOW LAST DATA ROW (inside table)
-        if inserts:
-            sbgexp_sheet.insert_rows(inserts, row=last_row + 1)
+        # ➕ INSERT (inside table instead of append)
+        if new_rows:
+            sbgexp_sheet.insert_rows(new_rows, row=len(rows) + 2)
 
         return jsonify({
             "status": "success",
-            "updated": updated_count,
-            "inserted": len(inserts)
+            "updated": len(updates),
+            "added": len(new_rows)
         })
 
     except Exception as e:
