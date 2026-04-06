@@ -9546,7 +9546,7 @@ async function syncPBtoSBGSheet() {
   console.log("Updates:", updates.length);
 
   // 🔥 CALL YOUR BACKEND
-  await fetch("/sbgexp/update", {
+  await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ inserts, updates })
