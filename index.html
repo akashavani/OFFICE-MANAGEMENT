@@ -2972,7 +2972,9 @@
 
     let empData = {};
     let pbData = {};
+
     let sbgExpData = { headers: [], rows: [] };
+    let sbgData = {};      // BudgetDB (SBG)
 
     async function loadData() {
 
@@ -9288,38 +9290,41 @@ function buildPBBudgetRows() {
 
       const rows = [
         {
-          label: `Salary-${mon}-${yr} for GO Employee`,
+          label: `Salary for GO Employee-${mon}-${yr}`,
           value: d.go,
           budget: "SALARY ( Non-IRLA )( Regular ) - For Govt Employees"
         },
         {
-          label: `Salary-${mon}-${yr} for PB Employee`,
+          label: `Salary for PB Employee-${mon}-${yr}`,
           value: d.nps,
           budget: "SALARY - For PB Employees Recruited After 05.10.2007"
         },
         {
-          label: `NPS-${mon}-${yr} Contribution`,
+          label: `NPS Contribution-${mon}-${yr}`,
           value: d.npsIncome,
           budget: "CPF Contribution / NPS - For PB Employees"
         },
         {
-          label: `Medical-${mon}-${yr} for GO Employee`,
+          label: `Medical Reimbursement for GO Employee-${mon}-${yr}`,
           value: d.goMed,
           budget: "Medical Treatment - For Govt Employees"
         },
         {
-          label: `Medical-${mon}-${yr} for PB Employee`,
+          label: `Medical Reimbursement for PB Employee-${mon}-${yr}`,
           value: d.npsMed,
           budget: "Medical Treatment - For PB Employees"
         },
         {
-          label: `EL-${mon}-${yr} Encashment`,
+          label: `EL (Leave) Encashment-${mon}-${yr}`,
           value: d.el,
           budget: "Leave Encashment - For PB Employees"
         }
       ];
 
       rows.forEach(r => {
+
+        // 🔥 🚀 SKIP ZERO VALUE ROWS (MAIN FIX)
+        if (!r.value || Number(r.value) === 0) return;   //skip addition of row if sum is 0, remove this if you want month wise
 
         const key = fy + "|" + r.budget + "|" + station;
 
@@ -9329,10 +9334,10 @@ function buildPBBudgetRows() {
         result.push([
           d.date,
           station,
-          "",   // Bill / Invoice Details
+          "",
           r.budget,
-          r.label,   // Expenditure Details
-          formatCurrency(r.value),                  // ×1000 already reversed here
+          r.label,
+          formatCurrency(r.value),
           formatCurrency(cumulativeMap[key])
         ]);
 
@@ -9343,9 +9348,7 @@ function buildPBBudgetRows() {
   });
 
   return result;
-  
 }
-
 
 // ======================================
 // 🔥 RENDER TABLE
@@ -9424,31 +9427,18 @@ function normalizeRow(r) {
   ].join("|");
 }
 
-//function getNewRowsFromPB() {
-//  const pbRows = buildPBBudgetRows();
 
-//  if (!sbgExpData || !sbgExpData.rows || !sbgExpData.rows.length) {
-//    return pbRows; // first time → send all
-//  }
-
-//  const existingKeys = new Set(
-//    sbgExpData.rows.map(r => normalizeRow(r))
-//  );
-
-//  return pbRows.filter(r => !existingKeys.has(normalizeRow(r)));
-//}
-
-
-async function updateSBGSheet(rows, mode = "append") {
+async function updateSBGSheet(rows) {
 
   if (!rows.length) {
-    console.log("⚠ No rows to send");
+    console.log("⚠ No new rows to send");
     return;
   }
 
   const formattedRows = convertRowsToObjects(rows);
 
-  console.log(`📤 Sending ${formattedRows.length} rows | Mode: ${mode}`);
+  console.log("📤 Sending rows:", formattedRows.length);
+  console.log("🧪 Sample row:", formattedRows[0]);
 
   const res = await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
     method: "POST",
@@ -9456,8 +9446,7 @@ async function updateSBGSheet(rows, mode = "append") {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      mode: mode,   // 🔥 IMPORTANT
-      data: formattedRows
+      data: formattedRows   // ✅ MUST BE 'data'
     })
   });
 
@@ -9470,12 +9459,42 @@ async function updateSBGSheet(rows, mode = "append") {
 
 async function reloadSBGData() {
 
-  console.log("🔄 Reloading SBG...");
+  console.log("🔄 Reloading SBG from server...");
 
   const res = await fetch("https://office-management-f425.onrender.com/sbgexp", {
-    cache: "no-store"
+    method: "GET",
+    cache: "no-store"   // 🔥 IMPORTANT (no caching)
   });
 
+  const data = await res.json();
+
+  // 🔥 FORCE UPDATE GLOBAL
+  sbgExpData = {
+    headers: data.headers,
+    rows: data.rows
+  };
+
+  console.log("✅ Updated sbgExpData:", sbgExpData.rows.length);
+  console.log("After reload:", sbgExpData.rows.slice(0, 3));
+}
+
+
+async function loadSBGData() {
+
+  const res = await fetch("https://office-management-f425.onrender.com/sbg");
+  const data = await res.json();
+
+  sbgData = {
+    headers: data.headers,
+    rows: data.rows
+  };
+
+  console.log("✅ SBG Loaded:", sbgData.rows.length);
+}
+
+async function reloadSBGExpData() {
+
+  const res = await fetch("https://office-management-f425.onrender.com/sbgexp", { cache: "no-store" });
   const data = await res.json();
 
   sbgExpData = {
@@ -9483,38 +9502,32 @@ async function reloadSBGData() {
     rows: data.rows
   };
 
-  console.log("✅ Reloaded:", sbgExpData.rows.length);
+  console.log("✅ SBGExp Loaded:", sbgExpData.rows.length);
 }
-
 
 async function syncPBtoSBG() {
 
-  console.log("🔄 FULL RECALC SYNC STARTED");
+  console.log("🚀 SYNC STARTED");
 
-  const allRows = buildPBBudgetRows();   // 🔥 DIRECT CALL
+  // 1️⃣ Build PB rows
+  const pbRows = buildPBBudgetRows();
 
-  await updateSBGSheet(allRows, "replace");  // 🔥 FULL RESET
+  // 2️⃣ Update SBGExpenditure
+  await updateSBGSheet(pbRows, "replace");
 
-  await reloadSBGData();
+  // 3️⃣ Reload SBGExp
+  await reloadSBGExpData();
 
-  await loadTable("sbgexp", "SBGexpenditureDB"); // refresh DB UI
+  // 4️⃣ 🔥 LOAD SBG DATA (THIS WAS MISSING)
+  await loadSBGData();
 
-  console.log("✅ FULL SYNC COMPLETED");
-}
+  // 5️⃣ Update BudgetDB
+  await updateBudgetDBFromSBGExp();
 
+  // 6️⃣ Refresh UI
+  await loadTable("sbg", "BudgetDB");
 
-
-async function addBudgetRows(newRows) {
-
-  console.log("➕ Adding new budget rows");
-
-  await updateSBGSheet(newRows, "append");  // 🔥 ONLY ADD
-
-  await reloadSBGData();
-
-  await loadTable("sbgexp", "SBGexpenditureDB");
-
-  console.log("✅ Rows added");
+  console.log("✅ SYNC COMPLETED");
 }
 
 
@@ -9643,6 +9656,112 @@ function renderFilterMainBudgetExpTable() {
     });
 
   });
+
+
+function getFYColumnIndexes(headers, fy) {
+
+  let sbgCol = -1;
+  let usedCol = -1;
+  let availCol = -1;
+
+  headers.forEach((h, i) => {
+
+    const clean = String(h).toLowerCase();
+
+    if (clean.includes(fy.toLowerCase()) && clean.includes("(sbg)")) {
+      sbgCol = i;
+    }
+
+    if (clean.includes(fy.toLowerCase()) && clean.includes("(used)")) {
+      usedCol = i;
+    }
+
+    if (clean.includes(fy.toLowerCase()) && clean.includes("(available")) {
+      availCol = i;
+    }
+
+  });
+
+  return { sbgCol, usedCol, availCol };
+}
+
+
+function getSBGUsedMap() {
+
+  const map = {};
+
+  sbgExpData.rows.forEach(row => {
+
+    const date = row[0];
+    const station = row[1];
+    const budget = row[3];
+    const cumulative = Number(row[6] || 0);
+
+    const fy = getFYFromDateStr(date);
+
+    const key = fy + "|" + budget + "|" + station;
+
+    // 🔥 always overwrite → LAST cumulative
+    map[key] = cumulative;
+
+  });
+
+  return map;
+}
+
+
+async function updateBudgetDBFromSBGExp() {
+
+  // 🔥 FIX: ensure data is loaded
+  if (!sbgData || !sbgData.rows || !sbgExpData.rows) {
+    console.error("❌ Data not ready");
+    return;
+  }
+
+  const headers = sbgData.headers;
+  const rows = sbgData.rows;
+
+  const usedMap = getSBGUsedMap();
+
+  rows.forEach(row => {
+
+    const budgetName = row[0];
+
+    Object.keys(usedMap).forEach(key => {
+
+      const [fy, budget, station] = key.split("|");
+
+      if (budgetName.trim().toLowerCase() !== budget.trim().toLowerCase()) return;
+
+      const { sbgCol, usedCol, availCol } = getFYColumnIndexes(headers, fy);
+
+      if (sbgCol === -1 || usedCol === -1 || availCol === -1) return;
+
+      const sbgVal = Number(row[sbgCol] || 0);
+      const usedVal = usedMap[key];
+
+      // 🔥 UPDATE VALUES
+      row[usedCol] = usedVal.toFixed(3);
+      row[availCol] = (sbgVal - usedVal).toFixed(3);
+
+    });
+
+  });
+
+  // 🔥 SEND BULK UPDATE
+  await fetch("https://office-management-f425.onrender.com/sbg/bulk-update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      headers: headers,
+      rows: rows
+    })
+  });
+
+  console.log("✅ BudgetDB Updated Successfully");
+}
 
 
 
