@@ -268,6 +268,25 @@ def update_sbgexp():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     
+
+@app.route("/sbg/update-row", methods=["POST"])
+def update_sbg_row():
+    try:
+        data = request.get_json()
+
+        row_index = data.get("rowIndex")
+        row_data = data.get("rowData")
+
+        if not row_index or not row_data:
+            return jsonify({"status": "error"}), 400
+
+        sbg_sheet.update(f"A{row_index}:Z{row_index}", [row_data])
+
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
     # =========================
 # RUN SERVER
 # =========================
