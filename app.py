@@ -260,22 +260,32 @@ def update_sbgexp():
 @app.route("/sbg/bulk-update", methods=["POST"])
 def bulk_update_sbg():
     try:
-        data = request.get_json()
-        headers = data.get("headers")
-        rows = data.get("rows")
+        req = request.get_json()
+        rows = req.get("rows", [])
 
         if not rows:
-            return jsonify({"status": "error"}), 400
+            return jsonify({"status": "error", "message": "No rows"}), 400
 
-        # 🔥 keep header row
-        sbg_sheet.batch_clear([f"A2:Z{len(rows)+1}"])
+        # 🔥 UPDATE EXACT RANGE (NO APPEND)
+        total_cols = len(rows[0])
+        total_rows = len(rows)
 
-        sbg_sheet.append_rows(rows)
+        end_col = chr(65 + total_cols - 1)  # A, B, C...
 
-        return jsonify({"status": "success"})
+        range_name = f"A2:{end_col}{total_rows+1}"
+
+        sbg_sheet.update(range_name, rows)
+
+        return jsonify({
+            "status": "success",
+            "updated_rows": total_rows
+        })
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
     
     # =========================
 # RUN SERVER
