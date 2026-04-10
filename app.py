@@ -266,38 +266,62 @@ def bulk_update_sbg():
         if not rows:
             return jsonify({"status": "error", "message": "No rows"}), 400
 
-        # 📥 Get headers from sheet
         data = sbg_sheet.get_all_values()
         headers = data[0]
 
-        # 🔍 Find columns dynamically
-        def find_col(keyword):
-            for i, h in enumerate(headers):
-                if keyword.lower() in h.lower():
-                    return i
-            return -1
+        # 🔥 CLEAN HEADER FUNCTION
+        def clean(h):
+            return str(h).lower().replace(" ", "")
 
-        # Example: works for ANY FY like 2024-25, 2025-26
-        sbg_col = find_col("(SBG)")
-        used_col = find_col("(Used)")
-        avail_col = find_col("(Available)")
+        # 🔥 FIND ALL FY GROUPS
+        fy_map = {}
 
-        if sbg_col == -1 or used_col == -1 or avail_col == -1:
-            return jsonify({
-                "status": "error",
-                "message": "Required columns not found (SBG/Used/Available)"
-            }), 400
+        for i, h in enumerate(headers):
 
-        # 🔥 CALCULATE AVAILABLE = SBG - USED
+            col = clean(h)
+
+            # extract FY like 2025-26
+            import re
+            match = re.search(r"\d{4}-\d{2}", col)
+            if not match:
+                continue
+
+            fy = match.group(0)
+
+            if fy not in fy_map:
+                fy_map[fy] = {}
+
+            if "(sbg)" in col:
+                fy_map[fy]["sbg"] = i
+            elif "(used)" in col:
+                fy_map[fy]["used"] = i
+            elif "(available)" in col:
+                fy_map[fy]["avail"] = i
+
+        print("FY MAP:", fy_map)
+
+        # 🔥 CALCULATE AVAILABLE FOR EACH FY
         for row in rows:
-            try:
-                sbg = float(row[sbg_col] or 0)
-                used = float(row[used_col] or 0)
-                row[avail_col] = round(sbg - used, 3)
-            except:
-                row[avail_col] = 0
 
-        # 🔥 SAFE RANGE (works beyond column Z)
+            for fy, cols in fy_map.items():
+
+                sbg_col = cols.get("sbg", -1)
+                used_col = cols.get("used", -1)
+                avail_col = cols.get("avail", -1)
+
+                if sbg_col == -1 or used_col == -1 or avail_col == -1:
+                    continue
+
+                try:
+                    sbg = float(row[sbg_col] or 0)
+                    used = float(row[used_col] or 0)
+
+                    row[avail_col] = round(sbg - used, 3)
+
+                except:
+                    row[avail_col] = 0
+
+        # 🔥 SAFE RANGE
         from gspread.utils import rowcol_to_a1
 
         total_rows = len(rows)
@@ -306,7 +330,6 @@ def bulk_update_sbg():
         end_cell = rowcol_to_a1(total_rows + 1, total_cols)
         range_name = f"A2:{end_cell}"
 
-        # ⚡ UPDATE SHEET
         sbg_sheet.update(range_name, rows)
 
         return jsonify({
