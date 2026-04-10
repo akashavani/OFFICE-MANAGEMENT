@@ -185,154 +185,73 @@ def update_pb():
 def update_sbgexp():
     try:
         req_data = request.get_json()
-        rows = req_data.get("data", [])
-        mode = req_data.get("mode", "append")
+        edit_rows = req_data.get("data", [])
 
-        if not rows:
-            return jsonify({"status": "error", "message": "No data"}), 400
+        if not edit_rows:
+            return jsonify({"status": "error", "message": "No data received"}), 400
 
+        # 📥 Existing data
         data = sbgexp_sheet.get_all_values()
-
-        if not data:
-            return jsonify({"status": "error", "message": "Sheet empty"}), 400
-
         headers = data[0]
+        rows = data[1:]
 
-        # ============================
-        # 🔥 STRICT VALIDATION
-        # ============================
-        def is_valid_row(row):
+        # 🔍 Column indexes
+        date_idx = headers.index("Date")
+        station_idx = headers.index("Station")
+        budget_idx = headers.index("SBG Expenditure Under")
+        details_idx = headers.index("Expenditure Details")
 
-            # 🔹 Required fields (adjust if needed)
-            required_fields = [
-                "Date",
-                "Station",
-                "SBG Expenditure Under",
-                "Expenditure Details"
-            ]
+        def clean(val):
+            return str(val).strip().lower()
 
-            if not all(str(row.get(f, "")).strip() != "" for f in required_fields):
-                return False
+        # ⚡ Create lookup map (LIKE PB)
+        row_map = {}
+        for i, r in enumerate(rows):
 
-            # 🔹 Reject empty / zero rows
-            values = [str(v).strip() for v in row.values()]
+            key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
+            row_map[key] = i + 2  # sheet row number
 
-            if all(v in ["", "0", "0.0", "0.00"] for v in values):
-                return False
+        updates = []
+        update_cells = []
+        new_rows = []
 
-            return True
+        # 🔄 Process incoming
+        for row_obj in edit_rows:
 
-        # 🔥 FILTER CLEAN ROWS
-        clean_rows = [row for row in rows if row and is_valid_row(row)]
+            key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
 
-        if not clean_rows:
-            return jsonify({
-                "status": "skipped",
-                "message": "No valid rows to insert"
-            })
+            # 🔥 build row in header order
+            new_row = [row_obj.get(h, "") for h in headers]
 
-        # ============================
-        # 🔥 FORMAT ROWS
-        # ============================
-        new_rows = [
-            [row.get(h, "") for h in headers]
-            for row in clean_rows
-        ]
+            if key in row_map:
 
-        # ============================
-        # 🔁 MODE: REPLACE
-        # ============================
-        if mode == "replace":
+                row_num = row_map[key]
 
-            last_row = len(data)
-
-            # 🔥 Clear only data rows (keep header)
-            if last_row > 1:
-                sbgexp_sheet.batch_clear([f"A2:G{last_row}"])
-
-            sbgexp_sheet.append_rows(new_rows)
-
-        # ============================
-        # ➕ MODE: APPEND
-        # ============================
-        elif mode == "append":
-
-            sbgexp_sheet.append_rows(new_rows)
-
-        # ============================
-        # 🔄 MODE: UPSERT
-        # ============================
-        elif mode == "upsert":
-
-            existing = data[1:]
-
-            def make_key(r):
-                return f"{r[0]}|{r[1]}|{r[3]}|{r[4]}"
-
-            row_map = {
-                make_key(r): i + 2
-                for i, r in enumerate(existing)
-            }
-
-            updates = []
-            inserts = []
-
-            for row in new_rows:
-                key = make_key(row)
-
-                if key in row_map:
-                    updates.append((row_map[key], row))
-                else:
-                    inserts.append(row)
-
-            # 🔥 Batch update
-            if updates:
-                batch_data = []
-                for row_num, row in updates:
-                    batch_data.append({
-                        "range": f"A{row_num}:G{row_num}",
-                        "values": [row]
+                # 🔥 batch update (FULL ROW like PB)
+                for col_idx, val in enumerate(new_row):
+                    update_cells.append({
+                        "range": gspread.utils.rowcol_to_a1(row_num, col_idx+1),
+                        "values": [[val]]
                     })
-                sbgexp_sheet.batch_update(batch_data)
 
-            # 🔥 Insert new rows
-            if inserts:
-                sbgexp_sheet.append_rows(inserts)
+                updates.append(row_num)
 
-        else:
-            return jsonify({
-                "status": "error",
-                "message": f"Invalid mode: {mode}"
-            }), 400
+            else:
+                new_rows.append(new_row)
+
+        # ⚡ BULK UPDATE
+        if update_cells:
+            sbgexp_sheet.batch_update(update_cells)
+
+        # ➕ INSERT (inside table instead of append)
+        if new_rows:
+            sbgexp_sheet.append_rows(new_rows)
 
         return jsonify({
             "status": "success",
-            "mode": mode,
-            "rows_received": len(rows),
-            "rows_inserted": len(new_rows)
+            "updated": len(updates),
+            "added": len(new_rows)
         })
-
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
-    
-
-@app.route("/sbg/update-row", methods=["POST"])
-def update_sbg_row():
-    try:
-        data = request.get_json()
-
-        row_index = data.get("rowIndex")
-        row_data = data.get("rowData")
-
-        if not row_index or not row_data:
-            return jsonify({"status": "error"}), 400
-
-        sbg_sheet.update(f"A{row_index}:Z{row_index}", [row_data])
-
-        return jsonify({"status": "success"})
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
