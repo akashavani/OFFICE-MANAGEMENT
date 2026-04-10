@@ -256,6 +256,27 @@ def update_sbgexp():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     
+
+@app.route("/sbg/bulk-update", methods=["POST"])
+def bulk_update_sbg():
+    try:
+        data = request.get_json()
+        headers = data.get("headers")
+        rows = data.get("rows")
+
+        if not rows:
+            return jsonify({"status": "error"}), 400
+
+        # 🔥 keep header row
+        sbg_sheet.batch_clear([f"A2:Z{len(rows)+1}"])
+
+        sbg_sheet.append_rows(rows)
+
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
     # =========================
 # RUN SERVER
 # =========================
