@@ -204,15 +204,12 @@ def update_sbgexp():
         def clean(val):
             return str(val).strip().lower()
 
-        # ⚡ Create lookup map (LIKE PB)
+        # 🔥 EXISTING KEY MAP (ONLY FOR UPDATE CHECK)
         row_map = {}
         for i, r in enumerate(rows):
-
             key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
-            row_map[key] = i + 2  # sheet row number
+            row_map[key] = i + 2
 
-        updates = []
-        update_cells = []
         new_rows = []
 
         # 🔄 Process incoming
@@ -220,36 +217,17 @@ def update_sbgexp():
 
             key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
 
-            # 🔥 build row in header order
-            new_row = [row_obj.get(h, "") for h in headers]
-
-            if key in row_map:
-
-                row_num = row_map[key]
-
-                # 🔥 batch update (FULL ROW like PB)
-                for col_idx, val in enumerate(new_row):
-                    update_cells.append({
-                        "range": gspread.utils.rowcol_to_a1(row_num, col_idx+1),
-                        "values": [[val]]
-                    })
-
-                updates.append(row_num)
-
-            else:
+            # 🔥 Only ADD if not exists
+            if key not in row_map:
+                new_row = [row_obj.get(h, "") for h in headers]
                 new_rows.append(new_row)
 
-        # ⚡ BULK UPDATE
-        if update_cells:
-            sbgexp_sheet.batch_update(update_cells)
-
-        # ➕ INSERT (inside table instead of append)
+        # ➕ ONLY APPEND (NO INSERT)
         if new_rows:
-            sbgexp_sheet.insert_rows(new_rows, row=len(rows) + 2)
+            sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
 
         return jsonify({
             "status": "success",
-            "updated": len(updates),
             "added": len(new_rows)
         })
 
