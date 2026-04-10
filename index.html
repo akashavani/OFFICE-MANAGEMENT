@@ -9445,6 +9445,30 @@ function filterValidRows(rows) {
 
 }
 
+// ===============================
+// 🔥 CLEAN ROWS BEFORE SEND
+// ===============================
+function cleanSBGRows(rows) {
+  return rows.filter(row => {
+
+    if (!row) return false;
+
+    // ✅ Required fields (adjust if needed)
+    if (!row["Station"] || !row["FY"] || !row["Budget Head"]) {
+      return false;
+    }
+
+    // ✅ Remove fully empty / zero rows
+    const values = Object.values(row).map(v => String(v).trim());
+
+    if (values.every(v => v === "" || v === "0" || v === "0.00")) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
 
 async function updateSBGSheet(rows, mode = "replace") {
 
@@ -9502,20 +9526,53 @@ async function reloadSBGData() {
 }
 
 
+// ===============================
+// 🚀 SEND TO BACKEND
+// ===============================
+async function saveSBGExpenditure() {
+
+  const rawRows = buildPBBudgetRows();   // 🔥 your existing function
+
+  console.log("RAW ROWS:", rawRows);
+
+  const cleanRows = cleanSBGRows(rawRows);
+
+  console.log("CLEAN ROWS:", cleanRows);
+
+  if (!cleanRows.length) {
+    alert("No valid data to save");
+    return;
+  }
+
+  await fetch("/sbgexp/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      data: cleanRows,
+      mode: "replace"   // or "append" / "upsert"
+    })
+  });
+
+  alert("SBG Expenditure Updated Successfully ✅");
+}
+
+
 async function syncPBtoSBG() {
 
-  console.log("🔄 FULL RECALC SYNC STARTED");
+  console.log("🔄 FULL SYNC STARTED");
 
-  const allRows = buildPBBudgetRows();
+  // 🔥 SAVE PB → SBGExp
+  await saveSBGExpenditure();
 
-  await updateSBGSheet(allRows, "replace");   // 🔥 update SBGExp
+  // 🔥 Reload updated data
+  await reloadSBGData();
 
-  await reloadSBGData();                      // 🔥 get fresh SBGExp
-
-  // 🔥 NOW UPDATE SBG MASTER TABLE
+  // 🔥 Update SBG master (Used & Available)
   await updateSBGFromExp();
 
-  // 🔥 refresh UI tables
+  // 🔥 Refresh UI
   await loadTable("sbgexp", "SBGexpenditureDB");
   await loadTable("sbg", "BudgetDB");
 
