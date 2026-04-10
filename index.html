@@ -2157,7 +2157,6 @@
       });
       on("PayBillPage_Station", "change", setDAPercent);
 
-      loadBudgetDropdown();
     });
 
 
@@ -8924,71 +8923,85 @@
 
     //===========================Budget Page Script =================== //
 
-    function loadBudgetDropdown() {
+function loadBudgetDropdown() {
 
-  if (!sbgData || !sbgData.headers || !sbgData.rows) return;
+  if (!sbgData || !sbgData.rows) {
+    console.warn("❌ sbgData not loaded");
+    return;
+  }
 
-  const headers = sbgData.headers;
   const rows = sbgData.rows;
-
-  const budgetIdx = headers.findIndex(h =>
-    String(h).toLowerCase().includes("budget")
-  );
-
-  if (budgetIdx === -1) return;
 
   const select = id("BudgetUnderSelect");
   if (!select) return;
 
-  select.innerHTML = `<option value="" hidden >Select Budget</option>`;
+  // 🔥 RESET
+  select.innerHTML = `<option value="" hidden>Select Budget</option>`;
 
-  // 🔥 DEFINE GROUPS
-  const groups = [
-    { name: "Salaries - GO", start: 0, end: 2 },
-    { name: "Salaries - PB", start: 3, end: 7 },
-    { name: "Admin Expenditure - IEBR", start: 8, end: 28 },
-    { name: "Programme Expenses", start: 29, end: 35 }
-  ];
+  // 🔥 FILTER VALID BUDGET ROWS
+  const budgetList = rows
+    .map(r => String(r[0] || "").trim())
+    .filter(val =>
+      val &&
+      val.toLowerCase() !== "station" // ❌ skip station row
+    );
 
-  // 🔥 CREATE GROUPS
-  groups.forEach(g => {
+  // 🔥 OPTIONAL GROUPING (AUTO)
+  const groupMap = {
+    "Salaries - GO": [],
+    "Salaries - PB": [],
+    "Admin Expenditure - IEBR": [],
+    "Programme Expenses": []
+  };
+
+  budgetList.forEach(val => {
+
+    const v = val.toLowerCase();
+
+    if (v.includes("govt")) {
+      groupMap["Salaries - GO"].push(val);
+    }
+    else if (v.includes("pb")) {
+      groupMap["Salaries - PB"].push(val);
+    }
+    else if (
+      v.includes("oe") ||
+      v.includes("rent") ||
+      v.includes("travel")
+    ) {
+      groupMap["Admin Expenditure - IEBR"].push(val);
+    }
+    else {
+      groupMap["Programme Expenses"].push(val);
+    }
+
+  });
+
+  // 🔥 CREATE DROPDOWN
+  Object.keys(groupMap).forEach(group => {
+
+    if (!groupMap[group].length) return;
 
     const optgroup = document.createElement("optgroup");
-    optgroup.label = g.name;
+    optgroup.label = group;
 
-    for (let i = g.start; i <= g.end && i < rows.length; i++) {
-
-      const val = String(rows[i][budgetIdx] || "").trim();
-      if (!val) continue;
+    groupMap[group].forEach(val => {
 
       const opt = document.createElement("option");
       opt.value = val;
       opt.textContent = val;
 
       optgroup.appendChild(opt);
-    }
 
-    if (optgroup.children.length) {
-      select.appendChild(optgroup);
-    }
+    });
+
+    select.appendChild(optgroup);
 
   });
 
-  // 🔥 LAST ROW (AS IS)
-  const lastRow = rows[rows.length - 1];
-  if (lastRow) {
-    const val = String(lastRow[budgetIdx] || "").trim();
-
-    if (val) {
-      const opt = document.createElement("option");
-      opt.value = val;
-      opt.textContent = val;
-
-      select.appendChild(opt);
-    }
-  }
-
+  console.log("✅ Dropdown Loaded:", budgetList.length);
 }
+
 
 //function loadBudgetStationDropdown() {
 
@@ -9127,35 +9140,6 @@ function getBudgetFYColumns() {
   id("SBGcalculated").value = formatCurrency((values[3] || 0) * 1000);
   id("SBGrevised").value = formatCurrency((values[4] || 0) * 1000);
 }
-
-
-
-
-//function loadBudgetFYDropdown() {
-  
-//  const headers = sbgExpData.headers;
-//  const rows = sbgExpData.rows;
-
-//  const dateIdx = headers.findIndex(h =>
-//    h.toLowerCase().includes("date")
-//  );
-
-//  if (dateIdx === -1) return;
-
-//  const fyList = [...new Set(
-//    rows.map(r => getBudgetFY(r[dateIdx])).filter(Boolean)
-//  )];
-
-//  const select = id("BudgetPage_FY");
-//  select.innerHTML = `<option value="" hidden>Select FY</option>`;
-
-//  fyList.forEach(fy => {
-//    const opt = document.createElement("option");
-//    opt.value = fy;
-//    opt.textContent = fy;
-//    select.appendChild(opt);
-//  });
-//}
 
  
 // ======================================
@@ -9420,11 +9404,21 @@ function convertRowsToObjects(rows) {
 
 function normalizeRow(r) {
   return [
-    String(r[0]).trim(), // Date
-    String(r[1]).trim(), // Station
-    String(r[3]).trim(), // Budget
-    String(r[4]).trim()  // Details
+    normalize(r[0]), // Date
+    normalize(r[1]), // Station
+    normalize(r[3]), // Budget
+    normalize(r[4])  // Details
   ].join("|");
+}
+
+function normalize(str) {
+  return String(str)
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    .replace(/-/g, "-")       // keep dash consistent
+    .trim();
 }
 
 
@@ -9437,8 +9431,8 @@ async function updateSBGSheet(rows) {
 
   const formattedRows = convertRowsToObjects(rows);
 
-  console.log("📤 Sending rows:", formattedRows.length);
-  console.log("🧪 Sample row:", formattedRows[0]);
+  //console.log("📤 Sending rows:", formattedRows.length);
+  //console.log("🧪 Sample row:", formattedRows[0]);
 
   const res = await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
     method: "POST",
@@ -9459,7 +9453,7 @@ async function updateSBGSheet(rows) {
 
 async function reloadSBGData() {
 
-  console.log("🔄 Reloading SBG from server...");
+  //console.log("🔄 Reloading SBG from server...");
 
   const res = await fetch("https://office-management-f425.onrender.com/sbgexp", {
     method: "GET",
@@ -9474,8 +9468,8 @@ async function reloadSBGData() {
     rows: data.rows
   };
 
-  console.log("✅ Updated sbgExpData:", sbgExpData.rows.length);
-  console.log("After reload:", sbgExpData.rows.slice(0, 3));
+  //console.log("✅ Updated sbgExpData:", sbgExpData.rows.length);
+  //console.log("After reload:", sbgExpData.rows.slice(0, 3));
 }
 
 
@@ -9489,7 +9483,7 @@ async function loadSBGData() {
     rows: data.rows
   };
 
-  console.log("✅ SBG Loaded:", sbgData.rows.length);
+  //console.log("✅ SBG Loaded:", sbgData.rows.length);
 }
 
 async function reloadSBGExpData() {
@@ -9502,12 +9496,12 @@ async function reloadSBGExpData() {
     rows: data.rows
   };
 
-  console.log("✅ SBGExp Loaded:", sbgExpData.rows.length);
+  //console.log("✅ SBGExp Loaded:", sbgExpData.rows.length);
 }
 
 async function syncPBtoSBG() {
 
-  console.log("🚀 SYNC STARTED");
+  //console.log("🚀 SYNC STARTED");
 
   // 1️⃣ Build PB rows
   const pbRows = buildPBBudgetRows();
@@ -9520,6 +9514,7 @@ async function syncPBtoSBG() {
 
   // 4️⃣ 🔥 LOAD SBG DATA (THIS WAS MISSING)
   await loadSBGData();
+  loadBudgetDropdown();
 
   // 5️⃣ Update BudgetDB
   await updateBudgetDBFromSBGExp();
@@ -9527,7 +9522,7 @@ async function syncPBtoSBG() {
   // 6️⃣ Refresh UI
   await loadTable("sbg", "BudgetDB");
 
-  console.log("✅ SYNC COMPLETED");
+  //console.log("✅ SYNC COMPLETED");
 }
 
 
@@ -9666,17 +9661,19 @@ function getFYColumnIndexes(headers, fy) {
 
   headers.forEach((h, i) => {
 
-    const clean = String(h).toLowerCase();
+    const col = String(h).toLowerCase().replace(/\s/g, "");
 
-    if (clean.includes(fy.toLowerCase()) && clean.includes("(sbg)")) {
+    const cleanFY = fy.toLowerCase();
+
+    if (col.includes(cleanFY) && col.includes("(sbg)")) {
       sbgCol = i;
     }
 
-    if (clean.includes(fy.toLowerCase()) && clean.includes("(used)")) {
+    if (col.includes(cleanFY) && col.includes("(used)")) {
       usedCol = i;
     }
 
-    if (clean.includes(fy.toLowerCase()) && clean.includes("(available")) {
+    if (col.includes(cleanFY) && col.includes("(available)")) {
       availCol = i;
     }
 
@@ -9693,22 +9690,23 @@ function getSBGUsedMap() {
   sbgExpData.rows.forEach(row => {
 
     const date = row[0];
-    const station = row[1];
-    const budget = row[3];
+    const budget = normalize(row[3]);
     const cumulative = Number(row[6] || 0);
 
     const fy = getFYFromDateStr(date);
 
-    const key = fy + "|" + budget + "|" + station;
+    const key = fy + "|" + budget;
 
-    // 🔥 always overwrite → LAST cumulative
-    map[key] = cumulative;
+    if (!map[key]) map[key] = 0;
+
+    map[key] += cumulative;
 
   });
 
+  //console.log("USED MAP:", map);
+
   return map;
 }
-
 
 async function updateBudgetDBFromSBGExp() {
 
@@ -9762,8 +9760,6 @@ async function updateBudgetDBFromSBGExp() {
 
   console.log("✅ BudgetDB Updated Successfully");
 }
-
-
 
 
   </script>
