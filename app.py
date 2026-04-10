@@ -205,10 +205,24 @@ def update_sbgexp():
         # ============================
 
         if mode == "replace":
-            # 🔥 FULL REWRITE (PB SYNC)
-            sbgexp_sheet.clear()
-            sbgexp_sheet.append_row(headers)
-            sbgexp_sheet.append_rows(new_rows)
+
+            # 🔥 GET EXISTING HEADERS (ROW 1)
+            data = sbgexp_sheet.get_all_values()
+
+            if not data:
+                return jsonify({"status": "error", "message": "Sheet empty"}), 400
+
+            headers = data[0]
+
+            # 🔥 CLEAR ONLY DATA ROWS (KEEP HEADER)
+            if len(data) > 1:
+                sbgexp_sheet.batch_clear([f"A2:G{len(data)}"])
+
+            # 🔥 WRITE NEW DATA
+            sbgexp_sheet.append_rows([
+                [row.get(h, "") for h in headers]
+                for row in rows
+            ])
 
         elif mode == "append":
             # 🔥 ADD NEW ROWS ONLY
