@@ -266,14 +266,47 @@ def bulk_update_sbg():
         if not rows:
             return jsonify({"status": "error", "message": "No rows"}), 400
 
-        # 🔥 UPDATE EXACT RANGE (NO APPEND)
-        total_cols = len(rows[0])
+        # 📥 Get headers from sheet
+        data = sbg_sheet.get_all_values()
+        headers = data[0]
+
+        # 🔍 Find columns dynamically
+        def find_col(keyword):
+            for i, h in enumerate(headers):
+                if keyword.lower() in h.lower():
+                    return i
+            return -1
+
+        # Example: works for ANY FY like 2024-25, 2025-26
+        sbg_col = find_col("(SBG)")
+        used_col = find_col("(Used)")
+        avail_col = find_col("(Available)")
+
+        if sbg_col == -1 or used_col == -1 or avail_col == -1:
+            return jsonify({
+                "status": "error",
+                "message": "Required columns not found (SBG/Used/Available)"
+            }), 400
+
+        # 🔥 CALCULATE AVAILABLE = SBG - USED
+        for row in rows:
+            try:
+                sbg = float(row[sbg_col] or 0)
+                used = float(row[used_col] or 0)
+                row[avail_col] = round(sbg - used, 3)
+            except:
+                row[avail_col] = 0
+
+        # 🔥 SAFE RANGE (works beyond column Z)
+        from gspread.utils import rowcol_to_a1
+
         total_rows = len(rows)
+        total_cols = len(rows[0])
 
-        end_col = chr(65 + total_cols - 1)  # A, B, C...
+        end_cell = rowcol_to_a1(total_rows + 1, total_cols)
+        range_name = f"A2:{end_cell}"
 
-        range_name = f"A2:{end_col}{total_rows+1}"
-
+        # ⚡ UPDATE SHEET
         sbg_sheet.update(range_name, rows)
 
         return jsonify({
