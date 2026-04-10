@@ -977,7 +977,6 @@
     #PB_GOViewTbl td:first-child,
     #PB_NPSViewTbl th:first-child,
     #PB_NPSViewTbl td:first-child,
-    .budget-table td:first-child,
     .budgetfromPB-table td:first-child {
       position: sticky;
       left: 0;
@@ -988,6 +987,16 @@
       background: white;
       min-width: 210px;
       width: 210px;
+    }
+
+    .budget-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 8;
+      white-space: nowrap;
+
+      /* 🔥 IMPORTANT FIX */
+      background: white;
     }
 
     /* header row first column */
@@ -2010,7 +2019,7 @@
           </tr>
         </table>
         <div style="display: flex;">
-          <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper" ></div>
+          <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper" style="display: none;"></div>
           <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
         </div>
         
@@ -2149,9 +2158,6 @@
       on("PayBillPage_Station", "change", setDAPercent);
 
       loadBudgetDropdown();
-      
-      //loadBudgetStationDropdown();
-      //loadBudgetFYDropdown();
     });
 
 
@@ -2247,6 +2253,7 @@
 
       // 🔥 THEN SYNC
       await syncPBtoSBG();
+      renderFilterMainBudgetExpTable(); 
     }
 
     /* =========================
@@ -7296,6 +7303,15 @@
       return "₹ " + formatNumber(num);
     }
 
+    function CurrencytoNum(val) {
+      if (!val) return 0;
+
+      return Number(
+        String(val)
+          .replace(/[^0-9.-]+/g, "") // 🔥 remove ₹ , spaces etc
+      ) || 0;
+    }
+
     function setValue(input, val) {
       if (!input) return;
       input.dataset.raw = val;
@@ -7416,16 +7432,7 @@
       return Number(String(v).replace(/[^\d.-]/g, "")) || 0;
     }
 
-    function number(val) { return String(val || "").replace(/[₹,]/g, "").trim(); }
-
-    function CurrencytoNum(val) {
-      if (!val) return 0;
-
-      return Number(
-        String(val)
-          .replace(/[^0-9.-]+/g, "") // 🔥 remove ₹ , spaces etc
-      ) || 0;
-    }
+    function number(val) { return String(val || "").replace(/[₹,]/g, "").trim(); }    
 
     /* =========================
        VISIBILITY HELPERS
@@ -9094,55 +9101,32 @@ function getBudgetFYColumns() {
   const headers = sbgData.headers;
   const rows = sbgData.rows;
 
-  // 🔥 FIND ALL FY MATCHING COLUMNS
   const fyCols = [];
 
   headers.forEach((h, i) => {
     const cleanFY = String(h).match(/\d{4}-\d{2}/)?.[0];
-    if (cleanFY === fyVal) {
-      fyCols.push(i);
-    }
+    if (cleanFY === fyVal) fyCols.push(i);
   });
 
-  if (!fyCols.length) {
-    console.warn("No FY columns found");
-    return;
-  }
+  if (!fyCols.length) return;
 
-  // 🔥 FIND BUDGET ROW
   const row = rows.find(r =>
     String(r[0]).trim().toLowerCase() === budgetVal.trim().toLowerCase()
   );
 
-  if (!row) {
-    console.warn("Budget row not found");
-    return;
-  }
+  if (!row) return;
 
-  // 🔥 MAP VALUES TO INPUTS
   const values = fyCols.map(i => row[i]);
 
-  //console.log("FY Columns:", fyCols);
-  //console.log("Values:", values);
-
-  // 🔥 SET VALUES (SAFE)
-  id("SBGsanctioned").value = values[0] || "";
-  id("SBGutilised").value = values[1] || "";
-  id("SBGavailable").value = values[2] || "";
-  id("SBGcalculated").value = values[3] || "";
-  id("SBGrevised").value = values[4] || "";
+  // 🔥 APPLY ×1000 + FORMAT
+  id("SBGsanctioned").value = formatCurrency((values[0] || 0) * 1000);
+  id("SBGutilised").value = formatCurrency((values[1] || 0) * 1000);
+  id("SBGavailable").value = formatCurrency((values[2] || 0) * 1000);
+  id("SBGcalculated").value = formatCurrency((values[3] || 0) * 1000);
+  id("SBGrevised").value = formatCurrency((values[4] || 0) * 1000);
 }
 
 
-["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
-  .forEach(idName => {
-
-    id(idName)?.addEventListener("change", () => {
-      //renderFilterMainBudgetExpTable();
-      getBudgetFYColumns();
-    });
-
-  });
 
 
 //function loadBudgetFYDropdown() {
@@ -9240,7 +9224,8 @@ function buildBudgetSummaryWithStation() {
     if (dept === "GO") {
 
       // ✅ GO SALARY = NET - MEDICAL
-      const goSalary = net - med;
+      //const goSalary = net - med;
+      const goSalary = net;
 
       summary[key].go += goSalary;
       summary[key].goMed += med;
@@ -9248,7 +9233,8 @@ function buildBudgetSummaryWithStation() {
     } else {
 
       // ✅ NON-GO SALARY = NET - MEDICAL - EL
-      const pbSalary = net - med - el;
+      //const pbSalary = net - med - el;
+      const pbSalary = net - el;
 
       summary[key].nps += pbSalary;
       summary[key].npsMed += med;
@@ -9346,8 +9332,8 @@ function buildPBBudgetRows() {
           "",   // Bill / Invoice Details
           r.budget,
           r.label,   // Expenditure Details
-          +(r.value / 1000).toFixed(2),
-          +(cumulativeMap[key] / 1000).toFixed(2)
+          formatCurrency(r.value),                  // ×1000 already reversed here
+          formatCurrency(cumulativeMap[key])
         ]);
 
       });
@@ -9417,66 +9403,52 @@ function renderBudgetfromPBData() {
 }
 
 
+function convertRowsToObjects(rows) {
+  return rows.map(r => ({
+    "Date": r[0],
+    "Station": r[1],
+    "Bill / Invoice Details": r[2],
+    "SBG Expenditure Under": r[3],
+    "Expenditure Details": r[4],
+    "Expenditure Amount (₹ in 000)": +(CurrencytoNum(r[5]) / 1000).toFixed(3),
+    "Cumulative Sum of Expenditure (₹ in 000)": +(CurrencytoNum(r[6]) / 1000).toFixed(3)
+  }));
+}
+
 function normalizeRow(r) {
   return [
+    String(r[0]).trim(), // Date
     String(r[1]).trim(), // Station
-    String(r[2] || "").trim(), // Bill
     String(r[3]).trim(), // Budget
-    String(r[4]).trim(), // Details
-    Number(r[5]).toFixed(2) // Amount
+    String(r[4]).trim()  // Details
   ].join("|");
 }
 
-function createKey(r) {
-  return [
-    r.station,
-    r.bill,
-    r.budget,
-    r.details,
-    r.amount.toFixed(2)
-  ].join("|");
-}
+//function getNewRowsFromPB() {
+//  const pbRows = buildPBBudgetRows();
 
-function convertRowsToObjects(rows, headers) {
-  return rows.map(r => {
-    const obj = {};
-    headers.forEach((h, i) => {
-      obj[h] = r[i] ?? "";
-    });
-    return obj;
-  });
-}
+//  if (!sbgExpData || !sbgExpData.rows || !sbgExpData.rows.length) {
+//    return pbRows; // first time → send all
+//  }
 
-function getNewRowsFromPB() {
+//  const existingKeys = new Set(
+//    sbgExpData.rows.map(r => normalizeRow(r))
+//  );
 
-  const pbRows = buildPBBudgetRows();
-
-  if (!sbgExpData || !sbgExpData.rows) return pbRows;
-
-  const existingKeys = new Set(
-    sbgExpData.rows.map(r => normalizeRow(r))
-  );
-
-  return pbRows.filter(r => {
-    const key = normalizeRow(r);
-    return !existingKeys.has(key);
-  });
-}
+//  return pbRows.filter(r => !existingKeys.has(normalizeRow(r)));
+//}
 
 
-async function updateSBGSheet(rows) {
-
-  console.log("Rows before send:", rows);
+async function updateSBGSheet(rows, mode = "append") {
 
   if (!rows.length) {
-    console.warn("❌ No rows to send");
+    console.log("⚠ No rows to send");
     return;
   }
 
-  const headers = sbgExpData.headers;
-  const formattedRows = convertRowsToObjects(rows, headers);
+  const formattedRows = convertRowsToObjects(rows);
 
-  console.log("Formatted:", formattedRows);
+  console.log(`📤 Sending ${formattedRows.length} rows | Mode: ${mode}`);
 
   const res = await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
     method: "POST",
@@ -9484,6 +9456,7 @@ async function updateSBGSheet(rows) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
+      mode: mode,   // 🔥 IMPORTANT
       data: formattedRows
     })
   });
@@ -9494,35 +9467,184 @@ async function updateSBGSheet(rows) {
 }
 
 
+
 async function reloadSBGData() {
 
-  const res = await fetch("https://office-management-f425.onrender.com/sbgexp");
+  console.log("🔄 Reloading SBG...");
+
+  const res = await fetch("https://office-management-f425.onrender.com/sbgexp", {
+    cache: "no-store"
+  });
+
   const data = await res.json();
 
-  sbgExpData = data;
+  sbgExpData = {
+    headers: data.headers,
+    rows: data.rows
+  };
 
-  console.log("✅ Reloaded SBG:", sbgExpData.rows.length);
+  console.log("✅ Reloaded:", sbgExpData.rows.length);
 }
-
 
 
 async function syncPBtoSBG() {
 
-  console.log("🔄 Sync Started");
+  console.log("🔄 FULL RECALC SYNC STARTED");
 
-  const newRows = getNewRowsFromPB();
+  const allRows = buildPBBudgetRows();   // 🔥 DIRECT CALL
 
-  console.log("New Rows:", newRows.length);
-
-  await updateSBGSheet(newRows);
+  await updateSBGSheet(allRows, "replace");  // 🔥 FULL RESET
 
   await reloadSBGData();
 
-  // 🔥 Re-render after sync
-  //renderFilterMainBudgetExpTable();
+  await loadTable("sbgexp", "SBGexpenditureDB"); // refresh DB UI
 
-  console.log("✅ Sync Completed");
+  console.log("✅ FULL SYNC COMPLETED");
 }
+
+
+
+async function addBudgetRows(newRows) {
+
+  console.log("➕ Adding new budget rows");
+
+  await updateSBGSheet(newRows, "append");  // 🔥 ONLY ADD
+
+  await reloadSBGData();
+
+  await loadTable("sbgexp", "SBGexpenditureDB");
+
+  console.log("✅ Rows added");
+}
+
+
+function filterSBGData() {
+
+  if (!sbgExpData || !sbgExpData.rows) return [];
+
+  const station = id("BudgetPage_Station")?.value || "";
+  const budget = id("BudgetUnderSelect")?.value || "";
+  const fy = id("BudgetPage_FY")?.value || "";
+
+  // 🔥 STRICT CONDITION: ALL REQUIRED
+  if (!station || !budget || !fy ||
+      station === "Select" || budget === "Select Budget" || fy === "Select") {
+
+    console.warn("⚠ Select all filters (Station, Budget, FY)");
+    return [];  // ❌ return empty → no data
+  }
+
+  return sbgExpData.rows.filter(row => {
+
+    const rowDate = String(row[0] || "").trim();
+    const rowStation = String(row[1] || "").trim();
+    const rowBudget = String(row[3] || "").trim();
+
+    const rowFY = getFYFromDateStr(rowDate);
+
+    return (
+      rowStation === station &&
+      rowBudget === budget &&
+      rowFY === fy
+    );
+  });
+}
+
+function renderFilterMainBudgetExpTable() {
+
+  const container = id("BudgetTableWrapper");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const station = id("BudgetPage_Station")?.value || "";
+  const budget = id("BudgetUnderSelect")?.value || "";
+  const fy = id("BudgetPage_FY")?.value || "";
+
+  // 🔥 If not all selected → show message
+  if (!station || !budget || !fy ||
+      station === "Select" || budget === "Select Budget" || fy === "Select") {
+
+    container.innerHTML = `<p style="text-align:center; color:#888;">
+      Please select Station, Budget & Financial Year
+    </p>`;
+    return;
+  }
+
+  const data = filterSBGData();
+
+  if (!data.length) {
+    container.innerHTML = `<p style="text-align:center; color:#888;">
+      No data found
+    </p>`;
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "budget-table";
+
+  table.innerHTML = `
+      <colgroup>
+        <col style="width: 5%;">
+        <col style="width: 10%;">
+        <col style="width: 15%;">
+        <col style="width: 18%;">
+        <col style="width: 32%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Station</th>
+          <th>Bill / Invoice Details</th>
+          <th>SBG Expenditure Under</th>
+          <th>Expenditure Details</th>
+          <th>Expenditure Amount (₹ in 000)</th>
+          <th>Cumulative Sum of Expenditure (₹ in 000)</th>
+        </tr>
+      </thead>
+  `;
+
+  const tbody = document.createElement("tbody");
+
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+
+    row.forEach((cell, i) => {
+      const td = document.createElement("td");
+
+      // 🔥 LAST 2 COLUMNS → ₹ FORMAT (×1000)
+      if (i === 5 || i === 6) {
+        const num = Number(cell);
+        td.textContent = isNaN(num) ? "" : formatCurrency(num * 1000);
+        td.style.textAlign = "right";
+      } else {
+        td.textContent = cell;
+      }
+
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+
+["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
+  .forEach(idName => {
+
+    id(idName)?.addEventListener("change", () => {      
+      getBudgetFYColumns();
+      renderFilterMainBudgetExpTable();
+    });
+
+  });
+
+
 
 
   </script>
