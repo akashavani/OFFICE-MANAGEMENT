@@ -9437,55 +9437,16 @@ function normalizeRow(r) {
 
 //  return pbRows.filter(r => !existingKeys.has(normalizeRow(r)));
 //}
-function filterValidRows(rows) {
-
-  return rows.filter(r => {
-    return r && r.some(v => String(v).trim() !== "");
-  });
-
-}
-
-// ===============================
-// 🔥 CLEAN ROWS BEFORE SEND
-// ===============================
-function cleanSBGRows(rows) {
-  return rows.filter(row => {
-
-    if (!row) return false;
-
-    // ✅ Required fields (adjust if needed)
-    if (!row["Station"] || !row["FY"] || !row["Budget Head"]) {
-      return false;
-    }
-
-    // ✅ Remove fully empty / zero rows
-    const values = Object.values(row).map(v => String(v).trim());
-
-    if (values.every(v => v === "" || v === "0" || v === "0.00")) {
-      return false;
-    }
-
-    return true;
-  });
-}
 
 
-async function updateSBGSheet(rows, mode = "replace") {
+async function updateSBGSheet(rows, mode = "append") {
 
-  if (!rows || !rows.length) {
-    console.warn("⚠ No rows to send");
+  if (!rows.length) {
+    console.log("⚠ No rows to send");
     return;
   }
 
-  // 🔥 REMOVE EMPTY ROWS FIRST
-  const validRows = filterValidRows(rows);
-
-  if (!validRows.length) {
-    console.warn("⚠ All rows empty — skipping API call");
-    return;
-  }
-
-  const formattedRows = convertRowsToObjects(validRows);
+  const formattedRows = convertRowsToObjects(rows);
 
   console.log(`📤 Sending ${formattedRows.length} rows | Mode: ${mode}`);
 
@@ -9495,7 +9456,7 @@ async function updateSBGSheet(rows, mode = "replace") {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      mode: mode,
+      mode: mode,   // 🔥 IMPORTANT
       data: formattedRows
     })
   });
@@ -9509,7 +9470,7 @@ async function updateSBGSheet(rows, mode = "replace") {
 
 async function reloadSBGData() {
 
-  console.log("🔄 Reloading SBGExp...");
+  console.log("🔄 Reloading SBG...");
 
   const res = await fetch("https://office-management-f425.onrender.com/sbgexp", {
     cache: "no-store"
@@ -9526,91 +9487,35 @@ async function reloadSBGData() {
 }
 
 
-// ===============================
-// 🚀 SEND TO BACKEND
-// ===============================
-async function saveSBGExpenditure() {
-
-  const rawRows = buildPBBudgetRows();   // 🔥 your existing function
-
-  console.log("RAW ROWS:", rawRows);
-
-  const cleanRows = cleanSBGRows(rawRows);
-
-  console.log("CLEAN ROWS:", cleanRows);
-
-  if (!cleanRows.length) {
-    alert("No valid data to save");
-    return;
-  }
-
-  await fetch("/sbgexp/update", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      data: cleanRows,
-      mode: "replace"   // or "append" / "upsert"
-    })
-  });
-
-  alert("SBG Expenditure Updated Successfully ✅");
-}
-
-
 async function syncPBtoSBG() {
 
-  console.log("🔄 FULL SYNC STARTED");
+  console.log("🔄 FULL RECALC SYNC STARTED");
 
-  // 🔥 SAVE PB → SBGExp
-  await saveSBGExpenditure();
+  const allRows = buildPBBudgetRows();   // 🔥 DIRECT CALL
 
-  // 🔥 Reload updated data
+  await updateSBGSheet(allRows, "replace");  // 🔥 FULL RESET
+
   await reloadSBGData();
 
-  // 🔥 Update SBG master (Used & Available)
-  await updateSBGFromExp();
-
-  // 🔥 Refresh UI
-  await loadTable("sbgexp", "SBGexpenditureDB");
-  await loadTable("sbg", "BudgetDB");
+  await loadTable("sbgexp", "SBGexpenditureDB"); // refresh DB UI
 
   console.log("✅ FULL SYNC COMPLETED");
 }
 
 
+
 async function addBudgetRows(newRows) {
 
-  const validRows = filterValidRows(newRows);
+  console.log("➕ Adding new budget rows");
 
-  if (!validRows.length) return;
-
-  await updateSBGSheet(validRows, "append");
+  await updateSBGSheet(newRows, "append");  // 🔥 ONLY ADD
 
   await reloadSBGData();
 
   await loadTable("sbgexp", "SBGexpenditureDB");
 
-  console.log("➕ Rows added");
+  console.log("✅ Rows added");
 }
-
-
-async function upsertBudgetRows(rows) {
-
-  const validRows = filterValidRows(rows);
-
-  if (!validRows.length) return;
-
-  await updateSBGSheet(validRows, "upsert");
-
-  await reloadSBGData();
-
-  await loadTable("sbgexp", "SBGexpenditureDB");
-
-  console.log("♻ Rows upserted");
-}
-
 
 
 function filterSBGData() {
@@ -9728,124 +9633,16 @@ function renderFilterMainBudgetExpTable() {
   container.appendChild(table);
 }
 
+
 ["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
   .forEach(idName => {
 
-    id(idName)?.addEventListener("change", async () => {
-
-      // 🔹 Update input fields from SBG
+    id(idName)?.addEventListener("change", () => {      
       getBudgetFYColumns();
-
-      // 🔹 Render filtered expenditure table
       renderFilterMainBudgetExpTable();
-
-      // 🔥 Update SBG master ONLY when required
-      const budget = id("BudgetUnderSelect")?.value;
-      const fy = id("BudgetPage_FY")?.value;
-
-      if (
-        budget && fy &&
-        budget !== "Select Budget" &&
-        fy !== "Select"
-      ) {
-        await updateSBGFromExp();
-      }
-
     });
 
   });
-
-  function getLastCumulativeValue(budget, fy) {
-
-  if (!sbgExpData || !sbgExpData.rows) return 0;
-
-  const filtered = sbgExpData.rows.filter(row => {
-    const rowFY = getFYFromDateStr(row[0]);
-    return (
-      row[3] === budget &&
-      rowFY === fy
-    );
-  });
-
-  if (!filtered.length) return 0;
-
-  // 🔥 TAKE LAST ROW (already sorted)
-  const lastRow = filtered[filtered.length - 1];
-
-  return Number(lastRow[6] || 0); // cumulative column
-}
-
-
-async function updateSBGFromExp() {
-
-  const budget = id("BudgetUnderSelect")?.value;
-  const fy = id("BudgetPage_FY")?.value;
-
-  if (!budget || !fy) return;
-
-  if (!sbgExpData || !sbgExpData.rows.length) {
-  console.warn("SBGExp data not loaded yet");
-  return;
-}
-
-  const headers = sbgData.headers;
-  const rows = sbgData.rows;
-
-  // 🔥 FIND FY COLUMN INDEXES
-  let sbgCol = -1;
-  let usedCol = -1;
-  let availCol = -1;
-
-  headers.forEach((h, i) => {
-
-    if (h.includes(fy) && h.includes("SBG")) sbgCol = i;
-    if (h.includes(fy) && h.includes("Used")) usedCol = i;
-    if (h.includes(fy) && h.includes("Available")) availCol = i;
-
-  });
-
-  if (sbgCol === -1 || usedCol === -1 || availCol === -1) {
-    console.warn("FY columns not found");
-    return;
-  }
-
-  // 🔥 FIND ROW
-  const rowIndex = rows.findIndex(r =>
-    String(r[0]).trim().toLowerCase() === budget.trim().toLowerCase()
-  );
-
-  if (rowIndex === -1) {
-    console.warn("Budget row not found");
-    return;
-  }
-
-  const row = rows[rowIndex];
-
-  // 🔥 GET LAST CUMULATIVE (₹ in 000)
-  const lastCumulative = getLastCumulativeValue(budget, fy);
-
-  // 🔥 UPDATE VALUES
-  row[usedCol] = lastCumulative.toFixed(3);
-
-  const sbgValue = Number(row[sbgCol] || 0);
-  row[availCol] = (sbgValue - lastCumulative).toFixed(3);
-
-  console.log("Updated Row:", row);
-
-  // 🔥 SEND UPDATE TO BACKEND
-  await fetch("https://office-management-f425.onrender.com/sbg/update-row", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      rowIndex: rowIndex + 2, // sheet index
-      rowData: row
-    })
-  });
-
-  console.log("✅ SBG Updated from Exp");
-}
 
 
 
