@@ -186,53 +186,67 @@ def update_sbgexp():
     try:
         req_data = request.get_json()
         rows = req_data.get("data", [])
-        mode = req_data.get("mode", "append")  # 🔥 default append
+        mode = req_data.get("mode", "append")  # default append
 
         if not rows:
             return jsonify({"status": "error", "message": "No data"}), 400
 
         data = sbgexp_sheet.get_all_values()
+
+        if not data:
+            return jsonify({"status": "error", "message": "Sheet empty"}), 400
+
         headers = data[0]
 
-        # 🔥 PREPARE ROWS
+        # ============================
+        # ✅ FILTER VALID ROWS ONLY
+        # ============================
+        def is_valid_row(row):
+            return any(str(v).strip() != "" for v in row.values())
+
+        clean_rows = [row for row in rows if row and is_valid_row(row)]
+
+        if not clean_rows:
+            return jsonify({
+                "status": "skipped",
+                "message": "No valid rows to insert"
+            })
+
+        # ============================
+        # 🔥 PREPARE ROW FORMAT
+        # ============================
         new_rows = [
             [row.get(h, "") for h in headers]
-            for row in rows
+            for row in clean_rows
         ]
 
         # ============================
-        # 🔥 MODE HANDLING
+        # 🔁 MODE: REPLACE
         # ============================
-
         if mode == "replace":
 
-            # 🔥 GET EXISTING HEADERS (ROW 1)
-            data = sbgexp_sheet.get_all_values()
-
-            if not data:
-                return jsonify({"status": "error", "message": "Sheet empty"}), 400
-
-            headers = data[0]
-
-            # 🔥 CLEAR ONLY DATA ROWS (KEEP HEADER)
+            # Clear only data rows (keep header)
             if len(data) > 1:
                 sbgexp_sheet.batch_clear([f"A2:G{len(data)}"])
 
-            # 🔥 WRITE NEW DATA
-            sbgexp_sheet.append_rows([
-                [row.get(h, "") for h in headers]
-                for row in rows
-            ])
-
-        elif mode == "append":
-            # 🔥 ADD NEW ROWS ONLY
             sbgexp_sheet.append_rows(new_rows)
 
+        # ============================
+        # ➕ MODE: APPEND
+        # ============================
+        elif mode == "append":
+
+            sbgexp_sheet.append_rows(new_rows)
+
+        # ============================
+        # 🔄 MODE: UPSERT
+        # ============================
         elif mode == "upsert":
-            # 🔥 OPTIONAL ADVANCED (UPDATE IF EXISTS)
+
             existing = data[1:]
 
             def make_key(r):
+                # adjust indexes if needed
                 return f"{r[0]}|{r[1]}|{r[3]}|{r[4]}"
 
             row_map = {
@@ -251,22 +265,38 @@ def update_sbgexp():
                 else:
                     inserts.append(row)
 
-            # update existing rows
-            for row_num, row in updates:
-                sbgexp_sheet.update(f"A{row_num}:G{row_num}", [row])
+            # 🔥 Batch update (faster)
+            if updates:
+                batch_data = []
+                for row_num, row in updates:
+                    batch_data.append({
+                        "range": f"A{row_num}:G{row_num}",
+                        "values": [row]
+                    })
+                sbgexp_sheet.batch_update(batch_data)
 
-            # insert new rows
+            # ➕ Insert new rows
             if inserts:
                 sbgexp_sheet.append_rows(inserts)
+
+        else:
+            return jsonify({
+                "status": "error",
+                "message": f"Invalid mode: {mode}"
+            }), 400
 
         return jsonify({
             "status": "success",
             "mode": mode,
-            "rows": len(new_rows)
+            "rows_received": len(rows),
+            "rows_inserted": len(new_rows)
         })
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
     
 
 @app.route("/sbg/update-row", methods=["POST"])
