@@ -9171,7 +9171,7 @@ function buildBudgetSummaryWithStation() {
 
   const empIdx = headers.indexOf("Employee Name");
   const monthIdx = headers.indexOf("Salary Month");
-  const netIdx = headers.indexOf("Net Income");
+  const netIdx = headers.indexOf("Gross Income");
   const npsIdx = headers.indexOf("NPS");
   const daaIdx = headers.indexOf("DAA on NPS");
   const stationIdx = headers.indexOf("Pay Drawn Station");
@@ -9437,16 +9437,31 @@ function normalizeRow(r) {
 
 //  return pbRows.filter(r => !existingKeys.has(normalizeRow(r)));
 //}
+function filterValidRows(rows) {
+
+  return rows.filter(r => {
+    return r && r.some(v => String(v).trim() !== "");
+  });
+
+}
 
 
-async function updateSBGSheet(rows, mode = "append") {
+async function updateSBGSheet(rows, mode = "replace") {
 
-  if (!rows.length) {
-    console.log("⚠ No rows to send");
+  if (!rows || !rows.length) {
+    console.warn("⚠ No rows to send");
     return;
   }
 
-  const formattedRows = convertRowsToObjects(rows);
+  // 🔥 REMOVE EMPTY ROWS FIRST
+  const validRows = filterValidRows(rows);
+
+  if (!validRows.length) {
+    console.warn("⚠ All rows empty — skipping API call");
+    return;
+  }
+
+  const formattedRows = convertRowsToObjects(validRows);
 
   console.log(`📤 Sending ${formattedRows.length} rows | Mode: ${mode}`);
 
@@ -9456,7 +9471,7 @@ async function updateSBGSheet(rows, mode = "append") {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      mode: mode,   // 🔥 IMPORTANT
+      mode: mode,
       data: formattedRows
     })
   });
@@ -9470,7 +9485,7 @@ async function updateSBGSheet(rows, mode = "append") {
 
 async function reloadSBGData() {
 
-  console.log("🔄 Reloading SBG...");
+  console.log("🔄 Reloading SBGExp...");
 
   const res = await fetch("https://office-management-f425.onrender.com/sbgexp", {
     cache: "no-store"
@@ -9491,31 +9506,54 @@ async function syncPBtoSBG() {
 
   console.log("🔄 FULL RECALC SYNC STARTED");
 
-  const allRows = buildPBBudgetRows();   // 🔥 DIRECT CALL
+  const allRows = buildPBBudgetRows();
 
-  await updateSBGSheet(allRows, "replace");  // 🔥 FULL RESET
+  await updateSBGSheet(allRows, "replace");   // 🔥 update SBGExp
 
-  await reloadSBGData();
+  await reloadSBGData();                      // 🔥 get fresh SBGExp
 
-  await loadTable("sbgexp", "SBGexpenditureDB"); // refresh DB UI
+  // 🔥 NOW UPDATE SBG MASTER TABLE
+  await updateSBGFromExp();
+
+  // 🔥 refresh UI tables
+  await loadTable("sbgexp", "SBGexpenditureDB");
+  await loadTable("sbg", "BudgetDB");
 
   console.log("✅ FULL SYNC COMPLETED");
 }
 
 
-
 async function addBudgetRows(newRows) {
 
-  console.log("➕ Adding new budget rows");
+  const validRows = filterValidRows(newRows);
 
-  await updateSBGSheet(newRows, "append");  // 🔥 ONLY ADD
+  if (!validRows.length) return;
+
+  await updateSBGSheet(validRows, "append");
 
   await reloadSBGData();
 
   await loadTable("sbgexp", "SBGexpenditureDB");
 
-  console.log("✅ Rows added");
+  console.log("➕ Rows added");
 }
+
+
+async function upsertBudgetRows(rows) {
+
+  const validRows = filterValidRows(rows);
+
+  if (!validRows.length) return;
+
+  await updateSBGSheet(validRows, "upsert");
+
+  await reloadSBGData();
+
+  await loadTable("sbgexp", "SBGexpenditureDB");
+
+  console.log("♻ Rows upserted");
+}
+
 
 
 function filterSBGData() {
@@ -9633,16 +9671,124 @@ function renderFilterMainBudgetExpTable() {
   container.appendChild(table);
 }
 
-
 ["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
   .forEach(idName => {
 
-    id(idName)?.addEventListener("change", () => {      
+    id(idName)?.addEventListener("change", async () => {
+
+      // 🔹 Update input fields from SBG
       getBudgetFYColumns();
+
+      // 🔹 Render filtered expenditure table
       renderFilterMainBudgetExpTable();
+
+      // 🔥 Update SBG master ONLY when required
+      const budget = id("BudgetUnderSelect")?.value;
+      const fy = id("BudgetPage_FY")?.value;
+
+      if (
+        budget && fy &&
+        budget !== "Select Budget" &&
+        fy !== "Select"
+      ) {
+        await updateSBGFromExp();
+      }
+
     });
 
   });
+
+  function getLastCumulativeValue(budget, fy) {
+
+  if (!sbgExpData || !sbgExpData.rows) return 0;
+
+  const filtered = sbgExpData.rows.filter(row => {
+    const rowFY = getFYFromDateStr(row[0]);
+    return (
+      row[3] === budget &&
+      rowFY === fy
+    );
+  });
+
+  if (!filtered.length) return 0;
+
+  // 🔥 TAKE LAST ROW (already sorted)
+  const lastRow = filtered[filtered.length - 1];
+
+  return Number(lastRow[6] || 0); // cumulative column
+}
+
+
+async function updateSBGFromExp() {
+
+  const budget = id("BudgetUnderSelect")?.value;
+  const fy = id("BudgetPage_FY")?.value;
+
+  if (!budget || !fy) return;
+
+  if (!sbgExpData || !sbgExpData.rows.length) {
+  console.warn("SBGExp data not loaded yet");
+  return;
+}
+
+  const headers = sbgData.headers;
+  const rows = sbgData.rows;
+
+  // 🔥 FIND FY COLUMN INDEXES
+  let sbgCol = -1;
+  let usedCol = -1;
+  let availCol = -1;
+
+  headers.forEach((h, i) => {
+
+    if (h.includes(fy) && h.includes("SBG")) sbgCol = i;
+    if (h.includes(fy) && h.includes("Used")) usedCol = i;
+    if (h.includes(fy) && h.includes("Available")) availCol = i;
+
+  });
+
+  if (sbgCol === -1 || usedCol === -1 || availCol === -1) {
+    console.warn("FY columns not found");
+    return;
+  }
+
+  // 🔥 FIND ROW
+  const rowIndex = rows.findIndex(r =>
+    String(r[0]).trim().toLowerCase() === budget.trim().toLowerCase()
+  );
+
+  if (rowIndex === -1) {
+    console.warn("Budget row not found");
+    return;
+  }
+
+  const row = rows[rowIndex];
+
+  // 🔥 GET LAST CUMULATIVE (₹ in 000)
+  const lastCumulative = getLastCumulativeValue(budget, fy);
+
+  // 🔥 UPDATE VALUES
+  row[usedCol] = lastCumulative.toFixed(3);
+
+  const sbgValue = Number(row[sbgCol] || 0);
+  row[availCol] = (sbgValue - lastCumulative).toFixed(3);
+
+  console.log("Updated Row:", row);
+
+  // 🔥 SEND UPDATE TO BACKEND
+  await fetch("https://office-management-f425.onrender.com/sbg/update-row", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      rowIndex: rowIndex + 2, // sheet index
+      rowData: row
+    })
+  });
+
+  console.log("✅ SBG Updated from Exp");
+}
 
 
 
