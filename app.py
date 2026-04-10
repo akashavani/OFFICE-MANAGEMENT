@@ -185,50 +185,70 @@ def update_pb():
 def update_sbgexp():
     try:
         req_data = request.get_json()
-        edit_rows = req_data.get("data", [])
+        rows = req_data.get("data", [])
+        mode = req_data.get("mode", "append")  # 🔥 default append
 
-        if not edit_rows:
-            return jsonify({"status": "error", "message": "No data received"}), 400
+        if not rows:
+            return jsonify({"status": "error", "message": "No data"}), 400
 
-        # 📥 Existing data
         data = sbgexp_sheet.get_all_values()
         headers = data[0]
-        rows = data[1:]
 
-        # 🔍 Column indexes
-        date_idx = headers.index("Date")
-        station_idx = headers.index("Station")
-        budget_idx = headers.index("SBG Expenditure Under")
-        details_idx = headers.index("Expenditure Details")
+        # 🔥 PREPARE ROWS
+        new_rows = [
+            [row.get(h, "") for h in headers]
+            for row in rows
+        ]
 
-        def clean(val):
-            return str(val).strip().lower()
+        # ============================
+        # 🔥 MODE HANDLING
+        # ============================
 
-        # 🔥 EXISTING KEY MAP (ONLY FOR UPDATE CHECK)
-        row_map = {}
-        for i, r in enumerate(rows):
-            key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
-            row_map[key] = i + 2
+        if mode == "replace":
+            # 🔥 FULL REWRITE (PB SYNC)
+            sbgexp_sheet.clear()
+            sbgexp_sheet.append_row(headers)
+            sbgexp_sheet.append_rows(new_rows)
 
-        new_rows = []
+        elif mode == "append":
+            # 🔥 ADD NEW ROWS ONLY
+            sbgexp_sheet.append_rows(new_rows)
 
-        # 🔄 Process incoming
-        for row_obj in edit_rows:
+        elif mode == "upsert":
+            # 🔥 OPTIONAL ADVANCED (UPDATE IF EXISTS)
+            existing = data[1:]
 
-            key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
+            def make_key(r):
+                return f"{r[0]}|{r[1]}|{r[3]}|{r[4]}"
 
-            # 🔥 Only ADD if not exists
-            if key not in row_map:
-                new_row = [row_obj.get(h, "") for h in headers]
-                new_rows.append(new_row)
+            row_map = {
+                make_key(r): i + 2
+                for i, r in enumerate(existing)
+            }
 
-        # ➕ ONLY APPEND (NO INSERT)
-        if new_rows:
-            sbgexp_sheet.append_rows(new_rows, value_input_option="USER_ENTERED")
+            updates = []
+            inserts = []
+
+            for row in new_rows:
+                key = make_key(row)
+
+                if key in row_map:
+                    updates.append((row_map[key], row))
+                else:
+                    inserts.append(row)
+
+            # update existing rows
+            for row_num, row in updates:
+                sbgexp_sheet.update(f"A{row_num}:G{row_num}", [row])
+
+            # insert new rows
+            if inserts:
+                sbgexp_sheet.append_rows(inserts)
 
         return jsonify({
             "status": "success",
-            "added": len(new_rows)
+            "mode": mode,
+            "rows": len(new_rows)
         })
 
     except Exception as e:
