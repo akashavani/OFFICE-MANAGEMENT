@@ -186,7 +186,7 @@ def update_sbgexp():
     try:
         req_data = request.get_json()
         rows = req_data.get("data", [])
-        mode = req_data.get("mode", "append")  # default append
+        mode = req_data.get("mode", "append")
 
         if not rows:
             return jsonify({"status": "error", "message": "No data"}), 400
@@ -199,11 +199,30 @@ def update_sbgexp():
         headers = data[0]
 
         # ============================
-        # ✅ FILTER VALID ROWS ONLY
+        # 🔥 STRICT VALIDATION
         # ============================
         def is_valid_row(row):
-            return any(str(v).strip() != "" for v in row.values())
 
+            # 🔹 Required fields (adjust if needed)
+            required_fields = [
+                "Date",
+                "Station",
+                "SBG Expenditure Under",
+                "Expenditure Details"
+            ]
+
+            if not all(str(row.get(f, "")).strip() != "" for f in required_fields):
+                return False
+
+            # 🔹 Reject empty / zero rows
+            values = [str(v).strip() for v in row.values()]
+
+            if all(v in ["", "0", "0.0", "0.00"] for v in values):
+                return False
+
+            return True
+
+        # 🔥 FILTER CLEAN ROWS
         clean_rows = [row for row in rows if row and is_valid_row(row)]
 
         if not clean_rows:
@@ -213,7 +232,7 @@ def update_sbgexp():
             })
 
         # ============================
-        # 🔥 PREPARE ROW FORMAT
+        # 🔥 FORMAT ROWS
         # ============================
         new_rows = [
             [row.get(h, "") for h in headers]
@@ -225,9 +244,11 @@ def update_sbgexp():
         # ============================
         if mode == "replace":
 
-            # Clear only data rows (keep header)
-            if len(data) > 1:
-                sbgexp_sheet.batch_clear([f"A2:G{len(data)}"])
+            last_row = len(data)
+
+            # 🔥 Clear only data rows (keep header)
+            if last_row > 1:
+                sbgexp_sheet.batch_clear([f"A2:G{last_row}"])
 
             sbgexp_sheet.append_rows(new_rows)
 
@@ -246,7 +267,6 @@ def update_sbgexp():
             existing = data[1:]
 
             def make_key(r):
-                # adjust indexes if needed
                 return f"{r[0]}|{r[1]}|{r[3]}|{r[4]}"
 
             row_map = {
@@ -265,7 +285,7 @@ def update_sbgexp():
                 else:
                     inserts.append(row)
 
-            # 🔥 Batch update (faster)
+            # 🔥 Batch update
             if updates:
                 batch_data = []
                 for row_num, row in updates:
@@ -275,7 +295,7 @@ def update_sbgexp():
                     })
                 sbgexp_sheet.batch_update(batch_data)
 
-            # ➕ Insert new rows
+            # 🔥 Insert new rows
             if inserts:
                 sbgexp_sheet.append_rows(inserts)
 
