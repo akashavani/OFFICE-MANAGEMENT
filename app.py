@@ -202,7 +202,7 @@ def update_sbgexp():
         details_idx = headers.index("Expenditure Details")
 
         def clean(val):
-            return str(val).strip().lower()
+            return str(val).lower()
 
         # ⚡ Existing key map (KEEP THIS)
         row_map = {}
