@@ -266,11 +266,11 @@ def bulk_update_sbg():
         if not rows:
             return jsonify({"status": "error", "message": "No rows"}), 400
 
-        # 📥 Get existing sheet
+        # 📥 Read existing sheet
         existing_data = sbg_sheet.get_all_values()
         total_cols = len(existing_data[0])
 
-        # ✅ Column letter converter (AA, AB...)
+        # ✅ Convert column number → Excel letter (AA, AB...)
         def col_to_letter(n):
             result = ""
             while n > 0:
@@ -285,13 +285,15 @@ def bulk_update_sbg():
         print("🔥 Rows received:", total_rows)
         print("🔥 Sample row:", rows[0])
 
-        # trim rows to exact column count
+        # ✅ Ensure row length matches sheet
         rows = [r[:total_cols] for r in rows]
 
+        # ✅ Correct range (DATA starts from row 3)
         range_name = f"A3:{end_col}{total_rows + 2}"
 
         print("📊 Updating Range:", range_name)
 
+        # 🔥 BULK UPDATE
         sbg_sheet.batch_update([{
             "range": range_name,
             "values": rows
