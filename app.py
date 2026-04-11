@@ -193,39 +193,89 @@ def update_sbgexp():
         # 📥 Existing data
         data = sbgexp_sheet.get_all_values()
         headers = data[0]
+        rows = data[1:]
 
+        # 🔍 Column indexes
+        date_idx = headers.index("Date")
+        station_idx = headers.index("Station")
+        budget_idx = headers.index("SBG Expenditure Under")
+        details_idx = headers.index("Expenditure Details")
+
+        def clean(val):
+            return str(val).strip().lower()
+
+        # ⚡ Existing key map (KEEP THIS)
+        row_map = {}
+        for i, r in enumerate(rows):
+            key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
+            row_map[key] = i + 2  # sheet row
+
+        updates = []
         update_cells = []
         new_rows = []
 
+        # 🔄 Process incoming
         for row_obj in edit_rows:
 
-            row_index = row_obj.get("rowIndex")
+            row_index = row_obj.get("rowIndex")  # 🔥 NEW (from frontend)
 
-            # 🔥 build row in correct order
+            key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
+
             new_row = [row_obj.get(h, "") for h in headers]
 
-            if row_index:  # ✅ UPDATE EXISTING
+            # =====================================
+            # 🔥 PRIORITY 1: UPDATE BY rowIndex
+            # =====================================
+            if row_index:
+
+                try:
+                    row_num = int(row_index)
+
+                    for col_idx, val in enumerate(new_row):
+                        update_cells.append({
+                            "range": gspread.utils.rowcol_to_a1(row_num, col_idx + 1),
+                            "values": [[val]]
+                        })
+
+                    updates.append(row_num)
+
+                    continue  # ✅ skip key logic
+
+                except Exception as e:
+                    print("⚠ rowIndex error:", e)
+
+            # =====================================
+            # 🔥 PRIORITY 2: FALLBACK KEY MATCH
+            # =====================================
+            if key in row_map:
+
+                row_num = row_map[key]
 
                 for col_idx, val in enumerate(new_row):
                     update_cells.append({
-                        "range": gspread.utils.rowcol_to_a1(row_index, col_idx + 1),
+                        "range": gspread.utils.rowcol_to_a1(row_num, col_idx + 1),
                         "values": [[val]]
                     })
 
-            else:  # ➕ NEW ROW
+                updates.append(row_num)
+
+            # =====================================
+            # ➕ NEW ROW
+            # =====================================
+            else:
                 new_rows.append(new_row)
 
-        # 🔥 BULK UPDATE (FAST)
+        # ⚡ BULK UPDATE
         if update_cells:
             sbgexp_sheet.batch_update(update_cells)
 
-        # ➕ APPEND NEW ROWS
+        # ➕ APPEND ONLY TRUE NEW ROWS
         if new_rows:
             sbgexp_sheet.append_rows(new_rows)
 
         return jsonify({
             "status": "success",
-            "updated": len(update_cells),
+            "updated": len(updates),
             "added": len(new_rows)
         })
 
