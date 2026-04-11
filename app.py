@@ -285,13 +285,17 @@ def bulk_update_sbg():
         print("🔥 Rows received:", total_rows)
         print("🔥 Sample row:", rows[0])
 
-        # ✅ FINAL FIX → start from Row 3
+        # trim rows to exact column count
+        rows = [r[:total_cols] for r in rows]
+
         range_name = f"A3:{end_col}{total_rows + 2}"
 
         print("📊 Updating Range:", range_name)
 
-        # 🔥 BULK UPDATE
-        sbg_sheet.update(range_name, rows)
+        sbg_sheet.batch_update([{
+            "range": range_name,
+            "values": rows
+        }])
 
         return jsonify({
             "status": "success",
