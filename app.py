@@ -266,11 +266,11 @@ def bulk_update_sbg():
         if not rows:
             return jsonify({"status": "error", "message": "No rows"}), 400
 
-        # 📥 Get existing sheet size
+        # 📥 Get existing sheet
         existing_data = sbg_sheet.get_all_values()
-        total_cols = len(existing_data[0])  # safer than rows[0]
+        total_cols = len(existing_data[0])
 
-        # ✅ FIX: Proper column naming (AA, AB...)
+        # ✅ Column letter converter (AA, AB...)
         def col_to_letter(n):
             result = ""
             while n > 0:
@@ -279,14 +279,16 @@ def bulk_update_sbg():
             return result
 
         end_col = col_to_letter(total_cols)
-
         total_rows = len(rows)
 
-        # ✅ SAFE RANGE
-        range_name = f"A2:{end_col}{total_rows + 1}"
+        print("🔥 API HIT")
+        print("🔥 Rows received:", total_rows)
+        print("🔥 Sample row:", rows[0])
+
+        # ✅ FINAL FIX → start from Row 3
+        range_name = f"A3:{end_col}{total_rows + 2}"
 
         print("📊 Updating Range:", range_name)
-        print("📊 Rows Count:", total_rows)
 
         # 🔥 BULK UPDATE
         sbg_sheet.update(range_name, rows)
