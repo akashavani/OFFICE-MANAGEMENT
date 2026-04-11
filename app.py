@@ -193,82 +193,6 @@ def update_sbgexp():
         # 📥 Existing data
         data = sbgexp_sheet.get_all_values()
         headers = data[0]
-        rows = data[1:]
-
-        # 🔍 Column indexes
-        date_idx = headers.index("Date")
-        station_idx = headers.index("Station")
-        budget_idx = headers.index("SBG Expenditure Under")
-        details_idx = headers.index("Expenditure Details")
-
-        def clean(val):
-            return str(val).strip().lower()
-
-        # ⚡ Create lookup map (LIKE PB)
-        row_map = {}
-        for i, r in enumerate(rows):
-
-            key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
-            row_map[key] = i + 2  # sheet row number
-
-        updates = []
-        update_cells = []
-        new_rows = []
-
-        # 🔄 Process incoming
-        for row_obj in edit_rows:
-
-            key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
-
-            # 🔥 build row in header order
-            new_row = [row_obj.get(h, "") for h in headers]
-
-            if key in row_map:
-
-                row_num = row_map[key]
-
-                # 🔥 batch update (FULL ROW like PB)
-                for col_idx, val in enumerate(new_row):
-                    update_cells.append({
-                        "range": gspread.utils.rowcol_to_a1(row_num, col_idx+1),
-                        "values": [[val]]
-                    })
-
-                updates.append(row_num)
-
-            else:
-                new_rows.append(new_row)
-
-        # ⚡ BULK UPDATE
-        if update_cells:
-            sbgexp_sheet.batch_update(update_cells)
-
-        # ➕ INSERT (inside table instead of append)
-        if new_rows:
-            sbgexp_sheet.append_rows(new_rows)
-
-        return jsonify({
-            "status": "success",
-            "updated": len(updates),
-            "added": len(new_rows)
-        })
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-    
-
-@app.route("/sbgexp/update", methods=["POST"])
-def update_sbgexp():
-    try:
-        req_data = request.get_json()
-        edit_rows = req_data.get("data", [])
-
-        if not edit_rows:
-            return jsonify({"status": "error", "message": "No data received"}), 400
-
-        # 📥 Existing data
-        data = sbgexp_sheet.get_all_values()
-        headers = data[0]
 
         update_cells = []
         new_rows = []
@@ -308,6 +232,61 @@ def update_sbgexp():
     except Exception as e:
         print("❌ ERROR:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
+    
+
+@app.route("/sbg/bulk-update", methods=["POST"])
+def bulk_update_sbg():
+    try:
+        req = request.get_json()
+        rows = req.get("rows", [])
+
+        if not rows:
+            return jsonify({"status": "error", "message": "No rows"}), 400
+
+        # 📥 Read existing sheet
+        existing_data = sbg_sheet.get_all_values()
+        total_cols = len(existing_data[0])
+
+        # ✅ Convert column number → Excel letter (AA, AB...)
+        def col_to_letter(n):
+            result = ""
+            while n > 0:
+                n, rem = divmod(n - 1, 26)
+                result = chr(65 + rem) + result
+            return result
+
+        end_col = col_to_letter(total_cols)
+        total_rows = len(rows)
+
+        print("🔥 API HIT")
+        print("🔥 Rows received:", total_rows)
+        print("🔥 Sample row:", rows[0])
+
+        # ✅ Ensure row length matches sheet
+        rows = [r[:total_cols] for r in rows]
+
+        # ✅ Correct range (DATA starts from row 3)
+        range_name = f"A3:{end_col}{total_rows + 2}"
+
+        print("📊 Updating Range:", range_name)
+
+        # 🔥 BULK UPDATE
+        sbg_sheet.batch_update([{
+            "range": range_name,
+            "values": rows
+        }])
+
+        return jsonify({
+            "status": "success",
+            "updated_rows": total_rows
+        })
+
+    except Exception as e:
+        print("❌ ERROR:", str(e))
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
     
     # =========================
 # RUN SERVER
