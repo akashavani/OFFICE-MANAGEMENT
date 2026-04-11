@@ -266,14 +266,29 @@ def bulk_update_sbg():
         if not rows:
             return jsonify({"status": "error", "message": "No rows"}), 400
 
-        # 🔥 UPDATE EXACT RANGE (NO APPEND)
-        total_cols = len(rows[0])
+        # 📥 Get existing sheet size
+        existing_data = sbg_sheet.get_all_values()
+        total_cols = len(existing_data[0])  # safer than rows[0]
+
+        # ✅ FIX: Proper column naming (AA, AB...)
+        def col_to_letter(n):
+            result = ""
+            while n > 0:
+                n, rem = divmod(n - 1, 26)
+                result = chr(65 + rem) + result
+            return result
+
+        end_col = col_to_letter(total_cols)
+
         total_rows = len(rows)
 
-        end_col = chr(65 + total_cols - 1)  # A, B, C...
+        # ✅ SAFE RANGE
+        range_name = f"A2:{end_col}{total_rows + 1}"
 
-        range_name = f"A2:{end_col}{total_rows+1}"
+        print("📊 Updating Range:", range_name)
+        print("📊 Rows Count:", total_rows)
 
+        # 🔥 BULK UPDATE
         sbg_sheet.update(range_name, rows)
 
         return jsonify({
@@ -282,6 +297,7 @@ def bulk_update_sbg():
         })
 
     except Exception as e:
+        print("❌ ERROR:", str(e))
         return jsonify({
             "status": "error",
             "message": str(e)
