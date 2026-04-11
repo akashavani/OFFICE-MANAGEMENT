@@ -1422,17 +1422,21 @@
     }
 
     .bill-text {
-      width: 150px;
-      min-height: 22px;
+      width: 100% !important;
+      min-width: 150px !important;
+      height: 100%;
       resize: none;   /* allow height resize only */
       background-color: #d3fc58;
+      border: 1px solid #94a3b8;
     }
 
     .details-text {
-      width: 300px;
-      min-height: 22px;
+      width: 100% !important;
+      min-width: 300px !important;
+      height: 100%;
       resize: none;
       background-color: #d3fc58;
+      border: 1px solid #94a3b8;
     }
 
     /*============================Budget CSS =====================*/
@@ -2150,15 +2154,31 @@
         className: "upload-mode"
       });
 
+      //setupSBGToggleButton("SBGaddBtn", {
+      //  defaultText: "Add",
+      //  activeText: "Save",
+      //  defaultIcon: "plus",
+      //  activeIcon: "upload",
+      //  className: "upload-mode"
+      //});
+
       setupSBGToggleButton("SBGaddBtn", {
         defaultText: "Add",
         activeText: "Save",
         defaultIcon: "plus",
         activeIcon: "upload",
         className: "upload-mode"
-      });
+      }, "add");
 
-       setupSBGEditButton("SBGeditBtn");
+      setupSBGToggleButton("SBGeditBtn", {
+        defaultText: "Edit",
+        activeText: "Update",
+        defaultIcon: "edit",
+        activeIcon: "upload",
+        className: "upload-mode"
+      }, "edit");
+
+       //setupSBGEditButton("SBGeditBtn");
 
       bindPayBillView(
         "PayBillPage_Station",
@@ -2285,7 +2305,7 @@
       // 🔥 THEN SYNC
       await syncPBtoSBG();
       renderFilterMainBudgetExpTable();
-      toggleButton();
+      //toggleButton();
     }
 
     /* =========================
@@ -4076,18 +4096,12 @@
       document.querySelectorAll(".action-group button").forEach(btn => {
         btn.disabled = false;
       });
-      document.querySelectorAll(".SBGaction-group button").forEach(btn => {
-        btn.disabled = false;
-      });
     }
 
     function disableAllButtons() {
       document.querySelectorAll(".action-group button").forEach(btn => {
         btn.disabled = true;
-      });
-      document.querySelectorAll(".SBGaction-group button").forEach(btn => {
-        btn.disabled = true;
-      });
+      });      
     }
 
     // 🔥============== DROPDOWN OPTIONS OF PAYBILL EDIT TABLE COLUMNS===========================
@@ -9002,6 +9016,7 @@
     }
 
 
+
     function loadBudgetDropdown() {
 
       if (!sbgData || !sbgData.rows) {
@@ -9180,7 +9195,8 @@
       if (!fyCols.length) return;
 
       const row = rows.find(r =>
-        String(r[0]).trim().toLowerCase() === budgetVal.trim().toLowerCase()
+        //String(r[0]).trim().toLowerCase() === budgetVal.trim().toLowerCase()
+        String(r[0]).toLowerCase() === budgetVal.toLowerCase()
       );
 
       if (!row) return;
@@ -9597,7 +9613,8 @@
 
       const rowDate = String(row[0] || "").trim();
       const rowStation = String(row[1] || "").trim();
-      const rowBudget = String(row[3] || "").trim();
+      //const rowBudget = String(row[3] || "").trim();
+      const rowBudget = String(row[3] || "");
 
       const rowFY = getFYFromDateStr(rowDate);
 
@@ -9607,44 +9624,14 @@
         rowFY === fy
       );
     });
-}
+}  
 
+function renderFilterMainBudgetExpTable() {
 
-    function filterSBGData2() {
-
-      if (!sbgExpData || !sbgExpData.rows) return [];
-
-      const station = id("BudgetPage_Station")?.value || "";
-      const budget = id("BudgetUnderSelect")?.value || "";
-      const fy = id("BudgetPage_FY")?.value || "";
-
-      // 🔥 STRICT CONDITION: ALL REQUIRED
-      if (!station || !budget || !fy ||
-        station === "Select" || budget === "Select Budget" || fy === "Select") {
-
-        console.warn("⚠ Select all filters (Station, Budget, FY)");
-        return [];  // ❌ return empty → no data
-      }
-
-      return sbgExpData.rows.filter(row => {
-
-        const rowDate = String(row[0] || "").trim();
-        const rowStation = String(row[1] || "").trim();
-        const rowBudget = String(row[3] || "").trim();
-
-        const rowFY = getFYFromDateStr(rowDate);
-
-        return (
-          rowStation === station &&
-          rowBudget === budget &&
-          rowFY === fy
-        );
-      });
-    }
-
-
-
-    function renderFilterMainBudgetExpTable() {
+  const sbgedit = id("SBGeditBtn");
+  const sbgadd = id("SBGaddBtn");
+  const sbgprint = id("SBGprintBtn");
+  const sbgXL = id("SBGexcelBtn");
 
   const container = id("BudgetTableWrapper");
   if (!container) return;
@@ -9655,26 +9642,231 @@
   const budget = id("BudgetUnderSelect")?.value || "";
   const fy = id("BudgetPage_FY")?.value || "";
 
+  // 🔥 BUTTON CONTROL
+  function toggleSBGButtons(disabled = true) {
+    if (sbgedit) sbgedit.disabled = disabled;
+    if (sbgadd) sbgadd.disabled = disabled;
+    if (sbgprint) sbgprint.disabled = disabled;
+    if (sbgXL) sbgXL.disabled = disabled;
+  }
+
+  // =========================
+  // ❌ INVALID FILTER
+  // =========================
   if (!station || !budget || !fy ||
-    station === "Select" || budget === "Select Budget" || fy === "Select") {
+      station === "Select" || budget === "Select Budget" || fy === "Select") {
 
-    container.innerHTML = `<p style="text-align:center; color:#888;">
-      Please select Station, Budget & Financial Year
-    </p>`;
+    toggleSBGButtons(true);
+
+    container.innerHTML = `
+      <p style="text-align:center; color:#888;">
+        Please select Station, Budget & Financial Year
+      </p>
+    `;
     return;
   }
 
-  // 🔥 IMPORTANT: ensure filter returns rowIndex
-  const data = filterSBGData(); 
-  // EXPECTED FORMAT:
-  // [{ rowIndex: 2, values: [...] }, { rowIndex: 3, values: [...] }]
+  // 🔥 FETCH DATA
+  const data = filterSBGData();
 
+  // =========================
+  // 🔥 CREATE TABLE ONCE
+  // =========================
+  const table = document.createElement("table");
+  table.className = "budget-table";
+
+  table.innerHTML = `
+    <colgroup>
+      <col style="width: 5%;">
+      <col style="width: 10%;">
+      <col style="width: 15%;">
+      <col style="width: 18%;">
+      <col style="width: 32%;">
+      <col style="width: 10%;">
+      <col style="width: 10%;">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Station</th>
+        <th>Bill / Invoice Details</th>
+        <th>SBG Expenditure Under</th>
+        <th>Expenditure Details</th>
+        <th>Expenditure Amount</th>
+        <th>Cumulative Sum of Expenditure</th>
+      </tr>
+    </thead>
+  `;
+
+  const tbody = document.createElement("tbody");
+  tbody.id = "budgetPBBody";
+
+  // =========================
+  // ❌ NO DATA
+  // =========================
   if (!data.length) {
-    container.innerHTML = `<p style="text-align:center; color:#888;">
-      No data found
-    </p>`;
+
+    toggleSBGButtons(true); // 🔥 DISABLE ALL
+    sbgadd.disabled = false;
+
+    const tr = document.createElement("tr");
+
+    const td = document.createElement("td");
+    td.colSpan = 7;
+    td.style.textAlign = "center";
+    td.style.color = "#888";
+    td.style.padding = "20px";
+    td.textContent = "No data found";
+
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+
+  } else {
+
+    // =========================
+    // ✅ DATA EXISTS
+    // =========================
+    toggleSBGButtons(false);
+
+    data.forEach((obj) => {
+
+      const tr = document.createElement("tr");
+      tr.dataset.rowIndex = obj.rowIndex;
+
+      const row = obj.values;
+
+      row.forEach((cell, i) => {
+
+        const td = document.createElement("td");
+
+        if (i === 5 || i === 6) {
+          const num = Number(cell);
+          td.textContent = isNaN(num) ? "" : formatCurrency(num * 1000);
+          td.style.textAlign = "right";
+
+          if (i === 6) {
+            td.classList.add("cum");
+            td.dataset.value = num * 1000;
+          }
+
+        } else {
+          td.textContent = cell;
+        }
+
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+function renderFilterMainBudgetExpTable2() {
+
+  const sbgedit = id("SBGeditBtn");
+  const sbgadd = id("SBGaddBtn");
+  const sbgprint = id("SBGprintBtn");
+  const sbgXL = id("SBGexcelBtn");
+
+  const container = id("BudgetTableWrapper");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const station = id("BudgetPage_Station")?.value || "";
+  const budget = id("BudgetUnderSelect")?.value || "";
+  const fy = id("BudgetPage_FY")?.value || "";
+
+  // 🔥 HELPER → enable/disable all buttons
+  function toggleSBGButtons(disabled = true) {
+    if (sbgedit) sbgedit.disabled = disabled;
+    if (sbgadd) sbgadd.disabled = disabled;
+    if (sbgprint) sbgprint.disabled = disabled;
+    if (sbgXL) sbgXL.disabled = disabled;
+  }
+
+  // =========================
+  // ❌ INVALID FILTER
+  // =========================
+  if (!station || !budget || !fy ||
+      station === "Select" || budget === "Select Budget" || fy === "Select") {
+
+    toggleSBGButtons(true); // 🔥 DISABLE ALL
+
+    container.innerHTML = `
+      <p style="text-align:center; color:#888;">
+        Please select Station, Budget & Financial Year
+      </p>
+    `;
     return;
   }
+
+  // 🔥 FETCH DATA
+  const data = filterSBGData();
+
+  // =========================
+  // ❌ NO DATA
+  // =========================
+  if (!data.length) {
+
+    toggleSBGButtons(true); // 🔥 DISABLE ALL
+    sbgadd.disabled = false;
+
+    // 🔥 CREATE TABLE WITH HEADER
+    const table = document.createElement("table");
+    table.className = "budget-table";
+
+    table.innerHTML = `
+      <colgroup>
+        <col style="width: 5%;">
+        <col style="width: 10%;">
+        <col style="width: 15%;">
+        <col style="width: 18%;">
+        <col style="width: 32%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Station</th>
+          <th>Bill / Invoice Details</th>
+          <th>SBG Expenditure Under</th>
+          <th>Expenditure Details</th>
+          <th>Expenditure Amount</th>
+          <th>Cumulative Sum of Expenditure</th>
+        </tr>
+      </thead>
+    `;
+
+    const tbody = document.createElement("tbody");
+    tbody.id = "budgetPBBody";
+
+    // 🔥 MERGED "NO DATA" ROW
+    const tr = document.createElement("tr");
+
+    const td = document.createElement("td");
+    td.colSpan = 7; // 🔥 FULL WIDTH
+    td.style.textAlign = "center";
+    td.style.color = "#888";
+    td.style.padding = "20px";
+    td.textContent = "No data found";
+
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+
+    table.appendChild(tbody);
+    container.appendChild(table);
+    return;
+  }
+
+  // =========================
+  // ✅ VALID DATA
+  // =========================
+  toggleSBGButtons(false); // 🔥 ENABLE ALL
 
   const table = document.createElement("table");
   table.className = "budget-table";
@@ -9696,8 +9888,8 @@
         <th>Bill / Invoice Details</th>
         <th>SBG Expenditure Under</th>
         <th>Expenditure Details</th>
-        <th>Expenditure Amount (₹ in 000)</th>
-        <th>Cumulative Sum of Expenditure (₹ in 000)</th>
+        <th>Expenditure Amount</th>
+        <th>Cumulative Sum of Expenditure</th>
       </tr>
     </thead>
   `;
@@ -9705,11 +9897,10 @@
   const tbody = document.createElement("tbody");
   tbody.id = "budgetPBBody";
 
-  data.forEach((obj, i) => {
+  data.forEach((obj) => {
 
     const tr = document.createElement("tr");
 
-    // 🔥 CRITICAL FIX (REAL SHEET ROW)
     tr.dataset.rowIndex = obj.rowIndex;
 
     const row = obj.values;
@@ -9723,7 +9914,6 @@
         td.textContent = isNaN(num) ? "" : formatCurrency(num * 1000);
         td.style.textAlign = "right";
 
-        // 🔥 store raw value for cumulative
         if (i === 6) {
           td.classList.add("cum");
           td.dataset.value = num * 1000;
@@ -9742,19 +9932,6 @@
   table.appendChild(tbody);
   container.appendChild(table);
 }
-
-
-
-    ["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
-      .forEach(idName => {
-
-        id(idName)?.addEventListener("change", () => {
-          getBudgetFYColumns();
-          renderFilterMainBudgetExpTable();
-          toggleButton();
-        });
-
-      });
 
 
 function getFYColumnIndexes(headers, fy) {
@@ -9887,92 +10064,6 @@ async function updateBudgetDBFromSBGExp() {
 }
 
 
-function setupSBGToggleButton(btnId, config) {
-  const selectedBudget = id("BudgetUnderSelect");
-  const selectedFY= id("BudgetPage_FY");
-  const selectedStation = id("BudgetPage_Station");
-
-  const sbgedit = id("SBGeditBtn");
-  const sbgadd = id("SBGaddBtn");
-  const sbgprint = id("SBGprintBtn");
-  const sbgXL = id("SBGexcelBtn");
-
-  const btn = id(btnId);
-  if (!btn) return;
-
-  let isSBGAddMode = false;
-  let isProcessing = false;
-
-  btn.onclick = async () => {
-
-    if (isProcessing) return;
-    isProcessing = true;
-
-    try {
-
-      const wrapper = document.querySelector(".BudgetTableWrapper"); // ✅ FIXED
-      const tbody = id("budgetPBBody");
-
-      if (!isSBGAddMode) {
-
-        // 🔥 ADD MODE
-        isSBGAddMode = true;
-
-        selectedBudget.disabled = true;
-        selectedFY.disabled = true;
-        selectedStation.disabled = true;
-        sbgprint.disabled = true;
-        sbgXL.disabled = true;
-        sbgedit.disabled = true;
-
-        btn.classList.add(config.className);
-        wrapper?.classList.add("edit-mode");
-
-        btn.querySelector("span").textContent = config.activeText;
-        updateIcon(btn, config.activeIcon);
-        addSBGRows(10);
-        initPreviousCumulative();
-        CalculateCumulative("add"); 
-
-      } else {
-
-        // 🔥 SAVE MODE
-        const success = await saveSBGData();
-        
-        if (!success) {
-          isProcessing = false;
-          return;
-        }
-
-        isSBGAddMode = false;
-
-        selectedBudget.disabled = false;
-        selectedFY.disabled = false;
-        selectedStation.disabled = false;
-        sbgprint.disabled = false;
-        sbgXL.disabled = false;
-        sbgedit.disabled = false;
-
-        btn.classList.remove(config.className);
-        wrapper?.classList.remove("edit-mode");
-
-        btn.querySelector("span").textContent = config.defaultText;
-        updateIcon(btn, config.defaultIcon);
-
-        renderBudgetfromPBData();
-      }
-
-    } catch (err) {
-      console.error("❌ SBG Toggle Error:", err);
-    } finally {
-      isProcessing = false;
-    }
-
-  };
-}
-
-
-
 function ensureSBGTable() {
 
   const container = id("BudgetTableWrapper");
@@ -9991,11 +10082,11 @@ function ensureSBGTable() {
 
     table.innerHTML = `
       <colgroup>
-        <col style="width: 5%;">
         <col style="width: 10%;">
-        <col style="width: 15%;">
-        <col style="width: 18%;">
-        <col style="width: 32%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+        <col style="width: 20%;">
+        <col style="width: 30%;">
         <col style="width: 10%;">
         <col style="width: 10%;">
       </colgroup>
@@ -10030,10 +10121,22 @@ function ensureSBGTable() {
 }
 
 
-
-function addSBGRows(count = 10) {
-
+function addSBGRows(count = 5) {
   const tbody = document.querySelector("#budgetPBBody");
+  if (!tbody) return;
+
+  // 🔥 REMOVE "NO DATA" MERGED ROW (IMPORTANT)
+  const firstRow = tbody.querySelector("tr");
+
+  if (firstRow && firstRow.children.length === 1) {
+    tbody.innerHTML = ""; // remove merged row completely
+  }
+
+  const budgetSelect = id("BudgetUnderSelect");
+  const stationSelect = id("BudgetPage_Station");
+
+  const selectedBudget = budgetSelect.options[budgetSelect.selectedIndex].text;
+  const selectedStation = stationSelect.options[stationSelect.selectedIndex].text;
 
   for (let i = 0; i < count; i++) {
 
@@ -10042,18 +10145,37 @@ function addSBGRows(count = 10) {
     tr.dataset.rowIndex = ""; // 🔥 NEW ROW
 
     tr.innerHTML = `
-      <td><input type="date"></td>
-      <td><input value="AIR KARWAR"></td>
-      <td><textarea class="bill-text"></textarea></td>
-      <td><span class="budget-val">OE (General)</span></td>
-      <td><textarea class="details-text"></textarea></td>
-      <td><input type="number" class="amt" value="0"></td>
-      <td class="cum"></td>
+      <td style="padding:0px"><input style="width:100%;border-radius:0" type="date"></td>
+
+      <td style="padding:0px">
+        <input style="width:100%;border-radius:0;height:100%" value="${selectedStation}">
+      </td>
+
+      <td style="padding:0px">
+        <textarea class="bill-text"></textarea>
+      </td>
+
+      <td>
+        <span style="width:280px" class="budget-val" data-value="${selectedBudget}">
+          ${selectedBudget}
+        </span>
+      </td>
+
+      <td style="padding:0px">
+        <textarea class="details-text"></textarea>
+      </td>
+
+      <td style="padding:0px">
+        <input style="width:100%;border-radius:0;height:100%" type="number" class="amt" value="0">
+      </td>
+
+      <td style="width:100%;text-align:right;" class="cum"></td>
     `;
 
     tbody.appendChild(tr);
   }
 }
+
 
 
 let previousCumulative = 0;
@@ -10185,7 +10307,7 @@ function CalculateCumulative(mode = "add") {
         }
       }
 
-      console.log(`Row ${i + 1} → FY: ${fy}, Amt: ${amt}, Cum: ${total}`);
+      //console.log(`Row ${i + 1} → FY: ${fy}, Amt: ${amt}, Cum: ${total}`);
     });
 
   }
@@ -10225,114 +10347,6 @@ function formatDateBack(d) {
 }
 
 
-async function saveSBGData() {
-
-  const rows = document.querySelectorAll("#budgetPBBody tr");
-  const data = [];
-
-  rows.forEach((tr) => {
-
-    const rowIndex = tr.dataset.rowIndex || "";
-
-    // ✅ DATE
-    let date = "";
-    const dateInput = tr.querySelector('input[type="date"]');
-    if (dateInput) date = dateInput.value;
-    else date = formatDateInput(tr.children[0]?.textContent);
-
-    // ✅ STATION
-    let station = "";
-    const stationInput = tr.querySelector('td:nth-child(2) input');
-    if (stationInput) station = stationInput.value;
-    else station = tr.children[1]?.textContent.trim();
-
-    // ✅ BILL
-    const bill = tr.querySelector('.bill-text')?.value || tr.children[2]?.textContent || "";
-
-    // ✅ BUDGET
-      let budget = "";
-      // 🔹 CASE 1: Editable row
-      const budgetEl = tr.querySelector('.budget-val');
-
-      if (budgetEl) {
-        budget = budgetEl.dataset?.value || budgetEl.textContent;
-      }
-
-      // 🔹 CASE 2: Normal row
-      else {
-        budget = tr.children[3]?.textContent || "";
-      }
-
-      console.log("📦 Budget (RAW):", JSON.stringify(budget));
-
-    // ✅ DETAILS
-    let details = "";
-    const detailsInput = tr.querySelector('.details-text');
-    if (detailsInput) details = detailsInput.value;
-    else details = tr.children[4]?.textContent.trim();
-
-    // ✅ AMOUNT
-    const rawAmount = CurrencytoNum(tr.querySelector('.amt')?.value || tr.children[5]?.textContent || 0);
-
-    // ✅ CUMULATIVE
-    const cumEl = tr.querySelector('.cum');
-
-    const rawCumulative = Number(
-      cumEl?.dataset?.value ||
-      cumEl?.querySelector("input")?.value ||
-      CurrencytoNum(cumEl?.textContent) ||
-      0
-    );
-
-    console.log("ROW:", rowIndex, "CUM:", rawCumulative);
-
-    if (!date || !station || !details || rawAmount === 0) return;
-
-    data.push({
-      rowIndex: rowIndex ? Number(rowIndex) : null,
-      "Date": formatDateBack(date),
-      "Station": station,
-      "Bill / Invoice Details": bill,
-      "SBG Expenditure Under": budget,
-      "Expenditure Details": details,
-      "Expenditure Amount (₹ in 000)": Number((rawAmount / 1000).toFixed(3)),
-      "Cumulative Sum of Expenditure (₹ in 000)": Number((rawCumulative / 1000).toFixed(3))
-    });
-
-  });
-
-  if (!data.length) {
-    alert("❌ Enter valid data");
-    return false;
-  }
-
-  console.log("🚀 FINAL PAYLOAD:", data);
-
-  const res = await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data })
-  });
-
-  const result = await res.json();
-
-  if (result?.status === "success") {
-
-    alert("✅ Uploaded Successfully");
-
-    await loadTable("sbg", "BudgetDB");
-    await loadTable("sbgexp", "SBGexpenditureDB");
-    renderFilterMainBudgetExpTable();
-
-    return true;
-
-  } else {
-    alert("❌ Save failed");
-    return false;
-  }
-}
-
-
 function convertSBGTableToEditable() {
 
   const tbody = document.querySelector("#BudgetTableWrapper table tbody");
@@ -10344,7 +10358,7 @@ function convertSBGTableToEditable() {
 
     [...tr.children].forEach((td, colIndex) => {
 
-      const text = td.textContent.trim();
+      const text = td.textContent;
 
       // ❌ Skip SBG (3) & Cumulative (6)
       if (colIndex === 3 || colIndex === 6) return;
@@ -10386,74 +10400,228 @@ function formatDateInput(dateStr) {
 }
 
 
-function setupSBGEditButton(btnId) {
+["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
+      .forEach(idName => {
 
-  const btn = id(btnId);
-  if (!btn) return;
+        id(idName)?.addEventListener("change", () => {
+          getBudgetFYColumns();
+          renderFilterMainBudgetExpTable();
+          //toggleButton();
+        });
+
+      });
+
+
+
+async function saveSBGData() {
+
+  const rows = document.querySelectorAll("#budgetPBBody tr");
+  const data = [];
+
+  rows.forEach((tr) => {
+
+    const rowIndex = tr.dataset.rowIndex || "";
+
+    // ✅ DATE
+    let date = "";
+    const dateInput = tr.querySelector('input[type="date"]');
+    if (dateInput) date = dateInput.value;
+    else date = formatDateInput(tr.children[0]?.textContent);
+
+    // ✅ STATION
+    let station = "";
+    const stationInput = tr.querySelector('td:nth-child(2) input');
+    if (stationInput) station = stationInput.value;
+    else station = tr.children[1]?.textContent.trim();
+
+    // ✅ BILL
+    const bill = tr.querySelector('.bill-text')?.value || tr.children[2]?.textContent || "";
+
+    // ✅ BUDGET
+      let budget = "";
+      // 🔹 CASE 1: Editable row
+      const budgetEl = tr.querySelector('.budget-val');
+
+      if (budgetEl) {
+        budget = budgetEl.dataset?.value || budgetEl.textContent;
+      }
+
+      // 🔹 CASE 2: Normal row
+      else {
+        budget = tr.children[3]?.textContent || "";
+      }
+
+      //console.log("📦 Budget (RAW):", JSON.stringify(budget));
+
+    // ✅ DETAILS
+    let details = "";
+    const detailsInput = tr.querySelector('.details-text');
+    if (detailsInput) details = detailsInput.value;
+    else details = tr.children[4]?.textContent.trim();
+
+    // ✅ AMOUNT
+    const rawAmount = CurrencytoNum(tr.querySelector('.amt')?.value || tr.children[5]?.textContent || 0);
+
+    // ✅ CUMULATIVE
+    const cumEl = tr.querySelector('.cum');
+
+    const rawCumulative = Number(
+      cumEl?.dataset?.value ||
+      cumEl?.querySelector("input")?.value ||
+      CurrencytoNum(cumEl?.textContent) ||
+      0
+    );
+
+    //console.log("ROW:", rowIndex, "CUM:", rawCumulative);
+
+    if (!date || !station || !details || rawAmount === 0) return;
+
+    data.push({
+      rowIndex: rowIndex ? Number(rowIndex) : null,
+      "Date": formatDateBack(date),
+      "Station": station,
+      "Bill / Invoice Details": bill,
+      "SBG Expenditure Under": budget,
+      "Expenditure Details": details,
+      "Expenditure Amount (₹ in 000)": Number((rawAmount / 1000).toFixed(3)),
+      "Cumulative Sum of Expenditure (₹ in 000)": Number((rawCumulative / 1000).toFixed(3))
+    });
+
+  });
+
+  if (!data.length) {
+    alert("❌ Enter valid data");
+    return false;
+  }
+
+  //console.log("🚀 FINAL PAYLOAD:", data);
+
+  const res = await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data })
+  });
+
+  const result = await res.json();
+
+  if (result?.status === "success") {
+
+    alert("✅ Uploaded Successfully");
+
+    await reloadSBGExpData();
+    await updateBudgetDBFromSBGExp();
+    await loadTable("sbg", "BudgetDB");
+    getBudgetFYColumns();
+    renderFilterMainBudgetExpTable();
+
+    return true;
+
+  } else {
+    alert("❌ Save failed");
+    return false;
+  }
+}
+
+function setupSBGToggleButton(btnId, config, modeType) {
 
   const selectedBudget = id("BudgetUnderSelect");
   const selectedFY = id("BudgetPage_FY");
   const selectedStation = id("BudgetPage_Station");
 
+  const sbgedit = id("SBGeditBtn");
   const sbgadd = id("SBGaddBtn");
-  const sbgprint = id("SBGprintBtn");
-  const sbgXL = id("SBGexcelBtn");
 
-  let isEditMode = false;
+  const btn = id(btnId);
+  if (!btn) return;
+
+  let isActive = false;
+  let isProcessing = false;
 
   btn.onclick = async () => {
 
-    const wrapper = document.querySelector(".BudgetTableWrapper");
+    if (isProcessing) return;
+    isProcessing = true;
 
-    if (!isEditMode) {
+    try {
 
-      // 🔥 ENTER EDIT MODE
-      isEditMode = true;
+      const wrapper = document.querySelector(".BudgetTableWrapper");
 
-      selectedBudget.disabled = true;
-      selectedFY.disabled = true;
-      selectedStation.disabled = true;
+      if (!isActive) {
 
-      sbgadd.disabled = true;
-      sbgprint.disabled = true;
-      sbgXL.disabled = true;
+        // =========================
+        // 🔥 ENTER MODE (ADD / EDIT)
+        // =========================
+        isActive = true;
 
-      wrapper?.classList.add("edit-mode");
+        selectedBudget.disabled = true;
+        selectedFY.disabled = true;
+        selectedStation.disabled = true;
 
-      convertSBGTableToEditable();
+        if (modeType === "add") sbgedit.disabled = true;
+        if (modeType === "edit") sbgadd.disabled = true;
 
-      setTimeout(() => {
-        initPreviousCumulative(); // (optional here)
-        CalculateCumulative("edit");  // ✅ starts from 0
-      }, 50); 
+        wrapper?.classList.add("edit-mode");
 
-      btn.querySelector("span").textContent = "Update";
+        btn.classList.add(config.className);
+        btn.querySelector("span").textContent = config.activeText;
+        updateIcon(btn, config.activeIcon);
 
-    } else {
+        if (modeType === "add") {
 
-      // 🔥 SAVE MODE
-      const success = await saveSBGData();
+          // 🔥 ADD MODE
+          addSBGRows(5);
 
-      if (!success) return;
+          setTimeout(() => {
+            initPreviousCumulative();
+            CalculateCumulative("add"); // continue from last value
+          }, 50);
 
-      isEditMode = false;
+        } else if (modeType === "edit") {
 
-      selectedBudget.disabled = false;
-      selectedFY.disabled = false;
-      selectedStation.disabled = false;
+          // 🔥 EDIT MODE
+          convertSBGTableToEditable();
 
-      sbgadd.disabled = false;
-      sbgprint.disabled = false;
-      sbgXL.disabled = false;
+          setTimeout(() => {
+            CalculateCumulative("edit"); // start fresh (recalculate all)
+          }, 50);
+        }
 
-      wrapper?.classList.remove("edit-mode");
+      } else {
 
-      btn.querySelector("span").textContent = "Edit";
+        // =========================
+        // 🔥 SAVE MODE
+        // =========================
 
-      renderFilterMainBudgetExpTable();
+        const success = await saveSBGData();
+        if (!success) {
+          isProcessing = false;
+          return;
+        }
+
+        isActive = false;
+
+        selectedBudget.disabled = false;
+        selectedFY.disabled = false;
+        selectedStation.disabled = false;
+
+        wrapper?.classList.remove("edit-mode");
+
+        btn.classList.remove(config.className);
+        btn.querySelector("span").textContent = config.defaultText;
+        updateIcon(btn, config.defaultIcon);
+
+        // 🔥 reload table clean
+        renderFilterMainBudgetExpTable();
+      }
+
+    } catch (err) {
+      console.error("❌ SBG Toggle Error:", err);
+    } finally {
+      isProcessing = false;
     }
   };
 }
+
 
 
   </script>
