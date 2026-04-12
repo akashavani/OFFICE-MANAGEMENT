@@ -1465,42 +1465,45 @@
     }
 
     /*============================Salary Slip CSS =====================*/
-    .SalarySlipTableWrapper{
-      width:50%;margin:auto;font-size:10px;
+    .SalarySlipTableWrapper {
+      width: 50%;
+      margin: auto;
+      font-size: 10px;
       background: white;
       overflow: auto;
       height: 600px;
     }
 
-    .SalarySlipTableWrapper table{
-      border:solid 1px black;
-      width:100%;border-collapse: collapse;
+    .SalarySlipTableWrapper table {
+      border: solid 1px black;
+      width: 100%;
+      border-collapse: collapse;
     }
 
-    .SalarySlipTableWrapper td:first-child{
+    .SalarySlipTableWrapper td:first-child {
       border-left: none;
     }
 
-    .SalarySlipTableWrapper tr:first-child td{
+    .SalarySlipTableWrapper tr:first-child td {
       border-top: none;
     }
 
 
-    .SalarySlipTableWrapper td:last-child{
+    .SalarySlipTableWrapper td:last-child {
       border-right: none;
     }
 
-    .SalarySlipTableWrapper tr:last-child td{
+    .SalarySlipTableWrapper tr:last-child td {
       border-bottom: none;
     }
 
-    .SalarySlipTableWrapper td{
-      padding:2px;
-      border:solid 1px black;
-      height:22px;
+    .SalarySlipTableWrapper td {
+      padding: 2px;
+      border: solid 1px black;
+      height: 22px;
     }
-    
-    #SalarySlipLogo{
+
+    #SalarySlipLogo {
       height: 50px;
     }
 
@@ -1511,7 +1514,7 @@
       border-collapse: collapse;
     }
 
-    #SalarySlipBreakup thead td{
+    #SalarySlipBreakup thead td {
       border-bottom: solid 1px black;
     }
 
@@ -2111,15 +2114,16 @@
           <table id="SalarySlipTable">
             <thead>
               <tr>
-                <th style="padding:1px 3px;">               
-                    <div style="border:solid 2px black;gap:4px;display: flex;flex-direction: row;padding: 8px 2px;">
-                      <img id="SalarySlipLogo" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-                      <div style="display: flex;flex-direction: column;margin: auto;">
-                        <h3 style="margin:0">PRASAR BHARATI</h3>
-                        <h3 style="margin:0">INDIA'S PUBLIC SERVICE BROADCASTER</h3>
-                        <h3 style="margin:0">AIR Dharwad</h3>
-                        <h3 style="margin:0">ALL INDIA RADIO</h3>
-                      </div>
+                <th style="padding:1px 3px;">
+                  <div style="border:solid 2px black;gap:4px;display: flex;flex-direction: row;padding: 8px 2px;">
+                    <img id="SalarySlipLogo"
+                      src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
+                    <div style="display: flex;flex-direction: column;margin: auto;">
+                      <h3 style="margin:0">PRASAR BHARATI</h3>
+                      <h3 style="margin:0">INDIA'S PUBLIC SERVICE BROADCASTER</h3>
+                      <h3 style="margin:0">AIR Dharwad</h3>
+                      <h3 style="margin:0">ALL INDIA RADIO</h3>
+                    </div>
                   </div>
                 </th>
               </tr>
@@ -2194,7 +2198,8 @@
                     </tr>
                     <tr>
                       <td colspan="4"></td>
-                      <td colspan="3" style="background-color:#d3d3d3;text-align:center;font-weight:bold">LOAN DEDUCTION DETAIL</td>
+                      <td colspan="3" style="background-color:#d3d3d3;text-align:center;font-weight:bold">LOAN DEDUCTION
+                        DETAIL</td>
                     </tr>
                   </table>
                 </td>
@@ -10849,256 +10854,256 @@
       return masked + visible;
     }
 
-  function fillSalarySlip(empName) {
+    function fillSalarySlip(empName) {
 
-  if (!empName) return;
+      if (!empName) return;
 
-  const emp = getEmployee(empName);
-  if (!emp) return;
+      const emp = getEmployee(empName);
+      if (!emp) return;
 
-  const headers = window.empCalcHeaders;
+      const headers = window.empCalcHeaders;
 
-  const get = (col) => {
-    const idx = headers.indexOf(col);
-    return idx !== -1 ? emp[idx] : "";
-  };
+      const get = (col) => {
+        const idx = headers.indexOf(col);
+        return idx !== -1 ? emp[idx] : "";
+      };
 
-  // 🔥 DESIGNATION
-  let rawDesig = String(get("Designation")).toUpperCase().trim();
-  let finalDesig = designationMap[rawDesig] || rawDesig;
+      // 🔥 DESIGNATION
+      let rawDesig = String(get("Designation")).toUpperCase().trim();
+      let finalDesig = designationMap[rawDesig] || rawDesig;
 
-  // =========================
-  // 🔽 FILL VALUES
-  // =========================
-  id("SSname").textContent = String(empName).toUpperCase();;
-  id("SSdesignation").textContent = finalDesig;
+      // =========================
+      // 🔽 FILL VALUES
+      // =========================
+      id("SSname").textContent = String(empName).toUpperCase();;
+      id("SSdesignation").textContent = finalDesig;
 
-  id("SShris").textContent = get("HRIS");
-  const rawLevel = get("Last Drawn Pay Level");
-  id("SSpaylevel").textContent = "Level - " + formatPayLevel(rawLevel);
+      id("SShris").textContent = get("HRIS");
+      const rawLevel = get("Last Drawn Pay Level");
+      id("SSpaylevel").textContent = "Level - " + formatPayLevel(rawLevel);
 
-  id("SSstation").textContent = get("Station");
-  id("SSsection").textContent = get("Section");
-  id("SSgpf").textContent = get("GPF");
-  id("SSpran").textContent = get("PRAN");
-  id("SSpfms").textContent = get("PFMS");
-  id("SSemail").textContent = get("Email");
-  id("SSaadhaar").textContent = maskValue(get("Aadhaar"));
-  id("SSpan").textContent = maskValue(get("PAN"));
-  id("SSmobile").textContent = maskValue(get("Mobile"));
-  id("SSaccount").textContent = maskValue(get("Account"));
-}
-
-
-function getPBRow(empName) {
-
-  if (!pbData || !pbData.headers || !pbData.rows) return null;
-
-  const headers = pbData.headers;
-  const rows = pbData.rows;
-
-  const nameIndex = headers.indexOf("Employee Name");
-  const monthIndex = headers.indexOf("Salary Month");
-
-  const selectedMonth = id("SalSlipPage_SalMonth")?.value || "";
-
-  if (nameIndex === -1 || monthIndex === -1) return null;
-
-  return rows.find(row =>
-    String(row[nameIndex]).trim() === empName &&
-    String(row[monthIndex]).trim() === selectedMonth
-  ) || null;
-}
-
-
-function formatMonthYear(value) {
-
-  if (!value) return "";
-
-  const monthNames = [
-    "JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE",
-    "JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"
-  ];
-
-  // Try normal parsing
-  const date = new Date(value);
-
-  if (!isNaN(date)) {
-    const month = monthNames[date.getMonth()];
-    const year = date.getFullYear();
-    return `${month} - ${year}`;
-  }
-
-  // 🔥 Fallback (manual parsing)
-  const parts = value.split(/[-/ ]/);
-  let m = parts[0];
-  let y = parts[1];
-
-  let monthIndex = isNaN(m)
-    ? monthNames.findIndex(x => x.startsWith(m.toUpperCase()))
-    : Number(m) - 1;
-
-  return `${monthNames[monthIndex]} - ${y}`;
-}
-
-
-function numberToWords(num) {
-
-  if (!num || num === 0) return "ZERO";
-
-  const a = [
-    "", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX",
-    "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE",
-    "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN",
-    "SEVENTEEN", "EIGHTEEN", "NINETEEN"
-  ];
-
-  const b = [
-    "", "", "TWENTY", "THIRTY", "FORTY",
-    "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"
-  ];
-
-  function twoDigit(n) {
-    if (n < 20) return a[n];
-    return b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "");
-  }
-
-  function threeDigit(n) {
-    let str = "";
-    if (n >= 100) {
-      str += a[Math.floor(n / 100)] + " HUNDRED ";
-      n %= 100;
+      id("SSstation").textContent = get("Station");
+      id("SSsection").textContent = get("Section");
+      id("SSgpf").textContent = get("GPF");
+      id("SSpran").textContent = get("PRAN");
+      id("SSpfms").textContent = get("PFMS");
+      id("SSemail").textContent = get("Email");
+      id("SSaadhaar").textContent = maskValue(get("Aadhaar"));
+      id("SSpan").textContent = maskValue(get("PAN"));
+      id("SSmobile").textContent = maskValue(get("Mobile"));
+      id("SSaccount").textContent = maskValue(get("Account"));
     }
-    if (n > 0) str += twoDigit(n);
-    return str.trim();
-  }
-
-  let result = "";
-
-  const crore = Math.floor(num / 10000000);
-  num %= 10000000;
-
-  const lakh = Math.floor(num / 100000);
-  num %= 100000;
-
-  const thousand = Math.floor(num / 1000);
-  num %= 1000;
-
-  const hundred = num;
-
-  if (crore) result += threeDigit(crore) + " CRORE ";
-  if (lakh) result += threeDigit(lakh) + " LAKH ";
-  if (thousand) result += threeDigit(thousand) + " THOUSAND ";
-  if (hundred) result += threeDigit(hundred);
-
-  return result.trim();
-}
 
 
-function buildSalaryBreakup(empName) {
+    function getPBRow(empName) {
 
-  const row = getPBRow(empName);
-  if (!row) {
-    console.warn("No data for:", empName, getSelectedMonth());
-    return;
-  }
+      if (!pbData || !pbData.headers || !pbData.rows) return null;
 
-  const h = pbData.headers;
-  const g = (col) => {
-    const i = h.indexOf(col);
-    return i !== -1 ? Number(row[i]) || 0 : 0;
-  };
+      const headers = pbData.headers;
+      const rows = pbData.rows;
 
-  // 💰 EARNINGS
-  const earnings = [
-    ["BASIC PAY", g("Basic Pay")],
-    ["DA", g("DA")],
-    ["HRA", g("HRA")],
-    ["TPTA", g("TA")],
-    ["NPSE", g("NPSE") + g("DAA on NPSE")],
-    ["CEA", g("CEA")],
-    ["LTA/EL ENCASH", g("LTA Reimburse") + g("EL Encash")],
-    ["BONUS / UNI ALL.", g("Bonus") + g("Uni All")],
-    ["ARREARS Gross", g("Total DAA") + g("Arrears")],
-    ["REIMBURSEMENT", g("Medical Reimburse")]
-  ];
+      const nameIndex = headers.indexOf("Employee Name");
+      const monthIndex = headers.indexOf("Salary Month");
 
-  const grossAmount = g("Gross Income");
+      const selectedMonth = id("SalSlipPage_SalMonth")?.value || "";
 
-  // 💸 DEDUCTIONS
-  const deductions = [
-    ["CGIS", g("CGEIS")],   
-    ["LF", g("L Fee")], 
-    ["TCS", g("AIR & TV CHE SOC")],    
-    ["IT", g("IT")],
-    ["GPF", g("GPF")],
-    ["ITC", g("Cess @4%")],   
-    ["NPS", g("NPSE") + g("DAA on NPSE")],     
-    ["NPSC", g("NPSC") + g("DAA on NPSC")],    
-    ["RECOVERY", g("REC P & A") + g("Recovery")],
-    ["PROT", g("Prof Tax")],
-    ["WATER", g("W Ch")],
-    ["LIC", g("LIC")]
-  ];
+      if (nameIndex === -1 || monthIndex === -1) return null;
 
-  const zeroEarnings = earnings.filter(e => e[1] !== 0);
-  const zeroDeductions = deductions.filter(d => d[1] !== 0);
-  const totalDeduction = g("Total Deduction");
-  const netIncome = g("Net Income");
-
-  const loanData = [];
-
-  // Example mapping (adjust column names if needed)
-  const loanRecovery = g("Loan Recovery");
-  const loanType = row[h.indexOf("Loan Type")] || "";
-  const installment = row[h.indexOf("Instalment Number")] || "";
-
-  if (loanRecovery || loanType || installment) {
-    loanData.push([
-      loanType,
-      installment,
-      formatCurrency(loanRecovery)
-    ]);
-  }
-
-  renderSalaryBreakup(
-    //earnings,
-    zeroEarnings,
-    //deductions,
-    zeroDeductions,
-    loanData,
-    grossAmount,
-    totalDeduction,
-    netIncome
-  );
-}
+      return rows.find(row =>
+        String(row[nameIndex]).trim() === empName &&
+        String(row[monthIndex]).trim() === selectedMonth
+      ) || null;
+    }
 
 
-function renderSalaryBreakup(earnings, deductions, loanData, gross, totalDeduction, net) {
+    function formatMonthYear(value) {
 
-  const tbody = id("SalarySlipBreakup")?.querySelector("tbody");
-  if (!tbody) return;
+      if (!value) return "";
 
-  tbody.innerHTML = "";
+      const monthNames = [
+        "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+        "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+      ];
 
-  const maxRows = Math.max(earnings.length, deductions.length, loanData.length);
+      // Try normal parsing
+      const date = new Date(value);
 
-  for (let i = 0; i < maxRows; i++) {
+      if (!isNaN(date)) {
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+        return `${month} - ${year}`;
+      }
 
-    const earn = earnings[i] || ["", 0];
-    const ded = deductions[i] || ["", 0];
-    const loan = loanData[i] || ["", "", ""];
+      // 🔥 Fallback (manual parsing)
+      const parts = value.split(/[-/ ]/);
+      let m = parts[0];
+      let y = parts[1];
 
-    // 🔥 Skip row if ALL empty OR zero
-    const isEmptyRow =
-      (!earn[0] && !ded[0] && !loan[0]) ||
-      (earn[1] === 0 && ded[1] === 0 && !loan[0]);
+      let monthIndex = isNaN(m)
+        ? monthNames.findIndex(x => x.startsWith(m.toUpperCase()))
+        : Number(m) - 1;
 
-    if (isEmptyRow) continue;
+      return `${monthNames[monthIndex]} - ${y}`;
+    }
 
-    const tr = document.createElement("tr");
 
-    tr.innerHTML = `
+    function numberToWords(num) {
+
+      if (!num || num === 0) return "ZERO";
+
+      const a = [
+        "", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX",
+        "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE",
+        "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN",
+        "SEVENTEEN", "EIGHTEEN", "NINETEEN"
+      ];
+
+      const b = [
+        "", "", "TWENTY", "THIRTY", "FORTY",
+        "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"
+      ];
+
+      function twoDigit(n) {
+        if (n < 20) return a[n];
+        return b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "");
+      }
+
+      function threeDigit(n) {
+        let str = "";
+        if (n >= 100) {
+          str += a[Math.floor(n / 100)] + " HUNDRED ";
+          n %= 100;
+        }
+        if (n > 0) str += twoDigit(n);
+        return str.trim();
+      }
+
+      let result = "";
+
+      const crore = Math.floor(num / 10000000);
+      num %= 10000000;
+
+      const lakh = Math.floor(num / 100000);
+      num %= 100000;
+
+      const thousand = Math.floor(num / 1000);
+      num %= 1000;
+
+      const hundred = num;
+
+      if (crore) result += threeDigit(crore) + " CRORE ";
+      if (lakh) result += threeDigit(lakh) + " LAKH ";
+      if (thousand) result += threeDigit(thousand) + " THOUSAND ";
+      if (hundred) result += threeDigit(hundred);
+
+      return result.trim();
+    }
+
+
+    function buildSalaryBreakup(empName) {
+
+      const row = getPBRow(empName);
+      if (!row) {
+        console.warn("No data for:", empName, getSelectedMonth());
+        return;
+      }
+
+      const h = pbData.headers;
+      const g = (col) => {
+        const i = h.indexOf(col);
+        return i !== -1 ? Number(row[i]) || 0 : 0;
+      };
+
+      // 💰 EARNINGS
+      const earnings = [
+        ["BASIC PAY", g("Basic Pay")],
+        ["DA", g("DA")],
+        ["HRA", g("HRA")],
+        ["TPTA", g("TA")],
+        ["NPSE", g("NPSE") + g("DAA on NPSE")],
+        ["CEA", g("CEA")],
+        ["LTA/EL ENCASH", g("LTA Reimburse") + g("EL Encash")],
+        ["BONUS / UNI ALL.", g("Bonus") + g("Uni All")],
+        ["ARREARS Gross", g("Total DAA") + g("Arrears")],
+        ["REIMBURSEMENT", g("Medical Reimburse")]
+      ];
+
+      const grossAmount = g("Gross Income");
+
+      // 💸 DEDUCTIONS
+      const deductions = [
+        ["CGIS", g("CGEIS")],
+        ["LF", g("L Fee")],
+        ["TCS", g("AIR & TV CHE SOC")],
+        ["IT", g("IT")],
+        ["GPF", g("GPF")],
+        ["ITC", g("Cess @4%")],
+        ["NPS", g("NPSE") + g("DAA on NPSE")],
+        ["NPSC", g("NPSC") + g("DAA on NPSC")],
+        ["RECOVERY", g("REC P & A") + g("Recovery")],
+        ["PROT", g("Prof Tax")],
+        ["WATER", g("W Ch")],
+        ["LIC", g("LIC")]
+      ];
+
+      const zeroEarnings = earnings.filter(e => e[1] !== 0);
+      const zeroDeductions = deductions.filter(d => d[1] !== 0);
+      const totalDeduction = g("Total Deduction");
+      const netIncome = g("Net Income");
+
+      const loanData = [];
+
+      // Example mapping (adjust column names if needed)
+      const loanRecovery = g("Loan Recovery");
+      const loanType = row[h.indexOf("Loan Type")] || "";
+      const installment = row[h.indexOf("Instalment Number")] || "";
+
+      if (loanRecovery || loanType || installment) {
+        loanData.push([
+          loanType,
+          installment,
+          formatCurrency(loanRecovery)
+        ]);
+      }
+
+      renderSalaryBreakup(
+        //earnings,
+        zeroEarnings,
+        //deductions,
+        zeroDeductions,
+        loanData,
+        grossAmount,
+        totalDeduction,
+        netIncome
+      );
+    }
+
+
+    function renderSalaryBreakup(earnings, deductions, loanData, gross, totalDeduction, net) {
+
+      const tbody = id("SalarySlipBreakup")?.querySelector("tbody");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+
+      const maxRows = Math.max(earnings.length, deductions.length, loanData.length);
+
+      for (let i = 0; i < maxRows; i++) {
+
+        const earn = earnings[i] || ["", 0];
+        const ded = deductions[i] || ["", 0];
+        const loan = loanData[i] || ["", "", ""];
+
+        // 🔥 Skip row if ALL empty OR zero
+        const isEmptyRow =
+          (!earn[0] && !ded[0] && !loan[0]) ||
+          (earn[1] === 0 && ded[1] === 0 && !loan[0]);
+
+        if (isEmptyRow) continue;
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
       <td>${earn[1] !== 0 ? earn[0] : ""}</td>
       <td style="text-align:right">${earn[1] !== 0 ? (earn[1]) : ""}</td>
 
@@ -11110,242 +11115,242 @@ function renderSalaryBreakup(earnings, deductions, loanData, gross, totalDeducti
       <td style="text-align:right">${loan[2] || ""}</td>
     `;
 
-    tbody.appendChild(tr);
-  }
+        tbody.appendChild(tr);
+      }
 
-  // =========================
-  // 🔻 TOTAL ROW
-  // =========================
-  const totalRow = document.createElement("tr");
-  totalRow.innerHTML = `
+      // =========================
+      // 🔻 TOTAL ROW
+      // =========================
+      const totalRow = document.createElement("tr");
+      totalRow.innerHTML = `
     <td><b>GROSS AMOUNT</b></td>
     <td style="text-align:right"><b>${(gross)}</b></td>
     <td><b>TOTAL DEDUCTION</b></td>
     <td style="text-align:right"><b>${(totalDeduction)}</b></td>
     <td colspan="3"></td>
   `;
-  tbody.appendChild(totalRow);
+      tbody.appendChild(totalRow);
 
-  // =========================
-  // 🔻 NET SALARY
-  // =========================
-  const words = numberToWords(Number(net));
+      // =========================
+      // 🔻 NET SALARY
+      // =========================
+      const words = numberToWords(Number(net));
 
-  const netRow = document.createElement("tr");
-  netRow.innerHTML = `
+      const netRow = document.createElement("tr");
+      netRow.innerHTML = `
     <td><b>NET SALARY</b></td>
     <td style="text-align:right"><b>${(net)}</b></td>
     <td colspan="5"><b>Rs. ${words} ONLY</b></td>
   `;
-  tbody.appendChild(netRow);
-}
-
-
-// =========================
-// 🔥 PARSE FY (2025-26 → 2025 & 2026)
-// =========================
-function parseFY(fy) {
-
-  if (!fy) return {};
-
-  let [start, end] = fy.split("-");
-
-  const startYear = Number(start);
-
-  const endYear = end.length === 2
-    ? Number(start.slice(0, 2) + end)
-    : Number(end);
-
-  return { startYear, endYear };
-}
-
-// =========================
-// 🔥 CHECK MONTH IN FY (MAR → FEB)
-// =========================
-function isMonthInFY(monthStr, fy) {
-
-  if (!monthStr || !fy) return false;
-
-  const { startYear, endYear } = parseFY(fy);
-
-  const [mon, yearStr] = monthStr.split("-");
-  const year = Number(yearStr);
-
-  const monthOrder = {
-    Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6,
-    Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12
-  };
-
-  const m = monthOrder[mon];
-
-  if (m >= 3 && m <= 12 && year === startYear) return true;
-  if ((m === 1 || m === 2) && year === endYear) return true;
-
-  return false;
-}
-
-// =========================
-// 🔥 GET PB DATA (EMP + FY)
-// =========================
-function getPBFYRows(empName) {
-
-  if (!pbData || !pbData.headers || !pbData.rows) return [];
-
-  const h = pbData.headers;
-
-  const nameIndex = h.indexOf("Employee Name");
-  const monthIndex = h.indexOf("Salary Month");
-
-  const selectedFY = id("SalSlipPage_FY")?.value;
-
-  return pbData.rows.filter(row =>
-    String(row[nameIndex]).trim() === empName &&
-    isMonthInFY(String(row[monthIndex]).trim(), selectedFY)
-  );
-}
-
-// =========================
-// 🔥 SORT MONTHS (MAR → FEB)
-// =========================
-function sortFYMonths(rows, monthIndex) {
-
-  const order = {
-    Mar:1, Apr:2, May:3, Jun:4, Jul:5, Aug:6,
-    Sep:7, Oct:8, Nov:9, Dec:10, Jan:11, Feb:12
-  };
-
-  return rows.sort((a, b) => {
-    const [m1] = a[monthIndex].split("-");
-    const [m2] = b[monthIndex].split("-");
-    return order[m1] - order[m2];
-  });
-}
-
-
-function formatTypeText(text, prefix) {
-
-  if (!text) return "";
-
-  text = String(text).toUpperCase();
-
-  const patterns = [
-    { key: "DAA", short: "DA" },
-    { key: "TA", short: "TA" },
-    { key: "HRA", short: "HRA" },
-    { key: "INCREMENT", short: "Inc." },
-    { key: "PAY", short: "Pay" },
-    { key: "MACP", short: "MACP" }
-  ];
-
-  const result = [];
-
-  patterns.forEach(p => {
-    if (text.includes(p.key)) {
-      result.push(`${p.short} ${prefix}`);
-    }
-  });
-
-  return result.join(", ");
-}
-
-
-// =========================
-// 🔥 BUILD FY TABLE (FINAL)
-// =========================
-function buildFYBreakup(empName) {
-
-  if (!pbData || !pbData.headers || !pbData.rows) return;
-
-  const h = pbData.headers;
-
-  const nameIndex = h.indexOf("Employee Name");
-  const monthIndex = h.indexOf("Salary Month");  
-
-  const selectedMonth = id("SalSlipPage_SalMonth")?.value;
-  if (!selectedMonth) return;
-
-  const [sm, sy] = selectedMonth.split("-");
-  const selectedYear = Number(sy);
-
-  const monthOrder = {
-    Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6,
-    Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12
-  };
-
-  const sMonth = monthOrder[sm];
-
-  const tbody = id("SalarySlipFYDetails")?.querySelector("tbody");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  const g = (row, col) => {
-    const i = h.indexOf(col);
-    return i !== -1 ? Number(row[i]) || 0 : 0;
-  };
-
-  let totalGross = 0;
-  let totalTDS = 0;
-  let totalArrear = 0;
-  let totalRecovery = 0;
-
-  // 🔥 LOOP ALL DATA (NO FY FILTER)
-  pbData.rows.forEach(row => {
-
-    if (String(row[nameIndex]).trim() !== empName) return;
-
-    const arrearText = row[h.indexOf("Arrears Details")] || "";
-    const recoveryText = row[h.indexOf("Recovery Details")] || "";
-
-    const arrearType = formatTypeText(arrearText, "Arr.");
-    const recoveryType = formatTypeText(recoveryText, "Rec.");
-
-    const month = row[monthIndex];
-    if (!month) return;
-
-    const [rm, ry] = month.split("-");
-    const rowYear = Number(ry);
-    const rMonth = monthOrder[rm];
-
-    let show = false;
-
-    // =========================
-    // 🔥 MARCH SPECIAL (FULL FY)
-    // =========================
-    if (sm === "Mar") {
-
-      const prevYear = selectedYear - 1;
-
-      if (rowYear === prevYear && rMonth >= 3) show = true;
-      if (rowYear === selectedYear && rMonth <= 2) show = true;
-
-    } 
-    else {
-
-      // 🔥 NORMAL (PAST MONTHS)
-      if (rowYear < selectedYear) show = true;
-      else if (rowYear === selectedYear && rMonth < sMonth) show = true;
-
+      tbody.appendChild(netRow);
     }
 
-    if (!show) return;
 
-    const arrear = g(row, "Total DAA") + g(row, "Arrears");
-    const recovery = g(row, "REC P & A") + g(row, "Recovery");
-    const gross = g(row, "Gross Income");
-    const tds = g(row, "IT");
+    // =========================
+    // 🔥 PARSE FY (2025-26 → 2025 & 2026)
+    // =========================
+    function parseFY(fy) {
 
-    // 🔥 skip empty rows
-    if (!arrear && !recovery && !gross && !tds) return;
+      if (!fy) return {};
 
-    totalGross += gross;
-    totalTDS += tds;
-    totalArrear += arrear;
-    totalRecovery += recovery;
+      let [start, end] = fy.split("-");
 
-    const tr = document.createElement("tr");
+      const startYear = Number(start);
 
-    tr.innerHTML = `
+      const endYear = end.length === 2
+        ? Number(start.slice(0, 2) + end)
+        : Number(end);
+
+      return { startYear, endYear };
+    }
+
+    // =========================
+    // 🔥 CHECK MONTH IN FY (MAR → FEB)
+    // =========================
+    function isMonthInFY(monthStr, fy) {
+
+      if (!monthStr || !fy) return false;
+
+      const { startYear, endYear } = parseFY(fy);
+
+      const [mon, yearStr] = monthStr.split("-");
+      const year = Number(yearStr);
+
+      const monthOrder = {
+        Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+        Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+      };
+
+      const m = monthOrder[mon];
+
+      if (m >= 3 && m <= 12 && year === startYear) return true;
+      if ((m === 1 || m === 2) && year === endYear) return true;
+
+      return false;
+    }
+
+    // =========================
+    // 🔥 GET PB DATA (EMP + FY)
+    // =========================
+    function getPBFYRows(empName) {
+
+      if (!pbData || !pbData.headers || !pbData.rows) return [];
+
+      const h = pbData.headers;
+
+      const nameIndex = h.indexOf("Employee Name");
+      const monthIndex = h.indexOf("Salary Month");
+
+      const selectedFY = id("SalSlipPage_FY")?.value;
+
+      return pbData.rows.filter(row =>
+        String(row[nameIndex]).trim() === empName &&
+        isMonthInFY(String(row[monthIndex]).trim(), selectedFY)
+      );
+    }
+
+    // =========================
+    // 🔥 SORT MONTHS (MAR → FEB)
+    // =========================
+    function sortFYMonths(rows, monthIndex) {
+
+      const order = {
+        Mar: 1, Apr: 2, May: 3, Jun: 4, Jul: 5, Aug: 6,
+        Sep: 7, Oct: 8, Nov: 9, Dec: 10, Jan: 11, Feb: 12
+      };
+
+      return rows.sort((a, b) => {
+        const [m1] = a[monthIndex].split("-");
+        const [m2] = b[monthIndex].split("-");
+        return order[m1] - order[m2];
+      });
+    }
+
+
+    function formatTypeText(text, prefix) {
+
+      if (!text) return "";
+
+      text = String(text).toUpperCase();
+
+      const patterns = [
+        { key: "DAA", short: "DA" },
+        { key: "TA", short: "TA" },
+        { key: "HRA", short: "HRA" },
+        { key: "INCREMENT", short: "Inc." },
+        { key: "PAY", short: "Pay" },
+        { key: "MACP", short: "MACP" }
+      ];
+
+      const result = [];
+
+      patterns.forEach(p => {
+        if (text.includes(p.key)) {
+          result.push(`${p.short} ${prefix}`);
+        }
+      });
+
+      return result.join(", ");
+    }
+
+
+    // =========================
+    // 🔥 BUILD FY TABLE (FINAL)
+    // =========================
+    function buildFYBreakup(empName) {
+
+      if (!pbData || !pbData.headers || !pbData.rows) return;
+
+      const h = pbData.headers;
+
+      const nameIndex = h.indexOf("Employee Name");
+      const monthIndex = h.indexOf("Salary Month");
+
+      const selectedMonth = id("SalSlipPage_SalMonth")?.value;
+      if (!selectedMonth) return;
+
+      const [sm, sy] = selectedMonth.split("-");
+      const selectedYear = Number(sy);
+
+      const monthOrder = {
+        Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+        Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+      };
+
+      const sMonth = monthOrder[sm];
+
+      const tbody = id("SalarySlipFYDetails")?.querySelector("tbody");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+
+      const g = (row, col) => {
+        const i = h.indexOf(col);
+        return i !== -1 ? Number(row[i]) || 0 : 0;
+      };
+
+      let totalGross = 0;
+      let totalTDS = 0;
+      let totalArrear = 0;
+      let totalRecovery = 0;
+
+      // 🔥 LOOP ALL DATA (NO FY FILTER)
+      pbData.rows.forEach(row => {
+
+        if (String(row[nameIndex]).trim() !== empName) return;
+
+        const arrearText = row[h.indexOf("Arrears Details")] || "";
+        const recoveryText = row[h.indexOf("Recovery Details")] || "";
+
+        const arrearType = formatTypeText(arrearText, "Arr.");
+        const recoveryType = formatTypeText(recoveryText, "Rec.");
+
+        const month = row[monthIndex];
+        if (!month) return;
+
+        const [rm, ry] = month.split("-");
+        const rowYear = Number(ry);
+        const rMonth = monthOrder[rm];
+
+        let show = false;
+
+        // =========================
+        // 🔥 MARCH SPECIAL (FULL FY)
+        // =========================
+        if (sm === "Mar") {
+
+          const prevYear = selectedYear - 1;
+
+          if (rowYear === prevYear && rMonth >= 3) show = true;
+          if (rowYear === selectedYear && rMonth <= 2) show = true;
+
+        }
+        else {
+
+          // 🔥 NORMAL (PAST MONTHS)
+          if (rowYear < selectedYear) show = true;
+          else if (rowYear === selectedYear && rMonth < sMonth) show = true;
+
+        }
+
+        if (!show) return;
+
+        const arrear = g(row, "Total DAA") + g(row, "Arrears");
+        const recovery = g(row, "REC P & A") + g(row, "Recovery");
+        const gross = g(row, "Gross Income");
+        const tds = g(row, "IT");
+
+        // 🔥 skip empty rows
+        if (!arrear && !recovery && !gross && !tds) return;
+
+        totalGross += gross;
+        totalTDS += tds;
+        totalArrear += arrear;
+        totalRecovery += recovery;
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
       <td>${arrearType}</td>
       <td style="text-align:right">${arrear ? (arrear) : ""}</td>
 
@@ -11357,15 +11362,15 @@ function buildFYBreakup(empName) {
       <td style="text-align:right">${(tds)}</td>
     `;
 
-    tbody.appendChild(tr);
-  });
+        tbody.appendChild(tr);
+      });
 
-  // =========================
-  // 🔻 TOTAL ROW
-  // =========================
-  const totalRow = document.createElement("tr");
+      // =========================
+      // 🔻 TOTAL ROW
+      // =========================
+      const totalRow = document.createElement("tr");
 
-  totalRow.innerHTML = `
+      totalRow.innerHTML = `
     <td><b>Total</b></td>
     <td style="text-align:right"><b>${(totalArrear)}</b></td>
     <td><b>Total</b></td>
@@ -11375,92 +11380,92 @@ function buildFYBreakup(empName) {
     <td style="text-align:right"><b>${(totalTDS)}</b></td>
   `;
 
-  tbody.appendChild(totalRow);
-}
-
-
-
-function handleSalarySlipChange() {
-
-  const empName = id("SalSlipPage_Emp")?.value;
-  const month = id("SalSlipPage_SalMonth")?.value;
-
-  if (!empName || empName === "Select") return;
-  if (!month || month === "Select") return;
-
-  // 🔥 Update header
-  id("SalarySlipHeaderMonth").textContent = formatMonthYear(month);
-
-  // 🔥 Fill data
-  fillSalarySlip(empName);
-  buildSalaryBreakup(empName);
-  buildFYBreakup(empName);
-}
-
-  ["SalSlipPage_Station", "SalSlipPage_Emp", "SalSlipPage_SalMonth", "SalSlipPage_FY"]
-  .forEach(idName => {
-
-    id(idName)?.addEventListener("change", () => {
-      setTimeout(() => {
-        handleSalarySlipChange(); // ✅ now reads updated value
-      }, 0);      
-    });
-
-  });
-
-
-// =========================
-// 🔥 BUILD EXCEL HTML (FINAL)
-// =========================
-function buildExcelSalarySlipHTML() {
-
-  const original = id("SalarySlipTable");
-  if (!original) return "";
-
-  // 🔥 CLONE NODE
-  const clone = original.cloneNode(true);
-
-  // =========================
-  // 🔥 COPY COMPUTED STYLES
-  // =========================
-  function copyStyles(src, dest) {
-
-    const computed = window.getComputedStyle(src);
-
-    let styleStr = "";
-
-    for (let i = 0; i < computed.length; i++) {
-      const prop = computed[i];
-      styleStr += `${prop}:${computed.getPropertyValue(prop)};`;
+      tbody.appendChild(totalRow);
     }
 
-    dest.style.cssText = styleStr;
 
-    // recurse
-    for (let i = 0; i < src.children.length; i++) {
-      copyStyles(src.children[i], dest.children[i]);
+
+    function handleSalarySlipChange() {
+
+      const empName = id("SalSlipPage_Emp")?.value;
+      const month = id("SalSlipPage_SalMonth")?.value;
+
+      if (!empName || empName === "Select") return;
+      if (!month || month === "Select") return;
+
+      // 🔥 Update header
+      id("SalarySlipHeaderMonth").textContent = formatMonthYear(month);
+
+      // 🔥 Fill data
+      fillSalarySlip(empName);
+      buildSalaryBreakup(empName);
+      buildFYBreakup(empName);
     }
-  }
 
-  copyStyles(original, clone);
+    ["SalSlipPage_Station", "SalSlipPage_Emp", "SalSlipPage_SalMonth", "SalSlipPage_FY"]
+      .forEach(idName => {
 
-  // =========================
-  // 🔥 FIX IMAGE SIZE
-  // =========================
-  clone.querySelectorAll("img").forEach(img => {
-    img.style.width = "60px";
-    img.style.height = "60px";
-    img.style.objectFit = "contain";
-  });
+        id(idName)?.addEventListener("change", () => {
+          setTimeout(() => {
+            handleSalarySlipChange(); // ✅ now reads updated value
+          }, 0);
+        });
 
-  // =========================
-  // 🔥 CREATE DOCUMENT
-  // =========================
-  const doc = document.implementation.createHTMLDocument("Salary Slip");
+      });
 
-  const style = doc.createElement("style");
 
-  style.textContent = `
+    // =========================
+    // 🔥 BUILD EXCEL HTML (FINAL)
+    // =========================
+    function buildExcelSalarySlipHTML() {
+
+      const original = id("SalarySlipTable");
+      if (!original) return "";
+
+      // 🔥 CLONE NODE
+      const clone = original.cloneNode(true);
+
+      // =========================
+      // 🔥 COPY COMPUTED STYLES
+      // =========================
+      function copyStyles(src, dest) {
+
+        const computed = window.getComputedStyle(src);
+
+        let styleStr = "";
+
+        for (let i = 0; i < computed.length; i++) {
+          const prop = computed[i];
+          styleStr += `${prop}:${computed.getPropertyValue(prop)};`;
+        }
+
+        dest.style.cssText = styleStr;
+
+        // recurse
+        for (let i = 0; i < src.children.length; i++) {
+          copyStyles(src.children[i], dest.children[i]);
+        }
+      }
+
+      copyStyles(original, clone);
+
+      // =========================
+      // 🔥 FIX IMAGE SIZE
+      // =========================
+      clone.querySelectorAll("img").forEach(img => {
+        img.style.width = "60px";
+        img.style.height = "60px";
+        img.style.objectFit = "contain";
+      });
+
+      // =========================
+      // 🔥 CREATE DOCUMENT
+      // =========================
+      const doc = document.implementation.createHTMLDocument("Salary Slip");
+
+      const style = doc.createElement("style");
+
+      style.textContent = `
     @page {
       size: A4 portrait;
       margin: 8mm;
@@ -11484,50 +11489,50 @@ function buildExcelSalarySlipHTML() {
     }
   `;
 
-  doc.head.appendChild(style);
+      doc.head.appendChild(style);
 
-  const div = doc.createElement("div");
-  div.appendChild(clone);
+      const div = doc.createElement("div");
+      div.appendChild(clone);
 
-  doc.body.appendChild(div);
+      doc.body.appendChild(div);
 
-  return "<!DOCTYPE html>\n<html>\n" + doc.documentElement.innerHTML + "\n</html>";
-}
-
-
-function exportSalarySlipExcel() {
-
-  const html = buildExcelSalarySlipHTML();
-
-  const blob = new Blob([html], {
-    type: "application/vnd.ms-excel"
-  });
-
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-
-  const empName = id("SalSlipPage_Emp")?.value || "SalarySlip";
-  const month = id("SalSlipPage_SalMonth")?.value || "";
-
-  a.href = url;
-  a.download = `${empName}_${month}.xls`;
-
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-
-  URL.revokeObjectURL(url);
-}
-
-id("SSexcelBtn")?.addEventListener("click", exportSalarySlipExcel);
+      return "<!DOCTYPE html>\n<html>\n" + doc.documentElement.innerHTML + "\n</html>";
+    }
 
 
-function printSalarySlipPDF() {
-   openPrintWindow(buildExcelSalarySlipHTML());
-}
+    function exportSalarySlipExcel() {
 
-id("SSprintBtn")?.addEventListener("click", printSalarySlipPDF);
+      const html = buildExcelSalarySlipHTML();
+
+      const blob = new Blob([html], {
+        type: "application/vnd.ms-excel"
+      });
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      const empName = id("SalSlipPage_Emp")?.value || "SalarySlip";
+      const month = id("SalSlipPage_SalMonth")?.value || "";
+
+      a.href = url;
+      a.download = `${empName}_${month}.xls`;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    }
+
+    id("SSexcelBtn")?.addEventListener("click", exportSalarySlipExcel);
+
+
+    function printSalarySlipPDF() {
+      openPrintWindow(buildExcelSalarySlipHTML());
+    }
+
+    id("SSprintBtn")?.addEventListener("click", printSalarySlipPDF);
 
   </script>
 
