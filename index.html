@@ -1238,7 +1238,8 @@
     /* Container */
     .action-group,
     .SBGaction-group,
-    .SSaction-group {
+    .SSaction-group,
+    .ITaction-group {
       display: flex;
       gap: 10px;
       padding: 1px 1px;
@@ -1254,7 +1255,8 @@
     /* Base button */
     .action-group button,
     .SBGaction-group button,
-    .SSaction-group button {
+    .SSaction-group button,
+    .ITaction-group button {
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -1272,7 +1274,9 @@
 
     /*================ Disabled=================== */
     .action-group button:disabled,
-    .SBGaction-group button:disabled {
+    .SBGaction-group button:disabled,
+    .SSaction-group button:disabled,
+    .ITaction-group button:disabled {
       opacity: 0.3;
       background: #ffffff;
       cursor: not-allowed;
@@ -1281,7 +1285,9 @@
 
     /*================ Hover ONLY when NOT disabled================ */
     .action-group button:not(:disabled):hover,
-    .SBGaction-group button:not(:disabled):hover {
+    .SBGaction-group button:not(:disabled):hover,
+    .SSaction-group button:not(:disabled):hover,
+    .ITaction-group button:not(:disabled):hover {
       padding: 4px 8px;
       background: #ffffff;
       border-color: #cbd5e1;
@@ -1291,7 +1297,8 @@
     /*================ Show text only when enabled================ */
     .action-group button:not(:disabled):hover span,
     .SBGaction-group button:not(:disabled):hover span,
-    .SSaction-group button:not(:disabled):hover span {
+    .SSaction-group button:not(:disabled):hover span,
+    .ITaction-group button:not(:disabled):hover span {
       max-width: 120px;
       opacity: 1;
       transition: max-width 2s ease;
@@ -1301,7 +1308,8 @@
     /* Icon resize only when enabled */
     .action-group button:not(:disabled):hover svg,
     .SBGaction-group button:not(:disabled):hover svg,
-    .SSaction-group button:not(:disabled):hover svg {
+    .SSaction-group button:not(:disabled):hover svg,
+    .ITaction-group button:not(:disabled):hover svg {
       width: 16px;
       height: 16px;
     }
@@ -1309,7 +1317,8 @@
     /* Icon */
     .action-group button svg,
     .SBGaction-group button svg,
-    .SSaction-group button svg {
+    .SSaction-group button svg,
+    .ITaction-group button svg {
       width: 18px;
       height: 18px;
       flex-shrink: 0;
@@ -1318,7 +1327,8 @@
     /*========= Hide text ================*/
     .action-group button span,
     .SBGaction-group button span,
-    .SSaction-group button span {
+    .SSaction-group button span,
+    .ITaction-group button span {
       max-width: 0;
       overflow: hidden;
       white-space: nowrap;
@@ -1329,7 +1339,8 @@
     /*=========== Active ===============*/
     .action-group button:active,
     .SBGaction-group button:active,
-    .SSaction-group button:active {
+    .SSaction-group button:active,
+    .ITaction-group button:active {
       transform: scale(0.96);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
@@ -1359,25 +1370,29 @@
     /*=============== Print (Neutral Professional Gray)============== */
     .action-group button:nth-child(3),
     .SBGaction-group button:nth-child(3),
-    .SSaction-group button:nth-child(1) {
+    .SSaction-group button:nth-child(1),
+    .ITaction-group button:nth-child(1) {
       color: #334155;
     }
 
     .action-group button:nth-child(3):hover,
     .SBGaction-group button:nth-child(3):hover,
-    .SSaction-group button:nth-child(1):hover {
+    .SSaction-group button:nth-child(1):hover,
+    .ITaction-group button:nth-child(1):hover {
       background: #f1f5f9;
     }
 
     .action-group button:nth-child(4),
     .SBGaction-group button:nth-child(4),
-    .SSaction-group button:nth-child(2) {
+    .SSaction-group button:nth-child(2),
+    .ITaction-group button:nth-child(2) {
       color: #217346;
     }
 
     .action-group button:nth-child(4):hover,
     .SBGaction-group button:nth-child(4):hover,
-    .SSaction-group button:nth-child(2):hover {
+    .SSaction-group button:nth-child(2):hover,
+    .ITaction-group button:nth-child(2):hover {
       background: #f1f5f9;
     }
 
@@ -1396,7 +1411,9 @@
       background: #15803d !important;
     }
 
-    #PBprintMenu {
+    #PBprintMenu, 
+    #SSprintMenu,
+    #ITprintMenu {
       position: absolute;
       top: 120%;
       left: 0;
@@ -1417,7 +1434,9 @@
       flex-direction: column;
     }
 
-    #PBprintMenu.show {
+    #PBprintMenu.show, 
+    #SSprintMenu.show,
+    #ITprintMenu.show  {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
@@ -1516,7 +1535,8 @@
       border-collapse: collapse;
     }
 
-    #SalarySlipBreakup thead td {
+    #SalarySlipBreakup thead td,
+    #SalarySlipFYDetails thead td  {
       border-bottom: solid 1px black;
     }
 
@@ -1526,6 +1546,79 @@
       text-align: center;
       font-weight: bold;
     }
+
+    /*============================Income Tax CSS =====================*/
+
+   .salary-toggle {
+    position: relative;
+    display: inline-flex;
+    background: #f1f3f5;
+    border-radius: 30px;
+    padding: 2px;
+    font-family: "Inter", sans-serif;
+    box-shadow:inset 0px 0px 1px 2px rgb(178, 178, 178);
+    margin: 0;
+  }
+
+/* hide radio */
+.salary-toggle input {
+  display: none;
+}
+
+/* buttons */
+.salary-toggle .btn {
+  flex: 1; /* 🔥 equal width */
+  text-align: center;
+  padding: 6px 12px;
+  border-radius: 25px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 2;
+  color: #555;
+  transition: 0.3s;
+  min-width: 150px; 
+}
+
+/* colors */
+.salary-toggle .btn.red {
+  color: #c92a2a;
+}
+.salary-toggle .btn.green {
+  color: #2b8a3e;
+}
+
+/* active text */
+#calcSalary:checked + .btn.red {
+  color: #fff;
+}
+#paidSalary:checked + .btn.green {
+  color: #fff;
+}
+
+/* 🔥 SLIDER */
+.salary-toggle .slider {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 3px);  /* 🔥 auto width */
+  height: calc(100% - 6px);
+  border-radius: 25px;
+  transition: 0.3s ease;
+  z-index: 1;
+}
+
+/* 🔴 Calculated */
+#calcSalary:checked ~ .slider {
+  background: #e03131;
+  transform: translateX(0);
+}
+
+/* 🟢 Paid (DEFAULT RIGHT) */
+#paidSalary:checked ~ .slider {
+  background: #2f9e44;
+  transform: translateX(100%);
+}
 
     /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
@@ -1562,7 +1655,8 @@
       }
 
       .action-group,
-      .SBGaction-group {
+      .SBGaction-group,
+      .SSaction-group {
         width: 100%;
       }
 
@@ -1903,6 +1997,7 @@
               <td><input disabled id="PayBillPage_TAZone"></td>
               <td><label>HRA Zone :</label></td>
               <td><input disabled id="PayBillPage_HRAZone"></td>
+              <td></td>
             </tr>
           </table>
 
@@ -1914,12 +2009,11 @@
             <button id="PBexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
             <div id="PBprintMenu">
               <div class="print-option menu-option" data-type="pdf-paybill">🧾 Pay Bill Report PDF</div>
-              <div class="print-option menu-option" id="daaOption" data-type="pdf-daa">📊 DAA Bill Report PDF</div>
+              <div class="print-option menu-option" id="daaPrintOption" data-type="pdf-daa">📊 DAA Bill Report PDF</div>
 
               <!-- EXCEL OPTIONS -->
-              <div class="excel-option menu-option" data-type="excel-paybill">⬇️ Pay Bill Excel Download</div>
-              <div class="excel-option menu-option" id="daaExcelOption" data-type="excel-daa">⬇️ DAA Excel Download
-              </div>
+              <div class="excel-option menu-option" data-type="excel-paybill">⬇️ Pay Bill Excel</div>
+              <div class="excel-option menu-option" id="daaExcelOption" data-type="excel-daa">⬇️ DAA Bill Excel</div>
             </div>
           </div>
         </div>
@@ -2112,7 +2206,6 @@
               <td></td>
               <td></td>
               <td></td>
-              <td></td>
             </tr>
           </table>
 
@@ -2120,6 +2213,15 @@
 
             <button id="SSprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
             <button id="SSexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+
+            <div id="SSprintMenu">
+              <div class="print-option menu-option" id="ssPrintOption" data-type="pdf-singleSS">🧾 Employee Salary Slip PDF </div>
+              <div class="print-option menu-option" data-type="pdf-allSS">🧾 All Employee Salary Slip PDF</div>
+
+              <!-- EXCEL OPTIONS -->
+              <div class="excel-option menu-option" id="ssExcelOption" data-type="excel-singleSS">⬇️ Employee Salary Slip Excel</div>
+              <div class="excel-option menu-option" data-type="excel-allSS">⬇️ All Employee Salary Slip Excel</div>
+            </div>
           </div>
         </div>
         <div class="SalarySlipTableWrapper" id="SalarySlipWrapper">
@@ -2243,7 +2345,7 @@
                       <tr>
                         <td colspan="7"
                           style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
-                          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============<h3>
+                          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============</h3>
                         </td>
                       </tr>
                     </tbody>
@@ -2285,7 +2387,7 @@
                       <tr>
                         <td colspan="7"
                           style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
-                          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============<h3>
+                          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============</h3>
                         </td>
                       </tr>
                     </tbody>
@@ -2310,6 +2412,65 @@
         <div class="header">
           <h2>Income Tax Calculation</h2>
         </div>
+        <div class="Selection-bar">
+          <table>
+            <colgroup>
+              <col style="width:80px">
+              <col style="width:170px">
+              <col style="width:100px">
+              <col style="width:300px">
+              <col style="width:40px">
+              <col style="width:90px">
+              <col style="width:60px">
+              <col style="width:100px">
+              <col style="width:50px">
+              <col style="width:40px">
+              <col style="width:90px">
+              <col style="width:80px">
+              <col style="width:90px">
+              <col style="width:30px">
+            </colgroup>
+            <tr>
+              <td><label for="ITPage_Station">Station :</label></td>
+              <td><select id="ITPage_Station"></select></td>
+              <td><label for="ITPage_Emp">Employee :</label></td>
+              <td><select id="ITPage_Emp"></select></td>
+              <td><label for="ITPage_FY">FY :</label></td>
+              <td><select id="ITPage_FY"></select></td>
+              <td colspan="2"><label for="ITCalcFor">IT Calulation For :</label></td>
+              <td colspan="4">
+                <div class="salary-toggle">
+
+                  <input type="radio" name="salaryMode" id="calcSalary" checked>
+                  <label for="calcSalary" class="btn red">Calculated Salary</label>
+
+                  <input type="radio" name="salaryMode" id="paidSalary">
+                  <label for="paidSalary" class="btn green">Paid Salary</label>
+
+                  <div class="slider"></div>
+
+                </div>
+              </td>
+              <td></td>
+            </tr>
+          </table>
+
+          <div class="ITaction-group">
+
+            <button id="ITprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
+            <button id="ITexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+
+            <div id="ITprintMenu">
+              <div class="print-option menu-option" id="itPrintOption" data-type="pdf-singleIT">🧾 Employee IT Calculation PDF </div>
+              <div class="print-option menu-option" data-type="pdf-allIT">🧾 All Employee IT Calculation PDF</div>
+
+              <!-- EXCEL OPTIONS -->
+              <div class="excel-option menu-option" id="itExcelOption" data-type="excel-singleIT">⬇️ Employee IT Calculation Excel</div>
+              <div class="excel-option menu-option" data-type="excel-allIT">⬇️ All Employee IT Calculation Excel</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div class="SectionPage" id="PensionPage" style="display:none">
@@ -2522,7 +2683,8 @@
         updateAndRenderDAA();
       });
       on("PayBillPage_Station", "change", setDAPercent);
-
+      document.querySelectorAll(".SSaction-group button").forEach(btn => {
+          btn.disabled = true;});
     });
 
 
@@ -3181,21 +3343,21 @@
       station: [
         "EmpPage_Station",
         "SalSlipPage_Station",
-        //"ITPage_Station",
+        "ITPage_Station",
         //"PensionPage_Station",
         "PayBillPage_Station",
         "BudgetPage_Station"
       ],
       employee: [
         "EmpPage_Emp",
-        //"ITPage_Emp",
+        "ITPage_Emp",
         //"PensionPage_Emp",
         "SalSlipPage_Emp",
         "PayBillPage_Emp"
       ],
       fy: [
         "PayBillPage_FY",
-        //"ITPage_FY",
+        "ITPage_FY",
         "SalSlipPage_FY",
         "BudgetPage_FY"
       ],
@@ -3558,6 +3720,9 @@
             if (type === "employee") {
               updateEmolumentTable();
               fillEmpDetails(filters.employee);
+              setTimeout(() => {
+                handleSalarySlipChange(); // ✅ now reads updated value
+              }, 0);
             }
           });
         });
@@ -6973,6 +7138,7 @@
       id("EmpPage_Station").value = station;
       id("BudgetPage_Station").value = station;
       id("SalSlipPage_Station").value = station;
+      id("ITPage_Station").value = station;
 
       // 🔄 Update filters
       filters.station = station;
@@ -7008,9 +7174,14 @@
       handleStationChange("SalSlipPage_Station");
     });
 
+    on("ITPage_Station", "change", () => {
+      handleStationChange("ITPage_Station");
+    });
+
     on("PayBillPage_FY", "change", refreshPBView);
     on("SalSlipPage_FY", "change", refreshPBView);
     on("BudgetPage_FY", "change", refreshPBView);
+    on("ITPage_FY", "change", refreshPBView);
     on("PayBillPage_SalMonth", "change", refreshPBView);
 
     function getNextMonthStr(current) {
@@ -8603,47 +8774,47 @@
       win.document.close();
     }
 
-    const menu = id("PBprintMenu");
-    const printBtn = id("PBprintBtn");
-    const excelBtn = id("PBexcelBtn");
+    const pbmenu = id("PBprintMenu");
+    const pbprintBtn = id("PBprintBtn");
+    const pbexcelBtn = id("PBexcelBtn");
 
 
     // 🔹 PRINT BUTTON
-    printBtn.addEventListener("click", (e) => {
+    pbprintBtn.addEventListener("click", (e) => {
       e.stopPropagation();
 
-      updatePrintMenuState();
+      updatePBPrintMenuState();
 
       document.querySelectorAll(".print-option").forEach(el => el.style.display = "block");
       document.querySelectorAll(".excel-option").forEach(el => el.style.display = "none");
 
-      menu.classList.add("show"); // ✅ ALWAYS OPEN
+      pbmenu.classList.add("show"); // ✅ ALWAYS OPEN
     });
 
 
     // 🔹 EXCEL BUTTON
-    excelBtn.addEventListener("click", (e) => {
+    pbexcelBtn.addEventListener("click", (e) => {
       e.stopPropagation();
 
-      updatePrintMenuState();
+      updatePBPrintMenuState();
 
       document.querySelectorAll(".print-option").forEach(el => el.style.display = "none");
       document.querySelectorAll(".excel-option").forEach(el => el.style.display = "block");
 
-      menu.classList.add("show"); // ✅ ALWAYS OPEN
+      pbmenu.classList.add("show"); // ✅ ALWAYS OPEN
     });
 
     // 🔹 CLOSE
     document.addEventListener("click", () => {
-      menu.classList.remove("show");
+      pbmenu.classList.remove("show");
     });
 
 
-    function updatePrintMenuState() {
+    function updatePBPrintMenuState() {
 
       const hasDAA = hasDAAData();
 
-      const printDAA = id("daaOption");
+      const printDAA = id("daaPrintOption");
       const excelDAA = id("daaExcelOption"); // ✅ FIXED ID
 
       [printDAA, excelDAA].forEach(opt => {
@@ -8664,7 +8835,7 @@
 
         const type = this.dataset.type;
 
-        menu.classList.remove("show");
+        pbmenu.classList.remove("show");
 
         // ===== PAY BILL PRINT =====
         if (type === "pdf-paybill") {
@@ -10826,7 +10997,9 @@
     }
 
 
-    //===================================SALARY SLIP SCRIPT ===================//
+    //================================================================================//
+    //                🔥🔥🔥🔥🔥SALARY SLIP SCRIPT🔥🔥🔥🔥🔥
+    //=============================================================================//
     const designationMap = {
       "TECH": "TECHNICIAN",
       "STECH": "SENIOR TECHNICIAN",
@@ -10923,6 +11096,51 @@
       id("SSaccount").textContent = maskValue(get("Account"));
     }
 
+    function resetSalarySlipFields() {
+
+      const fields = [
+        "SSname",
+        "SSdesignation",
+        "SShris",
+        "SSpaylevel",
+        "SSstation",
+        "SSsection",
+        "SSgpf",
+        "SSpran",
+        "SSpfms",
+        "SSemail",
+        "SSaadhaar",
+        "SSpan",
+        "SSmobile",
+        "SSaccount"
+      ];
+
+      fields.forEach(idName => {
+        const el = id(idName);
+        if (el) el.textContent = "";
+      });
+    }
+
+    function renderNoDataRow(tbody, colSpan = 7) {
+      if (!tbody) return;
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="${colSpan}" style="
+            text-align:center;
+            padding:15px;
+            color:red;
+            font-weight:bold;
+            font-size:13px;
+            background:#edebb7;
+          ">
+            <h3 style="margin:0; font-size:13px;">
+              ==============🚫 No Data 🚫==============
+            </h3>
+          </td>
+        </tr>
+      `;
+    }
 
     function getPBRow(empName) {
 
@@ -11136,7 +11354,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="7" style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
-              <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============<h3>
+              <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============</h3>
             </td>
           </tr>
         `;
@@ -11432,7 +11650,7 @@
         tbody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
-          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============<h3>
+          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============</h3>
         </td>
       </tr>
     `;
@@ -11468,12 +11686,12 @@
 
       totalRow.innerHTML = `
     <td>Total</td>
-    <td style="text-align:right"><b>${totalArrear}</b></td>
+    <td style="text-align:right">${totalArrear}</td>
     <td>Total</td>
-    <td style="text-align:right"><b>${totalRecovery}</b></td>
+    <td style="text-align:right">${totalRecovery}</td>
     <td>Total</td>
-    <td style="text-align:right"><b>${totalGross}</b></td>
-    <td style="text-align:right"><b>${totalTDS}</b></td>
+    <td style="text-align:right">${totalGross}</td>
+    <td style="text-align:right">${totalTDS}</td>
   `;
 
       tbody.appendChild(totalRow);
@@ -11481,6 +11699,11 @@
 
 
     function handleSalarySlipChange() {
+
+      document.querySelectorAll(".SSaction-group button").forEach(btn => {
+          btn.disabled = false;});
+
+          updateSSPrintMenuState();
 
       const empName = id("SalSlipPage_Emp")?.value;
       const month = id("SalSlipPage_SalMonth")?.value;
@@ -11497,211 +11720,252 @@
       buildSalarySlipFYBreakup(empName);
     }
 
-    ["SalSlipPage_Station", "SalSlipPage_Emp", "SalSlipPage_SalMonth", "SalSlipPage_FY"]
-      .forEach(idName => {
-
-        id(idName)?.addEventListener("change", () => {
-          setTimeout(() => {
-            handleSalarySlipChange(); // ✅ now reads updated value
-          }, 0);
-        });
-
-      });
-
-
+    
     // =========================
     // 🔥 BUILD EXCEL HTML (FINAL)
     // =========================
 
-    async function exportSalarySlipExcel() {
+    async function exportSalarySlipExcel(mode = "single") {
 
-      const wrapper = id("SalarySlipWrapper");
-      if (!wrapper) return;
+  const workbook = new ExcelJS.Workbook();
 
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet("Salary Slip");
+  const wrapper = id("SalarySlipWrapper");
+  const station = id("SalSlipPage_Station")?.value;
+  const selectedMonth = id("SalSlipPage_SalMonth")?.value;
+  const selectedEmp = id("SalSlipPage_Emp")?.value;
 
-      let currentRow = 1;
+  
 
-      function rgbToARGB(rgb) {
-        const m = rgb.match(/\d+/g);
-        if (!m) return null;
-        return "FF" + m.map(x => (+x).toString(16).padStart(2, "0")).join("");
-      }
+  if (!selectedMonth) return;
 
-      let setNextRowSmall = false;
+  const h = pbData.headers;
+  const nameIndex = h.indexOf("Employee Name");
+  const stationIndex = h.indexOf("Pay Drawn Station");
+  const monthIndex = h.indexOf("Salary Month");
 
-      function processTable(table, isNested = false) {
+  // =========================
+  // 🔥 COMMON HELPERS
+  // =========================
+  function rgbToARGB(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m) return null;
+    return "FF" + m.map(x => (+x).toString(16).padStart(2, "0")).join("");
+  }
 
-        const rows = table.querySelectorAll(":scope > thead > tr, :scope > tbody > tr, :scope > tr");
+  function isValidColor(cs) {
+    const bg = cs.backgroundColor;
+    if (!bg) return false;
+    if (bg === "transparent") return false;
+    if (bg.includes("rgba") && bg.endsWith(", 0)")) return false;
+    if (bg === "rgb(0, 0, 0)") return false;
+    return true;
+  }
 
-        rows.forEach(tr => {
+  function parseValue(text) {
+    if (!text) return " ";
+    const clean = text.replace(/[,₹\s]/g, "");
+    return (!isNaN(clean) && clean !== "") ? Number(clean) : text;
+  }
 
-          let colIndex = 1;
-          let hasData = false;
+  // =========================
+  // 🔥 TABLE PROCESSOR
+  // =========================
+  function processTable(sheet, table) {
 
-          const cells = tr.querySelectorAll(":scope > th, :scope > td");
+    let currentRow = 1;
+    let setNextRowSmall = false;
 
-          const excelRow = sheet.getRow(currentRow);
+    function walk(table, isNested = false) {
 
-          let rowHasNested = false; // 🔥 detect nested in THIS row
+      const rows = table.querySelectorAll(":scope > thead > tr, :scope > tbody > tr, :scope > tr");
 
-          cells.forEach(cell => {
+      rows.forEach(tr => {
 
-            const nested = cell.querySelector("table");
+        let colIndex = 1;
+        let hasData = false;
 
-            if (nested) {
-              rowHasNested = true;
+        const cells = tr.querySelectorAll(":scope > th, :scope > td");
+        const excelRow = sheet.getRow(currentRow);
 
-              // 🔥 process nested as nested (flag true)
-              processTable(nested, true);
-              return;
-            }
+        let rowHasNested = false;
 
-            hasData = true;
+        cells.forEach(cell => {
 
-            const text = cell.innerText.trim();
-            const cs = window.getComputedStyle(cell);
+          const nested = cell.querySelector("table");
 
-            const colSpan = cell.colSpan || 1;
-            const rowSpan = cell.rowSpan || 1;
+          if (nested) {
+            rowHasNested = true;
+            walk(nested, true);
+            return;
+          }
 
-            const excelCell = excelRow.getCell(colIndex);
+          hasData = true;
 
-            function parseValue(text) {
+          const text = cell.innerText.trim();
+          const cs = window.getComputedStyle(cell);
 
-              if (!text) return " ";
+          const colSpan = cell.colSpan || 1;
+          const rowSpan = cell.rowSpan || 1;
 
-              // remove commas, ₹, spaces
-              const clean = text.replace(/[,₹\s]/g, "");
+          const excelCell = excelRow.getCell(colIndex);
 
-              // check if numeric
-              if (!isNaN(clean) && clean !== "") {
-                return Number(clean);
-              }
+          const isSpecialField = text.length >= 10 && /^[0-9]+$/.test(text); // large numeric string
 
-              return text;
-            }
-
+          if (isSpecialField) {
+            excelCell.value = text; // keep as string
+            excelCell.numFmt = "@"; // 🔥 force TEXT format
+          } else {
             excelCell.value = parseValue(text);
-
-            // FONT
-            const isBold =
-              cs.fontWeight === "bold" ||
-              parseInt(cs.fontWeight) >= 600 ||
-              cell.querySelector("b, strong") !== null ||
-              cell.style.fontWeight === "bold";
-
-            excelCell.font = {
-              name: "Calibri",
-              size: 11,
-              bold: isBold,
-              italic: cs.fontStyle === "italic",
-              underline: cs.textDecoration.includes("underline"),
-              color: cs.color ? { argb: rgbToARGB(cs.color) } : undefined
-            };
-
-            // ALIGNMENT
-            excelCell.alignment = {
-              horizontal: cs.textAlign || "left",
-              vertical: "middle",
-              wrapText: true
-            };
-
-            // BACKGROUND
-            if (cs.backgroundColor && cs.backgroundColor !== "rgba(0, 0, 0, 0)") {
-              const argb = rgbToARGB(cs.backgroundColor);
-              if (argb) {
-                excelCell.fill = {
-                  type: "pattern",
-                  pattern: "solid",
-                  fgColor: { argb }
-                };
-              }
-            }
-
-            // BORDER
-            excelCell.border = {
-              top: { style: "thin" },
-              bottom: { style: "thin" },
-              left: { style: "thin" },
-              right: { style: "thin" }
-            };
-
-            // MERGE
-            if (rowSpan > 1 || colSpan > 1) {
-              sheet.mergeCells(
-                currentRow,
-                colIndex,
-                currentRow + rowSpan - 1,
-                colIndex + colSpan - 1
-              );
-            }
-
-            colIndex += colSpan;
-          });
-
-          // =========================
-          // 🔥 AFTER ROW FINISH
-          // =========================
-          if (hasData) {
-
-            // 🔥 APPLY HEIGHT ONLY FOR MAIN TABLE (NOT nested)
-            if (!isNested && setNextRowSmall) {
-              excelRow.height = 3;
-              setNextRowSmall = false;
-            }
-
-            excelRow.commit();
-            currentRow++;
           }
 
-          // 🔥 AFTER FULL ROW (important!)
-          if (rowHasNested && !isNested) {
-            setNextRowSmall = true;
+          const isBold =
+            cs.fontWeight === "bold" ||
+            parseInt(cs.fontWeight) >= 600 ||
+            cell.querySelector("b, strong");
+
+          excelCell.font = {
+            name: "Calibri",
+            size: 11,
+            bold: isBold
+          };
+
+          excelCell.alignment = {
+            horizontal: cs.textAlign || "left",
+            vertical: "middle",
+            wrapText: true
+          };
+
+          if (isValidColor(cs)) {
+            const argb = rgbToARGB(cs.backgroundColor);
+            if (argb && argb !== "FF000000") {
+              excelCell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb }
+              };
+            }
           }
 
-        });
-      }
+          excelCell.border = {
+            top: { style: "thin" },
+            bottom: { style: "thin" },
+            left: { style: "thin" },
+            right: { style: "thin" }
+          };
 
-      processTable(wrapper.querySelector("table"));
+          if (rowSpan > 1 || colSpan > 1) {
+            sheet.mergeCells(
+              currentRow,
+              colIndex,
+              currentRow + rowSpan - 1,
+              colIndex + colSpan - 1
+            );
+          }
 
-      sheet.getRow(1).height = 65; // 🔥 set height (adjust as needed)
-      sheet.views = [{ showGridLines: false }];
-      // =========================
-      // 🔥 COLUMN WIDTH AUTO
-      // =========================
-      sheet.columns = [
-        { width: 17 },
-        { width: 14 },
-        { width: 18 },
-        { width: 22 },
-        { width: 12 },
-        { width: 13 },
-        { width: 12 }
-      ];
-
-      // =========================
-      // 🔥 IMAGE
-      // =========================
-      const img = wrapper.querySelector("img");
-
-      if (img && img.src) {
-
-        const base64 = await getBase64Image(img.src);
-
-        const imageId = workbook.addImage({
-          base64,
-          extension: "png"
+          colIndex += colSpan;
         });
 
-        sheet.addImage(imageId, {
-          tl: { col: 0, row: 0 },
-          ext: { width: 80, height: 80 }
-        });
-      }
+        if (hasData) {
 
-      sheet.pageSetup = {
+          if (!isNested && setNextRowSmall) {
+            excelRow.height = 3;
+            setNextRowSmall = false;
+          }
+
+          excelRow.commit();
+          currentRow++;
+        }
+
+        if (rowHasNested && !isNested) {
+          setNextRowSmall = true;
+        }
+
+      });
+    }
+
+    walk(table);
+
+    return currentRow;
+  }
+
+  // =========================
+  // 🔥 EMPLOYEE LIST
+  // =========================
+  let employees = [];
+
+  if (mode === "single") {
+    if (!selectedEmp) return;
+    employees = [selectedEmp];
+  } else {
+
+    employees = [...new Set(
+      pbData.rows
+        .filter(r =>
+          String(r[stationIndex]).trim() === station &&
+          String(r[monthIndex]).trim() === selectedMonth
+        )
+        .map(r => r[nameIndex])
+    )];
+
+    if (!employees.length) {
+      alert("No employees found for selected month");
+      return;
+    }
+  }
+
+  // =========================
+  // 🔁 LOOP
+  // =========================
+  for (const empName of employees) {    
+
+    // 🔥 build UI
+    const month = id("SalSlipPage_SalMonth")?.value;
+    id("SalarySlipHeaderMonth").textContent = formatMonthYear(month);
+    fillSalarySlip(empName);
+    buildSalaryBreakup(empName);
+    buildSalarySlipFYBreakup(empName);
+
+    const wrapper = id("SalarySlipWrapper");
+    if (!wrapper) continue;
+
+    const sheet = workbook.addWorksheet(
+      mode === "single" ? "Salary Slip" : String(empName).substring(0, 25)
+    );
+
+    const lastRow = processTable(sheet, wrapper.querySelector("table"));
+
+    // =========================
+    // 🖼️ LOGO
+    // =========================
+    const img = wrapper.querySelector("img");
+
+    if (img && img.src) {
+
+      const base64 = await getBase64Image(img.src);
+
+      const imageId = workbook.addImage({
+        base64,
+        extension: "png"
+      });
+
+      sheet.addImage(imageId, {
+        tl: { col: 0, row: 0 },
+        ext: { width: 80, height: 80 }
+      });
+    }
+
+    // =========================
+    // 🔧 SETTINGS
+    // =========================
+    sheet.getRow(1).height = 65;
+    sheet.views = [{ showGridLines: false }];
+
+    sheet.columns = [
+      { width: 17 }, { width: 14 }, { width: 18 },
+      { width: 22 }, { width: 12 }, { width: 13 }, { width: 12 }
+    ];
+
+    sheet.pageSetup = {
         paperSize: 9,          // 🔥 A4
         orientation: 'portrait',
         fitToPage: true,
@@ -11717,81 +11981,113 @@
         }
       };
 
-      const lastRow = sheet.lastRow.number;
-      const lastCol = 7; // 🔥 your fixed 7 columns
+    sheet.pageSetup.printArea = `A1:G${lastRow}`;
+  }
 
-      sheet.pageSetup.printArea = `A1:G${lastRow}`;
-      // =========================
-      // 🔥 DOWNLOAD
-      // =========================
-      const buffer = await workbook.xlsx.writeBuffer();
+  // =========================
+  // 📥 DOWNLOAD
+  // =========================
+  const buffer = await workbook.xlsx.writeBuffer();
 
-      const empName = id("SalSlipPage_Emp")?.value || "SalarySlip";
-      const month = id("SalSlipPage_SalMonth")?.value || "";
+  const fileName =
+    mode === "single"
+      ? `${selectedEmp}_${selectedMonth}_SalarySlip.xlsx`
+      : `${station}_${selectedMonth}_SalarySlips.xlsx`;
 
-      saveAs(
-        new Blob([buffer]),
-        `${empName}_${month}_SalarySlip.xlsx`
-      );
+  saveAs(new Blob([buffer]), fileName);
+
+  // =========================
+  // 🔄 RESET UI AFTER EXPORT
+  // =========================
+  if (mode === "all") {
+    resetSalarySlipFields();
+    renderNoDataRow(id("SalarySlipBreakup")?.querySelector("tbody"),  7);
+    renderNoDataRow(id("SalarySlipFYDetails")?.querySelector("tbody"), 7);
+  }
+}
+
+
+    function buildSalarySlipHTML(mode = "single") {
+
+  const wrapper = id("SalarySlipWrapper");
+  const station = id("SalSlipPage_Station")?.value;
+  const selectedMonth = id("SalSlipPage_SalMonth")?.value;
+  const selectedEmp = id("SalSlipPage_Emp")?.value;
+
+  if (!wrapper || !selectedMonth) return "";
+
+  const h = pbData.headers;
+  const nameIndex = h.indexOf("Employee Name");
+  const stationIndex = h.indexOf("Pay Drawn Station");
+  const monthIndex = h.indexOf("Salary Month");
+
+  // =========================
+  // 🔥 EMPLOYEE LIST
+  // =========================
+  let employees = [];
+
+  if (mode === "single") {
+    if (!selectedEmp) return "";
+    employees = [selectedEmp];
+  } else {
+    employees = [...new Set(
+      pbData.rows
+        .filter(r =>
+          String(r[stationIndex]).trim() === station &&
+          String(r[monthIndex]).trim() === selectedMonth
+        )
+        .map(r => r[nameIndex])
+    )];
+
+    if (!employees.length) {
+      alert("No employees found");
+      return "";
     }
+  }
 
-    id("SSexcelBtn")?.addEventListener("click", exportSalarySlipExcel);
+  // =========================
+  // 🔥 CREATE DOCUMENT
+  // =========================
+  const doc = document.implementation.createHTMLDocument("Salary Slips");
 
+  // =========================
+  // 🔥 COPY STYLES
+  // =========================
+  document.querySelectorAll("style, link[rel='stylesheet']").forEach(el => {
+    try { doc.head.appendChild(el.cloneNode(true)); } catch (e) {}
+  });
 
+  // =========================
+  // 🔥 PRINT CSS
+  // =========================
+  const style = doc.createElement("style");
 
-
-    function buildSalarySlipHTML() {
-
-      const wrapper = id("SalarySlipWrapper"); // ✅ your existing wrapper
-      if (!wrapper) return "";
-
-      const clone = wrapper.cloneNode(true);
-
-      // =========================
-      // 🔥 CREATE DOCUMENT
-      // =========================
-      const doc = document.implementation.createHTMLDocument("Salary Slip");
-
-      // =========================
-      // 🔥 COPY STYLES SAFELY
-      // =========================
-      document.querySelectorAll("style, link[rel='stylesheet']").forEach(el => {
-        try {
-          doc.head.appendChild(el.cloneNode(true));
-        } catch (e) { }
-      });
-
-      // =========================
-      // 🔥 ADD PRINT FIXES ONLY
-      // =========================
-      const style = doc.createElement("style");
-
-      style.textContent = `
+  style.textContent = `
     @page {
       size: A4 portrait;
-      margin: 8mm;
+      margin: 5mm;
     }
 
     body {
       margin: 0;
-      background:white;
+      background: white;
     }
 
-    /* 🔥 FIX WIDTH (NO SHRINK) */
-    #SalarySlipWrapper{
-      width: 190mm !important;
+    .page {
       margin: 0 auto;
+      page-break-after: always;
     }
 
-  /* 🔥 CRITICAL FIX: REMOVE OVERFLOW */
-  #SalarySlipWrapper,
-  #SalarySlipWrapper * {
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto !important;
-    background:white;
-  }
+    .page:last-child {
+      page-break-after: auto;
+    }
 
+    .page * {
+      overflow: visible !important;
+      max-height: none !important;
+      height: auto !important;
+      background: white;
+    }
 
     img {
       max-width: 60px !important;
@@ -11803,25 +12099,206 @@
     }
   `;
 
-      doc.head.appendChild(style);
+  doc.head.appendChild(style);
 
-      // =========================
-      // 🔥 ADD CONTENT
-      // =========================
-      doc.body.appendChild(clone);
+  // =========================
+  // 🔁 LOOP EMPLOYEES
+  // =========================
+  employees.forEach(empName => {
 
-      // =========================
-      // 🔥 RETURN HTML
-      // =========================
-      return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+    // 🔥 build UI dynamically
+    const month = id("SalSlipPage_SalMonth")?.value;
+    id("SalarySlipHeaderMonth").textContent = formatMonthYear(month);
+
+    fillSalarySlip(empName);
+    buildSalaryBreakup(empName);
+    buildSalarySlipFYBreakup(empName);
+
+    const clone = wrapper.cloneNode(true);
+
+    const page = doc.createElement("div");
+    page.className = "page";
+    page.appendChild(clone);
+
+    doc.body.appendChild(page);
+  });
+
+  return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+}
+
+
+
+    const ssmenu = id("SSprintMenu");
+    const ssprintBtn = id("SSprintBtn");
+    const ssexcelBtn = id("SSexcelBtn");
+
+
+    // 🔹 PRINT BUTTON
+    ssprintBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      updateSSPrintMenuState();
+
+      document.querySelectorAll(".print-option").forEach(el => el.style.display = "block");
+      document.querySelectorAll(".excel-option").forEach(el => el.style.display = "none");
+
+      ssmenu.classList.add("show"); // ✅ ALWAYS OPEN
+    });
+
+
+    // 🔹 EXCEL BUTTON
+    ssexcelBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      updateSSPrintMenuState();
+
+      document.querySelectorAll(".print-option").forEach(el => el.style.display = "none");
+      document.querySelectorAll(".excel-option").forEach(el => el.style.display = "block");
+
+      ssmenu.classList.add("show"); // ✅ ALWAYS OPEN
+    });
+
+     document.addEventListener("click", () => {
+      ssmenu.classList.remove("show");
+    });
+
+
+    function updateSSPrintMenuState() {
+
+      const hasEmp = id("SalSlipPage_Emp")?.value;
+
+      const printSS = id("ssPrintOption");
+      const excelSS = id("ssExcelOption"); // ✅ FIXED ID
+
+      [printSS, excelSS].forEach(opt => {
+        if (!opt) return;
+
+        if (hasEmp) {
+          opt.classList.remove("disabled");
+        } else {
+          opt.classList.add("disabled");
+        }
+      });
     }
 
+    document.querySelectorAll(".menu-option").forEach(opt => {
 
-    function printSalarySlipPDF() {
-      openPrintWindow(buildSalarySlipHTML());
+      opt.addEventListener("click", function () {
+
+        const type = this.dataset.type;
+
+        ssmenu.classList.remove("show");
+
+        // =====SALARY SLIP PRINT =====
+        if (type === "pdf-singleSS") {         
+          openPrintWindow(buildSalarySlipHTML("single"));
+        }
+
+        // ===== ALL SALARY SLIP PRINT =====
+        if (type === "pdf-allSS") {
+          openPrintWindow(buildSalarySlipHTML("all"));
+          resetSalarySlipFields();
+          renderNoDataRow(id("SalarySlipBreakup")?.querySelector("tbody"),  7);
+          renderNoDataRow(id("SalarySlipFYDetails")?.querySelector("tbody"), 7);          
+        }
+
+        // ===== SALARY SLIP EXCEL ✅ FIXED =====
+        if (type === "excel-singleSS") {
+          exportSalarySlipExcel("single");
+        }
+
+        // ===== ALL SALARY SLIP EXCEL =====
+        if (type === "excel-allSS") {
+          exportSalarySlipExcel("all");
+        }
+
+      });
+
+    });
+
+
+    ["SalSlipPage_Station", "SalSlipPage_Emp", "SalSlipPage_SalMonth", "SalSlipPage_FY"]
+      .forEach(idName => {
+
+        id(idName)?.addEventListener("change", () => {         
+
+          setTimeout(() => {
+            handleSalarySlipChange(); // ✅ now reads updated value
+          }, 0);
+        });
+
+      });
+
+
+
+      //================================================================================//
+    //                🔥🔥🔥🔥🔥INCOME TAX SCRIPT🔥🔥🔥🔥🔥
+    //=============================================================================//
+
+    const itmenu = id("ITprintMenu");
+    const itprintBtn = id("ITprintBtn");
+    const itexcelBtn = id("ITexcelBtn");
+
+
+    // 🔹 PRINT BUTTON
+    itprintBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      updateITPrintMenuState();
+
+      document.querySelectorAll(".print-option").forEach(el => el.style.display = "block");
+      document.querySelectorAll(".excel-option").forEach(el => el.style.display = "none");
+
+      itmenu.classList.add("show"); // ✅ ALWAYS OPEN
+    });
+
+
+    // 🔹 EXCEL BUTTON
+    itexcelBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      updateITPrintMenuState();
+
+      document.querySelectorAll(".print-option").forEach(el => el.style.display = "none");
+      document.querySelectorAll(".excel-option").forEach(el => el.style.display = "block");
+
+      itmenu.classList.add("show"); // ✅ ALWAYS OPEN
+    });
+
+     document.addEventListener("click", () => {
+      itmenu.classList.remove("show");
+    });
+
+
+    function updateITPrintMenuState() {
+
+      const hasEmp = id("ITPage_Emp")?.value;
+
+      const printIT = id("itPrintOption");
+      const excelIT = id("itExcelOption"); // ✅ FIXED ID
+
+      [printIT, excelIT].forEach(opt => {
+        if (!opt) return;
+
+        if (hasEmp) {
+          opt.classList.remove("disabled");
+        } else {
+          opt.classList.add("disabled");
+        }
+      });
     }
 
-    id("SSprintBtn")?.addEventListener("click", printSalarySlipPDF);
+      document.querySelectorAll("input[name='salaryMode']").forEach(radio => {
+        radio.addEventListener("change", () => {
+
+          if (radio.id === "calcSalary") {
+            console.log("Calculated Salary Selected");
+          } else {
+            console.log("Paid Salary Selected");
+          }
+
+        });
+      });
 
   </script>
 
