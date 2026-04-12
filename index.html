@@ -1466,10 +1466,10 @@
 
     /*============================Salary Slip CSS =====================*/
     .SalarySlipTableWrapper {
-      width: 50%;
+      width: 60%;
       margin: auto;
       font-size: 10px;
-      background: white;
+      background-color: white;
       overflow: auto;
       height: 600px;
     }
@@ -1478,6 +1478,8 @@
       border: solid 1px black;
       width: 100%;
       border-collapse: collapse;
+      font-size: 12px !important;
+      background-color: white;
     }
 
     .SalarySlipTableWrapper td:first-child {
@@ -1528,6 +1530,13 @@
     /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
   =================================================== */
+    @media (max-width: 1200px) {
+      .SalarySlipTableWrapper {
+        width: 70%
+      }
+    }
+
+
     @media (max-width: 900px) {
 
       body::before {
@@ -1612,6 +1621,9 @@
         height: calc(100vh - 50%);
       }
 
+      .SalarySlipTableWrapper {
+        width: 95%;
+      }
     }
   </style>
 
@@ -2110,11 +2122,11 @@
             <button id="SSexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
           </div>
         </div>
-        <div class="SalarySlipTableWrapper">
+        <div class="SalarySlipTableWrapper" id="SalarySlipWrapper">
           <table id="SalarySlipTable">
             <thead>
               <tr>
-                <th style="padding:1px 3px;">
+                <th colspan="7" style="padding:1px 3px;">
                   <div style="border:solid 2px black;gap:4px;display: flex;flex-direction: row;padding: 8px 2px;">
                     <img id="SalarySlipLogo"
                       src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
@@ -2128,7 +2140,7 @@
                 </th>
               </tr>
               <tr>
-                <th style="padding:0px;border:solid 1px black;height:30px;">
+                <th colspan="7" style="padding:0px;border:solid 1px black;height:30px;">
                   SALARY SLIP FOR THE MONTH OF <span id="SalarySlipHeaderMonth"></span>
                 </th>
               </tr>
@@ -2227,12 +2239,19 @@
                         <td>RECOVERY </td>
                       </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody>
+                      <tr>
+                        <td colspan="7"
+                          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+                          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============<h3>
+                        </td>
+                      </tr>
+                    </tbody>
                   </table>
                 </td>
               </tr>
               <tr>
-                <td style="max-height:2px;height:2px;padding: 0;"></td>
+                <td colspan="7" style="max-height:2px;height:2px;padding: 0;"></td>
               </tr>
               <tr>
                 <td style="padding:0px;">
@@ -2262,12 +2281,23 @@
                         <td>TDS </td>
                       </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody>
+                      <tr>
+                        <td colspan="7"
+                          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+                          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============<h3>
+                        </td>
+                      </tr>
+                    </tbody>
                   </table>
                 </td>
               </tr>
               <tr>
-                <td style="text-align:center">This is the Computer generated payslip doesn't required any Signatures
+                <td colspan="7" style="height: 0;padding: 0;"></td>
+              </tr>
+              <tr>
+                <td colspan="7" style="text-align:center">This is the Computer generated payslip doesn't required any
+                  Signatures
                 </td>
               </tr>
             </tbody>
@@ -10797,7 +10827,6 @@
 
 
     //===================================SALARY SLIP SCRIPT ===================//
-
     const designationMap = {
       "TECH": "TECHNICIAN",
       "STECH": "SENIOR TECHNICIAN",
@@ -10999,12 +11028,30 @@
       return result.trim();
     }
 
-
+    //==============================================================================
+    //        CREATE SALARY SLIP SELECTED MONTH SALARY BREAKUP
+    //==============================================================================
     function buildSalaryBreakup(empName) {
 
-      const row = getPBRow(empName);
+      const selectedMonth = id("SalSlipPage_SalMonth")?.value;
+
+      const nameIndex = pbData.headers.indexOf("Employee Name");
+      const monthIndex = pbData.headers.indexOf("Salary Month");
+
+      const row = pbData.rows.find(r =>
+        String(r[nameIndex]).trim() === String(empName).trim() &&
+        String(r[monthIndex]).trim() === String(selectedMonth).trim()
+      );
+
       if (!row) {
-        console.warn("No data for:", empName, getSelectedMonth());
+        //console.warn("No data for:", empName, selectedMonth);
+
+        // 🔥 directly render No Data
+        renderSalaryBreakup(
+          [], [], [], 0, 0, 0,
+          true // 🔥 noData flag
+        );
+
         return;
       }
 
@@ -11067,24 +11114,34 @@
       }
 
       renderSalaryBreakup(
-        //earnings,
         zeroEarnings,
-        //deductions,
         zeroDeductions,
         loanData,
         grossAmount,
         totalDeduction,
-        netIncome
+        netIncome,
+        false
       );
     }
 
 
-    function renderSalaryBreakup(earnings, deductions, loanData, gross, totalDeduction, net) {
+    function renderSalaryBreakup(earnings, deductions, loanData, gross, totalDeduction, net, noData = false) {
 
       const tbody = id("SalarySlipBreakup")?.querySelector("tbody");
       if (!tbody) return;
 
       tbody.innerHTML = "";
+
+      if (noData) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+              <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============<h3>
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
       const maxRows = Math.max(earnings.length, deductions.length, loanData.length);
 
@@ -11254,10 +11311,10 @@
     }
 
 
-    // =========================
-    // 🔥 BUILD FY TABLE (FINAL)
-    // =========================
-    function buildFYBreakup(empName) {
+    // =========================================================================
+    // 🔥 BUILD SALARY SLIP FY-IT,ARREARS, GROSS & RECOVERIES TABLE (FINAL)
+    // ==========================================================================
+    function buildSalarySlipFYBreakup(empName) {
 
       if (!pbData || !pbData.headers || !pbData.rows) return;
 
@@ -11279,31 +11336,20 @@
 
       const sMonth = monthOrder[sm];
 
-      const tbody = id("SalarySlipFYDetails")?.querySelector("tbody");
-      if (!tbody) return;
-
-      tbody.innerHTML = "";
-
       const g = (row, col) => {
         const i = h.indexOf(col);
         return i !== -1 ? Number(row[i]) || 0 : 0;
       };
 
+      let rowsData = []; // 🔥 store rows
       let totalGross = 0;
       let totalTDS = 0;
       let totalArrear = 0;
       let totalRecovery = 0;
 
-      // 🔥 LOOP ALL DATA (NO FY FILTER)
       pbData.rows.forEach(row => {
 
         if (String(row[nameIndex]).trim() !== empName) return;
-
-        const arrearText = row[h.indexOf("Arrears Details")] || "";
-        const recoveryText = row[h.indexOf("Recovery Details")] || "";
-
-        const arrearType = formatTypeText(arrearText, "Arr.");
-        const recoveryType = formatTypeText(recoveryText, "Rec.");
 
         const month = row[monthIndex];
         if (!month) return;
@@ -11314,23 +11360,13 @@
 
         let show = false;
 
-        // =========================
-        // 🔥 MARCH SPECIAL (FULL FY)
-        // =========================
         if (sm === "Mar") {
-
           const prevYear = selectedYear - 1;
-
           if (rowYear === prevYear && rMonth >= 3) show = true;
           if (rowYear === selectedYear && rMonth <= 2) show = true;
-
-        }
-        else {
-
-          // 🔥 NORMAL (PAST MONTHS)
+        } else {
           if (rowYear < selectedYear) show = true;
           else if (rowYear === selectedYear && rMonth < sMonth) show = true;
-
         }
 
         if (!show) return;
@@ -11340,26 +11376,86 @@
         const gross = g(row, "Gross Income");
         const tds = g(row, "IT");
 
-        // 🔥 skip empty rows
         if (!arrear && !recovery && !gross && !tds) return;
+
+        const arrearType = formatTypeText(row[h.indexOf("Arrears Details")] || "", "Arr.");
+        const recoveryType = formatTypeText(row[h.indexOf("Recovery Details")] || "", "Rec.");
+
+        rowsData.push({
+          arrearType,
+          arrear,
+          recoveryType,
+          recovery,
+          month,
+          gross,
+          tds
+        });
 
         totalGross += gross;
         totalTDS += tds;
         totalArrear += arrear;
         totalRecovery += recovery;
+      });
+
+      // =========================
+      // 🔥 NO DATA CASE
+      // =========================
+      if (!rowsData.length) {
+        renderFYBreakup([], 0, 0, 0, 0, true);
+        return;
+      }
+
+      // =========================
+      // 🔥 NORMAL CASE
+      // =========================
+      renderFYBreakup(
+        rowsData,
+        totalArrear,
+        totalRecovery,
+        totalGross,
+        totalTDS,
+        false
+      );
+    }
+
+    function renderFYBreakup(rowsData, totalArrear, totalRecovery, totalGross, totalTDS, noData = false) {
+
+      const tbody = id("SalarySlipFYDetails")?.querySelector("tbody");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+
+      // =========================
+      // ❌ NO DATA
+      // =========================
+      if (noData) {
+        tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============<h3>
+        </td>
+      </tr>
+    `;
+        return;
+      }
+
+      // =========================
+      // 🔻 ROWS
+      // =========================
+      rowsData.forEach(r => {
 
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-      <td>${arrearType}</td>
-      <td style="text-align:right">${arrear ? (arrear) : ""}</td>
+      <td>${r.arrearType}</td>
+      <td style="text-align:right">${r.arrear || ""}</td>
 
-      <td>${recoveryType}</td>
-      <td style="text-align:right">${recovery ? (recovery) : ""}</td>
+      <td>${r.recoveryType}</td>
+      <td style="text-align:right">${r.recovery || ""}</td>
 
-      <td>${month}</td>
-      <td style="text-align:right">${(gross)}</td>
-      <td style="text-align:right">${(tds)}</td>
+      <td>${r.month}</td>
+      <td style="text-align:right">${r.gross}</td>
+      <td style="text-align:right">${r.tds}</td>
     `;
 
         tbody.appendChild(tr);
@@ -11371,18 +11467,17 @@
       const totalRow = document.createElement("tr");
 
       totalRow.innerHTML = `
-    <td><b>Total</b></td>
-    <td style="text-align:right"><b>${(totalArrear)}</b></td>
-    <td><b>Total</b></td>
-    <td style="text-align:right"><b>${(totalRecovery)}</b></td>
-    <td><b>Total</b></td>
-    <td style="text-align:right"><b>${(totalGross)}</b></td>
-    <td style="text-align:right"><b>${(totalTDS)}</b></td>
+    <td>Total</td>
+    <td style="text-align:right"><b>${totalArrear}</b></td>
+    <td>Total</td>
+    <td style="text-align:right"><b>${totalRecovery}</b></td>
+    <td>Total</td>
+    <td style="text-align:right"><b>${totalGross}</b></td>
+    <td style="text-align:right"><b>${totalTDS}</b></td>
   `;
 
       tbody.appendChild(totalRow);
     }
-
 
 
     function handleSalarySlipChange() {
@@ -11399,7 +11494,7 @@
       // 🔥 Fill data
       fillSalarySlip(empName);
       buildSalaryBreakup(empName);
-      buildFYBreakup(empName);
+      buildSalarySlipFYBreakup(empName);
     }
 
     ["SalSlipPage_Station", "SalSlipPage_Emp", "SalSlipPage_SalMonth", "SalSlipPage_FY"]
@@ -11417,52 +11512,258 @@
     // =========================
     // 🔥 BUILD EXCEL HTML (FINAL)
     // =========================
-    function buildExcelSalarySlipHTML() {
 
-      const original = id("SalarySlipTable");
-      if (!original) return "";
+    async function exportSalarySlipExcel() {
 
-      // 🔥 CLONE NODE
-      const clone = original.cloneNode(true);
+      const wrapper = id("SalarySlipWrapper");
+      if (!wrapper) return;
 
-      // =========================
-      // 🔥 COPY COMPUTED STYLES
-      // =========================
-      function copyStyles(src, dest) {
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet("Salary Slip");
 
-        const computed = window.getComputedStyle(src);
+      let currentRow = 1;
 
-        let styleStr = "";
-
-        for (let i = 0; i < computed.length; i++) {
-          const prop = computed[i];
-          styleStr += `${prop}:${computed.getPropertyValue(prop)};`;
-        }
-
-        dest.style.cssText = styleStr;
-
-        // recurse
-        for (let i = 0; i < src.children.length; i++) {
-          copyStyles(src.children[i], dest.children[i]);
-        }
+      function rgbToARGB(rgb) {
+        const m = rgb.match(/\d+/g);
+        if (!m) return null;
+        return "FF" + m.map(x => (+x).toString(16).padStart(2, "0")).join("");
       }
 
-      copyStyles(original, clone);
+      let setNextRowSmall = false;
+
+      function processTable(table, isNested = false) {
+
+        const rows = table.querySelectorAll(":scope > thead > tr, :scope > tbody > tr, :scope > tr");
+
+        rows.forEach(tr => {
+
+          let colIndex = 1;
+          let hasData = false;
+
+          const cells = tr.querySelectorAll(":scope > th, :scope > td");
+
+          const excelRow = sheet.getRow(currentRow);
+
+          let rowHasNested = false; // 🔥 detect nested in THIS row
+
+          cells.forEach(cell => {
+
+            const nested = cell.querySelector("table");
+
+            if (nested) {
+              rowHasNested = true;
+
+              // 🔥 process nested as nested (flag true)
+              processTable(nested, true);
+              return;
+            }
+
+            hasData = true;
+
+            const text = cell.innerText.trim();
+            const cs = window.getComputedStyle(cell);
+
+            const colSpan = cell.colSpan || 1;
+            const rowSpan = cell.rowSpan || 1;
+
+            const excelCell = excelRow.getCell(colIndex);
+
+            function parseValue(text) {
+
+              if (!text) return " ";
+
+              // remove commas, ₹, spaces
+              const clean = text.replace(/[,₹\s]/g, "");
+
+              // check if numeric
+              if (!isNaN(clean) && clean !== "") {
+                return Number(clean);
+              }
+
+              return text;
+            }
+
+            excelCell.value = parseValue(text);
+
+            // FONT
+            const isBold =
+              cs.fontWeight === "bold" ||
+              parseInt(cs.fontWeight) >= 600 ||
+              cell.querySelector("b, strong") !== null ||
+              cell.style.fontWeight === "bold";
+
+            excelCell.font = {
+              name: "Calibri",
+              size: 11,
+              bold: isBold,
+              italic: cs.fontStyle === "italic",
+              underline: cs.textDecoration.includes("underline"),
+              color: cs.color ? { argb: rgbToARGB(cs.color) } : undefined
+            };
+
+            // ALIGNMENT
+            excelCell.alignment = {
+              horizontal: cs.textAlign || "left",
+              vertical: "middle",
+              wrapText: true
+            };
+
+            // BACKGROUND
+            if (cs.backgroundColor && cs.backgroundColor !== "rgba(0, 0, 0, 0)") {
+              const argb = rgbToARGB(cs.backgroundColor);
+              if (argb) {
+                excelCell.fill = {
+                  type: "pattern",
+                  pattern: "solid",
+                  fgColor: { argb }
+                };
+              }
+            }
+
+            // BORDER
+            excelCell.border = {
+              top: { style: "thin" },
+              bottom: { style: "thin" },
+              left: { style: "thin" },
+              right: { style: "thin" }
+            };
+
+            // MERGE
+            if (rowSpan > 1 || colSpan > 1) {
+              sheet.mergeCells(
+                currentRow,
+                colIndex,
+                currentRow + rowSpan - 1,
+                colIndex + colSpan - 1
+              );
+            }
+
+            colIndex += colSpan;
+          });
+
+          // =========================
+          // 🔥 AFTER ROW FINISH
+          // =========================
+          if (hasData) {
+
+            // 🔥 APPLY HEIGHT ONLY FOR MAIN TABLE (NOT nested)
+            if (!isNested && setNextRowSmall) {
+              excelRow.height = 3;
+              setNextRowSmall = false;
+            }
+
+            excelRow.commit();
+            currentRow++;
+          }
+
+          // 🔥 AFTER FULL ROW (important!)
+          if (rowHasNested && !isNested) {
+            setNextRowSmall = true;
+          }
+
+        });
+      }
+
+      processTable(wrapper.querySelector("table"));
+
+      sheet.getRow(1).height = 65; // 🔥 set height (adjust as needed)
+      sheet.views = [{ showGridLines: false }];
+      // =========================
+      // 🔥 COLUMN WIDTH AUTO
+      // =========================
+      sheet.columns = [
+        { width: 17 },
+        { width: 14 },
+        { width: 18 },
+        { width: 22 },
+        { width: 12 },
+        { width: 13 },
+        { width: 12 }
+      ];
 
       // =========================
-      // 🔥 FIX IMAGE SIZE
+      // 🔥 IMAGE
       // =========================
-      clone.querySelectorAll("img").forEach(img => {
-        img.style.width = "60px";
-        img.style.height = "60px";
-        img.style.objectFit = "contain";
-      });
+      const img = wrapper.querySelector("img");
+
+      if (img && img.src) {
+
+        const base64 = await getBase64Image(img.src);
+
+        const imageId = workbook.addImage({
+          base64,
+          extension: "png"
+        });
+
+        sheet.addImage(imageId, {
+          tl: { col: 0, row: 0 },
+          ext: { width: 80, height: 80 }
+        });
+      }
+
+      sheet.pageSetup = {
+        paperSize: 9,          // 🔥 A4
+        orientation: 'portrait',
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: false,
+        margins: {
+          left: 0.3,
+          right: 0.3,
+          top: 0.5,
+          bottom: 0.5,
+          header: 0.3,
+          footer: 0.3
+        }
+      };
+
+      const lastRow = sheet.lastRow.number;
+      const lastCol = 7; // 🔥 your fixed 7 columns
+
+      sheet.pageSetup.printArea = `A1:G${lastRow}`;
+      // =========================
+      // 🔥 DOWNLOAD
+      // =========================
+      const buffer = await workbook.xlsx.writeBuffer();
+
+      const empName = id("SalSlipPage_Emp")?.value || "SalarySlip";
+      const month = id("SalSlipPage_SalMonth")?.value || "";
+
+      saveAs(
+        new Blob([buffer]),
+        `${empName}_${month}_SalarySlip.xlsx`
+      );
+    }
+
+    id("SSexcelBtn")?.addEventListener("click", exportSalarySlipExcel);
+
+
+
+
+    function buildSalarySlipHTML() {
+
+      const wrapper = id("SalarySlipWrapper"); // ✅ your existing wrapper
+      if (!wrapper) return "";
+
+      const clone = wrapper.cloneNode(true);
 
       // =========================
       // 🔥 CREATE DOCUMENT
       // =========================
       const doc = document.implementation.createHTMLDocument("Salary Slip");
 
+      // =========================
+      // 🔥 COPY STYLES SAFELY
+      // =========================
+      document.querySelectorAll("style, link[rel='stylesheet']").forEach(el => {
+        try {
+          doc.head.appendChild(el.cloneNode(true));
+        } catch (e) { }
+      });
+
+      // =========================
+      // 🔥 ADD PRINT FIXES ONLY
+      // =========================
       const style = doc.createElement("style");
 
       style.textContent = `
@@ -11470,18 +11771,31 @@
       size: A4 portrait;
       margin: 8mm;
     }
-      *{
-      font-size:11px;
-      }
-    
+
     body {
       margin: 0;
+      background:white;
     }
 
-    table {
-      table-layout: fixed;
-      width: 950px;
-      border-collapse: collapse;
+    /* 🔥 FIX WIDTH (NO SHRINK) */
+    #SalarySlipWrapper{
+      width: 190mm !important;
+      margin: 0 auto;
+    }
+
+  /* 🔥 CRITICAL FIX: REMOVE OVERFLOW */
+  #SalarySlipWrapper,
+  #SalarySlipWrapper * {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    background:white;
+  }
+
+
+    img {
+      max-width: 60px !important;
+      max-height: 60px !important;
     }
 
     tr {
@@ -11491,45 +11805,20 @@
 
       doc.head.appendChild(style);
 
-      const div = doc.createElement("div");
-      div.appendChild(clone);
+      // =========================
+      // 🔥 ADD CONTENT
+      // =========================
+      doc.body.appendChild(clone);
 
-      doc.body.appendChild(div);
-
-      return "<!DOCTYPE html>\n<html>\n" + doc.documentElement.innerHTML + "\n</html>";
+      // =========================
+      // 🔥 RETURN HTML
+      // =========================
+      return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
     }
-
-
-    function exportSalarySlipExcel() {
-
-      const html = buildExcelSalarySlipHTML();
-
-      const blob = new Blob([html], {
-        type: "application/vnd.ms-excel"
-      });
-
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-
-      const empName = id("SalSlipPage_Emp")?.value || "SalarySlip";
-      const month = id("SalSlipPage_SalMonth")?.value || "";
-
-      a.href = url;
-      a.download = `${empName}_${month}.xls`;
-
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      URL.revokeObjectURL(url);
-    }
-
-    id("SSexcelBtn")?.addEventListener("click", exportSalarySlipExcel);
 
 
     function printSalarySlipPDF() {
-      openPrintWindow(buildExcelSalarySlipHTML());
+      openPrintWindow(buildSalarySlipHTML());
     }
 
     id("SSprintBtn")?.addEventListener("click", printSalarySlipPDF);
