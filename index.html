@@ -1236,7 +1236,8 @@
     }
 
     /* Container */
-    .action-group,.SBGaction-group {
+    .action-group,
+    .SBGaction-group {
       display: flex;
       gap: 10px;
       padding: 1px 1px;
@@ -1250,7 +1251,8 @@
     }
 
     /* Base button */
-    .action-group button,.SBGaction-group button {
+    .action-group button,
+    .SBGaction-group button {
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -1258,22 +1260,26 @@
       font-weight: 500;
       border-radius: 6px;
       border: 1px solid transparent;
-      background: #ffffff;
+      background: #d7faff;
       color: #334155;
       cursor: pointer;
       transition: all 0.25s ease;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.36);
+      /*box-shadow: 0 1px 2px rgba(0, 115, 255, 0.593);*/
+      box-shadow: 0 0 2px 1px rgba(0, 149, 149, 0.511);
     }
 
     /*================ Disabled=================== */
-    .action-group button:disabled, .SBGaction-group  button:disabled{
-      opacity: 0.5;
+    .action-group button:disabled,
+    .SBGaction-group button:disabled {
+      opacity: 0.3;
+      background: #ffffff;
       cursor: not-allowed;
       box-shadow: none;
     }
 
     /*================ Hover ONLY when NOT disabled================ */
-    .action-group button:not(:disabled):hover,  .SBGaction-group button:not(:disabled):hover{
+    .action-group button:not(:disabled):hover,
+    .SBGaction-group button:not(:disabled):hover {
       padding: 4px 8px;
       background: #ffffff;
       border-color: #cbd5e1;
@@ -1281,7 +1287,8 @@
     }
 
     /*================ Show text only when enabled================ */
-    .action-group button:not(:disabled):hover span,.SBGaction-group button:not(:disabled):hover span  {
+    .action-group button:not(:disabled):hover span,
+    .SBGaction-group button:not(:disabled):hover span {
       max-width: 120px;
       opacity: 1;
       transition: max-width 2s ease;
@@ -1289,20 +1296,23 @@
     }
 
     /* Icon resize only when enabled */
-    .action-group button:not(:disabled):hover svg,.SBGaction-group button:not(:disabled):hover svg {
+    .action-group button:not(:disabled):hover svg,
+    .SBGaction-group button:not(:disabled):hover svg {
       width: 16px;
       height: 16px;
     }
 
     /* Icon */
-    .action-group button svg,.SBGaction-group button svg {
+    .action-group button svg,
+    .SBGaction-group button svg {
       width: 18px;
       height: 18px;
       flex-shrink: 0;
     }
 
     /*========= Hide text ================*/
-    .action-group button span,.SBGaction-group button span {
+    .action-group button span,
+    .SBGaction-group button span {
       max-width: 0;
       overflow: hidden;
       white-space: nowrap;
@@ -1311,56 +1321,58 @@
     }
 
     /*=========== Active ===============*/
-    .action-group button:active,.SBGaction-group button:active {
+    .action-group button:active,
+    .SBGaction-group button:active {
       transform: scale(0.96);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     /*========== Edit (Professional Blue - soft)=============== */
-    .action-group button:nth-child(1),.SBGaction-group button:nth-child(1) {
+    .action-group button:nth-child(1),
+    .SBGaction-group button:nth-child(1) {
       color: #1d4ed8;
-      border-color: #dbeafe;
-      background: #f8fbff;
     }
 
-    .action-group button:nth-child(1):hover,.SBGaction-group button:nth-child(1):hover {
+    .action-group button:nth-child(1):hover,
+    .SBGaction-group button:nth-child(1):hover {
       background: #eef5ff;
     }
 
     /* ==============Add (Professional Green - soft) =================*/
-    .action-group button:nth-child(2),.SBGaction-group button:nth-child(2)  {
-      color: #15803d;
-      border-color: #dcfce7;
-      background: #f7fef9;
+    .action-group button:nth-child(2),
+    .SBGaction-group button:nth-child(2) {
+      color: #805e15;
     }
 
-    .action-group button:nth-child(2):hover,.SBGaction-group button:nth-child(2):hover  {
+    .action-group button:nth-child(2):hover,
+    .SBGaction-group button:nth-child(2):hover {
       background: #ecfdf5;
     }
 
     /*=============== Print (Neutral Professional Gray)============== */
-    .action-group button:nth-child(3),.SBGaction-group button:nth-child(3) {
+    .action-group button:nth-child(3),
+    .SBGaction-group button:nth-child(3) {
       color: #334155;
-      border-color: #e2e8f0;
-      background: #f8fafc;
     }
 
-    .action-group button:nth-child(3):hover,.SBGaction-group button:nth-child(3):hover {
+    .action-group button:nth-child(3):hover,
+    .SBGaction-group button:nth-child(3):hover {
       background: #f1f5f9;
     }
 
-    .action-group button:nth-child(4),.SBGaction-group button:nth-child(4) {
+    .action-group button:nth-child(4),
+    .SBGaction-group button:nth-child(4) {
       color: #217346;
-      border-color: #e2e8f0;
-      background: white;
     }
 
-    .action-group button:nth-child(4):hover,.SBGaction-group button:nth-child(4):hover {
+    .action-group button:nth-child(4):hover,
+    .SBGaction-group button:nth-child(4):hover {
       background: #f1f5f9;
     }
 
     /* Upload mode */
-    .action-group button.upload-mode,.SBGaction-group button.upload-mode {
+    .action-group button.upload-mode,
+    .SBGaction-group button.upload-mode {
       background: #16a34a !important;
       color: #ffffff !important;
       box-shadow:
@@ -1368,7 +1380,8 @@
         0 0 12px rgba(34, 197, 94, 0.3);
     }
 
-    .action-group button.upload-mode:hover,.SBGaction-group button.upload-mode:hover {
+    .action-group button.upload-mode:hover,
+    .SBGaction-group button.upload-mode:hover {
       background: #15803d !important;
     }
 
@@ -1425,7 +1438,8 @@
       width: 100% !important;
       min-width: 150px !important;
       height: 100%;
-      resize: none;   /* allow height resize only */
+      resize: none;
+      /* allow height resize only */
       background-color: #d3fc58;
       border: 1px solid #94a3b8;
     }
@@ -1469,7 +1483,8 @@
         flex-direction: column;
       }
 
-      .action-group,.SBGaction-group {
+      .action-group,
+      .SBGaction-group {
         width: 100%;
       }
 
@@ -2021,7 +2036,7 @@
             </tr>
           </table>
 
-          <div class="SBGaction-group" >
+          <div class="SBGaction-group">
             <button id="SBGeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
             <button id="SBGaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
 
@@ -2154,14 +2169,6 @@
         className: "upload-mode"
       });
 
-      //setupSBGToggleButton("SBGaddBtn", {
-      //  defaultText: "Add",
-      //  activeText: "Save",
-      //  defaultIcon: "plus",
-      //  activeIcon: "upload",
-      //  className: "upload-mode"
-      //});
-
       setupSBGToggleButton("SBGaddBtn", {
         defaultText: "Add",
         activeText: "Save",
@@ -2178,7 +2185,7 @@
         className: "upload-mode"
       }, "edit");
 
-       //setupSBGEditButton("SBGeditBtn");
+      //setupSBGEditButton("SBGeditBtn");
 
       bindPayBillView(
         "PayBillPage_Station",
@@ -2305,7 +2312,6 @@
       // 🔥 THEN SYNC
       await syncPBtoSBG();
       renderFilterMainBudgetExpTable();
-      //toggleButton();
     }
 
     /* =========================
@@ -4101,7 +4107,7 @@
     function disableAllButtons() {
       document.querySelectorAll(".action-group button").forEach(btn => {
         btn.disabled = true;
-      });      
+      });
     }
 
     // 🔥============== DROPDOWN OPTIONS OF PAYBILL EDIT TABLE COLUMNS===========================
@@ -9588,94 +9594,151 @@
 
     function filterSBGData() {
 
-  if (!sbgExpData || !sbgExpData.rows) return [];
+      if (!sbgExpData || !sbgExpData.rows) return [];
 
-  const station = id("BudgetPage_Station")?.value || "";
-  const budget = id("BudgetUnderSelect")?.value || "";
-  const fy = id("BudgetPage_FY")?.value || "";
+      const station = id("BudgetPage_Station")?.value || "";
+      const budget = id("BudgetUnderSelect")?.value || "";
+      const fy = id("BudgetPage_FY")?.value || "";
 
-  if (!station || !budget || !fy ||
-    station === "Select" || budget === "Select Budget" || fy === "Select") {
+      if (!station || !budget || !fy ||
+        station === "Select" || budget === "Select Budget" || fy === "Select") {
 
-    console.warn("⚠ Select all filters (Station, Budget, FY)");
-    return [];
-  }
+        console.warn("⚠ Select all filters (Station, Budget, FY)");
+        return [];
+      }
 
-  // 🔥 KEEP ORIGINAL INDEX
-  return sbgExpData.rows
-    .map((row, i) => ({
-      rowIndex: i + 2,   // 🔥 ACTUAL SHEET ROW
-      values: row
-    }))
-    .filter(obj => {
+      // 🔥 KEEP ORIGINAL INDEX
+      return sbgExpData.rows
+        .map((row, i) => ({
+          rowIndex: i + 2,   // 🔥 ACTUAL SHEET ROW
+          values: row
+        }))
+        .filter(obj => {
 
-      const row = obj.values;
+          const row = obj.values;
 
-      const rowDate = String(row[0] || "").trim();
-      const rowStation = String(row[1] || "").trim();
-      //const rowBudget = String(row[3] || "").trim();
-      const rowBudget = String(row[3] || "");
+          const rowDate = String(row[0] || "").trim();
+          const rowStation = String(row[1] || "").trim();
+          //const rowBudget = String(row[3] || "").trim();
+          const rowBudget = String(row[3] || "");
 
-      const rowFY = getFYFromDateStr(rowDate);
+          const rowFY = getFYFromDateStr(rowDate);
 
-      return (
-        rowStation === station &&
-        rowBudget === budget &&
-        rowFY === fy
-      );
-    });
-}  
+          return (
+            rowStation === station &&
+            rowBudget === budget &&
+            rowFY === fy
+          );
+        });
+    }
 
-function renderFilterMainBudgetExpTable() {
 
-  const sbgedit = id("SBGeditBtn");
-  const sbgadd = id("SBGaddBtn");
-  const sbgprint = id("SBGprintBtn");
-  const sbgXL = id("SBGexcelBtn");
+    // 🔥 BUTTON CONTROL
+      function toggleSBGButtons(mode = "default") {
 
-  const container = id("BudgetTableWrapper");
-  if (!container) return;
+        const budget = id("BudgetUnderSelect");
+        const sbgindex = budget?.selectedIndex ?? -1;
 
-  container.innerHTML = "";
+        const sbgedit = id("SBGeditBtn");
+        const sbgadd = id("SBGaddBtn");
+        const sbgprint = id("SBGprintBtn");
+        const sbgXL = id("SBGexcelBtn");
 
-  const station = id("BudgetPage_Station")?.value || "";
-  const budget = id("BudgetUnderSelect")?.value || "";
-  const fy = id("BudgetPage_FY")?.value || "";
+        // 🔄 RESET ALL FIRST
+        if (sbgedit) sbgedit.disabled = false;
+        if (sbgadd) sbgadd.disabled = false;
+        if (sbgprint) sbgprint.disabled = false;
+        if (sbgXL) sbgXL.disabled = false;
 
-  // 🔥 BUTTON CONTROL
-  function toggleSBGButtons(disabled = true) {
-    if (sbgedit) sbgedit.disabled = disabled;
-    if (sbgadd) sbgadd.disabled = disabled;
-    if (sbgprint) sbgprint.disabled = disabled;
-    if (sbgXL) sbgXL.disabled = disabled;
-  }
+        // =========================
+        // 🔴 MODE: ALL DISABLED
+        // =========================
+        if (mode === "allDisabled") {
+          if (sbgedit) sbgedit.disabled = true;
+          if (sbgadd) sbgadd.disabled = true;
+          if (sbgprint) sbgprint.disabled = true;
+          if (sbgXL) sbgXL.disabled = true;
+          return;
+        }
 
-  // =========================
-  // ❌ INVALID FILTER
-  // =========================
-  if (!station || !budget || !fy ||
-      station === "Select" || budget === "Select Budget" || fy === "Select") {
+        // =========================
+        // 🟡 MODE: NO DATA (only ADD enabled)
+        // =========================
+        if (mode === "noData") {
+          if (sbgindex >= 0 && sbgindex <= 8){
+            if (sbgedit) sbgedit.disabled = true;
+            if (sbgadd) sbgadd.disabled = true;
+            if (sbgprint) sbgprint.disabled = true;
+            if (sbgXL) sbgXL.disabled = true;
+          }else{
+            if (sbgedit) sbgedit.disabled = true;
+            if (sbgadd) sbgadd.disabled = false; // ✅ only this enabled
+            if (sbgprint) sbgprint.disabled = true;
+            if (sbgXL) sbgXL.disabled = true;
+          }          
+          return;
+        }
 
-    toggleSBGButtons(true);
+        // =========================
+        // 🟢 MODE: DATA EXISTS → INDEX RULE
+        // =========================
+        if (mode === "pbData"){
+          if (sbgindex >= 0 && sbgindex <= 8) {
+            // ❌ disable all
+            if (sbgedit) sbgedit.disabled = true;
+            if (sbgadd) sbgadd.disabled = true;
+            if (sbgprint) sbgprint.disabled = false;
+            if (sbgXL) sbgXL.disabled = false;
+          }else{
+            if (sbgedit) sbgedit.disabled = false;
+            if (sbgadd) sbgadd.disabled = false;
+            if (sbgprint) sbgprint.disabled = false;
+            if (sbgXL) sbgXL.disabled = false;
+          }
+        }      
 
-    container.innerHTML = `
+      }
+      
+
+
+    function renderFilterMainBudgetExpTable() {      
+
+      const container = id("BudgetTableWrapper");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      const station = id("BudgetPage_Station")?.value || "";
+      const budget = id("BudgetUnderSelect");
+      const fy = id("BudgetPage_FY")?.value || "";
+      
+
+      // =========================
+      // ❌ INVALID FILTER
+      // =========================
+      if (!station || !budget || !fy ||
+        station === "Select" || budget === "Select Budget" || fy === "Select") {
+
+        toggleSBGButtons("allDisabled");
+
+        container.innerHTML = `
       <p style="text-align:center; color:#888;">
         Please select Station, Budget & Financial Year
       </p>
     `;
-    return;
-  }
+        return;
+      }
 
-  // 🔥 FETCH DATA
-  const data = filterSBGData();
+      // 🔥 FETCH DATA
+      const data = filterSBGData();
 
-  // =========================
-  // 🔥 CREATE TABLE ONCE
-  // =========================
-  const table = document.createElement("table");
-  table.className = "budget-table";
+      // =========================
+      // 🔥 CREATE TABLE ONCE
+      // =========================
+      const table = document.createElement("table");
+      table.className = "budget-table";
 
-  table.innerHTML = `
+      table.innerHTML = `
     <colgroup>
       <col style="width: 5%;">
       <col style="width: 10%;">
@@ -9698,389 +9761,220 @@ function renderFilterMainBudgetExpTable() {
     </thead>
   `;
 
-  const tbody = document.createElement("tbody");
-  tbody.id = "budgetPBBody";
+      const tbody = document.createElement("tbody");
+      tbody.id = "budgetPBBody";
 
-  // =========================
-  // ❌ NO DATA
-  // =========================
-  if (!data.length) {
+      // =========================
+      // ❌ NO DATA
+      // =========================
+      if (!data.length) {
 
-    toggleSBGButtons(true); // 🔥 DISABLE ALL
-    sbgadd.disabled = false;
+        toggleSBGButtons("noData");
 
-    const tr = document.createElement("tr");
-
-    const td = document.createElement("td");
-    td.colSpan = 7;
-    td.style.textAlign = "center";
-    td.style.color = "#888";
-    td.style.padding = "20px";
-    td.textContent = "No data found";
-
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-
-  } else {
-
-    // =========================
-    // ✅ DATA EXISTS
-    // =========================
-    toggleSBGButtons(false);
-
-    data.forEach((obj) => {
-
-      const tr = document.createElement("tr");
-      tr.dataset.rowIndex = obj.rowIndex;
-
-      const row = obj.values;
-
-      row.forEach((cell, i) => {
+        const tr = document.createElement("tr");
 
         const td = document.createElement("td");
-
-        if (i === 5 || i === 6) {
-          const num = Number(cell);
-          td.textContent = isNaN(num) ? "" : formatCurrency(num * 1000);
-          td.style.textAlign = "right";
-
-          if (i === 6) {
-            td.classList.add("cum");
-            td.dataset.value = num * 1000;
-          }
-
-        } else {
-          td.textContent = cell;
-        }
+        td.colSpan = 7;
+        td.style.textAlign = "center";
+        td.style.color = "#888";
+        td.style.padding = "20px";
+        td.textContent = "No data found";
 
         tr.appendChild(td);
-      });
+        tbody.appendChild(tr);
 
-      tbody.appendChild(tr);
-    });
-  }
+      } else {
 
-  table.appendChild(tbody);
-  container.appendChild(table);
-}
+        // =========================
+        // ✅ DATA EXISTS
+        // =========================
+        toggleSBGButtons("pbData");
 
-function renderFilterMainBudgetExpTable2() {
 
-  const sbgedit = id("SBGeditBtn");
-  const sbgadd = id("SBGaddBtn");
-  const sbgprint = id("SBGprintBtn");
-  const sbgXL = id("SBGexcelBtn");
+        data.forEach((obj) => {
 
-  const container = id("BudgetTableWrapper");
-  if (!container) return;
+          const tr = document.createElement("tr");
+          tr.dataset.rowIndex = obj.rowIndex;
 
-  container.innerHTML = "";
+          const row = obj.values;
 
-  const station = id("BudgetPage_Station")?.value || "";
-  const budget = id("BudgetUnderSelect")?.value || "";
-  const fy = id("BudgetPage_FY")?.value || "";
+          row.forEach((cell, i) => {
 
-  // 🔥 HELPER → enable/disable all buttons
-  function toggleSBGButtons(disabled = true) {
-    if (sbgedit) sbgedit.disabled = disabled;
-    if (sbgadd) sbgadd.disabled = disabled;
-    if (sbgprint) sbgprint.disabled = disabled;
-    if (sbgXL) sbgXL.disabled = disabled;
-  }
+            const td = document.createElement("td");
 
-  // =========================
-  // ❌ INVALID FILTER
-  // =========================
-  if (!station || !budget || !fy ||
-      station === "Select" || budget === "Select Budget" || fy === "Select") {
+            if (i === 5 || i === 6) {
+              const num = Number(cell);
+              td.textContent = isNaN(num) ? "" : formatCurrency(num * 1000);
+              td.style.textAlign = "right";
 
-    toggleSBGButtons(true); // 🔥 DISABLE ALL
+              if (i === 6) {
+                td.classList.add("cum");
+                td.dataset.value = num * 1000;
+              }
 
-    container.innerHTML = `
-      <p style="text-align:center; color:#888;">
-        Please select Station, Budget & Financial Year
-      </p>
-    `;
-    return;
-  }
+            } else {
+              td.textContent = cell;
+            }
 
-  // 🔥 FETCH DATA
-  const data = filterSBGData();
+            tr.appendChild(td);
+          });
 
-  // =========================
-  // ❌ NO DATA
-  // =========================
-  if (!data.length) {
+          tbody.appendChild(tr);
+        });
+      }
 
-    toggleSBGButtons(true); // 🔥 DISABLE ALL
-    sbgadd.disabled = false;
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
 
-    // 🔥 CREATE TABLE WITH HEADER
-    const table = document.createElement("table");
-    table.className = "budget-table";
 
-    table.innerHTML = `
-      <colgroup>
-        <col style="width: 5%;">
-        <col style="width: 10%;">
-        <col style="width: 15%;">
-        <col style="width: 18%;">
-        <col style="width: 32%;">
-        <col style="width: 10%;">
-        <col style="width: 10%;">
-      </colgroup>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Station</th>
-          <th>Bill / Invoice Details</th>
-          <th>SBG Expenditure Under</th>
-          <th>Expenditure Details</th>
-          <th>Expenditure Amount</th>
-          <th>Cumulative Sum of Expenditure</th>
-        </tr>
-      </thead>
-    `;
+    function getFYColumnIndexes(headers, fy) {
 
-    const tbody = document.createElement("tbody");
-    tbody.id = "budgetPBBody";
+      let sbgCol = -1;
+      let usedCol = -1;
+      let availCol = -1;
 
-    // 🔥 MERGED "NO DATA" ROW
-    const tr = document.createElement("tr");
+      headers.forEach((h, i) => {
 
-    const td = document.createElement("td");
-    td.colSpan = 7; // 🔥 FULL WIDTH
-    td.style.textAlign = "center";
-    td.style.color = "#888";
-    td.style.padding = "20px";
-    td.textContent = "No data found";
+        const clean = String(h).toLowerCase();
 
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-
-    table.appendChild(tbody);
-    container.appendChild(table);
-    return;
-  }
-
-  // =========================
-  // ✅ VALID DATA
-  // =========================
-  toggleSBGButtons(false); // 🔥 ENABLE ALL
-
-  const table = document.createElement("table");
-  table.className = "budget-table";
-
-  table.innerHTML = `
-    <colgroup>
-      <col style="width: 5%;">
-      <col style="width: 10%;">
-      <col style="width: 15%;">
-      <col style="width: 18%;">
-      <col style="width: 32%;">
-      <col style="width: 10%;">
-      <col style="width: 10%;">
-    </colgroup>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Station</th>
-        <th>Bill / Invoice Details</th>
-        <th>SBG Expenditure Under</th>
-        <th>Expenditure Details</th>
-        <th>Expenditure Amount</th>
-        <th>Cumulative Sum of Expenditure</th>
-      </tr>
-    </thead>
-  `;
-
-  const tbody = document.createElement("tbody");
-  tbody.id = "budgetPBBody";
-
-  data.forEach((obj) => {
-
-    const tr = document.createElement("tr");
-
-    tr.dataset.rowIndex = obj.rowIndex;
-
-    const row = obj.values;
-
-    row.forEach((cell, i) => {
-
-      const td = document.createElement("td");
-
-      if (i === 5 || i === 6) {
-        const num = Number(cell);
-        td.textContent = isNaN(num) ? "" : formatCurrency(num * 1000);
-        td.style.textAlign = "right";
-
-        if (i === 6) {
-          td.classList.add("cum");
-          td.dataset.value = num * 1000;
+        if (clean.includes(fy.toLowerCase()) && clean.includes("(sbg)")) {
+          sbgCol = i;
         }
 
-      } else {
-        td.textContent = cell;
+        if (clean.includes(fy.toLowerCase()) && clean.includes("(used)")) {
+          usedCol = i;
+        }
+
+        if (clean.includes(fy.toLowerCase()) && clean.includes("(available)")) { // ✅ FIXED
+          availCol = i;
+        }
+
+      });
+
+      return { sbgCol, usedCol, availCol };
+    }
+
+
+    // ✅ BUILD USED MAP (FY + Budget + Station)
+    function getSBGUsedMap() {
+
+      const map = {};
+
+      sbgExpData.rows.forEach(row => {
+
+        const date = row[0];
+        const station = String(row[1]).trim().toLowerCase();
+        const budget = String(row[3]).trim().toLowerCase();
+        const cumulative = Number(row[6] || 0);
+
+        const fy = getFYFromDateStr(date);
+
+        const key = fy + "|" + budget + "|" + station;
+
+        // ✅ ALWAYS KEEP LATEST VALUE (overwrite)
+        map[key] = cumulative;
+
+      });
+
+      return map;
+    }
+
+
+    // ✅ MAIN FUNCTION
+    async function updateBudgetDBFromSBGExp() {
+
+      if (!sbgData || !sbgData.headers || !sbgData.rows || !sbgExpData.rows) {
+        console.error("❌ Data not ready");
+        return;
       }
 
-      tr.appendChild(td);
-    });
+      const headers = sbgData.headers;
+      const rows = sbgData.rows;
 
-    tbody.appendChild(tr);
-  });
+      const stationRow = rows[0];      // ✅ station row
+      const dataRows = rows.slice(1);  // ✅ actual data
 
-  table.appendChild(tbody);
-  container.appendChild(table);
-}
+      const usedMap = getSBGUsedMap();
 
+      dataRows.forEach(row => {
 
-function getFYColumnIndexes(headers, fy) {
+        const budgetName = String(row[0]).trim().toLowerCase();
 
-  let sbgCol = -1;
-  let usedCol = -1;
-  let availCol = -1;
+        headers.forEach((h) => {
 
-  headers.forEach((h, i) => {
+          const clean = String(h).toLowerCase();
 
-    const clean = String(h).toLowerCase();
+          if (!clean.includes("(sbg)")) return;
 
-    if (clean.includes(fy.toLowerCase()) && clean.includes("(sbg)")) {
-      sbgCol = i;
+          const fy = clean.match(/\d{4}-\d{2}/)?.[0];
+          if (!fy) return;
+
+          const { sbgCol, usedCol, availCol } = getFYColumnIndexes(headers, fy);
+
+          if (sbgCol === -1) return;
+
+          const stationName = String(stationRow[sbgCol]).trim().toLowerCase();
+
+          const key = fy + "|" + budgetName + "|" + stationName;
+
+          const usedVal = usedMap[key];
+          const sbgVal = Number(row[sbgCol] || 0);
+
+          if (usedVal !== undefined) {
+
+            // ✅ NORMAL CASE
+            row[usedCol] = Number(usedVal).toFixed(3);
+            row[availCol] = Number(sbgVal - usedVal).toFixed(3);
+
+          } else {
+
+            // ✅ FALLBACK CASE (VERY IMPORTANT)
+            const existingUsed = Number(row[usedCol] || 0);
+
+            row[availCol] = Number(sbgVal - existingUsed).toFixed(3);
+
+            //console.log("⚠️ Fallback used for:", key);
+          }
+
+        });
+
+      });
+
+      const res = await fetch("https://office-management-f425.onrender.com/sbg/bulk-update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          rows: dataRows
+        })
+      });
+
+      const data = await res.json();
+
+      console.log("Reloaded API RESPONSE:", data);
+      //console.log("✅ BudgetDB Updated Successfully");
     }
 
-    if (clean.includes(fy.toLowerCase()) && clean.includes("(used)")) {
-      usedCol = i;
-    }
 
-    if (clean.includes(fy.toLowerCase()) && clean.includes("(available)")) { // ✅ FIXED
-      availCol = i;
-    }
+    function ensureSBGTable() {
 
-  });
+      const container = id("BudgetTableWrapper");
+      if (!container) return null;
 
-  return { sbgCol, usedCol, availCol };
-}
+      let table = container.querySelector("table");
+      let tbody;
 
+      // ✅ If table NOT exists → create full structure
+      if (!table) {
 
-// ✅ BUILD USED MAP (FY + Budget + Station)
-function getSBGUsedMap() {
+        container.innerHTML = ""; // clear message like "No data"
 
-  const map = {};
+        table = document.createElement("table");
+        table.className = "budget-table";
 
-  sbgExpData.rows.forEach(row => {
-
-    const date = row[0];
-    const station = String(row[1]).trim().toLowerCase();
-    const budget = String(row[3]).trim().toLowerCase();
-    const cumulative = Number(row[6] || 0);
-
-    const fy = getFYFromDateStr(date);
-
-    const key = fy + "|" + budget + "|" + station;
-
-    // ✅ ALWAYS KEEP LATEST VALUE (overwrite)
-    map[key] = cumulative;
-
-  });
-
-  return map;
-}
-
-
-// ✅ MAIN FUNCTION
-async function updateBudgetDBFromSBGExp() {
-
-  if (!sbgData || !sbgData.headers || !sbgData.rows || !sbgExpData.rows) {
-    console.error("❌ Data not ready");
-    return;
-  }
-
-  const headers = sbgData.headers;
-  const rows = sbgData.rows;
-
-  const stationRow = rows[0];      // ✅ station row
-  const dataRows = rows.slice(1);  // ✅ actual data
-
-  const usedMap = getSBGUsedMap();
-
-  dataRows.forEach(row => {
-
-    const budgetName = String(row[0]).trim().toLowerCase();
-
-    headers.forEach((h) => {
-
-      const clean = String(h).toLowerCase();
-
-      if (!clean.includes("(sbg)")) return;
-
-      const fy = clean.match(/\d{4}-\d{2}/)?.[0];
-      if (!fy) return;
-
-      const { sbgCol, usedCol, availCol } = getFYColumnIndexes(headers, fy);
-
-      if (sbgCol === -1) return;
-
-      const stationName = String(stationRow[sbgCol]).trim().toLowerCase();
-
-      const key = fy + "|" + budgetName + "|" + stationName;
-
-      const usedVal = usedMap[key];
-      const sbgVal = Number(row[sbgCol] || 0);
-
-      if (usedVal !== undefined) {
-
-        // ✅ NORMAL CASE
-        row[usedCol] = Number(usedVal).toFixed(3);
-        row[availCol] = Number(sbgVal - usedVal).toFixed(3);
-
-      } else {
-
-        // ✅ FALLBACK CASE (VERY IMPORTANT)
-        const existingUsed = Number(row[usedCol] || 0);
-
-        row[availCol] = Number(sbgVal - existingUsed).toFixed(3);
-
-        //console.log("⚠️ Fallback used for:", key);
-      }
-
-    });
-
-  });
-
-  const res = await fetch("https://office-management-f425.onrender.com/sbg/bulk-update", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      rows: dataRows
-    })
-  });
-
-  const data = await res.json();
-
-  console.log("Reloaded API RESPONSE:", data);
-  //console.log("✅ BudgetDB Updated Successfully");
-}
-
-
-function ensureSBGTable() {
-
-  const container = id("BudgetTableWrapper");
-  if (!container) return null;
-
-  let table = container.querySelector("table");
-  let tbody;
-
-  // ✅ If table NOT exists → create full structure
-  if (!table) {
-
-    container.innerHTML = ""; // clear message like "No data"
-
-    table = document.createElement("table");
-    table.className = "budget-table";
-
-    table.innerHTML = `
+        table.innerHTML = `
       <colgroup>
         <col style="width: 10%;">
         <col style="width: 10%;">
@@ -10104,47 +9998,47 @@ function ensureSBGTable() {
       <tbody id="budgetPBBody"></tbody>
     `;
 
-    container.appendChild(table);
-  }
+        container.appendChild(table);
+      }
 
-  // ✅ Get tbody (existing or newly created)
-  tbody = table.querySelector("#budgetPBBody");
+      // ✅ Get tbody (existing or newly created)
+      tbody = table.querySelector("#budgetPBBody");
 
-  // fallback safety
-  if (!tbody) {
-    tbody = document.createElement("tbody");
-    tbody.id = "budgetPBBody";
-    table.appendChild(tbody);
-  }
+      // fallback safety
+      if (!tbody) {
+        tbody = document.createElement("tbody");
+        tbody.id = "budgetPBBody";
+        table.appendChild(tbody);
+      }
 
-  return tbody;
-}
+      return tbody;
+    }
 
 
-function addSBGRows(count = 5) {
-  const tbody = document.querySelector("#budgetPBBody");
-  if (!tbody) return;
+    function addSBGRows(count = 5) {
+      const tbody = document.querySelector("#budgetPBBody");
+      if (!tbody) return;
 
-  // 🔥 REMOVE "NO DATA" MERGED ROW (IMPORTANT)
-  const firstRow = tbody.querySelector("tr");
+      // 🔥 REMOVE "NO DATA" MERGED ROW (IMPORTANT)
+      const firstRow = tbody.querySelector("tr");
 
-  if (firstRow && firstRow.children.length === 1) {
-    tbody.innerHTML = ""; // remove merged row completely
-  }
+      if (firstRow && firstRow.children.length === 1) {
+        tbody.innerHTML = ""; // remove merged row completely
+      }
 
-  const budgetSelect = id("BudgetUnderSelect");
-  const stationSelect = id("BudgetPage_Station");
+      const budgetSelect = id("BudgetUnderSelect");
+      const stationSelect = id("BudgetPage_Station");
 
-  const selectedBudget = budgetSelect.options[budgetSelect.selectedIndex].text;
-  const selectedStation = stationSelect.options[stationSelect.selectedIndex].text;
+      const selectedBudget = budgetSelect.options[budgetSelect.selectedIndex].text;
+      const selectedStation = stationSelect.options[stationSelect.selectedIndex].text;
 
-  for (let i = 0; i < count; i++) {
+      for (let i = 0; i < count; i++) {
 
-    const tr = document.createElement("tr");
+        const tr = document.createElement("tr");
 
-    tr.dataset.rowIndex = ""; // 🔥 NEW ROW
+        tr.dataset.rowIndex = ""; // 🔥 NEW ROW
 
-    tr.innerHTML = `
+        tr.innerHTML = `
       <td style="padding:0px"><input style="width:100%;border-radius:0" type="date"></td>
 
       <td style="padding:0px">
@@ -10172,455 +10066,454 @@ function addSBGRows(count = 5) {
       <td style="width:100%;text-align:right;" class="cum"></td>
     `;
 
-    tbody.appendChild(tr);
-  }
-}
+        tbody.appendChild(tr);
+      }
+    }
 
 
 
-let previousCumulative = 0;
+    let previousCumulative = 0;
 
 
-function initPreviousCumulative() {
-  previousCumulative = getLastCumulativeFromTable();
-  //console.log("🔥 Previous:", previousCumulative);
-}
+    function initPreviousCumulative() {
+      previousCumulative = getLastCumulativeFromTable();
+      //console.log("🔥 Previous:", previousCumulative);
+    }
 
-function getLastCumulativeFromTable() {
+    function getLastCumulativeFromTable() {
 
-  const container = document.getElementById("BudgetTableWrapper");
+      const container = document.getElementById("BudgetTableWrapper");
 
-  const rows = container.querySelectorAll("table tbody tr");
+      const rows = container.querySelectorAll("table tbody tr");
 
-  if (!rows.length) return 0;
+      if (!rows.length) return 0;
 
-  // ✅ ALWAYS TAKE FIRST ROW (existing data row)
-  const firstRow = rows[0];
+      // ✅ ALWAYS TAKE FIRST ROW (existing data row)
+      const firstRow = rows[0];
 
-  const lastCell = firstRow.children[6]?.textContent || "0";
+      const lastCell = firstRow.children[6]?.textContent || "0";
 
-  const clean = String(lastCell).replace(/[^0-9.-]/g, "");
+      const clean = String(lastCell).replace(/[^0-9.-]/g, "");
 
-  return Number(clean) || 0;
-}
+      return Number(clean) || 0;
+    }
 
-function sortRowsByDate(rows) {
-  return [...rows].sort((a, b) => {
-    const d1 = new Date(a.querySelector('input[type="date"]')?.value || a.children[0].textContent);
-    const d2 = new Date(b.querySelector('input[type="date"]')?.value || b.children[0].textContent);
-    return d1 - d2;
-  });
-}
+    function sortRowsByDate(rows) {
+      return [...rows].sort((a, b) => {
+        const d1 = new Date(a.querySelector('input[type="date"]')?.value || a.children[0].textContent);
+        const d2 = new Date(b.querySelector('input[type="date"]')?.value || b.children[0].textContent);
+        return d1 - d2;
+      });
+    }
 
-function CalculateCumulative(mode = "add") {
+    function CalculateCumulative(mode = "add") {
 
-  const tbody = document.querySelector("#BudgetTableWrapper tbody");
-  if (!tbody) return;
+      const tbody = document.querySelector("#BudgetTableWrapper tbody");
+      if (!tbody) return;
 
-  function calculate() {
+      function calculate() {
 
-    const rows = [...tbody.querySelectorAll("tr")];
+        const rows = [...tbody.querySelectorAll("tr")];
 
-    // 🔥 SORT BY DATE (CRITICAL)
-    rows.sort((a, b) => {
+        // 🔥 SORT BY DATE (CRITICAL)
+        rows.sort((a, b) => {
 
-      const getDate = (r) => {
-        const input = r.querySelector('input[type="date"]');
-        if (input && input.value) return input.value; // YYYY-MM-DD
-        return r.children[0]?.textContent || ""; // DD-MM-YYYY
-      };
+          const getDate = (r) => {
+            const input = r.querySelector('input[type="date"]');
+            if (input && input.value) return input.value; // YYYY-MM-DD
+            return r.children[0]?.textContent || ""; // DD-MM-YYYY
+          };
 
-      const parse = (d) => {
-        if (!d) return new Date(0);
+          const parse = (d) => {
+            if (!d) return new Date(0);
 
-        if (d.includes("-") && d.length === 10) {
-          if (d[4] === "-") return new Date(d); // YYYY-MM-DD
+            if (d.includes("-") && d.length === 10) {
+              if (d[4] === "-") return new Date(d); // YYYY-MM-DD
 
-          const [dd, mm, yyyy] = d.split("-");
-          return new Date(yyyy, mm - 1, dd);
-        }
+              const [dd, mm, yyyy] = d.split("-");
+              return new Date(yyyy, mm - 1, dd);
+            }
 
-        return new Date(0);
-      };
+            return new Date(0);
+          };
 
-      return parse(getDate(a)) - parse(getDate(b));
-    });
+          return parse(getDate(a)) - parse(getDate(b));
+        });
 
-    // 🔥 FY TOTAL MAP
-    const fyTotals = {};
+        // 🔥 FY TOTAL MAP
+        const fyTotals = {};
 
-    rows.forEach((r, i) => {
+        rows.forEach((r, i) => {
 
-      // 🔹 GET DATE (input OR text)
-      let dateStr = "";
+          // 🔹 GET DATE (input OR text)
+          let dateStr = "";
 
-      const dateInput = r.querySelector('input[type="date"]');
+          const dateInput = r.querySelector('input[type="date"]');
 
-      if (dateInput && dateInput.value) {
-        const [y, m, d] = dateInput.value.split("-");
-        dateStr = `${d}-${m}-${y}`;
-      } else {
-        dateStr = r.children[0]?.textContent || "";
+          if (dateInput && dateInput.value) {
+            const [y, m, d] = dateInput.value.split("-");
+            dateStr = `${d}-${m}-${y}`;
+          } else {
+            dateStr = r.children[0]?.textContent || "";
+          }
+
+          const fy = getFYFromDateStr(dateStr);
+          if (!fy) return;
+
+          // 🔥 INIT FY
+          if (!fyTotals[fy]) fyTotals[fy] = 0;
+
+          // 🔹 GET AMOUNT
+          let amt = 0;
+
+          const amtInput = r.querySelector(".amt");
+
+          if (amtInput) {
+            amt = Number(amtInput.value || 0);
+          } else {
+            const val = r.children[5]?.textContent || "0";
+            amt = Number(val.replace(/[^0-9.-]/g, "")) || 0;
+          }
+
+          // 🔥 ADD TO FY
+          fyTotals[fy] += amt;
+
+          const total = fyTotals[fy];
+
+          // 🔹 GET CUM CELL
+          const cumCell = r.querySelector(".cum") || r.children[6];
+          if (!cumCell) return;
+
+          // 🔥 STORE RAW VALUE (IMPORTANT FOR SAVE)
+          cumCell.dataset.value = total;
+
+          const input = cumCell.querySelector("input");
+
+          // 🔥 UI UPDATE
+          if (total === 0) {
+            if (input) input.value = "";
+            else cumCell.textContent = "";
+          } else {
+            if (input) {
+              input.value = total.toFixed(0);
+            } else {
+              cumCell.textContent = formatCurrency(total);
+            }
+          }
+
+          //console.log(`Row ${i + 1} → FY: ${fy}, Amt: ${amt}, Cum: ${total}`);
+        });
+
       }
 
-      const fy = getFYFromDateStr(dateStr);
-      if (!fy) return;
+      // ✅ EVENT (amount + date change)
+      if (!tbody._cumAttached) {
 
-      // 🔥 INIT FY
-      if (!fyTotals[fy]) fyTotals[fy] = 0;
+        tbody.addEventListener("input", (e) => {
+          if (
+            e.target.classList.contains("amt") ||
+            e.target.type === "date"
+          ) {
+            calculate();
+          }
+        });
 
-      // 🔹 GET AMOUNT
-      let amt = 0;
-
-      const amtInput = r.querySelector(".amt");
-
-      if (amtInput) {
-        amt = Number(amtInput.value || 0);
-      } else {
-        const val = r.children[5]?.textContent || "0";
-        amt = Number(val.replace(/[^0-9.-]/g, "")) || 0;
+        tbody._cumAttached = true;
       }
 
-      // 🔥 ADD TO FY
-      fyTotals[fy] += amt;
+      // 🔥 INITIAL RUN
+      calculate();
+    }
 
-      const total = fyTotals[fy];
 
-      // 🔹 GET CUM CELL
-      const cumCell = r.querySelector(".cum") || r.children[6];
-      if (!cumCell) return;
+    function formatDateBack(d) {
 
-      // 🔥 STORE RAW VALUE (IMPORTANT FOR SAVE)
-      cumCell.dataset.value = total;
+      if (!d) return "";
 
-      const input = cumCell.querySelector("input");
+      const parts = d.split("-");
 
-      // 🔥 UI UPDATE
-      if (total === 0) {
-        if (input) input.value = "";
-        else cumCell.textContent = "";
-      } else {
-        if (input) {
-          input.value = total.toFixed(0);
-        } else {
-          cumCell.textContent = formatCurrency(total);
-        }
+      // input: yyyy-mm-dd → output: dd-mm-yyyy
+      if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
       }
 
-      //console.log(`Row ${i + 1} → FY: ${fy}, Amt: ${amt}, Cum: ${total}`);
-    });
-
-  }
-
-  // ✅ EVENT (amount + date change)
-  if (!tbody._cumAttached) {
-
-    tbody.addEventListener("input", (e) => {
-      if (
-        e.target.classList.contains("amt") ||
-        e.target.type === "date"
-      ) {
-        calculate();
-      }
-    });
-
-    tbody._cumAttached = true;
-  }
-
-  // 🔥 INITIAL RUN
-  calculate();
-}
+      return d;
+    }
 
 
-function formatDateBack(d) {
+    function convertSBGTableToEditable() {
 
-  if (!d) return "";
+      const tbody = document.querySelector("#BudgetTableWrapper table tbody");
+      if (!tbody) return;
 
-  const parts = d.split("-");
+      const rows = tbody.querySelectorAll("tr");
 
-  // input: yyyy-mm-dd → output: dd-mm-yyyy
-  if (parts.length === 3) {
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-  }
+      rows.forEach((tr) => {
 
-  return d;
-}
+        [...tr.children].forEach((td, colIndex) => {
 
+          const text = td.textContent;
 
-function convertSBGTableToEditable() {
+          // ❌ Skip SBG (3) & Cumulative (6)
+          if (colIndex === 3 || colIndex === 6) return;
 
-  const tbody = document.querySelector("#BudgetTableWrapper table tbody");
-  if (!tbody) return;
+          // 📅 Date
+          if (colIndex === 0) {
+            td.innerHTML = `<input type="date" value="${formatDateInput(text)}">`;
+          }
 
-  const rows = tbody.querySelectorAll("tr");
+          // 🏢 Station
+          else if (colIndex === 1) {
+            td.innerHTML = `<input value="${text}">`;
+          }
 
-  rows.forEach((tr) => {
+          // 🧾 Bill + Details
+          else if (colIndex === 2 || colIndex === 4) {
+            td.innerHTML = `<textarea>${text}</textarea>`;
+          }
 
-    [...tr.children].forEach((td, colIndex) => {
+          // 💰 Amount
+          else if (colIndex === 5) {
+            const clean = text.replace(/[^0-9.-]/g, "");
+            td.innerHTML = `<input type="number" class="amt" value="${clean}">`;
+          }
 
-      const text = td.textContent;
+        });
 
-      // ❌ Skip SBG (3) & Cumulative (6)
-      if (colIndex === 3 || colIndex === 6) return;
+      });
 
-      // 📅 Date
-      if (colIndex === 0) {
-        td.innerHTML = `<input type="date" value="${formatDateInput(text)}">`;
-      }
-
-      // 🏢 Station
-      else if (colIndex === 1) {
-        td.innerHTML = `<input value="${text}">`;
-      }
-
-      // 🧾 Bill + Details
-      else if (colIndex === 2 || colIndex === 4) {
-        td.innerHTML = `<textarea>${text}</textarea>`;
-      }
-
-      // 💰 Amount
-      else if (colIndex === 5) {
-        const clean = text.replace(/[^0-9.-]/g, "");
-        td.innerHTML = `<input type="number" class="amt" value="${clean}">`;
-      }
-
-    });
-
-  });
-
-  //console.log("✅ Converted to editable table");
-}
+      //console.log("✅ Converted to editable table");
+    }
 
 
-function formatDateInput(dateStr) {
-  if (!dateStr) return "";
+    function formatDateInput(dateStr) {
+      if (!dateStr) return "";
 
-  const [d, m, y] = dateStr.split("-");
-  return `${y}-${m}-${d}`;
-}
+      const [d, m, y] = dateStr.split("-");
+      return `${y}-${m}-${d}`;
+    }
 
 
-["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
+    ["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"]
       .forEach(idName => {
 
         id(idName)?.addEventListener("change", () => {
           getBudgetFYColumns();
           renderFilterMainBudgetExpTable();
-          //toggleButton();
         });
 
       });
 
 
 
-async function saveSBGData() {
+    async function saveSBGData() {
 
-  const rows = document.querySelectorAll("#budgetPBBody tr");
-  const data = [];
+      const rows = document.querySelectorAll("#budgetPBBody tr");
+      const data = [];
 
-  rows.forEach((tr) => {
+      rows.forEach((tr) => {
 
-    const rowIndex = tr.dataset.rowIndex || "";
+        const rowIndex = tr.dataset.rowIndex || "";
 
-    // ✅ DATE
-    let date = "";
-    const dateInput = tr.querySelector('input[type="date"]');
-    if (dateInput) date = dateInput.value;
-    else date = formatDateInput(tr.children[0]?.textContent);
+        // ✅ DATE
+        let date = "";
+        const dateInput = tr.querySelector('input[type="date"]');
+        if (dateInput) date = dateInput.value;
+        else date = formatDateInput(tr.children[0]?.textContent);
 
-    // ✅ STATION
-    let station = "";
-    const stationInput = tr.querySelector('td:nth-child(2) input');
-    if (stationInput) station = stationInput.value;
-    else station = tr.children[1]?.textContent.trim();
+        // ✅ STATION
+        let station = "";
+        const stationInput = tr.querySelector('td:nth-child(2) input');
+        if (stationInput) station = stationInput.value;
+        else station = tr.children[1]?.textContent.trim();
 
-    // ✅ BILL
-    const bill = tr.querySelector('.bill-text')?.value || tr.children[2]?.textContent || "";
+        // ✅ BILL
+        const bill = tr.querySelector('.bill-text')?.value || tr.children[2]?.textContent || "";
 
-    // ✅ BUDGET
-      let budget = "";
-      // 🔹 CASE 1: Editable row
-      const budgetEl = tr.querySelector('.budget-val');
+        // ✅ BUDGET
+        let budget = "";
+        // 🔹 CASE 1: Editable row
+        const budgetEl = tr.querySelector('.budget-val');
 
-      if (budgetEl) {
-        budget = budgetEl.dataset?.value || budgetEl.textContent;
-      }
-
-      // 🔹 CASE 2: Normal row
-      else {
-        budget = tr.children[3]?.textContent || "";
-      }
-
-      //console.log("📦 Budget (RAW):", JSON.stringify(budget));
-
-    // ✅ DETAILS
-    let details = "";
-    const detailsInput = tr.querySelector('.details-text');
-    if (detailsInput) details = detailsInput.value;
-    else details = tr.children[4]?.textContent.trim();
-
-    // ✅ AMOUNT
-    const rawAmount = CurrencytoNum(tr.querySelector('.amt')?.value || tr.children[5]?.textContent || 0);
-
-    // ✅ CUMULATIVE
-    const cumEl = tr.querySelector('.cum');
-
-    const rawCumulative = Number(
-      cumEl?.dataset?.value ||
-      cumEl?.querySelector("input")?.value ||
-      CurrencytoNum(cumEl?.textContent) ||
-      0
-    );
-
-    //console.log("ROW:", rowIndex, "CUM:", rawCumulative);
-
-    if (!date || !station || !details || rawAmount === 0) return;
-
-    data.push({
-      rowIndex: rowIndex ? Number(rowIndex) : null,
-      "Date": formatDateBack(date),
-      "Station": station,
-      "Bill / Invoice Details": bill,
-      "SBG Expenditure Under": budget,
-      "Expenditure Details": details,
-      "Expenditure Amount (₹ in 000)": Number((rawAmount / 1000).toFixed(3)),
-      "Cumulative Sum of Expenditure (₹ in 000)": Number((rawCumulative / 1000).toFixed(3))
-    });
-
-  });
-
-  if (!data.length) {
-    alert("❌ Enter valid data");
-    return false;
-  }
-
-  //console.log("🚀 FINAL PAYLOAD:", data);
-
-  const res = await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data })
-  });
-
-  const result = await res.json();
-
-  if (result?.status === "success") {
-
-    alert("✅ Uploaded Successfully");
-
-    await reloadSBGExpData();
-    await updateBudgetDBFromSBGExp();
-    await loadTable("sbg", "BudgetDB");
-    getBudgetFYColumns();
-    renderFilterMainBudgetExpTable();
-
-    return true;
-
-  } else {
-    alert("❌ Save failed");
-    return false;
-  }
-}
-
-function setupSBGToggleButton(btnId, config, modeType) {
-
-  const selectedBudget = id("BudgetUnderSelect");
-  const selectedFY = id("BudgetPage_FY");
-  const selectedStation = id("BudgetPage_Station");
-
-  const sbgedit = id("SBGeditBtn");
-  const sbgadd = id("SBGaddBtn");
-
-  const btn = id(btnId);
-  if (!btn) return;
-
-  let isActive = false;
-  let isProcessing = false;
-
-  btn.onclick = async () => {
-
-    if (isProcessing) return;
-    isProcessing = true;
-
-    try {
-
-      const wrapper = document.querySelector(".BudgetTableWrapper");
-
-      if (!isActive) {
-
-        // =========================
-        // 🔥 ENTER MODE (ADD / EDIT)
-        // =========================
-        isActive = true;
-
-        selectedBudget.disabled = true;
-        selectedFY.disabled = true;
-        selectedStation.disabled = true;
-
-        if (modeType === "add") sbgedit.disabled = true;
-        if (modeType === "edit") sbgadd.disabled = true;
-
-        wrapper?.classList.add("edit-mode");
-
-        btn.classList.add(config.className);
-        btn.querySelector("span").textContent = config.activeText;
-        updateIcon(btn, config.activeIcon);
-
-        if (modeType === "add") {
-
-          // 🔥 ADD MODE
-          addSBGRows(5);
-
-          setTimeout(() => {
-            initPreviousCumulative();
-            CalculateCumulative("add"); // continue from last value
-          }, 50);
-
-        } else if (modeType === "edit") {
-
-          // 🔥 EDIT MODE
-          convertSBGTableToEditable();
-
-          setTimeout(() => {
-            CalculateCumulative("edit"); // start fresh (recalculate all)
-          }, 50);
+        if (budgetEl) {
+          budget = budgetEl.dataset?.value || budgetEl.textContent;
         }
+
+        // 🔹 CASE 2: Normal row
+        else {
+          budget = tr.children[3]?.textContent || "";
+        }
+
+        //console.log("📦 Budget (RAW):", JSON.stringify(budget));
+
+        // ✅ DETAILS
+        let details = "";
+        const detailsInput = tr.querySelector('.details-text');
+        if (detailsInput) details = detailsInput.value;
+        else details = tr.children[4]?.textContent.trim();
+
+        // ✅ AMOUNT
+        const rawAmount = CurrencytoNum(tr.querySelector('.amt')?.value || tr.children[5]?.textContent || 0);
+
+        // ✅ CUMULATIVE
+        const cumEl = tr.querySelector('.cum');
+
+        const rawCumulative = Number(
+          cumEl?.dataset?.value ||
+          cumEl?.querySelector("input")?.value ||
+          CurrencytoNum(cumEl?.textContent) ||
+          0
+        );
+
+        //console.log("ROW:", rowIndex, "CUM:", rawCumulative);
+
+        if (!date || !station || !details || rawAmount === 0) return;
+
+        data.push({
+          rowIndex: rowIndex ? Number(rowIndex) : null,
+          "Date": formatDateBack(date),
+          "Station": station,
+          "Bill / Invoice Details": bill,
+          "SBG Expenditure Under": budget,
+          "Expenditure Details": details,
+          "Expenditure Amount (₹ in 000)": Number((rawAmount / 1000).toFixed(3)),
+          "Cumulative Sum of Expenditure (₹ in 000)": Number((rawCumulative / 1000).toFixed(3))
+        });
+
+      });
+
+      if (!data.length) {
+        alert("❌ Enter valid data");
+        return false;
+      }
+
+      //console.log("🚀 FINAL PAYLOAD:", data);
+
+      const res = await fetch("https://office-management-f425.onrender.com/sbgexp/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data })
+      });
+
+      const result = await res.json();
+
+      if (result?.status === "success") {
+
+        alert("✅ Uploaded Successfully");
+
+        await reloadSBGExpData();
+        await updateBudgetDBFromSBGExp();
+        await loadTable("sbg", "BudgetDB");
+        getBudgetFYColumns();
+        renderFilterMainBudgetExpTable();
+
+        return true;
 
       } else {
-
-        // =========================
-        // 🔥 SAVE MODE
-        // =========================
-
-        const success = await saveSBGData();
-        if (!success) {
-          isProcessing = false;
-          return;
-        }
-
-        isActive = false;
-
-        selectedBudget.disabled = false;
-        selectedFY.disabled = false;
-        selectedStation.disabled = false;
-
-        wrapper?.classList.remove("edit-mode");
-
-        btn.classList.remove(config.className);
-        btn.querySelector("span").textContent = config.defaultText;
-        updateIcon(btn, config.defaultIcon);
-
-        // 🔥 reload table clean
-        renderFilterMainBudgetExpTable();
+        alert("❌ Save failed");
+        return false;
       }
-
-    } catch (err) {
-      console.error("❌ SBG Toggle Error:", err);
-    } finally {
-      isProcessing = false;
     }
-  };
-}
+
+    function setupSBGToggleButton(btnId, config, modeType) {
+
+      const selectedBudget = id("BudgetUnderSelect");
+      const selectedFY = id("BudgetPage_FY");
+      const selectedStation = id("BudgetPage_Station");
+
+      const sbgedit = id("SBGeditBtn");
+      const sbgadd = id("SBGaddBtn");
+
+      const btn = id(btnId);
+      if (!btn) return;
+
+      let isActive = false;
+      let isProcessing = false;
+
+      btn.onclick = async () => {
+
+        if (isProcessing) return;
+        isProcessing = true;
+
+        try {
+
+          const wrapper = document.querySelector(".BudgetTableWrapper");
+
+          if (!isActive) {
+
+            // =========================
+            // 🔥 ENTER MODE (ADD / EDIT)
+            // =========================
+            isActive = true;
+
+            selectedBudget.disabled = true;
+            selectedFY.disabled = true;
+            selectedStation.disabled = true;
+
+            if (modeType === "add") sbgedit.disabled = true;
+            if (modeType === "edit") sbgadd.disabled = true;
+
+            wrapper?.classList.add("edit-mode");
+
+            btn.classList.add(config.className);
+            btn.querySelector("span").textContent = config.activeText;
+            updateIcon(btn, config.activeIcon);
+
+            if (modeType === "add") {
+
+              // 🔥 ADD MODE
+              addSBGRows(5);
+
+              setTimeout(() => {
+                initPreviousCumulative();
+                CalculateCumulative("add"); // continue from last value
+              }, 50);
+
+            } else if (modeType === "edit") {
+
+              // 🔥 EDIT MODE
+              convertSBGTableToEditable();
+
+              setTimeout(() => {
+                CalculateCumulative("edit"); // start fresh (recalculate all)
+              }, 50);
+            }
+
+          } else {
+
+            // =========================
+            // 🔥 SAVE MODE
+            // =========================
+
+            const success = await saveSBGData();
+            if (!success) {
+              isProcessing = false;
+              return;
+            }
+
+            isActive = false;
+
+            selectedBudget.disabled = false;
+            selectedFY.disabled = false;
+            selectedStation.disabled = false;
+
+            wrapper?.classList.remove("edit-mode");
+
+            btn.classList.remove(config.className);
+            btn.querySelector("span").textContent = config.defaultText;
+            updateIcon(btn, config.defaultIcon);
+
+            // 🔥 reload table clean
+            renderFilterMainBudgetExpTable();
+          }
+
+        } catch (err) {
+          console.error("❌ SBG Toggle Error:", err);
+        } finally {
+          isProcessing = false;
+        }
+      };
+    }
 
 
 
