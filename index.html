@@ -1237,7 +1237,8 @@
 
     /* Container */
     .action-group,
-    .SBGaction-group {
+    .SBGaction-group,
+    .SSaction-group {
       display: flex;
       gap: 10px;
       padding: 1px 1px;
@@ -1252,7 +1253,8 @@
 
     /* Base button */
     .action-group button,
-    .SBGaction-group button {
+    .SBGaction-group button,
+    .SSaction-group button {
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -1288,7 +1290,8 @@
 
     /*================ Show text only when enabled================ */
     .action-group button:not(:disabled):hover span,
-    .SBGaction-group button:not(:disabled):hover span {
+    .SBGaction-group button:not(:disabled):hover span,
+    .SSaction-group button:not(:disabled):hover span {
       max-width: 120px;
       opacity: 1;
       transition: max-width 2s ease;
@@ -1297,14 +1300,16 @@
 
     /* Icon resize only when enabled */
     .action-group button:not(:disabled):hover svg,
-    .SBGaction-group button:not(:disabled):hover svg {
+    .SBGaction-group button:not(:disabled):hover svg,
+    .SSaction-group button:not(:disabled):hover svg {
       width: 16px;
       height: 16px;
     }
 
     /* Icon */
     .action-group button svg,
-    .SBGaction-group button svg {
+    .SBGaction-group button svg,
+    .SSaction-group button svg {
       width: 18px;
       height: 18px;
       flex-shrink: 0;
@@ -1312,7 +1317,8 @@
 
     /*========= Hide text ================*/
     .action-group button span,
-    .SBGaction-group button span {
+    .SBGaction-group button span,
+    .SSaction-group button span {
       max-width: 0;
       overflow: hidden;
       white-space: nowrap;
@@ -1322,7 +1328,8 @@
 
     /*=========== Active ===============*/
     .action-group button:active,
-    .SBGaction-group button:active {
+    .SBGaction-group button:active,
+    .SSaction-group button:active {
       transform: scale(0.96);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
@@ -1351,22 +1358,26 @@
 
     /*=============== Print (Neutral Professional Gray)============== */
     .action-group button:nth-child(3),
-    .SBGaction-group button:nth-child(3) {
+    .SBGaction-group button:nth-child(3),
+    .SSaction-group button:nth-child(1) {
       color: #334155;
     }
 
     .action-group button:nth-child(3):hover,
-    .SBGaction-group button:nth-child(3):hover {
+    .SBGaction-group button:nth-child(3):hover,
+    .SSaction-group button:nth-child(1):hover {
       background: #f1f5f9;
     }
 
     .action-group button:nth-child(4),
-    .SBGaction-group button:nth-child(4) {
+    .SBGaction-group button:nth-child(4),
+    .SSaction-group button:nth-child(2) {
       color: #217346;
     }
 
     .action-group button:nth-child(4):hover,
-    .SBGaction-group button:nth-child(4):hover {
+    .SBGaction-group button:nth-child(4):hover,
+    .SSaction-group button:nth-child(2):hover {
       background: #f1f5f9;
     }
 
@@ -1453,8 +1464,63 @@
       border: 1px solid #94a3b8;
     }
 
-    /*============================Budget CSS =====================*/
+    /*============================Salary Slip CSS =====================*/
+    .SalarySlipTableWrapper{
+      width:50%;margin:auto;font-size:10px;
+      background: white;
+      overflow: auto;
+      height: 600px;
+    }
 
+    .SalarySlipTableWrapper table{
+      border:solid 1px black;
+      width:100%;border-collapse: collapse;
+    }
+
+    .SalarySlipTableWrapper td:first-child{
+      border-left: none;
+    }
+
+    .SalarySlipTableWrapper tr:first-child td{
+      border-top: none;
+    }
+
+
+    .SalarySlipTableWrapper td:last-child{
+      border-right: none;
+    }
+
+    .SalarySlipTableWrapper tr:last-child td{
+      border-bottom: none;
+    }
+
+    .SalarySlipTableWrapper td{
+      padding:2px;
+      border:solid 1px black;
+      height:22px;
+    }
+    
+    #SalarySlipLogo{
+      height: 50px;
+    }
+
+    #SalarySlipBreakup,
+    #SalarySlipFYDetails {
+      width: 100%;
+      border: none;
+      border-collapse: collapse;
+    }
+
+    #SalarySlipBreakup thead td{
+      border-bottom: solid 1px black;
+    }
+
+    #SalarySlipBreakup thead td,
+    #SalarySlipFYDetails thead td {
+      background-color: #d3d3d3;
+      text-align: center;
+      font-weight: bold;
+    }
 
     /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
@@ -1814,7 +1880,7 @@
               <td><select id="PayBillPage_FY"></select></td>
               <td><label for="PayBillPage_SalMonth">Month :</label></td>
               <td><select id="PayBillPage_SalMonth"></select></td>
-              <td><label>DA(%) :</td>
+              <td><label>DA(%) :</label></td>
               <td><input style="max-width:40px;" disabled id="PayBillPage_DA%" type="text">
                 <input id="PayBillPage_OldDA%" disabled style="max-width:40px;" type="text" hidden>
               </td>
@@ -1996,6 +2062,212 @@
       <div class="SectionPage" id="SalarySlipPage" style="display:none">
         <div class="header">
           <h2>Salary Slip</h2>
+        </div>
+        <div class="Selection-bar">
+          <table>
+            <colgroup>
+              <col style="width:80px">
+              <col style="width:170px">
+              <col style="width:100px">
+              <col style="width:300px">
+              <col style="width:40px">
+              <col style="width:90px">
+              <col style="width:60px">
+              <col style="width:100px">
+              <col style="width:50px">
+              <col style="width:40px">
+              <col style="width:90px">
+              <col style="width:80px">
+              <col style="width:90px">
+              <col style="width:30px">
+            </colgroup>
+            <tr>
+              <td><label for="SalSlipPage_Station">Station :</label></td>
+              <td><select id="SalSlipPage_Station"></select></td>
+              <td><label for="SalSlipPage_Emp">Employee :</label></td>
+              <td><select id="SalSlipPage_Emp"></select></td>
+              <td><label for="SalSlipPage_FY">FY :</label></td>
+              <td><select id="SalSlipPage_FY"></select></td>
+              <td><label for="SalSlipPage_SalMonth">Month :</label></td>
+              <td><select id="SalSlipPage_SalMonth"></select></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </table>
+
+          <div class="SSaction-group">
+
+            <button id="SSprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
+            <button id="SSexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+          </div>
+        </div>
+        <div class="SalarySlipTableWrapper">
+          <table id="SalarySlipTable">
+            <thead>
+              <tr>
+                <th style="padding:1px 3px;">               
+                    <div style="border:solid 2px black;gap:4px;display: flex;flex-direction: row;padding: 8px 2px;">
+                      <img id="SalarySlipLogo" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
+                      <div style="display: flex;flex-direction: column;margin: auto;">
+                        <h3 style="margin:0">PRASAR BHARATI</h3>
+                        <h3 style="margin:0">INDIA'S PUBLIC SERVICE BROADCASTER</h3>
+                        <h3 style="margin:0">AIR Dharwad</h3>
+                        <h3 style="margin:0">ALL INDIA RADIO</h3>
+                      </div>
+                  </div>
+                </th>
+              </tr>
+              <tr>
+                <th style="padding:0px;border:solid 1px black;height:30px;">
+                  SALARY SLIP FOR THE MONTH OF <span id="SalarySlipHeaderMonth"></span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:0;">
+                  <table style="width:100%;border-collapse:collapse;margin:0px;border:none;">
+                    <colgroup>
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:13%">
+                      <col style="width:13%">
+                      <col style="width:13%">
+                    </colgroup>
+                    <tr>
+                      <td style="font-weight:bold">NAME:</td>
+                      <td colspan="6" id="SSname"></td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight:bold">IRLA/LOCAL CODE: </td>
+                      <td colspan="4"></td>
+                      <td style="font-weight:bold">HRIS CODE:</td>
+                      <td id="SShris"></td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight:bold">SALARY OFFICE:</td>
+                      <td colspan="2">AIR Dharwad</td>
+                      <td style="font-weight:bold">PAY LEVEL:</td>
+                      <td colspan="3" id="SSpaylevel"></td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight:bold">POSTING OFFICE :</td>
+                      <td colspan="2" id="SSstation"></td>
+                      <td style="font-weight:bold">DIRECTORATE/VERTICAL<br>:</td>
+                      <td colspan="3">DG:AIR</td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight:bold">DESIGNATION:</td>
+                      <td colspan="2" id="SSdesignation"></td>
+                      <td style="font-weight:bold">DEPARTMENT/WING: </td>
+                      <td colspan="3" id="SSsection"></td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight:bold">AADHAR NUMBER:</td>
+                      <td id="SSaadhaar"></td>
+                      <td style="font-weight:bold">PAN: </td>
+                      <td id="SSpan"></td>
+                      <td style="font-weight:bold">GPF/CPF <br>NUMBER:</td>
+                      <td colspan="2" id="SSgpf"></td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight:bold">PRAN NUMBER: </td>
+                      <td id="SSpran"></td>
+                      <td style="font-weight:bold">SALARY ACCOUNT:</td>
+                      <td id="SSaccount"></td>
+                      <td style="font-weight:bold">PFMS CODE:</td>
+                      <td colspan="2" id="SSpfms"></td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight:bold">MOBILE NO: </td>
+                      <td id="SSmobile"></td>
+                      <td style="font-weight:bold">E-MAIL :</td>
+                      <td colspan="4" id="SSemail"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="4"></td>
+                      <td colspan="3" style="background-color:#d3d3d3;text-align:center;font-weight:bold">LOAN DEDUCTION DETAIL</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:0px;">
+                  <table id="SalarySlipBreakup">
+                    <colgroup>
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:13%">
+                      <col style="width:13%">
+                      <col style="width:13%">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <td>EARNING </td>
+                        <td>AMOUNT </td>
+                        <td>DEDUCTIONS </td>
+                        <td>AMOUNT </td>
+                        <td>LOAN TYPE </td>
+                        <td>INSTALLMENT<br>NO </td>
+                        <td>RECOVERY </td>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="max-height:2px;height:2px;padding: 0;"></td>
+              </tr>
+              <tr>
+                <td style="padding:0px;">
+                  <table id="SalarySlipFYDetails">
+                    <colgroup>
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:15%">
+                      <col style="width:13%">
+                      <col style="width:13%">
+                      <col style="width:13%">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <td colspan="2">ARREAR DETAILS</td>
+                        <td colspan="2">RECOVERY DETAILS</td>
+                        <td colspan="3">TAX DETAILS</td>
+                      </tr>
+                      <tr>
+                        <td>TYPE </td>
+                        <td>ARREAR </td>
+                        <td>TYPE </td>
+                        <td>RECOVERY </td>
+                        <td>MONTH </td>
+                        <td>GROSS</td>
+                        <td>TDS </td>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align:center">This is the Computer generated payslip doesn't required any Signatures
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
         </div>
       </div>
 
@@ -2233,7 +2505,8 @@
 
         let result = await res.json();
 
-        console.log("API Database Loaded:", api, result);
+        //console.log("API Database Loaded:", api, result);
+        console.log("API Database Loaded:", api);
 
         // 🔥 ADD THIS HERE (IMPORTANT)
         if (api === "pb") pbData = result;
@@ -2872,7 +3145,7 @@
     const selectMap = {
       station: [
         "EmpPage_Station",
-        //"SalarySlipPage_Station",
+        "SalSlipPage_Station",
         //"ITPage_Station",
         //"PensionPage_Station",
         "PayBillPage_Station",
@@ -2882,18 +3155,18 @@
         "EmpPage_Emp",
         //"ITPage_Emp",
         //"PensionPage_Emp",
-        //"SalarySlipPage_Emp",
+        "SalSlipPage_Emp",
         "PayBillPage_Emp"
       ],
       fy: [
         "PayBillPage_FY",
         //"ITPage_FY",
-        //"SalarySlipPage_FY",
+        "SalSlipPage_FY",
         "BudgetPage_FY"
       ],
       month: [
         "PayBillPage_SalMonth",
-        //"SalarySlipPage_SalMonth"
+        "SalSlipPage_SalMonth"
       ]
     };
 
@@ -3137,10 +3410,6 @@
             }
           }
         });
-
-        //console.log("VALID MONTHS:", [...validMonths]);
-        //console.log("FILTER MONTH:", filters.month);
-        //console.log("ADD MODE:", isAddMode);
 
         // 🔥 2. FORCE ADD AFTER LOOP (THIS IS THE KEY FIX)
         if (isAddMode && filters.month) {
@@ -6668,6 +6937,7 @@
       id("PayBillPage_Station").value = station;
       id("EmpPage_Station").value = station;
       id("BudgetPage_Station").value = station;
+      id("SalSlipPage_Station").value = station;
 
       // 🔄 Update filters
       filters.station = station;
@@ -6699,7 +6969,12 @@
       handleStationChange("BudgetPage_Station");
     });
 
+    on("SalSlipPage_Station", "change", () => {
+      handleStationChange("SalSlipPage_Station");
+    });
+
     on("PayBillPage_FY", "change", refreshPBView);
+    on("SalSlipPage_FY", "change", refreshPBView);
     on("BudgetPage_FY", "change", refreshPBView);
     on("PayBillPage_SalMonth", "change", refreshPBView);
 
@@ -9634,74 +9909,74 @@
 
 
     // 🔥 BUTTON CONTROL
-      function toggleSBGButtons(mode = "default") {
+    function toggleSBGButtons(mode = "default") {
 
-        const budget = id("BudgetUnderSelect");
-        const sbgindex = budget?.selectedIndex ?? -1;
+      const budget = id("BudgetUnderSelect");
+      const sbgindex = budget?.selectedIndex ?? -1;
 
-        const sbgedit = id("SBGeditBtn");
-        const sbgadd = id("SBGaddBtn");
-        const sbgprint = id("SBGprintBtn");
-        const sbgXL = id("SBGexcelBtn");
+      const sbgedit = id("SBGeditBtn");
+      const sbgadd = id("SBGaddBtn");
+      const sbgprint = id("SBGprintBtn");
+      const sbgXL = id("SBGexcelBtn");
 
-        // 🔄 RESET ALL FIRST
-        if (sbgedit) sbgedit.disabled = false;
-        if (sbgadd) sbgadd.disabled = false;
-        if (sbgprint) sbgprint.disabled = false;
-        if (sbgXL) sbgXL.disabled = false;
+      // 🔄 RESET ALL FIRST
+      if (sbgedit) sbgedit.disabled = false;
+      if (sbgadd) sbgadd.disabled = false;
+      if (sbgprint) sbgprint.disabled = false;
+      if (sbgXL) sbgXL.disabled = false;
 
-        // =========================
-        // 🔴 MODE: ALL DISABLED
-        // =========================
-        if (mode === "allDisabled") {
+      // =========================
+      // 🔴 MODE: ALL DISABLED
+      // =========================
+      if (mode === "allDisabled") {
+        if (sbgedit) sbgedit.disabled = true;
+        if (sbgadd) sbgadd.disabled = true;
+        if (sbgprint) sbgprint.disabled = true;
+        if (sbgXL) sbgXL.disabled = true;
+        return;
+      }
+
+      // =========================
+      // 🟡 MODE: NO DATA (only ADD enabled)
+      // =========================
+      if (mode === "noData") {
+        if (sbgindex >= 0 && sbgindex <= 8) {
           if (sbgedit) sbgedit.disabled = true;
           if (sbgadd) sbgadd.disabled = true;
           if (sbgprint) sbgprint.disabled = true;
           if (sbgXL) sbgXL.disabled = true;
-          return;
+        } else {
+          if (sbgedit) sbgedit.disabled = true;
+          if (sbgadd) sbgadd.disabled = false; // ✅ only this enabled
+          if (sbgprint) sbgprint.disabled = true;
+          if (sbgXL) sbgXL.disabled = true;
         }
-
-        // =========================
-        // 🟡 MODE: NO DATA (only ADD enabled)
-        // =========================
-        if (mode === "noData") {
-          if (sbgindex >= 0 && sbgindex <= 8){
-            if (sbgedit) sbgedit.disabled = true;
-            if (sbgadd) sbgadd.disabled = true;
-            if (sbgprint) sbgprint.disabled = true;
-            if (sbgXL) sbgXL.disabled = true;
-          }else{
-            if (sbgedit) sbgedit.disabled = true;
-            if (sbgadd) sbgadd.disabled = false; // ✅ only this enabled
-            if (sbgprint) sbgprint.disabled = true;
-            if (sbgXL) sbgXL.disabled = true;
-          }          
-          return;
-        }
-
-        // =========================
-        // 🟢 MODE: DATA EXISTS → INDEX RULE
-        // =========================
-        if (mode === "pbData"){
-          if (sbgindex >= 0 && sbgindex <= 8) {
-            // ❌ disable all
-            if (sbgedit) sbgedit.disabled = true;
-            if (sbgadd) sbgadd.disabled = true;
-            if (sbgprint) sbgprint.disabled = false;
-            if (sbgXL) sbgXL.disabled = false;
-          }else{
-            if (sbgedit) sbgedit.disabled = false;
-            if (sbgadd) sbgadd.disabled = false;
-            if (sbgprint) sbgprint.disabled = false;
-            if (sbgXL) sbgXL.disabled = false;
-          }
-        }      
-
+        return;
       }
-      
+
+      // =========================
+      // 🟢 MODE: DATA EXISTS → INDEX RULE
+      // =========================
+      if (mode === "pbData") {
+        if (sbgindex >= 0 && sbgindex <= 8) {
+          // ❌ disable all
+          if (sbgedit) sbgedit.disabled = true;
+          if (sbgadd) sbgadd.disabled = true;
+          if (sbgprint) sbgprint.disabled = false;
+          if (sbgXL) sbgXL.disabled = false;
+        } else {
+          if (sbgedit) sbgedit.disabled = false;
+          if (sbgadd) sbgadd.disabled = false;
+          if (sbgprint) sbgprint.disabled = false;
+          if (sbgXL) sbgXL.disabled = false;
+        }
+      }
+
+    }
 
 
-    function renderFilterMainBudgetExpTable() {      
+
+    function renderFilterMainBudgetExpTable() {
 
       const container = id("BudgetTableWrapper");
       if (!container) return;
@@ -9711,7 +9986,7 @@
       const station = id("BudgetPage_Station")?.value || "";
       const budget = id("BudgetUnderSelect");
       const fy = id("BudgetPage_FY")?.value || "";
-      
+
 
       // =========================
       // ❌ INVALID FILTER
@@ -9953,7 +10228,7 @@
 
       const data = await res.json();
 
-      console.log("Reloaded API RESPONSE:", data);
+      //console.log("Reloaded API RESPONSE:", data);
       //console.log("✅ BudgetDB Updated Successfully");
     }
 
@@ -10516,6 +10791,743 @@
     }
 
 
+    //===================================SALARY SLIP SCRIPT ===================//
+
+    const designationMap = {
+      "TECH": "TECHNICIAN",
+      "STECH": "SENIOR TECHNICIAN",
+      "EA": "ENGINEERING ASSISTANT",
+      "SEA": "SENIOR ENGINEERING ASSISTANT",
+      "AE": "ASSISTANT ENGINEER",
+      "UDC": "UPPER DIVISION CLERK",
+      "LDC": "LOWER DIVISION CLERK",
+      "MTR DRIVER": "MOTOR DRIVER",
+      "PEX": "PROGRAMME EXECUTIVE"
+    };
+
+
+    function getEmployee(empName) {
+
+      if (!empName || !window.empCalcHeaders || !window.empCalcRows) return null;
+
+      const headers = window.empCalcHeaders;
+      const rows = window.empCalcRows;
+
+      const nameIndex = headers.indexOf("Employee Name");
+      if (nameIndex === -1) return null;
+
+      return rows.find(row =>
+        String(row[nameIndex]).trim() === empName
+      ) || null;
+    }
+
+    function formatPayLevel(level) {
+
+      if (!level) return "";
+
+      level = String(level).trim().toUpperCase();
+
+      // If purely number
+      if (/^\d+$/.test(level)) {
+        const num = Number(level);
+        return num < 10 ? "0" + num : String(num);
+      }
+
+      // If like 13A → keep as is
+      return level;
+    }
+
+
+    function maskValue(value) {
+
+      if (!value) return "";
+
+      const str = String(value).replace(/\s+/g, ""); // remove spaces
+      const visible = str.slice(-3);                 // last 3 digits
+      const masked = "X".repeat(Math.max(0, str.length - 3));
+
+      return masked + visible;
+    }
+
+  function fillSalarySlip(empName) {
+
+  if (!empName) return;
+
+  const emp = getEmployee(empName);
+  if (!emp) return;
+
+  const headers = window.empCalcHeaders;
+
+  const get = (col) => {
+    const idx = headers.indexOf(col);
+    return idx !== -1 ? emp[idx] : "";
+  };
+
+  // 🔥 DESIGNATION
+  let rawDesig = String(get("Designation")).toUpperCase().trim();
+  let finalDesig = designationMap[rawDesig] || rawDesig;
+
+  // =========================
+  // 🔽 FILL VALUES
+  // =========================
+  id("SSname").textContent = String(empName).toUpperCase();;
+  id("SSdesignation").textContent = finalDesig;
+
+  id("SShris").textContent = get("HRIS");
+  const rawLevel = get("Last Drawn Pay Level");
+  id("SSpaylevel").textContent = "Level - " + formatPayLevel(rawLevel);
+
+  id("SSstation").textContent = get("Station");
+  id("SSsection").textContent = get("Section");
+  id("SSgpf").textContent = get("GPF");
+  id("SSpran").textContent = get("PRAN");
+  id("SSpfms").textContent = get("PFMS");
+  id("SSemail").textContent = get("Email");
+  id("SSaadhaar").textContent = maskValue(get("Aadhaar"));
+  id("SSpan").textContent = maskValue(get("PAN"));
+  id("SSmobile").textContent = maskValue(get("Mobile"));
+  id("SSaccount").textContent = maskValue(get("Account"));
+}
+
+
+function getPBRow(empName) {
+
+  if (!pbData || !pbData.headers || !pbData.rows) return null;
+
+  const headers = pbData.headers;
+  const rows = pbData.rows;
+
+  const nameIndex = headers.indexOf("Employee Name");
+  const monthIndex = headers.indexOf("Salary Month");
+
+  const selectedMonth = id("SalSlipPage_SalMonth")?.value || "";
+
+  if (nameIndex === -1 || monthIndex === -1) return null;
+
+  return rows.find(row =>
+    String(row[nameIndex]).trim() === empName &&
+    String(row[monthIndex]).trim() === selectedMonth
+  ) || null;
+}
+
+
+function formatMonthYear(value) {
+
+  if (!value) return "";
+
+  const monthNames = [
+    "JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE",
+    "JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"
+  ];
+
+  // Try normal parsing
+  const date = new Date(value);
+
+  if (!isNaN(date)) {
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    return `${month} - ${year}`;
+  }
+
+  // 🔥 Fallback (manual parsing)
+  const parts = value.split(/[-/ ]/);
+  let m = parts[0];
+  let y = parts[1];
+
+  let monthIndex = isNaN(m)
+    ? monthNames.findIndex(x => x.startsWith(m.toUpperCase()))
+    : Number(m) - 1;
+
+  return `${monthNames[monthIndex]} - ${y}`;
+}
+
+
+function numberToWords(num) {
+
+  if (!num || num === 0) return "ZERO";
+
+  const a = [
+    "", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX",
+    "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE",
+    "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN",
+    "SEVENTEEN", "EIGHTEEN", "NINETEEN"
+  ];
+
+  const b = [
+    "", "", "TWENTY", "THIRTY", "FORTY",
+    "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"
+  ];
+
+  function twoDigit(n) {
+    if (n < 20) return a[n];
+    return b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "");
+  }
+
+  function threeDigit(n) {
+    let str = "";
+    if (n >= 100) {
+      str += a[Math.floor(n / 100)] + " HUNDRED ";
+      n %= 100;
+    }
+    if (n > 0) str += twoDigit(n);
+    return str.trim();
+  }
+
+  let result = "";
+
+  const crore = Math.floor(num / 10000000);
+  num %= 10000000;
+
+  const lakh = Math.floor(num / 100000);
+  num %= 100000;
+
+  const thousand = Math.floor(num / 1000);
+  num %= 1000;
+
+  const hundred = num;
+
+  if (crore) result += threeDigit(crore) + " CRORE ";
+  if (lakh) result += threeDigit(lakh) + " LAKH ";
+  if (thousand) result += threeDigit(thousand) + " THOUSAND ";
+  if (hundred) result += threeDigit(hundred);
+
+  return result.trim();
+}
+
+
+function buildSalaryBreakup(empName) {
+
+  const row = getPBRow(empName);
+  if (!row) {
+    console.warn("No data for:", empName, getSelectedMonth());
+    return;
+  }
+
+  const h = pbData.headers;
+  const g = (col) => {
+    const i = h.indexOf(col);
+    return i !== -1 ? Number(row[i]) || 0 : 0;
+  };
+
+  // 💰 EARNINGS
+  const earnings = [
+    ["BASIC PAY", g("Basic Pay")],
+    ["DA", g("DA")],
+    ["HRA", g("HRA")],
+    ["TPTA", g("TA")],
+    ["NPSE", g("NPSE") + g("DAA on NPSE")],
+    ["CEA", g("CEA")],
+    ["LTA/EL ENCASH", g("LTA Reimburse") + g("EL Encash")],
+    ["BONUS / UNI ALL.", g("Bonus") + g("Uni All")],
+    ["ARREARS Gross", g("Total DAA") + g("Arrears")],
+    ["REIMBURSEMENT", g("Medical Reimburse")]
+  ];
+
+  const grossAmount = g("Gross Income");
+
+  // 💸 DEDUCTIONS
+  const deductions = [
+    ["CGIS", g("CGEIS")],   
+    ["LF", g("L Fee")], 
+    ["TCS", g("AIR & TV CHE SOC")],    
+    ["IT", g("IT")],
+    ["GPF", g("GPF")],
+    ["ITC", g("Cess @4%")],   
+    ["NPS", g("NPSE") + g("DAA on NPSE")],     
+    ["NPSC", g("NPSC") + g("DAA on NPSC")],    
+    ["RECOVERY", g("REC P & A") + g("Recovery")],
+    ["PROT", g("Prof Tax")],
+    ["WATER", g("W Ch")],
+    ["LIC", g("LIC")]
+  ];
+
+  const zeroEarnings = earnings.filter(e => e[1] !== 0);
+  const zeroDeductions = deductions.filter(d => d[1] !== 0);
+  const totalDeduction = g("Total Deduction");
+  const netIncome = g("Net Income");
+
+  const loanData = [];
+
+  // Example mapping (adjust column names if needed)
+  const loanRecovery = g("Loan Recovery");
+  const loanType = row[h.indexOf("Loan Type")] || "";
+  const installment = row[h.indexOf("Instalment Number")] || "";
+
+  if (loanRecovery || loanType || installment) {
+    loanData.push([
+      loanType,
+      installment,
+      formatCurrency(loanRecovery)
+    ]);
+  }
+
+  renderSalaryBreakup(
+    //earnings,
+    zeroEarnings,
+    //deductions,
+    zeroDeductions,
+    loanData,
+    grossAmount,
+    totalDeduction,
+    netIncome
+  );
+}
+
+
+function renderSalaryBreakup(earnings, deductions, loanData, gross, totalDeduction, net) {
+
+  const tbody = id("SalarySlipBreakup")?.querySelector("tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const maxRows = Math.max(earnings.length, deductions.length, loanData.length);
+
+  for (let i = 0; i < maxRows; i++) {
+
+    const earn = earnings[i] || ["", 0];
+    const ded = deductions[i] || ["", 0];
+    const loan = loanData[i] || ["", "", ""];
+
+    // 🔥 Skip row if ALL empty OR zero
+    const isEmptyRow =
+      (!earn[0] && !ded[0] && !loan[0]) ||
+      (earn[1] === 0 && ded[1] === 0 && !loan[0]);
+
+    if (isEmptyRow) continue;
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${earn[1] !== 0 ? earn[0] : ""}</td>
+      <td style="text-align:right">${earn[1] !== 0 ? (earn[1]) : ""}</td>
+
+      <td>${ded[1] !== 0 ? ded[0] : ""}</td>
+      <td style="text-align:right">${ded[1] !== 0 ? (ded[1]) : ""}</td>
+
+      <td>${loan[0] || ""}</td>
+      <td>${loan[1] || ""}</td>
+      <td style="text-align:right">${loan[2] || ""}</td>
+    `;
+
+    tbody.appendChild(tr);
+  }
+
+  // =========================
+  // 🔻 TOTAL ROW
+  // =========================
+  const totalRow = document.createElement("tr");
+  totalRow.innerHTML = `
+    <td><b>GROSS AMOUNT</b></td>
+    <td style="text-align:right"><b>${(gross)}</b></td>
+    <td><b>TOTAL DEDUCTION</b></td>
+    <td style="text-align:right"><b>${(totalDeduction)}</b></td>
+    <td colspan="3"></td>
+  `;
+  tbody.appendChild(totalRow);
+
+  // =========================
+  // 🔻 NET SALARY
+  // =========================
+  const words = numberToWords(Number(net));
+
+  const netRow = document.createElement("tr");
+  netRow.innerHTML = `
+    <td><b>NET SALARY</b></td>
+    <td style="text-align:right"><b>${(net)}</b></td>
+    <td colspan="5"><b>Rs. ${words} ONLY</b></td>
+  `;
+  tbody.appendChild(netRow);
+}
+
+
+// =========================
+// 🔥 PARSE FY (2025-26 → 2025 & 2026)
+// =========================
+function parseFY(fy) {
+
+  if (!fy) return {};
+
+  let [start, end] = fy.split("-");
+
+  const startYear = Number(start);
+
+  const endYear = end.length === 2
+    ? Number(start.slice(0, 2) + end)
+    : Number(end);
+
+  return { startYear, endYear };
+}
+
+// =========================
+// 🔥 CHECK MONTH IN FY (MAR → FEB)
+// =========================
+function isMonthInFY(monthStr, fy) {
+
+  if (!monthStr || !fy) return false;
+
+  const { startYear, endYear } = parseFY(fy);
+
+  const [mon, yearStr] = monthStr.split("-");
+  const year = Number(yearStr);
+
+  const monthOrder = {
+    Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6,
+    Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12
+  };
+
+  const m = monthOrder[mon];
+
+  if (m >= 3 && m <= 12 && year === startYear) return true;
+  if ((m === 1 || m === 2) && year === endYear) return true;
+
+  return false;
+}
+
+// =========================
+// 🔥 GET PB DATA (EMP + FY)
+// =========================
+function getPBFYRows(empName) {
+
+  if (!pbData || !pbData.headers || !pbData.rows) return [];
+
+  const h = pbData.headers;
+
+  const nameIndex = h.indexOf("Employee Name");
+  const monthIndex = h.indexOf("Salary Month");
+
+  const selectedFY = id("SalSlipPage_FY")?.value;
+
+  return pbData.rows.filter(row =>
+    String(row[nameIndex]).trim() === empName &&
+    isMonthInFY(String(row[monthIndex]).trim(), selectedFY)
+  );
+}
+
+// =========================
+// 🔥 SORT MONTHS (MAR → FEB)
+// =========================
+function sortFYMonths(rows, monthIndex) {
+
+  const order = {
+    Mar:1, Apr:2, May:3, Jun:4, Jul:5, Aug:6,
+    Sep:7, Oct:8, Nov:9, Dec:10, Jan:11, Feb:12
+  };
+
+  return rows.sort((a, b) => {
+    const [m1] = a[monthIndex].split("-");
+    const [m2] = b[monthIndex].split("-");
+    return order[m1] - order[m2];
+  });
+}
+
+
+function formatTypeText(text, prefix) {
+
+  if (!text) return "";
+
+  text = String(text).toUpperCase();
+
+  const patterns = [
+    { key: "DAA", short: "DA" },
+    { key: "TA", short: "TA" },
+    { key: "HRA", short: "HRA" },
+    { key: "INCREMENT", short: "Inc." },
+    { key: "PAY", short: "Pay" },
+    { key: "MACP", short: "MACP" }
+  ];
+
+  const result = [];
+
+  patterns.forEach(p => {
+    if (text.includes(p.key)) {
+      result.push(`${p.short} ${prefix}`);
+    }
+  });
+
+  return result.join(", ");
+}
+
+
+// =========================
+// 🔥 BUILD FY TABLE (FINAL)
+// =========================
+function buildFYBreakup(empName) {
+
+  if (!pbData || !pbData.headers || !pbData.rows) return;
+
+  const h = pbData.headers;
+
+  const nameIndex = h.indexOf("Employee Name");
+  const monthIndex = h.indexOf("Salary Month");  
+
+  const selectedMonth = id("SalSlipPage_SalMonth")?.value;
+  if (!selectedMonth) return;
+
+  const [sm, sy] = selectedMonth.split("-");
+  const selectedYear = Number(sy);
+
+  const monthOrder = {
+    Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6,
+    Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12
+  };
+
+  const sMonth = monthOrder[sm];
+
+  const tbody = id("SalarySlipFYDetails")?.querySelector("tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const g = (row, col) => {
+    const i = h.indexOf(col);
+    return i !== -1 ? Number(row[i]) || 0 : 0;
+  };
+
+  let totalGross = 0;
+  let totalTDS = 0;
+  let totalArrear = 0;
+  let totalRecovery = 0;
+
+  // 🔥 LOOP ALL DATA (NO FY FILTER)
+  pbData.rows.forEach(row => {
+
+    if (String(row[nameIndex]).trim() !== empName) return;
+
+    const arrearText = row[h.indexOf("Arrears Details")] || "";
+    const recoveryText = row[h.indexOf("Recovery Details")] || "";
+
+    const arrearType = formatTypeText(arrearText, "Arr.");
+    const recoveryType = formatTypeText(recoveryText, "Rec.");
+
+    const month = row[monthIndex];
+    if (!month) return;
+
+    const [rm, ry] = month.split("-");
+    const rowYear = Number(ry);
+    const rMonth = monthOrder[rm];
+
+    let show = false;
+
+    // =========================
+    // 🔥 MARCH SPECIAL (FULL FY)
+    // =========================
+    if (sm === "Mar") {
+
+      const prevYear = selectedYear - 1;
+
+      if (rowYear === prevYear && rMonth >= 3) show = true;
+      if (rowYear === selectedYear && rMonth <= 2) show = true;
+
+    } 
+    else {
+
+      // 🔥 NORMAL (PAST MONTHS)
+      if (rowYear < selectedYear) show = true;
+      else if (rowYear === selectedYear && rMonth < sMonth) show = true;
+
+    }
+
+    if (!show) return;
+
+    const arrear = g(row, "Total DAA") + g(row, "Arrears");
+    const recovery = g(row, "REC P & A") + g(row, "Recovery");
+    const gross = g(row, "Gross Income");
+    const tds = g(row, "IT");
+
+    // 🔥 skip empty rows
+    if (!arrear && !recovery && !gross && !tds) return;
+
+    totalGross += gross;
+    totalTDS += tds;
+    totalArrear += arrear;
+    totalRecovery += recovery;
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${arrearType}</td>
+      <td style="text-align:right">${arrear ? (arrear) : ""}</td>
+
+      <td>${recoveryType}</td>
+      <td style="text-align:right">${recovery ? (recovery) : ""}</td>
+
+      <td>${month}</td>
+      <td style="text-align:right">${(gross)}</td>
+      <td style="text-align:right">${(tds)}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  // =========================
+  // 🔻 TOTAL ROW
+  // =========================
+  const totalRow = document.createElement("tr");
+
+  totalRow.innerHTML = `
+    <td><b>Total</b></td>
+    <td style="text-align:right"><b>${(totalArrear)}</b></td>
+    <td><b>Total</b></td>
+    <td style="text-align:right"><b>${(totalRecovery)}</b></td>
+    <td><b>Total</b></td>
+    <td style="text-align:right"><b>${(totalGross)}</b></td>
+    <td style="text-align:right"><b>${(totalTDS)}</b></td>
+  `;
+
+  tbody.appendChild(totalRow);
+}
+
+
+
+function handleSalarySlipChange() {
+
+  const empName = id("SalSlipPage_Emp")?.value;
+  const month = id("SalSlipPage_SalMonth")?.value;
+
+  if (!empName || empName === "Select") return;
+  if (!month || month === "Select") return;
+
+  // 🔥 Update header
+  id("SalarySlipHeaderMonth").textContent = formatMonthYear(month);
+
+  // 🔥 Fill data
+  fillSalarySlip(empName);
+  buildSalaryBreakup(empName);
+  buildFYBreakup(empName);
+}
+
+  ["SalSlipPage_Station", "SalSlipPage_Emp", "SalSlipPage_SalMonth", "SalSlipPage_FY"]
+  .forEach(idName => {
+
+    id(idName)?.addEventListener("change", () => {
+      setTimeout(() => {
+        handleSalarySlipChange(); // ✅ now reads updated value
+      }, 0);      
+    });
+
+  });
+
+
+// =========================
+// 🔥 BUILD EXCEL HTML (FINAL)
+// =========================
+function buildExcelSalarySlipHTML() {
+
+  const original = id("SalarySlipTable");
+  if (!original) return "";
+
+  // 🔥 CLONE NODE
+  const clone = original.cloneNode(true);
+
+  // =========================
+  // 🔥 COPY COMPUTED STYLES
+  // =========================
+  function copyStyles(src, dest) {
+
+    const computed = window.getComputedStyle(src);
+
+    let styleStr = "";
+
+    for (let i = 0; i < computed.length; i++) {
+      const prop = computed[i];
+      styleStr += `${prop}:${computed.getPropertyValue(prop)};`;
+    }
+
+    dest.style.cssText = styleStr;
+
+    // recurse
+    for (let i = 0; i < src.children.length; i++) {
+      copyStyles(src.children[i], dest.children[i]);
+    }
+  }
+
+  copyStyles(original, clone);
+
+  // =========================
+  // 🔥 FIX IMAGE SIZE
+  // =========================
+  clone.querySelectorAll("img").forEach(img => {
+    img.style.width = "60px";
+    img.style.height = "60px";
+    img.style.objectFit = "contain";
+  });
+
+  // =========================
+  // 🔥 CREATE DOCUMENT
+  // =========================
+  const doc = document.implementation.createHTMLDocument("Salary Slip");
+
+  const style = doc.createElement("style");
+
+  style.textContent = `
+    @page {
+      size: A4 portrait;
+      margin: 8mm;
+    }
+      *{
+      font-size:11px;
+      }
+    
+    body {
+      margin: 0;
+    }
+
+    table {
+      table-layout: fixed;
+      width: 950px;
+      border-collapse: collapse;
+    }
+
+    tr {
+      page-break-inside: avoid;
+    }
+  `;
+
+  doc.head.appendChild(style);
+
+  const div = doc.createElement("div");
+  div.appendChild(clone);
+
+  doc.body.appendChild(div);
+
+  return "<!DOCTYPE html>\n<html>\n" + doc.documentElement.innerHTML + "\n</html>";
+}
+
+
+function exportSalarySlipExcel() {
+
+  const html = buildExcelSalarySlipHTML();
+
+  const blob = new Blob([html], {
+    type: "application/vnd.ms-excel"
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+
+  const empName = id("SalSlipPage_Emp")?.value || "SalarySlip";
+  const month = id("SalSlipPage_SalMonth")?.value || "";
+
+  a.href = url;
+  a.download = `${empName}_${month}.xls`;
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+}
+
+id("SSexcelBtn")?.addEventListener("click", exportSalarySlipExcel);
+
+
+function printSalarySlipPDF() {
+   openPrintWindow(buildExcelSalarySlipHTML());
+}
+
+id("SSprintBtn")?.addEventListener("click", printSalarySlipPDF);
 
   </script>
 
