@@ -758,7 +758,7 @@
     .PB-Table-WrapperGO table:not(#PB_GOITCalc),
     .PB-Table-WrapperNPS table:not(#PB_NPSITCalc),
     .budget-table,
-    .budgetfromPB-table {
+    .budgetfromPB-table{
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
@@ -1624,6 +1624,33 @@
       transform: translateX(100%);
     }
 
+    .ITtableWrapper {
+      margin: 4px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 130px);
+      /* adjust header height */
+      gap: 10px;
+
+    }
+
+    .ITtableWrapper table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: auto;
+      background: #ffffff;
+      border-radius: 10px;
+      height: max-content;
+    }
+
+    .ITtableWrapper table th,
+    .ITtableWrapper table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      border-right: dotted 1px #d7dae0;
+    }
+
     /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
   =================================================== */
@@ -2000,7 +2027,7 @@
               <td><label>TA Zone :</label></td>
               <td><input disabled id="PayBillPage_TAZone"></td>
               <td><label>HRA Zone :</label></td>
-              <td><input disabled id="PayBillPage_HRAZone"></td>
+              <td><input disabled id="PayBillPage_HRAZone"><input hidden id="PayBillPage_HRA%"></td>
               <td></td>
             </tr>
           </table>
@@ -2447,10 +2474,10 @@
               <td colspan="4">
                 <div class="salary-toggle">
 
-                  <input type="radio" name="salaryMode" id="calcSalary" checked>
+                  <input type="radio" name="salaryMode" id="calcSalary">
                   <label for="calcSalary" class="btn red">Calculated Salary</label>
 
-                  <input type="radio" name="salaryMode" id="paidSalary">
+                  <input type="radio" name="salaryMode" id="paidSalary" checked>
                   <label for="paidSalary" class="btn green">Paid Salary</label>
 
                   <div class="slider"></div>
@@ -7155,6 +7182,24 @@
 
       // 🌆 Update Zones (both pages)
       const zone = getCityZone(station) || {};
+      const hraZone = zone.hra;
+      setTimeout(() => {
+        const daPercent = Number(id("PayBillPage_DA%")?.value) || 0;
+
+        let percent = 0;
+
+        if (hraZone === "X") percent = 28;
+        else if (hraZone === "Y") percent = 18;
+        else percent = 8;
+
+        if (daPercent >= 50) percent += 2;
+        else if (daPercent >= 25) percent += 1;
+
+        id("PayBillPage_HRA%").value = percent;
+
+      }, 100); // ⏱ 50–150ms is ideal
+
+
 
       id("PayBillPage_TAZone").value = val(zone.ta);
       id("PayBillPage_HRAZone").value = val(zone.hra);
@@ -12298,17 +12343,31 @@
       });
     }
 
-    document.querySelectorAll("input[name='salaryMode']").forEach(radio => {
-      radio.addEventListener("change", () => {
+   document.querySelectorAll("input[name='salaryMode']").forEach(radio => {
 
-        if (radio.id === "calcSalary") {
-          console.log("Calculated Salary Selected");
-        } else {
-          console.log("Paid Salary Selected");
-        }
+  radio.addEventListener("change", () => {
 
-      });
-    });
+    const empName = id("ITPage_Emp")?.value;
+    const selectedFY = id("ITPage_FY")?.value;
+
+    const wrapper = document.querySelector(".ITtableWrapper");
+    if (wrapper) wrapper.innerHTML = "Loading...";
+
+    // =========================
+    // 🔥 MODE SWITCH
+    // =========================
+    const mode = (radio.id === "calcSalary") ? "calculated" : "paid";
+
+    //console.log(`🔄 Mode Changed → ${mode}`);
+
+    // =========================
+    // 🔥 RENDER TABLE
+    // =========================
+    renderCalculatedITTable(empName, selectedFY, mode);
+
+  });
+
+});
 
     // =========================
     // 🔥 CONSTANTS
@@ -12359,13 +12418,8 @@
     // =========================
     function getEmpPayDetails(empName) {
 
-      if (!window.empData || !window.empData.headers || !window.empData.rows) {
-        console.warn("⏳ empData not ready");
-        return { level: 0, index: 0 };
-      }
-
-      const h = window.empData.headers;
-      const rows = window.empData.rows;
+      const h = window.empCalcHeaders;
+      const rows = window.empCalcRows;
 
       const nameIndex = h.indexOf("Employee Name");
 
@@ -12404,93 +12458,479 @@
       return Number(row[colIndex]) || 0;
     }
 
+
+    function getRetirementMonth(retirementDate) {
+
+  if (!retirementDate) return "";
+
+  // Format: May-31,2027
+  const [monthPart, yearPart] = retirementDate.split(",");
+
+  if (!monthPart || !yearPart) return "";
+
+  const monthName = monthPart.split("-")[0]; // May
+  const year = yearPart.trim();              // 2027
+
+  return `${monthName}-${year}`;             // May-2027
+}
+
+function getMonthValue(m) {
+  const [mon, yr] = m.split("-");
+  return Number(yr) * 12 + monthOrder[mon];
+}
     // =========================
     // 🚀 MAIN FUNCTION
     // =========================
-    function buildCalculatedFY(empName, selectedFY) {
+  function buildProjectedFY(empName, selectedFY, mode = "calculated") {
 
-      if (!pbData || !pbData.rows) return [];
+  if (!pbData || !pbData.rows) return [];
 
-      const h = pbData.headers;
-      const rows = pbData.rows;
+  const h = pbData.headers;
+  const rows = pbData.rows;
 
-      const nameIndex = h.indexOf("Employee Name");
-      const monthIndex = h.indexOf("Salary Month");
-      const basicIndex = h.indexOf("Basic Pay");
+  const nameIndex = h.indexOf("Employee Name");
+  const monthIndex = h.indexOf("Salary Month");
 
-      // =========================
-      // 🔥 FILTER EMP + FY
-      // =========================
-      const empRows = rows.filter(r =>
-        String(r[nameIndex]).trim() === empName &&
-        isMonthInFY(r[monthIndex], selectedFY)
-      );
+  const empRows = rows.filter(r =>
+    String(r[nameIndex]).trim() === empName
+  );
 
-      // =========================
-      // 🔥 SORT
-      // =========================
-      empRows.sort((a, b) => {
-        const [m1, y1] = a[monthIndex].split("-");
-        const [m2, y2] = b[monthIndex].split("-");
+  if (!empRows.length) return [];
 
-        return (Number(y1) * 12 + monthOrder[m1]) -
-          (Number(y2) * 12 + monthOrder[m2]);
+  empRows.sort((a, b) => {
+    const [m1, y1] = a[monthIndex].split("-");
+    const [m2, y2] = b[monthIndex].split("-");
+    return (Number(y1) * 12 + monthOrder[m1]) -
+           (Number(y2) * 12 + monthOrder[m2]);
+  });
+
+  const lastPB = empRows[empRows.length - 1];
+
+  const g = (row, col) => {
+    const i = h.indexOf(col);
+    return i !== -1 ? Number(row[i]) || 0 : 0;
+  };
+
+  // =========================
+  // 🔥 BASE VALUES
+  // =========================
+  let DA_percent = Number(id("PayBillPage_DA%")?.value) || g(lastPB, "DA%");
+  let HRA_percent = Number(id("PayBillPage_HRA%")?.value) || g(lastPB, "HRA%");
+  let TA = g(lastPB, "TA");
+  let CGEIS = g(lastPB, "CGEIS");
+  let GPF = g(lastPB, "GPF");
+  let NetIT = g(lastPB, "Net IT");
+
+  // =========================
+  // 🔥 EMP DATA
+  // =========================
+  const empHeaders = window.empCalcHeaders;
+  const empRowsData = window.empCalcRows;
+
+  const empRow = empRowsData.find(r =>
+    String(r[empHeaders.indexOf("Employee Name")]).trim() === empName
+  );
+
+  if (!empRow) return [];
+
+  const emp = getEmpPayDetails(empName);
+
+  let level = emp.level;
+  let index = emp.index;
+
+  const lastIncrementMonth =
+    String(empRow[empHeaders.indexOf("Last Increment")] || "").split("-")[0];
+
+  const retirementMonth = getRetirementMonth(
+    empRow[empHeaders.indexOf("Superannuation")]
+  );
+
+  const dept =
+    String(empRow[empHeaders.indexOf("Department")] || "").toUpperCase();
+
+  // =========================
+  // 🔁 LOOP FY
+  // =========================
+  const result = [];
+
+  FY_MONTHS.forEach((m, i) => {
+
+    const startYear = Number(selectedFY.split("-")[0]);
+    const year = (i <= 9) ? startYear : startYear + 1;
+
+    const fullMonth = `${m}-${year}`;
+
+    const pbRow = empRows.find(r =>
+      String(r[monthIndex]).trim() === fullMonth
+    );
+
+    // =========================
+    // 🔹 PAID MODE
+    // =========================
+    if (mode === "paid") {
+
+      if (!pbRow) {
+        result.push({
+          month: fullMonth,
+          "Basic Pay": 0,
+          "DA": 0,
+          "TA": 0,
+          "HRA": 0,
+          "NPSE": 0,
+          "NPSE2": 0,
+          "Gross Income": 0,
+          "Net IT": 0,
+          "GPF": 0,
+          "CGEIS": 0,
+          "Total Deduction": 0
+        });
+        return;
+      }
+
+      let baseNPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
+
+      let NPSE = dept !== "GO" ? baseNPSE : 0;
+
+      result.push({
+        month: fullMonth,
+        "Basic Pay": g(pbRow, "Basic Pay"),
+        "DA": g(pbRow, "DA"),
+        "TA": g(pbRow, "TA"),
+        "HRA": g(pbRow, "HRA"),
+        "NPSE": NPSE,
+        "NPSE2": NPSE, // 🔥 repeated
+        "Gross Income": g(pbRow, "Gross Income"),
+        "Net IT": g(pbRow, "Net IT"),
+        "GPF": g(pbRow, "GPF"),
+        "CGEIS": g(pbRow, "CGEIS"),
+        "Total Deduction": g(pbRow, "Total Deduction")
       });
 
-      // =========================
-      // 🔥 GET LEVEL + INDEX
-      // =========================
-      let { level, index } = getEmpPayDetails(empName);
-
-      let lastRow = null;
-      const result = [];
-
-      const fyStart = Number(selectedFY.split("-")[0]);
-      const fyEnd = fyStart + 1;
-
-      // =========================
-      // 🔁 LOOP FY MONTHS
-      // =========================
-      FY_MONTHS.forEach((m, i) => {
-
-        const year = (i <= 9) ? fyStart : fyEnd; // Mar-Dec → fyStart, Jan-Feb → fyEnd
-        const fullMonth = `${m}-${year}`;
-
-        let current = empRows.find(r =>
-          String(r[monthIndex]) === fullMonth
-        );
-
-        // =========================
-        // 🔥 FILL MISSING MONTH
-        // =========================
-        if (!current && lastRow) {
-          current = [...lastRow];
-          current[monthIndex] = fullMonth;
-        }
-
-        if (!current) return;
-
-        // =========================
-        // 🔥 INCREMENT LOGIC
-        // =========================
-        if (m === "Jul" || m === "Jan") {
-
-          index += 1;
-
-          const newBasic = getBasicFromCPC(level, index);
-
-          if (basicIndex !== -1 && newBasic) {
-            current[basicIndex] = newBasic;
-          }
-        }
-
-        lastRow = [...current];
-        result.push(current);
-      });
-
-      return result;
+      return;
     }
 
+    // =========================
+    // 🔹 CALCULATED MODE
+    // =========================
+    let basic, DA, HRA, NPSE;
+
+    if (!pbRow) {
+
+      if (m === lastIncrementMonth) index++;
+
+      basic = getBasicFromCPC(level, index);
+
+      DA = basic * (DA_percent / 100);
+      HRA = HRA_percent ? basic * (HRA_percent / 100) : 0;
+
+      NPSE = dept !== "GO" ? (basic + DA) * 0.14 : 0;
+
+      let gross = basic + DA + HRA + TA + NPSE;
+      let deduction = NPSE + CGEIS + GPF + NetIT;
+
+      // 🔥 retirement
+      if (
+        retirementMonth &&
+        getMonthValue(fullMonth) >= getMonthValue(retirementMonth)
+      ) {
+        basic = DA = HRA = TA = NPSE = gross = deduction = 0;
+      }
+
+      result.push({
+        month: fullMonth,
+        "Basic Pay": Math.round(basic),
+        "DA": Math.round(DA),
+        "TA": Math.round(TA),
+        "HRA": Math.round(HRA),
+        "NPSE": Math.round(NPSE),
+        "NPSE2": Math.round(NPSE), // 🔥 repeated
+        "Gross Income": Math.round(gross),
+        "Net IT": NetIT,
+        "GPF": GPF,
+        "CGEIS": CGEIS,
+        "Total Deduction": Math.round(deduction)
+      });
+
+    } else {
+
+      let baseNPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
+      NPSE = dept !== "GO" ? baseNPSE : 0;
+
+      result.push({
+        month: fullMonth,
+        "Basic Pay": g(pbRow, "Basic Pay"),
+        "DA": g(pbRow, "DA"),
+        "TA": g(pbRow, "TA"),
+        "HRA": g(pbRow, "HRA"),
+        "NPSE": NPSE,
+        "NPSE2": NPSE, // 🔥 repeated
+        "Gross Income": g(pbRow, "Gross Income"),
+        "Net IT": g(pbRow, "Net IT"),
+        "GPF": g(pbRow, "GPF"),
+        "CGEIS": g(pbRow, "CGEIS"),
+        "Total Deduction": g(pbRow, "Total Deduction")
+      });
+    }
+  });
+
+  return result;
+}
+
+
+    function buildProjectedFY2(empName, selectedFY, mode = "calculated") {
+
+  if (!pbData || !pbData.rows) return [];
+
+  const h = pbData.headers;
+  const rows = pbData.rows;
+
+  const nameIndex = h.indexOf("Employee Name");
+  const monthIndex = h.indexOf("Salary Month");
+
+  // =========================
+  // 🔥 FILTER EMP PB DATA
+  // =========================
+  const empRows = rows.filter(r =>
+    String(r[nameIndex]).trim() === empName
+  );
+
+  if (!empRows.length) return [];
+
+  // =========================
+  // 🔥 SORT PB DATA
+  // =========================
+  empRows.sort((a, b) => {
+    const [m1, y1] = a[monthIndex].split("-");
+    const [m2, y2] = b[monthIndex].split("-");
+    return (Number(y1) * 12 + monthOrder[m1]) -
+           (Number(y2) * 12 + monthOrder[m2]);
+  });
+
+  const lastPB = empRows[empRows.length - 1];
+
+  const g = (row, col) => {
+    const i = h.indexOf(col);
+    return i !== -1 ? Number(row[i]) || 0 : 0;
+  };
+
+  // =========================
+  // 🔥 BASE VALUES
+  // =========================
+  let DA_percent = g(lastPB, "DA%");
+  console.log("DA_percent", DA_percent)
+  let HRA = g(lastPB, "HRA");
+  let HRA_percent = id("PayBillPage_HRA%").value;
+  let TA = g(lastPB, "TA");
+  let CGEIS = g(lastPB, "CGEIS");
+  let GPF = g(lastPB, "GPF");
+  let NetIT = g(lastPB, "Net IT");
+
+  // =========================
+  // 🔥 EMP DATA
+  // =========================
+  const empHeaders = window.empCalcHeaders;
+  const empRowsData = window.empCalcRows;
+
+  const empNameIndex = empHeaders.indexOf("Employee Name");
+
+  const empRow = empRowsData.find(r =>
+    String(r[empNameIndex]).trim() === empName
+  );
+
+  if (!empRow) return [];
+
+  const emp = getEmpPayDetails(empName);
+
+  let level = emp.level;
+  let index = emp.index;
+
+  const lastIncrementMonth =
+    String(empRow[empHeaders.indexOf("Last Increment")] || "").split("-")[0];
+
+  const retirementDate =
+    empRow[empHeaders.indexOf("Superannuation")] || "";
+
+  const dept =
+  String(empRow[empHeaders.indexOf("Department")] || "").toUpperCase();
+
+  const retirementMonth = getRetirementMonth(retirementDate);
+
+  // =========================
+  // 🔁 LOOP FY
+  // =========================
+  const result = [];
+
+  FY_MONTHS.forEach((m, i) => {
+
+    const startYear = Number(selectedFY.split("-")[0]);
+    const year = (i <= 9) ? startYear : startYear + 1;
+
+    const fullMonth = `${m}-${year}`;
+
+    const pbRow = empRows.find(r =>
+      String(r[monthIndex]).trim() === fullMonth
+    );
+
+    // =========================
+    // 🔹 PAID MODE (FIXED)
+    // =========================
+    if (mode === "paid") {
+      if (!pbRow) {
+        result.push({
+          month: fullMonth,
+          "Basic Pay": 0,
+          "DA": 0,
+          "TA": 0,
+          "HRA": 0,          
+          "NPSE": 0,
+          "CEA":0,
+          "EL Encashment":0,
+          "Bonus":0,
+          "DAA & Arrears":0,
+          "Uniform Allowance":0,
+          "Gross Income": 0,
+          "Net IT": 0,    
+          "GPF": 0,      
+          "NPSC": 0,
+          "NPSE2": 0,
+          "CGEIS": 0,
+          "Prof Tax": 0,
+          "Recovery Pay & Arr": 0,
+          "Total Deduction": 0      
+        });
+        return;
+      }
+
+      const NPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
+      const NPSC = g(pbRow, "NPSC") + g(pbRow, "DAA on NPSC");
+      const Arrear = g(pbRow, "Arrears") + g(pbRow, "Total DAA");
+
+      result.push({
+        month: fullMonth,
+        "Basic Pay": g(pbRow, "Basic Pay"),
+        "DA": g(pbRow, "DA"),
+        "TA": g(pbRow, "TA"),
+        "HRA": g(pbRow, "HRA"),        
+        "NPSE": NPSE,
+        "CEA":g(pbRow, "CEA"), 
+        "EL Encashment":g(pbRow, "EL Encash"), 
+        "Bonus":g(pbRow, "Bonus"), 
+        "DAA & Arrears":Arrear,
+        "Uniform Allowance":g(pbRow, "Uni All"), 
+        "Gross Income": g(pbRow, "Gross Income"),
+        "Net IT": g(pbRow, "Net IT"),
+        "GPF": g(pbRow, "GPF"),
+        "NPSC": NPSC,
+        "NPSE2": NPSE,
+        "CGEIS": g(pbRow, "CGEIS"),
+        "Prof Tax": g(pbRow, "Prof Tax"),
+        "Recovery Pay & Arr": g(pbRow, "REC P & A"),
+        "Total Deduction": g(pbRow, "Total Deduction")
+      });
+
+      return;
+    }
+
+    // =========================
+    // 🔹 CALCULATED MODE
+    // =========================
+    let row;
+
+    if (!pbRow) {
+
+      if (m === lastIncrementMonth) index++;
+
+      let basic = getBasicFromCPC(level, index);
+      let DA = basic * (DA_percent / 100);
+      if (HRA !== 0){
+        HRA = HRA_percent ? basic * (HRA_percent / 100) : 0;
+      }else{
+        HRA = 0;
+      }
+      
+      let NPSE = 0;
+      let NPSC = 0;
+      let NPS = 0;
+
+      if (dept !== "GO") {
+        NPSE = (basic + DA) * 0.14;
+        NPSC = (basic + DA) * 0.10;
+        NPS = NPSE + NPSC;
+      }
+
+      let gross = basic + DA + HRA + TA + NPSE;
+      let deduction = NPS + CGEIS + GPF + NetIT;
+
+      // 🔥 retirement
+      if (
+        retirementMonth &&
+        getMonthValue(fullMonth) >= getMonthValue(retirementMonth)
+      ) {
+        basic = DA = HRA = TA = NPSE = NPSC = NPS = gross = deduction = 0;
+      }
+
+      row = {
+        month: fullMonth,
+        "Basic Pay": Math.round(basic),
+        "DA": Math.round(DA),
+        "TA": Math.round(TA),
+        "HRA": Math.round(HRA),       
+        "NPSE": Math.round(NPSE), 
+        "CEA":0, 
+        "EL Encashment":0, 
+        "Bonus":0, 
+        "DAA & Arrears":0,
+        "Uniform Allowance":0, 
+        "Gross Income": Math.round(gross),
+        "Net IT": g(pbRow, "Net IT"),
+        "GPF": g(pbRow, "GPF"),
+        "NPSE2": Math.round(NPSE),
+        "NPSC": Math.round(NPSC),
+        "CGEIS": g(pbRow, "CGEIS"),
+        "Prof Tax": g(pbRow, "Prof Tax"),
+        "Recovery Pay & Arr": 0,
+        "Total Deduction": Math.round(deduction)
+      };
+
+    } else {
+
+      // 🔥 if PB exists use it directly (converted)
+      const NPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
+      const NPSC = g(pbRow, "NPSC") + g(pbRow, "DAA on NPSC");
+      const Arrear = g(pbRow, "Arrears") + g(pbRow, "Total DAA");
+
+      row = {
+        month: fullMonth,
+        "Basic Pay": g(pbRow, "Basic Pay"),
+        "DA": g(pbRow, "DA"),
+        "TA": g(pbRow, "TA"),
+        "HRA": g(pbRow, "HRA"),        
+        "NPSE": NPSE,
+        "CEA":g(pbRow, "CEA"), 
+        "EL Encashment":g(pbRow, "EL Encash"), 
+        "Bonus":g(pbRow, "Bonus"), 
+        "DAA & Arrears":Arrear,
+        "Uniform Allowance":g(pbRow, "Uni All"), 
+        "Gross Income": g(pbRow, "Gross Income"),
+        "Net IT": g(pbRow, "Net IT"),
+        "GPF": g(pbRow, "GPF"),
+        "NPSC": NPSC,
+        "NPSE2": NPSE,
+        "CGEIS": g(pbRow, "CGEIS"),
+        "Prof Tax": g(pbRow, "Prof Tax"),
+        "Recovery Pay & Arr": g(pbRow, "REC P & A"),
+        "Total Deduction": g(pbRow, "Total Deduction")
+      };
+    }
+
+    result.push(row);
+  });
+
+  return result;
+}
+
+
+    
     function renderCalculatedITTable(empName, selectedFY) {
 
       const wrapper = document.querySelector(".ITtableWrapper");
@@ -12498,7 +12938,7 @@
 
       wrapper.innerHTML = ""; // 🔥 clear previous
 
-      const data = buildCalculatedFY(empName, selectedFY);
+      const data = buildProjectedFY(empName, selectedFY, "calculated")
       const h = pbData.headers;
 
       if (!data.length) {
@@ -12515,10 +12955,12 @@
       // =========================
       const COMPONENTS = [
         ["Basic Pay", "Basic Pay"],
-        ["Dearness Allowance", "DA"],
-        ["Travel Allowance", "TA"],
+        ["DA", "DA"],
+        ["TA", "TA"],
         ["HRA", "HRA"],
-        ["NPS (Govt. Contri.)", "NPSE"],
+        ["NPSE", "NPSE"],
+        ["NPSE2", "NPSE"],
+        ["NPSC", "NPSC"],
         ["CEA", "CEA"],
         ["EL Encashment", "EL Encash"],
         ["Bonus", "Bonus"],
@@ -12527,7 +12969,8 @@
         ["Gross Income", "Gross Income"],
         ["IT Recovered", "Net IT"],
         ["NPS (Total Contri.)", "NPS"],
-        ["Prof Tax", "Prof Tax"]
+        ["Prof Tax", "Prof Tax"],
+        ["Recovery Pay & Arr","REC P & A"]
       ];
 
       const g = (row, col) => {
@@ -12553,7 +12996,7 @@
 
       headRow.innerHTML = `
     <th>Salary Breakup</th>
-    ${data.map(r => `<th>${r[h.indexOf("Salary Month")]}</th>`).join("")}
+    ${data.map(r => `<th>${r.month}</th>`).join("")}
     <th>Total</th>
   `;
 
@@ -12574,7 +13017,7 @@
         let html = `<td><b>${label}</b></td>`;
 
         data.forEach(row => {
-          const val = g(row, colName);
+          const val = row[colName] ?? 0;
           total += val;
 
           html += `
@@ -12622,30 +13065,41 @@
       // =========================
       wrapper.appendChild(table);
     }
+    
 
-    function isDataReady() {
-      return pbData && window.empData && cpcData;
-    }
 
-    ["ITPage_Station", "ITPage_Emp", "ITPage_FY"]
-      .forEach(idName => {
+   ["ITPage_Station", "ITPage_Emp", "ITPage_FY"]
+.forEach(idName => {
 
-        id(idName)?.addEventListener("change", () => {
+  id(idName)?.addEventListener("change", () => {
 
-          const empName = id("ITPage_Emp").value;
-          const selectedFY = id("ITPage_FY").value;
+    const empName = id("ITPage_Emp")?.value;
+    const selectedFY = id("ITPage_FY")?.value;
 
-          if (!empName || !selectedFY) return;
+    if (!empName || !selectedFY) return;
 
-          //if (!isDataReady()) {
-          //  console.warn("⏳ Waiting for data...");
-          //  return;
-          //}
+    // =========================
+    // 🔥 GET CURRENT MODE
+    // =========================
+    const selectedModeEl = document.querySelector("input[name='salaryMode']:checked");
+    const mode = selectedModeEl?.id === "calcSalary" ? "calculated" : "paid";
 
-          renderCalculatedITTable(empName, selectedFY);
-        });
+    console.log(`🔄 Dropdown Changed → ${mode}`);
 
-      });
+    // =========================
+    // 🔄 LOADING STATE
+    // =========================
+    const wrapper = document.querySelector(".ITtableWrapper");
+    if (wrapper) wrapper.innerHTML = "Loading...";
+
+    // =========================
+    // 🔥 RENDER
+    // =========================
+    renderCalculatedITTable(empName, selectedFY, mode);
+
+  });
+
+});
   </script>
 
 </body>
