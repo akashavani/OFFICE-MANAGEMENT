@@ -1,23 +1,31 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-  <title>PayBill Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <base target="_top">
-  <!-- font style -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <!-- Icon -->
-  <script defer src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+  <head>
+    <title>PayBill Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
+    <!-- font style -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet">
+    <!-- Icon -->
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-  <style>
+    <style>
     /* =========================
       RESET
       ========================= */
@@ -1631,6 +1639,7 @@
       height: calc(100vh - 130px);
       /* adjust header height */
       gap: 10px;
+      text-align: center;
 
     }
 
@@ -1649,7 +1658,13 @@
       padding: 5px 8px;
       border-bottom: 1px solid #e5e7eb;
       border-right: dotted 1px #d7dae0;
+      text-align: left;
     }
+    .ITtableWrapper table th{
+      background: #1f4e79;
+      color: #ffffff;
+    }
+    
 
     /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
@@ -1752,866 +1767,938 @@
     }
   </style>
 
-</head>
+  </head>
 
-<body>
+  <body>
 
-  <div class="app">
+    <div class="app">
 
-    <div class="left-panel collapsed" id="sidebar">
+      <div class="left-panel collapsed" id="sidebar">
 
-      <!-- Toggle button -->
-      <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+        <!-- Toggle button -->
+        <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-      <div class="menu-list">
+        <div class="menu-list">
 
-        <button class="menu-btn active" data-tooltip="Dashboard" data-page="DashBoard">
-          <i data-lucide="layout-dashboard"></i>
-          <span>Dashboard</span>
-        </button>
+          <button class="menu-btn active" data-tooltip="Dashboard"
+            data-page="DashBoard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Employee Details" data-page="EmpPage">
-          <i data-lucide="user"></i>
-          <span>Employee Details</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Employee Details"
+            data-page="EmpPage">
+            <i data-lucide="user"></i>
+            <span>Employee Details</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Pay Bill" data-page="PayBillPage">
-          <i data-lucide="file-text"></i>
-          <span>Pay Bill</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Pay Bill"
+            data-page="PayBillPage">
+            <i data-lucide="file-text"></i>
+            <span>Pay Bill</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Salary Slip" data-page="SalarySlipPage">
-          <i data-lucide="receipt"></i>
-          <span>Salary Slip</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Salary Slip"
+            data-page="SalarySlipPage">
+            <i data-lucide="receipt"></i>
+            <span>Salary Slip</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
-          <i data-lucide="calculator"></i>
-          <span>Income Tax</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Income Tax" data-page="ITPage">
+            <i data-lucide="calculator"></i>
+            <span>Income Tax</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Pensions" data-page="PensionPage">
-          <i data-lucide="landmark"></i>
-          <span>Pensions</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Pensions"
+            data-page="PensionPage">
+            <i data-lucide="landmark"></i>
+            <span>Pensions</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Budgets" data-page="BudgetPage">
-          <i data-lucide="pie-chart"></i>
-          <span>Budgets</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Budgets"
+            data-page="BudgetPage">
+            <i data-lucide="pie-chart"></i>
+            <span>Budgets</span>
+          </button>
 
-        <button class="menu-btn" data-tooltip="Database" data-page="DatabasePage">
-          <i data-lucide="database"></i>
-          <span>Database</span>
-        </button>
+          <button class="menu-btn" data-tooltip="Database"
+            data-page="DatabasePage">
+            <i data-lucide="database"></i>
+            <span>Database</span>
+          </button>
+
+        </div>
+
+        <div class="menu-footer">
+          <button class="logout-btn" data-tooltip="Logout">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </button>
+        </div>
 
       </div>
 
-      <div class="menu-footer">
-        <button class="logout-btn" data-tooltip="Logout">
-          <i data-lucide="log-out"></i>
-          <span>Logout</span>
-        </button>
-      </div>
+      <div class="right-panel">
 
-    </div>
+        <img class="watermark"
+          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
 
-    <div class="right-panel">
-
-      <img class="watermark" src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-
-      <div class="SectionPage" id="DashBoard">
-        <div class="header">
-          <h2>Office Management</h2>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="EmpPage" style="display:none">
-        <div class="header">
-          <h2>Employee Profile Details</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:100px">
-              <col style="width:300px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:60px">
-              <col style="width:100px">
-              <col style="width:50px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:80px">
-              <col style="width:90px">
-              <col style="width:30px">
-            </colgroup>
-            <tr>
-              <td><label for="EmpPage_Station">Station :</label></td>
-              <td><select id="EmpPage_Station"></select></td>
-              <td><label for="EmpPage_Emp">Employee :</label></td>
-              <td><select id="EmpPage_Emp"></select></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><label>TA Zone :</label></td>
-              <td><input disabled id="EmpPage_TAZone"></td>
-              <td><label>HRA Zone :</label></td>
-              <td><input disabled id="EmpPage_HRAZone"></td>
-              <td></td>
-            </tr>
-          </table>
-          <div class="action-group"></div>
-        </div>
-        <div class="Emp-Table-Wrapper">
-          <table id="EmpDetailTbl">
-            <tr>
-              <th colspan="2">Personal Details</th>
-            </tr>
-            <tr>
-              <td>Name</td>
-              <td id="Employee Name"></td>
-            </tr>
-            <tr>
-              <td>Department</td>
-              <td id="Department"></td>
-            </tr>
-            <tr>
-              <td>HRIS</td>
-              <td id="HRIS"></td>
-            </tr>
-            <tr>
-              <td>Designation</td>
-              <td id="Designation"></td>
-            </tr>
-            <tr>
-              <td>Section</td>
-              <td id="Section"></td>
-            </tr>
-            <tr>
-              <td>Group</td>
-              <td id="Group"></td>
-            </tr>
-            <tr>
-              <td>PAN</td>
-              <td id="PAN"></td>
-            </tr>
-            <tr>
-              <td>Aadhaar</td>
-              <td id="Aadhaar"></td>
-            </tr>
-            <tr>
-              <td>PFMS</td>
-              <td id="PFMS"></td>
-            </tr>
-            <tr>
-              <td>PRAN</td>
-              <td id="PRAN"></td>
-            </tr>
-            <tr>
-              <td>GPF</td>
-              <td id="GPF"></td>
-            </tr>
-            <tr>
-              <td>Salary Account</td>
-              <td id="Account"></td>
-            </tr>
-            <tr>
-              <td>Mobile</td>
-              <td id="Mobile"></td>
-            </tr>
-            <tr>
-              <td>Address</td>
-              <td id="Address"></td>
-            </tr>
-          </table>
-          <table>
-            <tr>
-              <th colspan="2">Pay Details</th>
-            </tr>
-            <tr>
-              <td>Date of Birth</td>
-              <td id="DOB"></td>
-            </tr>
-            <tr>
-              <td>Date of Joining</td>
-              <td id="DOJ"></td>
-            </tr>
-            <tr>
-              <td>Superannuation</td>
-              <td id="Superannuation"></td>
-            </tr>
-            <tr>
-              <td>Last Increment Date</td>
-              <td id="Last Increment"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Salary Month</td>
-              <td id="Last Drawn Salary Month"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Pay Level</td>
-              <td id="Last Drawn Pay Level"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Grade Pay</td>
-              <td id="Last Drawn Grade Pay"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Pay Band</td>
-              <td id="Last Drawn Pay Band"></td>
-            </tr>
-            <tr>
-              <td>Last Drawn Basic Pay</td>
-              <td id="Last Drawn Basic Pay"></td>
-            </tr>
-            <tr>
-              <td>Last DA Drawn</td>
-              <td id="Last Drawn DA"></td>
-            </tr>
-            <tr>
-              <td>Qualifying Service as on Today</td>
-              <td id="Qualifying Service"></td>
-            </tr>
-            <tr>
-              <td>Completed 6 Monthly Period as on Today</td>
-              <td id="Completed 6 Monthly Period"></td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="PayBillPage" style="display:none">
-        <div class="header">
-          <h2>Pay Bill Generation</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:100px">
-              <col style="width:300px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:60px">
-              <col style="width:100px">
-              <col style="width:50px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:80px">
-              <col style="width:90px">
-              <col style="width:30px">
-            </colgroup>
-            <tr>
-              <td><label for="PayBillPage_Station">Station :</label></td>
-              <td><select id="PayBillPage_Station"></select></td>
-              <td></td>
-              <td></td>
-              <td style="display:none"><label for="PayBillPage_Emp">Employee
-                  :</label></td>
-              <td style="display:none"><select id="PayBillPage_Emp"></select></td>
-              <td><label for="PayBillPage_FY">FY :</label></td>
-              <td><select id="PayBillPage_FY"></select></td>
-              <td><label for="PayBillPage_SalMonth">Month :</label></td>
-              <td><select id="PayBillPage_SalMonth"></select></td>
-              <td><label>DA(%) :</label></td>
-              <td><input style="max-width:40px;" disabled id="PayBillPage_DA%" type="text">
-                <input id="PayBillPage_OldDA%" disabled style="max-width:40px;" type="text" hidden>
-              </td>
-              <td><label>TA Zone :</label></td>
-              <td><input disabled id="PayBillPage_TAZone"></td>
-              <td><label>HRA Zone :</label></td>
-              <td><input disabled id="PayBillPage_HRAZone"><input hidden id="PayBillPage_HRA%"></td>
-              <td></td>
-            </tr>
-          </table>
-
-          <div class="action-group">
-            <button id="PBeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
-            <button id="PBaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
-
-            <button id="PBprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
-            <button id="PBexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
-            <div id="PBprintMenu">
-              <div class="print-option menu-option" data-type="pdf-paybill">🧾 Pay Bill Report PDF</div>
-              <div class="print-option menu-option" id="daaPrintOption" data-type="pdf-daa">📊 DAA Bill Report PDF</div>
-
-              <!-- EXCEL OPTIONS -->
-              <div class="excel-option menu-option" data-type="excel-paybill">⬇️ Pay Bill Excel</div>
-              <div class="excel-option menu-option" id="daaExcelOption" data-type="excel-daa">⬇️ DAA Bill Excel</div>
-            </div>
+        <div class="SectionPage" id="DashBoard">
+          <div class="header">
+            <h2>Office Management</h2>
           </div>
         </div>
-        <div class="PB-Table-Wrapper">
 
-          <div class="PB-Table-WrapperGO">
-            <table id="PB_GOViewTbl"></table>
-            <table id="PB_GOITCalc"></table>
-            <table id="PB_GOEditTbl"></table>
-            <table class="daaArrearsTbl" id="daaGOTableCalculation">
+        <div class="SectionPage" id="EmpPage" style="display:none">
+          <div class="header">
+            <h2>Employee Profile Details</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
               <colgroup>
-                <col style="width:180px">
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:100px">
+                <col style="width:300px">
+                <col style="width:40px">
+                <col style="width:90px">
                 <col style="width:60px">
-                <col style="width:60px">
-                <col style="width:50px">
-                <col style="width:60px">
-                <col style="width:50px">
-                <col style="width:60px">
-                <col style="width:50px">
+                <col style="width:100px">
                 <col style="width:50px">
                 <col style="width:40px">
-                <col style="width:50px">
-                <col style="width:40px">
-                <col style="width:50px">
-              </colgroup>
-              <thead>
-                <tr>
-                  <th colspan="13" style="border: none;">
-                    <div class="header-container">
-                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-
-                      <div class="header-text">
-                        <h1>PRASAR BHARATI</h1>
-                        <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
-                        <h3></h3>
-                      </div>
-                    </div>
-                  </th>
-                </tr>
-                <tr>
-                  <th colspan="13" style="border: solid 1.5px black;padding: 5px;text-align: center;">MANUAL BILL OF DA
-                    ARREARS IN r/o ALL GO STAFF</th>
-                </tr>
-                <tr>
-                  <th rowspan="2">NAME / DESIGNATION</th>
-                  <th rowspan="2">MONTH</th>
-                  <th rowspan="2">BASIC PAY</th>
-                  <th rowspan="2">TA</th>
-                  <th colspan="2">DRAWN SALARY <br><span class="OldDASpan"></span></th>
-                  <th colspan="2">DUE SALARY <br><span class="NewDASpan"></span></th>
-                  <th colspan="2">DIFFERENCE</th>
-                  <th colspan="2">TOTAL</th>
-                  <th rowspan="2">NET DAA</th>
-                </tr>
-                <tr>
-                  <th>DA</th>
-                  <th>TA</th>
-                  <th>New DA</th>
-                  <th>New TA</th>
-                  <th>Diff DA</th>
-                  <th>Diff TA</th>
-                  <th>DAA</th>
-                  <th>DAA on TA</th>
-                </tr>
-              </thead>
-
-              <tbody></tbody> <!-- 🔥 REQUIRED -->
-            </table>
-          </div>
-          <div class="PB-Table-WrapperNPS">
-            <table id="PB_NPSViewTbl"></table>
-            <table id="PB_NPSITCalc"></table>
-            <table id="PB_NPSEditTbl"></table>
-            <table class="daaArrearsTbl" id="daaNPSTableCalculation">
-              <colgroup>
-                <col style="width:180px">
-                <col style="width:60px">
-                <col style="width:60px">
-                <col style="width:50px">
-                <col style="width:60px">
-                <col style="width:50px">
-                <col style="width:50px">
-                <col style="width:50px">
-                <col style="width:60px">
-                <col style="width:50px">
-                <col style="width:50px">
-                <col style="width:50px">
-                <col style="width:50px">
-                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:90px">
                 <col style="width:30px">
-                <col style="width:30px">
-                <col style="width:50px">
-                <col style="width:40px">
-                <col style="width:50px">
-                <col style="width:50px">
               </colgroup>
-              <thead>
-                <tr>
-                  <th colspan="20" style="border: none;">
-                    <div class="header-container">
-                      <img src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-
-                      <div class="header-text">
-                        <h1>PRASAR BHARATI</h1>
-                        <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
-                        <h3></h3>
-                      </div>
-                    </div>
-                  </th>
-                </tr>
-                <tr>
-                  <th colspan="20" style="border: solid 1.5px black;padding: 5px;text-align: center;">MANUAL BILL OF DA
-                    ARREARS IN r/o ALL PRASAR BHARATI STAFF</th>
-                </tr>
-                <tr>
-                  <th rowspan="2">NAME / DESIGNATION</th>
-                  <th rowspan="2">MONTH</th>
-                  <th rowspan="2">BASIC PAY</th>
-                  <th rowspan="2">TA</th>
-                  <th colspan="4">DRAWN SALARY <br><span class="OldDASpan"></span></th>
-                  <th colspan="4">DUE SALARY <br><span class="NewDASpan"></span></th>
-                  <th colspan="4">DIFFERENCE</th>
-                  <th colspan="2">TOTAL</th>
-                  <th rowspan="2">NET DAA</th>
-                  <th rowspan="2">NET DAA on NPS</th>
-                </tr>
-                <tr>
-                  <th>DA</th>
-                  <th>TA</th>
-                  <th>NPSE</th>
-                  <th>NPSC</th>
-                  <th>New DA</th>
-                  <th>New TA</th>
-                  <th>New NPSE</th>
-                  <th>New NPSC</th>
-                  <th>Diff DA</th>
-                  <th>Diff TA</th>
-                  <th>Diff NPSE</th>
-                  <th>Diff NPSC</th>
-                  <th>DAA</th>
-                  <th>DAA on TA</th>
-                </tr>
-              </thead>
-
-              <tbody></tbody> <!-- 🔥 REQUIRED -->
-            </table>
-          </div>
-        </div>
-        <div class="Error_Note">
-          <span id="DA_Error" class="PB-error"></span>
-          <span id="GPF_Error" class="PB-error"></span>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="SalarySlipPage" style="display:none">
-        <div class="header">
-          <h2>Salary Slip</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:100px">
-              <col style="width:300px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:60px">
-              <col style="width:100px">
-              <col style="width:50px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:80px">
-              <col style="width:90px">
-              <col style="width:30px">
-            </colgroup>
-            <tr>
-              <td><label for="SalSlipPage_Station">Station :</label></td>
-              <td><select id="SalSlipPage_Station"></select></td>
-              <td><label for="SalSlipPage_Emp">Employee :</label></td>
-              <td><select id="SalSlipPage_Emp"></select></td>
-              <td><label for="SalSlipPage_FY">FY :</label></td>
-              <td><select id="SalSlipPage_FY"></select></td>
-              <td><label for="SalSlipPage_SalMonth">Month :</label></td>
-              <td><select id="SalSlipPage_SalMonth"></select></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </table>
-
-          <div class="SSaction-group">
-
-            <button id="SSprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
-            <button id="SSexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
-
-            <div id="SSprintMenu">
-              <div class="print-option menu-option" id="ssPrintOption" data-type="pdf-singleSS">🧾 Employee Salary Slip
-                PDF </div>
-              <div class="print-option menu-option" data-type="pdf-allSS">🧾 All Employee Salary Slip PDF</div>
-
-              <!-- EXCEL OPTIONS -->
-              <div class="excel-option menu-option" id="ssExcelOption" data-type="excel-singleSS">⬇️ Employee Salary
-                Slip Excel</div>
-              <div class="excel-option menu-option" data-type="excel-allSS">⬇️ All Employee Salary Slip Excel</div>
-            </div>
-          </div>
-        </div>
-        <div class="SalarySlipTableWrapper" id="SalarySlipWrapper">
-          <table id="SalarySlipTable">
-            <thead>
               <tr>
-                <th colspan="7" style="padding:1px 3px;">
-                  <div style="border:solid 2px black;gap:4px;display: flex;flex-direction: row;padding: 8px 2px;">
-                    <img id="SalarySlipLogo"
-                      src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
-                    <div style="display: flex;flex-direction: column;margin: auto;">
-                      <h3 style="margin:0">PRASAR BHARATI</h3>
-                      <h3 style="margin:0">INDIA'S PUBLIC SERVICE BROADCASTER</h3>
-                      <h3 style="margin:0">AIR Dharwad</h3>
-                      <h3 style="margin:0">ALL INDIA RADIO</h3>
+                <td><label for="EmpPage_Station">Station :</label></td>
+                <td><select id="EmpPage_Station"></select></td>
+                <td><label for="EmpPage_Emp">Employee :</label></td>
+                <td><select id="EmpPage_Emp"></select></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><label>TA Zone :</label></td>
+                <td><input disabled id="EmpPage_TAZone"></td>
+                <td><label>HRA Zone :</label></td>
+                <td><input disabled id="EmpPage_HRAZone"></td>
+                <td></td>
+              </tr>
+            </table>
+            <div class="action-group"></div>
+          </div>
+          <div class="Emp-Table-Wrapper">
+            <table id="EmpDetailTbl">
+              <tr>
+                <th colspan="2">Personal Details</th>
+              </tr>
+              <tr>
+                <td>Name</td>
+                <td id="Employee Name"></td>
+              </tr>
+              <tr>
+                <td>Department</td>
+                <td id="Department"></td>
+              </tr>
+              <tr>
+                <td>HRIS</td>
+                <td id="HRIS"></td>
+              </tr>
+              <tr>
+                <td>Designation</td>
+                <td id="Designation"></td>
+              </tr>
+              <tr>
+                <td>Section</td>
+                <td id="Section"></td>
+              </tr>
+              <tr>
+                <td>Group</td>
+                <td id="Group"></td>
+              </tr>
+              <tr>
+                <td>PAN</td>
+                <td id="PAN"></td>
+              </tr>
+              <tr>
+                <td>Aadhaar</td>
+                <td id="Aadhaar"></td>
+              </tr>
+              <tr>
+                <td>PFMS</td>
+                <td id="PFMS"></td>
+              </tr>
+              <tr>
+                <td>PRAN</td>
+                <td id="PRAN"></td>
+              </tr>
+              <tr>
+                <td>GPF</td>
+                <td id="GPF"></td>
+              </tr>
+              <tr>
+                <td>Salary Account</td>
+                <td id="Account"></td>
+              </tr>
+              <tr>
+                <td>Mobile</td>
+                <td id="Mobile"></td>
+              </tr>
+              <tr>
+                <td>Address</td>
+                <td id="Address"></td>
+              </tr>
+            </table>
+            <table>
+              <tr>
+                <th colspan="2">Pay Details</th>
+              </tr>
+              <tr>
+                <td>Date of Birth</td>
+                <td id="DOB"></td>
+              </tr>
+              <tr>
+                <td>Date of Joining</td>
+                <td id="DOJ"></td>
+              </tr>
+              <tr>
+                <td>Superannuation</td>
+                <td id="Superannuation"></td>
+              </tr>
+              <tr>
+                <td>Last Increment Date</td>
+                <td id="Last Increment"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Salary Month</td>
+                <td id="Last Drawn Salary Month"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Pay Level</td>
+                <td id="Last Drawn Pay Level"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Grade Pay</td>
+                <td id="Last Drawn Grade Pay"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Pay Band</td>
+                <td id="Last Drawn Pay Band"></td>
+              </tr>
+              <tr>
+                <td>Last Drawn Basic Pay</td>
+                <td id="Last Drawn Basic Pay"></td>
+              </tr>
+              <tr>
+                <td>Last DA Drawn</td>
+                <td id="Last Drawn DA"></td>
+              </tr>
+              <tr>
+                <td>Qualifying Service as on Today</td>
+                <td id="Qualifying Service"></td>
+              </tr>
+              <tr>
+                <td>Completed 6 Monthly Period as on Today</td>
+                <td id="Completed 6 Monthly Period"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="SectionPage" id="PayBillPage" style="display:none">
+          <div class="header">
+            <h2>Pay Bill Generation</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:100px">
+                <col style="width:300px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:60px">
+                <col style="width:100px">
+                <col style="width:50px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:90px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="PayBillPage_Station">Station :</label></td>
+                <td><select id="PayBillPage_Station"></select></td>
+                <td></td>
+                <td></td>
+                <td style="display:none"><label for="PayBillPage_Emp">Employee
+                    :</label></td>
+                <td style="display:none"><select
+                    id="PayBillPage_Emp"></select></td>
+                <td><label for="PayBillPage_FY">FY :</label></td>
+                <td><select id="PayBillPage_FY"></select></td>
+                <td><label for="PayBillPage_SalMonth">Month :</label></td>
+                <td><select id="PayBillPage_SalMonth"></select></td>
+                <td><label>DA(%) :</label></td>
+                <td><input style="max-width:40px;" disabled id="PayBillPage_DA%"
+                    type="text">
+                  <input id="PayBillPage_OldDA%" disabled
+                    style="max-width:40px;" type="text" hidden>
+                </td>
+                <td><label>TA Zone :</label></td>
+                <td><input disabled id="PayBillPage_TAZone"></td>
+                <td><label>HRA Zone :</label></td>
+                <td><input disabled id="PayBillPage_HRAZone"><input hidden
+                    id="PayBillPage_HRA%"></td>
+                <td></td>
+              </tr>
+            </table>
+
+            <div class="action-group">
+              <button id="PBeditBtn"><i
+                  data-lucide="edit"></i><span>Edit</span></button>
+              <button id="PBaddBtn"><i
+                  data-lucide="plus"></i><span>Add</span></button>
+
+              <button id="PBprintBtn"><i
+                  data-lucide="printer"></i><span>Print</span></button>
+              <button id="PBexcelBtn"><i
+                  data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+              <div id="PBprintMenu">
+                <div class="print-option menu-option" data-type="pdf-paybill">🧾
+                  Pay Bill Report PDF</div>
+                <div class="print-option menu-option" id="daaPrintOption"
+                  data-type="pdf-daa">📊 DAA Bill Report PDF</div>
+
+                <!-- EXCEL OPTIONS -->
+                <div class="excel-option menu-option"
+                  data-type="excel-paybill">⬇️ Pay Bill Excel</div>
+                <div class="excel-option menu-option" id="daaExcelOption"
+                  data-type="excel-daa">⬇️ DAA Bill Excel</div>
+              </div>
+            </div>
+          </div>
+          <div class="PB-Table-Wrapper">
+
+            <div class="PB-Table-WrapperGO">
+              <table id="PB_GOViewTbl"></table>
+              <table id="PB_GOITCalc"></table>
+              <table id="PB_GOEditTbl"></table>
+              <table class="daaArrearsTbl" id="daaGOTableCalculation">
+                <colgroup>
+                  <col style="width:180px">
+                  <col style="width:60px">
+                  <col style="width:60px">
+                  <col style="width:50px">
+                  <col style="width:60px">
+                  <col style="width:50px">
+                  <col style="width:60px">
+                  <col style="width:50px">
+                  <col style="width:50px">
+                  <col style="width:40px">
+                  <col style="width:50px">
+                  <col style="width:40px">
+                  <col style="width:50px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th colspan="13" style="border: none;">
+                      <div class="header-container">
+                        <img
+                          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
+
+                        <div class="header-text">
+                          <h1>PRASAR BHARATI</h1>
+                          <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
+                          <h3></h3>
+                        </div>
+                      </div>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th colspan="13"
+                      style="border: solid 1.5px black;padding: 5px;text-align: center;">MANUAL
+                      BILL OF DA
+                      ARREARS IN r/o ALL GO STAFF</th>
+                  </tr>
+                  <tr>
+                    <th rowspan="2">NAME / DESIGNATION</th>
+                    <th rowspan="2">MONTH</th>
+                    <th rowspan="2">BASIC PAY</th>
+                    <th rowspan="2">TA</th>
+                    <th colspan="2">DRAWN SALARY <br><span
+                        class="OldDASpan"></span></th>
+                    <th colspan="2">DUE SALARY <br><span
+                        class="NewDASpan"></span></th>
+                    <th colspan="2">DIFFERENCE</th>
+                    <th colspan="2">TOTAL</th>
+                    <th rowspan="2">NET DAA</th>
+                  </tr>
+                  <tr>
+                    <th>DA</th>
+                    <th>TA</th>
+                    <th>New DA</th>
+                    <th>New TA</th>
+                    <th>Diff DA</th>
+                    <th>Diff TA</th>
+                    <th>DAA</th>
+                    <th>DAA on TA</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody> <!-- 🔥 REQUIRED -->
+              </table>
+            </div>
+            <div class="PB-Table-WrapperNPS">
+              <table id="PB_NPSViewTbl"></table>
+              <table id="PB_NPSITCalc"></table>
+              <table id="PB_NPSEditTbl"></table>
+              <table class="daaArrearsTbl" id="daaNPSTableCalculation">
+                <colgroup>
+                  <col style="width:180px">
+                  <col style="width:60px">
+                  <col style="width:60px">
+                  <col style="width:50px">
+                  <col style="width:60px">
+                  <col style="width:50px">
+                  <col style="width:50px">
+                  <col style="width:50px">
+                  <col style="width:60px">
+                  <col style="width:50px">
+                  <col style="width:50px">
+                  <col style="width:50px">
+                  <col style="width:50px">
+                  <col style="width:40px">
+                  <col style="width:30px">
+                  <col style="width:30px">
+                  <col style="width:50px">
+                  <col style="width:40px">
+                  <col style="width:50px">
+                  <col style="width:50px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th colspan="20" style="border: none;">
+                      <div class="header-container">
+                        <img
+                          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
+
+                        <div class="header-text">
+                          <h1>PRASAR BHARATI</h1>
+                          <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
+                          <h3></h3>
+                        </div>
+                      </div>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th colspan="20"
+                      style="border: solid 1.5px black;padding: 5px;text-align: center;">MANUAL
+                      BILL OF DA
+                      ARREARS IN r/o ALL PRASAR BHARATI STAFF</th>
+                  </tr>
+                  <tr>
+                    <th rowspan="2">NAME / DESIGNATION</th>
+                    <th rowspan="2">MONTH</th>
+                    <th rowspan="2">BASIC PAY</th>
+                    <th rowspan="2">TA</th>
+                    <th colspan="4">DRAWN SALARY <br><span
+                        class="OldDASpan"></span></th>
+                    <th colspan="4">DUE SALARY <br><span
+                        class="NewDASpan"></span></th>
+                    <th colspan="4">DIFFERENCE</th>
+                    <th colspan="2">TOTAL</th>
+                    <th rowspan="2">NET DAA</th>
+                    <th rowspan="2">NET DAA on NPS</th>
+                  </tr>
+                  <tr>
+                    <th>DA</th>
+                    <th>TA</th>
+                    <th>NPSE</th>
+                    <th>NPSC</th>
+                    <th>New DA</th>
+                    <th>New TA</th>
+                    <th>New NPSE</th>
+                    <th>New NPSC</th>
+                    <th>Diff DA</th>
+                    <th>Diff TA</th>
+                    <th>Diff NPSE</th>
+                    <th>Diff NPSC</th>
+                    <th>DAA</th>
+                    <th>DAA on TA</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody> <!-- 🔥 REQUIRED -->
+              </table>
+            </div>
+          </div>
+          <div class="Error_Note">
+            <span id="DA_Error" class="PB-error"></span>
+            <span id="GPF_Error" class="PB-error"></span>
+          </div>
+        </div>
+
+        <div class="SectionPage" id="SalarySlipPage" style="display:none">
+          <div class="header">
+            <h2>Salary Slip</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:100px">
+                <col style="width:300px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:60px">
+                <col style="width:100px">
+                <col style="width:50px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:90px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="SalSlipPage_Station">Station :</label></td>
+                <td><select id="SalSlipPage_Station"></select></td>
+                <td><label for="SalSlipPage_Emp">Employee :</label></td>
+                <td><select id="SalSlipPage_Emp"></select></td>
+                <td><label for="SalSlipPage_FY">FY :</label></td>
+                <td><select id="SalSlipPage_FY"></select></td>
+                <td><label for="SalSlipPage_SalMonth">Month :</label></td>
+                <td><select id="SalSlipPage_SalMonth"></select></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </table>
+
+            <div class="SSaction-group">
+
+              <button id="SSprintBtn"><i
+                  data-lucide="printer"></i><span>Print</span></button>
+              <button id="SSexcelBtn"><i
+                  data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+
+              <div id="SSprintMenu">
+                <div class="print-option menu-option" id="ssPrintOption"
+                  data-type="pdf-singleSS">🧾 Employee Salary Slip
+                  PDF </div>
+                <div class="print-option menu-option" data-type="pdf-allSS">🧾
+                  All Employee Salary Slip PDF</div>
+
+                <!-- EXCEL OPTIONS -->
+                <div class="excel-option menu-option" id="ssExcelOption"
+                  data-type="excel-singleSS">⬇️ Employee Salary
+                  Slip Excel</div>
+                <div class="excel-option menu-option" data-type="excel-allSS">⬇️
+                  All Employee Salary Slip Excel</div>
+              </div>
+            </div>
+          </div>
+          <div class="SalarySlipTableWrapper" id="SalarySlipWrapper">
+            <table id="SalarySlipTable">
+              <thead>
+                <tr>
+                  <th colspan="7" style="padding:1px 3px;">
+                    <div
+                      style="border:solid 2px black;gap:4px;display: flex;flex-direction: row;padding: 8px 2px;">
+                      <img id="SalarySlipLogo"
+                        src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l">
+                      <div
+                        style="display: flex;flex-direction: column;margin: auto;">
+                        <h3 style="margin:0">PRASAR BHARATI</h3>
+                        <h3 style="margin:0">INDIA'S PUBLIC SERVICE
+                          BROADCASTER</h3>
+                        <h3 style="margin:0">AIR Dharwad</h3>
+                        <h3 style="margin:0">ALL INDIA RADIO</h3>
+                      </div>
                     </div>
+                  </th>
+                </tr>
+                <tr>
+                  <th colspan="7"
+                    style="padding:0px;border:solid 1px black;height:30px;">
+                    SALARY SLIP FOR THE MONTH OF <span
+                      id="SalarySlipHeaderMonth"></span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:0;">
+                    <table
+                      style="width:100%;border-collapse:collapse;margin:0px;border:none;">
+                      <colgroup>
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:13%">
+                        <col style="width:13%">
+                        <col style="width:13%">
+                      </colgroup>
+                      <tr>
+                        <td style="font-weight:bold">NAME:</td>
+                        <td colspan="6" id="SSname"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight:bold">IRLA/LOCAL CODE: </td>
+                        <td colspan="4"></td>
+                        <td style="font-weight:bold">HRIS CODE:</td>
+                        <td id="SShris"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight:bold">SALARY OFFICE:</td>
+                        <td colspan="2">AIR Dharwad</td>
+                        <td style="font-weight:bold">PAY LEVEL:</td>
+                        <td colspan="3" id="SSpaylevel"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight:bold">POSTING OFFICE :</td>
+                        <td colspan="2" id="SSstation"></td>
+                        <td
+                          style="font-weight:bold">DIRECTORATE/VERTICAL<br>:</td>
+                        <td colspan="3">DG:AIR</td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight:bold">DESIGNATION:</td>
+                        <td colspan="2" id="SSdesignation"></td>
+                        <td style="font-weight:bold">DEPARTMENT/WING: </td>
+                        <td colspan="3" id="SSsection"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight:bold">AADHAR NUMBER:</td>
+                        <td id="SSaadhaar"></td>
+                        <td style="font-weight:bold">PAN: </td>
+                        <td id="SSpan"></td>
+                        <td style="font-weight:bold">GPF/CPF <br>NUMBER:</td>
+                        <td colspan="2" id="SSgpf"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight:bold">PRAN NUMBER: </td>
+                        <td id="SSpran"></td>
+                        <td style="font-weight:bold">SALARY ACCOUNT:</td>
+                        <td id="SSaccount"></td>
+                        <td style="font-weight:bold">PFMS CODE:</td>
+                        <td colspan="2" id="SSpfms"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight:bold">MOBILE NO: </td>
+                        <td id="SSmobile"></td>
+                        <td style="font-weight:bold">E-MAIL :</td>
+                        <td colspan="4" id="SSemail"></td>
+                      </tr>
+                      <tr>
+                        <td colspan="4"></td>
+                        <td colspan="3"
+                          style="background-color:#d3d3d3;text-align:center;font-weight:bold">LOAN
+                          DEDUCTION
+                          DETAIL</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0px;">
+                    <table id="SalarySlipBreakup">
+                      <colgroup>
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:13%">
+                        <col style="width:13%">
+                        <col style="width:13%">
+                      </colgroup>
+                      <thead>
+                        <tr>
+                          <td>EARNING </td>
+                          <td>AMOUNT </td>
+                          <td>DEDUCTIONS </td>
+                          <td>AMOUNT </td>
+                          <td>LOAN TYPE </td>
+                          <td>INSTALLMENT<br>NO </td>
+                          <td>RECOVERY </td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td colspan="7"
+                            style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+                            <h3
+                              style="font-size:13px;background:#edebb7;">==============🚫
+                              No Data 🚫==============</h3>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="7"
+                    style="max-height:2px;height:2px;padding: 0;"></td>
+                </tr>
+                <tr>
+                  <td style="padding:0px;">
+                    <table id="SalarySlipFYDetails">
+                      <colgroup>
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:15%">
+                        <col style="width:13%">
+                        <col style="width:13%">
+                        <col style="width:13%">
+                      </colgroup>
+                      <thead>
+                        <tr>
+                          <td colspan="2">ARREAR DETAILS</td>
+                          <td colspan="2">RECOVERY DETAILS</td>
+                          <td colspan="3">TAX DETAILS</td>
+                        </tr>
+                        <tr>
+                          <td>TYPE </td>
+                          <td>ARREAR </td>
+                          <td>TYPE </td>
+                          <td>RECOVERY </td>
+                          <td>MONTH </td>
+                          <td>GROSS</td>
+                          <td>TDS </td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td colspan="7"
+                            style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+                            <h3
+                              style="font-size:13px;background:#edebb7;">==============🚫
+                              No Data 🚫==============</h3>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="7" style="height: 0;padding: 0;"></td>
+                </tr>
+                <tr>
+                  <td colspan="7" style="text-align:center">This is the Computer
+                    generated payslip doesn't required any
+                    Signatures
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+
+        <div class="SectionPage" id="ITPage" style="display:none">
+          <div class="header">
+            <h2>Income Tax Calculation</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:100px">
+                <col style="width:300px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:60px">
+                <col style="width:100px">
+                <col style="width:50px">
+                <col style="width:40px">
+                <col style="width:90px">
+                <col style="width:80px">
+                <col style="width:90px">
+                <col style="width:30px">
+              </colgroup>
+              <tr>
+                <td><label for="ITPage_Station">Station :</label></td>
+                <td><select id="ITPage_Station"></select></td>
+                <td><label for="ITPage_Emp">Employee :</label></td>
+                <td><select id="ITPage_Emp"></select></td>
+                <td><label for="ITPage_FY">FY :</label></td>
+                <td><select id="ITPage_FY"></select></td>
+                <td colspan="2"><label for="ITCalcFor">IT Calulation For
+                    :</label></td>
+                <td colspan="4">
+                  <div class="salary-toggle">
+
+                    <input type="radio" name="salaryMode" id="calcSalary" value="Calculated Salary" checked>
+                    <label for="calcSalary" class="btn red">Calculated
+                      Salary</label>
+
+                    <input type="radio" name="salaryMode" id="paidSalary" value="Paid Salary">
+                    <label for="paidSalary" class="btn green">Paid
+                      Salary</label>
+
+                    <div class="slider"></div>
+
                   </div>
-                </th>
-              </tr>
-              <tr>
-                <th colspan="7" style="padding:0px;border:solid 1px black;height:30px;">
-                  SALARY SLIP FOR THE MONTH OF <span id="SalarySlipHeaderMonth"></span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="padding:0;">
-                  <table style="width:100%;border-collapse:collapse;margin:0px;border:none;">
-                    <colgroup>
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:13%">
-                      <col style="width:13%">
-                      <col style="width:13%">
-                    </colgroup>
-                    <tr>
-                      <td style="font-weight:bold">NAME:</td>
-                      <td colspan="6" id="SSname"></td>
-                    </tr>
-                    <tr>
-                      <td style="font-weight:bold">IRLA/LOCAL CODE: </td>
-                      <td colspan="4"></td>
-                      <td style="font-weight:bold">HRIS CODE:</td>
-                      <td id="SShris"></td>
-                    </tr>
-                    <tr>
-                      <td style="font-weight:bold">SALARY OFFICE:</td>
-                      <td colspan="2">AIR Dharwad</td>
-                      <td style="font-weight:bold">PAY LEVEL:</td>
-                      <td colspan="3" id="SSpaylevel"></td>
-                    </tr>
-                    <tr>
-                      <td style="font-weight:bold">POSTING OFFICE :</td>
-                      <td colspan="2" id="SSstation"></td>
-                      <td style="font-weight:bold">DIRECTORATE/VERTICAL<br>:</td>
-                      <td colspan="3">DG:AIR</td>
-                    </tr>
-                    <tr>
-                      <td style="font-weight:bold">DESIGNATION:</td>
-                      <td colspan="2" id="SSdesignation"></td>
-                      <td style="font-weight:bold">DEPARTMENT/WING: </td>
-                      <td colspan="3" id="SSsection"></td>
-                    </tr>
-                    <tr>
-                      <td style="font-weight:bold">AADHAR NUMBER:</td>
-                      <td id="SSaadhaar"></td>
-                      <td style="font-weight:bold">PAN: </td>
-                      <td id="SSpan"></td>
-                      <td style="font-weight:bold">GPF/CPF <br>NUMBER:</td>
-                      <td colspan="2" id="SSgpf"></td>
-                    </tr>
-                    <tr>
-                      <td style="font-weight:bold">PRAN NUMBER: </td>
-                      <td id="SSpran"></td>
-                      <td style="font-weight:bold">SALARY ACCOUNT:</td>
-                      <td id="SSaccount"></td>
-                      <td style="font-weight:bold">PFMS CODE:</td>
-                      <td colspan="2" id="SSpfms"></td>
-                    </tr>
-                    <tr>
-                      <td style="font-weight:bold">MOBILE NO: </td>
-                      <td id="SSmobile"></td>
-                      <td style="font-weight:bold">E-MAIL :</td>
-                      <td colspan="4" id="SSemail"></td>
-                    </tr>
-                    <tr>
-                      <td colspan="4"></td>
-                      <td colspan="3" style="background-color:#d3d3d3;text-align:center;font-weight:bold">LOAN DEDUCTION
-                        DETAIL</td>
-                    </tr>
-                  </table>
                 </td>
+                <td></td>
               </tr>
-              <tr>
-                <td style="padding:0px;">
-                  <table id="SalarySlipBreakup">
-                    <colgroup>
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:13%">
-                      <col style="width:13%">
-                      <col style="width:13%">
-                    </colgroup>
-                    <thead>
-                      <tr>
-                        <td>EARNING </td>
-                        <td>AMOUNT </td>
-                        <td>DEDUCTIONS </td>
-                        <td>AMOUNT </td>
-                        <td>LOAN TYPE </td>
-                        <td>INSTALLMENT<br>NO </td>
-                        <td>RECOVERY </td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td colspan="7"
-                          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
-                          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============</h3>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td colspan="7" style="max-height:2px;height:2px;padding: 0;"></td>
-              </tr>
-              <tr>
-                <td style="padding:0px;">
-                  <table id="SalarySlipFYDetails">
-                    <colgroup>
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:15%">
-                      <col style="width:13%">
-                      <col style="width:13%">
-                      <col style="width:13%">
-                    </colgroup>
-                    <thead>
-                      <tr>
-                        <td colspan="2">ARREAR DETAILS</td>
-                        <td colspan="2">RECOVERY DETAILS</td>
-                        <td colspan="3">TAX DETAILS</td>
-                      </tr>
-                      <tr>
-                        <td>TYPE </td>
-                        <td>ARREAR </td>
-                        <td>TYPE </td>
-                        <td>RECOVERY </td>
-                        <td>MONTH </td>
-                        <td>GROSS</td>
-                        <td>TDS </td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td colspan="7"
-                          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
-                          <h3 style="font-size:13px;background:#edebb7;">==============🚫 No Data 🚫==============</h3>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td colspan="7" style="height: 0;padding: 0;"></td>
-              </tr>
-              <tr>
-                <td colspan="7" style="text-align:center">This is the Computer generated payslip doesn't required any
-                  Signatures
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            </table>
 
-        </div>
-      </div>
+            <div class="ITaction-group">
 
-      <div class="SectionPage" id="ITPage" style="display:none">
-        <div class="header">
-          <h2>Income Tax Calculation</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:100px">
-              <col style="width:300px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:60px">
-              <col style="width:100px">
-              <col style="width:50px">
-              <col style="width:40px">
-              <col style="width:90px">
-              <col style="width:80px">
-              <col style="width:90px">
-              <col style="width:30px">
-            </colgroup>
-            <tr>
-              <td><label for="ITPage_Station">Station :</label></td>
-              <td><select id="ITPage_Station"></select></td>
-              <td><label for="ITPage_Emp">Employee :</label></td>
-              <td><select id="ITPage_Emp"></select></td>
-              <td><label for="ITPage_FY">FY :</label></td>
-              <td><select id="ITPage_FY"></select></td>
-              <td colspan="2"><label for="ITCalcFor">IT Calulation For :</label></td>
-              <td colspan="4">
-                <div class="salary-toggle">
+              <button id="ITprintBtn"><i
+                  data-lucide="printer"></i><span>Print</span></button>
+              <button id="ITexcelBtn"><i
+                  data-lucide="file-spreadsheet"></i><span>Excel</span></button>
 
-                  <input type="radio" name="salaryMode" id="calcSalary">
-                  <label for="calcSalary" class="btn red">Calculated Salary</label>
+              <div id="ITprintMenu">
+                <div class="print-option menu-option" id="itPrintOption"
+                  data-type="pdf-singleIT">🧾 Employee IT
+                  Calculation PDF </div>
+                <div class="print-option menu-option" data-type="pdf-allIT">🧾
+                  All Employee IT Calculation PDF</div>
 
-                  <input type="radio" name="salaryMode" id="paidSalary" checked>
-                  <label for="paidSalary" class="btn green">Paid Salary</label>
-
-                  <div class="slider"></div>
-
-                </div>
-              </td>
-              <td></td>
-            </tr>
-          </table>
-
-          <div class="ITaction-group">
-
-            <button id="ITprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
-            <button id="ITexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
-
-            <div id="ITprintMenu">
-              <div class="print-option menu-option" id="itPrintOption" data-type="pdf-singleIT">🧾 Employee IT
-                Calculation PDF </div>
-              <div class="print-option menu-option" data-type="pdf-allIT">🧾 All Employee IT Calculation PDF</div>
-
-              <!-- EXCEL OPTIONS -->
-              <div class="excel-option menu-option" id="itExcelOption" data-type="excel-singleIT">⬇️ Employee IT
-                Calculation Excel</div>
-              <div class="excel-option menu-option" data-type="excel-allIT">⬇️ All Employee IT Calculation Excel</div>
+                <!-- EXCEL OPTIONS -->
+                <div class="excel-option menu-option" id="itExcelOption"
+                  data-type="excel-singleIT">⬇️ Employee IT
+                  Calculation Excel</div>
+                <div class="excel-option menu-option" data-type="excel-allIT">⬇️
+                  All Employee IT Calculation Excel</div>
+              </div>
             </div>
           </div>
+          <div class="ITtableWrapper"></div>
         </div>
-        <div class="ITtableWrapper"></div>
-      </div>
 
-      <div class="SectionPage" id="PensionPage" style="display:none">
-        <div class="header">
-          <h2>Pension Benifits & Calculations</h2>
-          <table id="EmolumentTbl" border="1"></table>
-        </div>
-      </div>
-
-      <div class="SectionPage" id="BudgetPage" style="display:none">
-        <div class="header">
-          <h2>Budgets</h2>
-        </div>
-        <div class="Selection-bar">
-          <table>
-            <colgroup>
-              <col style="width:80px">
-              <col style="width:170px">
-              <col style="width:70px">
-              <col style="width:100px">
-              <col style="width:120px">
-              <col style="width:400px">
-            </colgroup>
-            <tr>
-              <td><label for="BudgetPage_Station">Station :</label></td>
-              <td><select id="BudgetPage_Station"></select></td>
-              <td><label for="BudgetPage_FY">FY :</label></td>
-              <td><select id="BudgetPage_FY"></select></td>
-              <td><label>Budget under</label></td>
-              <td><select id="BudgetUnderSelect" style="width: 400px;"></select></td>
-            </tr>
-          </table>
-
-          <div class="SBGaction-group">
-            <button id="SBGeditBtn"><i data-lucide="edit"></i><span>Edit</span></button>
-            <button id="SBGaddBtn"><i data-lucide="plus"></i><span>Add</span></button>
-
-            <button id="SBGprintBtn"><i data-lucide="printer"></i><span>Print</span></button>
-            <button id="SBGexcelBtn"><i data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+        <div class="SectionPage" id="PensionPage" style="display:none">
+          <div class="header">
+            <h2>Pension Benifits & Calculations</h2>
+            <table id="EmolumentTbl" border="1"></table>
           </div>
         </div>
-        <table
-          style="width: 100%;padding: 4px;margin: 5px;border-radius: 8px;border:solid 1px rgb(189, 189, 189);font-weight: bold;">
-          <tr>
-            <td>Sanctioned SBG</td>
-            <td><input disabled id="SBGsanctioned" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
-            <td>SBG Utilised</td>
-            <td><input disabled id="SBGutilised" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
-            <td>Available SBG</td>
-            <td><input disabled id="SBGavailable" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
-            <td>Calculated SBG</td>
-            <td><input disabled id="SBGcalculated" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
-            <td>Revised SBG</td>
-            <td><input disabled id="SBGrevised" style="font-size: 12px;font-weight: bold;width: 150px;"></td>
-          </tr>
-        </table>
-        <div style="display: flex;">
-          <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper" style="display: none;"></div>
-          <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
+
+        <div class="SectionPage" id="BudgetPage" style="display:none">
+          <div class="header">
+            <h2>Budgets</h2>
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width:80px">
+                <col style="width:170px">
+                <col style="width:70px">
+                <col style="width:100px">
+                <col style="width:120px">
+                <col style="width:400px">
+              </colgroup>
+              <tr>
+                <td><label for="BudgetPage_Station">Station :</label></td>
+                <td><select id="BudgetPage_Station"></select></td>
+                <td><label for="BudgetPage_FY">FY :</label></td>
+                <td><select id="BudgetPage_FY"></select></td>
+                <td><label>Budget under</label></td>
+                <td><select id="BudgetUnderSelect"
+                    style="width: 400px;"></select></td>
+              </tr>
+            </table>
+
+            <div class="SBGaction-group">
+              <button id="SBGeditBtn"><i
+                  data-lucide="edit"></i><span>Edit</span></button>
+              <button id="SBGaddBtn"><i
+                  data-lucide="plus"></i><span>Add</span></button>
+
+              <button id="SBGprintBtn"><i
+                  data-lucide="printer"></i><span>Print</span></button>
+              <button id="SBGexcelBtn"><i
+                  data-lucide="file-spreadsheet"></i><span>Excel</span></button>
+            </div>
+          </div>
+          <table
+            style="width: 100%;padding: 4px;margin: 5px;border-radius: 8px;border:solid 1px rgb(189, 189, 189);font-weight: bold;">
+            <tr>
+              <td>Sanctioned SBG</td>
+              <td><input disabled id="SBGsanctioned"
+                  style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+              <td>SBG Utilised</td>
+              <td><input disabled id="SBGutilised"
+                  style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+              <td>Available SBG</td>
+              <td><input disabled id="SBGavailable"
+                  style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+              <td>Calculated SBG</td>
+              <td><input disabled id="SBGcalculated"
+                  style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+              <td>Revised SBG</td>
+              <td><input disabled id="SBGrevised"
+                  style="font-size: 12px;font-weight: bold;width: 150px;"></td>
+            </tr>
+          </table>
+          <div style="display: flex;">
+            <div class="BudgetTablefromPBWrapper" id="BudgetTablefromPBWrapper"
+              style="display: none;"></div>
+            <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
+          </div>
+
         </div>
 
-      </div>
+        <div class="SectionPage" id="DatabasePage" style="display:none">
+          <div class="header">
+            <h2>Database</h2>
+          </div>
 
-      <div class="SectionPage" id="DatabasePage" style="display:none">
-        <div class="header">
-          <h2>Database</h2>
+          <div class="button-bar">
+            <button onclick="showSheet('EmpDB',this)" class="active">Employee
+              Database</button>
+            <button onclick="showSheet('BudgetDB',this)">Budget
+              Database</button>
+            <button onclick="showSheet('SBGexpenditureDB',this)">Budget
+              Expenditures
+              Database</button>
+            <button onclick="showSheet('PBDB',this)">Pay Bill
+              Database</button>
+            <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
+              CPC</button>
+            <button onclick="showSheet('QtrsRateDB',this)">Quarters
+              Rate</button>
+            <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
+            <button onclick="showSheet('CommFactDB',this)">Commutation
+              Factors</button>
+            <button onclick="showSheet('ITDB',this)">IT Database</button>
+          </div>
+
+          <div class="DB-Table-Wrapper">
+            <table id="EmpDB"></table>
+            <table id="EmpDBCalc"></table>
+            <table id="BudgetDB" style="display:none;"></table>
+            <table id="SBGexpenditureDB" style="display:none;"></table>
+            <table id="PBDB" style="display:none;"></table>
+            <table id="CPC7DB" style="display:none;"></table>
+            <table id="QtrsRateDB" style="display:none;"></table>
+            <table id="CityZoneDB" style="display:none;"></table>
+            <table id="CommFactDB" style="display:none;"></table>
+            <table id="ITDB" style="display:none;"></table>
+          </div>
         </div>
 
-        <div class="button-bar">
-          <button onclick="showSheet('EmpDB',this)" class="active">Employee
-            Database</button>
-          <button onclick="showSheet('BudgetDB',this)">Budget
-            Database</button>
-          <button onclick="showSheet('SBGexpenditureDB',this)">Budget Expenditures
-            Database</button>
-          <button onclick="showSheet('PBDB',this)">Pay Bill
-            Database</button>
-          <button onclick="showSheet('CPC7DB',this)">Pay Matrix 7th
-            CPC</button>
-          <button onclick="showSheet('QtrsRateDB',this)">Quarters
-            Rate</button>
-          <button onclick="showSheet('CityZoneDB',this)">City Zones</button>
-          <button onclick="showSheet('CommFactDB',this)">Commutation
-            Factors</button>
-          <button onclick="showSheet('ITDB',this)">IT Database</button>
-        </div>
-
-        <div class="DB-Table-Wrapper">
-          <table id="EmpDB"></table>
-          <table id="EmpDBCalc"></table>
-          <table id="BudgetDB" style="display:none;"></table>
-          <table id="SBGexpenditureDB" style="display:none;"></table>
-          <table id="PBDB" style="display:none;"></table>
-          <table id="CPC7DB" style="display:none;"></table>
-          <table id="QtrsRateDB" style="display:none;"></table>
-          <table id="CityZoneDB" style="display:none;"></table>
-          <table id="CommFactDB" style="display:none;"></table>
-          <table id="ITDB" style="display:none;"></table>
-        </div>
       </div>
 
     </div>
 
-  </div>
-
-  <script>
+    <script>
 
 
     /* =========================
@@ -12373,9 +12460,9 @@
     // 🔥 CONSTANTS
     // =========================
     const monthOrder = {
-      Mar: 1, Apr: 2, May: 3, Jun: 4, Jul: 5, Aug: 6,
-      Sep: 7, Oct: 8, Nov: 9, Dec: 10, Jan: 11, Feb: 12
-    };
+  Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+  Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+};
 
     const FY_MONTHS = [
       "Mar", "Apr", "May", "Jun", "Jul", "Aug",
@@ -12459,29 +12546,67 @@
     }
 
 
-    function getRetirementMonth(retirementDate) {
-
+function getRetirementMonth(retirementDate) {
   if (!retirementDate) return "";
 
-  // Format: May-31,2027
-  const [monthPart, yearPart] = retirementDate.split(",");
+  const d = new Date(retirementDate);
 
-  if (!monthPart || !yearPart) return "";
+  const month = d.toLocaleString("en-US", { month: "short" });
+  const year = d.getFullYear();
 
-  const monthName = monthPart.split("-")[0]; // May
-  const year = yearPart.trim();              // 2027
-
-  return `${monthName}-${year}`;             // May-2027
+  return `${month}-${year}`;
 }
+
 
 function getMonthValue(m) {
   const [mon, yr] = m.split("-");
   return Number(yr) * 12 + monthOrder[mon];
 }
+
+
+function isAfterRetirement(fullMonth, retirementMonth) {
+  if (!retirementMonth) return false;
+
+  const [m1, y1] = fullMonth.split("-");
+  const [m2, y2] = retirementMonth.split("-");
+
+  const v1 = Number(y1) * 12 + monthOrder[m1];
+  const v2 = Number(y2) * 12 + monthOrder[m2];
+
+  return v1 > v2;
+}
+
+
+function getEmptyRow(month) {
+  return {
+    month,
+    "Basic Pay": 0,
+    "DA": 0,
+    "TA": 0,
+    "HRA": 0,
+    "NPSE": 0,    
+    "CEA": 0,
+    "EL Encashment": 0,
+    "Bonus": 0,
+    "DAA & Arrears": 0,
+    "Uniform Allowance": 0,
+    "Gross Income": 0,
+    "Net IT": 0,
+    "GPF": 0,
+    "NPSE2": 0,
+    "NPSC": 0,
+    "CGEIS": 0,
+    "LIC": 0,
+    "Prof Tax": 0,
+    "Recovery Pay & Arr": 0
+    //"Total Deduction": 0
+  };
+}
     // =========================
     // 🚀 MAIN FUNCTION
     // =========================
-  function buildProjectedFY(empName, selectedFY, mode = "calculated") {
+
+function buildProjectedFY(empName, selectedFY, mode = "calculated") {
 
   if (!pbData || !pbData.rows) return [];
 
@@ -12505,25 +12630,24 @@ function getMonthValue(m) {
   });
 
   const lastPB = empRows[empRows.length - 1];
+  const lastPBMonth = lastPB[monthIndex];
 
   const g = (row, col) => {
     const i = h.indexOf(col);
     return i !== -1 ? Number(row[i]) || 0 : 0;
   };
 
-  // =========================
   // 🔥 BASE VALUES
-  // =========================
   let DA_percent = Number(id("PayBillPage_DA%")?.value) || g(lastPB, "DA%");
   let HRA_percent = Number(id("PayBillPage_HRA%")?.value) || g(lastPB, "HRA%");
   let TA = g(lastPB, "TA");
   let CGEIS = g(lastPB, "CGEIS");
+  let ProfTax = g(lastPB, "Prof Tax");
   let GPF = g(lastPB, "GPF");
   let NetIT = g(lastPB, "Net IT");
+  let lic = g(lastPB, "LIC");
 
-  // =========================
   // 🔥 EMP DATA
-  // =========================
   const empHeaders = window.empCalcHeaders;
   const empRowsData = window.empCalcRows;
 
@@ -12534,7 +12658,6 @@ function getMonthValue(m) {
   if (!empRow) return [];
 
   const emp = getEmpPayDetails(empName);
-
   let level = emp.level;
   let index = emp.index;
 
@@ -12548,10 +12671,8 @@ function getMonthValue(m) {
   const dept =
     String(empRow[empHeaders.indexOf("Department")] || "").toUpperCase();
 
-  // =========================
-  // 🔁 LOOP FY
-  // =========================
   const result = [];
+  let incrementApplied = false;
 
   FY_MONTHS.forEach((m, i) => {
 
@@ -12561,7 +12682,7 @@ function getMonthValue(m) {
     const fullMonth = `${m}-${year}`;
 
     const pbRow = empRows.find(r =>
-      String(r[monthIndex]).trim() === fullMonth
+      String(r[monthIndex]).trim().toUpperCase() === fullMonth.toUpperCase()
     );
 
     // =========================
@@ -12569,27 +12690,23 @@ function getMonthValue(m) {
     // =========================
     if (mode === "paid") {
 
-      if (!pbRow) {
-        result.push({
-          month: fullMonth,
-          "Basic Pay": 0,
-          "DA": 0,
-          "TA": 0,
-          "HRA": 0,
-          "NPSE": 0,
-          "NPSE2": 0,
-          "Gross Income": 0,
-          "Net IT": 0,
-          "GPF": 0,
-          "CGEIS": 0,
-          "Total Deduction": 0
-        });
+      if (getMonthValue(fullMonth) > getMonthValue(lastPBMonth)) {
+        result.push({ month: fullMonth });
         return;
       }
 
-      let baseNPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
+      if (!pbRow) {
+        result.push({ month: fullMonth });
+        return;
+      }
 
-      let NPSE = dept !== "GO" ? baseNPSE : 0;
+      const baseNPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
+      const baseNPSC = g(pbRow, "NPSC") + g(pbRow, "DAA on NPSC");
+      const NPSE = dept !== "GO" ? baseNPSE : 0;
+      const NPSC = dept !== "GO" ? baseNPSC : 0;
+
+
+      const arrear = g(pbRow, "Arrears") + g(pbRow, "Total DAA");
 
       result.push({
         month: fullMonth,
@@ -12597,13 +12714,22 @@ function getMonthValue(m) {
         "DA": g(pbRow, "DA"),
         "TA": g(pbRow, "TA"),
         "HRA": g(pbRow, "HRA"),
-        "NPSE": NPSE,
-        "NPSE2": NPSE, // 🔥 repeated
+        "NPSE": NPSE,        
+        "CEA": g(pbRow, "CEA"),
+        "EL Encashment": g(pbRow, "EL Encash"),
+        "Bonus": g(pbRow, "Bonus"),
+        "DAA & Arrears": arrear,
+        "Uniform Allowance": g(pbRow, "Uni All"),
         "Gross Income": g(pbRow, "Gross Income"),
         "Net IT": g(pbRow, "Net IT"),
         "GPF": g(pbRow, "GPF"),
+        "NPSE2": NPSE,
+        "NPSC": NPSC,
         "CGEIS": g(pbRow, "CGEIS"),
-        "Total Deduction": g(pbRow, "Total Deduction")
+        "LIC": g(pbRow, "LIC"),
+        "Prof Tax": g(pbRow, "Prof Tax"),
+        "Recovery Pay & Arr": g(pbRow, "REC P & A")
+        //"Total Deduction": g(pbRow, "Total Deduction")
       });
 
       return;
@@ -12612,28 +12738,54 @@ function getMonthValue(m) {
     // =========================
     // 🔹 CALCULATED MODE
     // =========================
-    let basic, DA, HRA, NPSE;
+    let basic, DA, HRA, NPSE, NPSC;
 
-    if (!pbRow) {
+    // 🔥 GET LAST NON-ZERO HRA FROM FULL pbData (NOT empRows)
+    let lastHRAValue = 0;
 
-      if (m === lastIncrementMonth) index++;
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const r = rows[i];
+
+      if (String(r[nameIndex]).trim() !== empName) continue;
+
+      const val = g(r, "HRA");
+
+      if (val && val !== 0) {
+        lastHRAValue = val;
+        break;
+      }
+    }
+
+    const isFuture =
+      getMonthValue(fullMonth) > getMonthValue(lastPBMonth);
+
+    if (!pbRow || isFuture) {
+
+      // 🔥 APPLY INCREMENT ONCE
+      if (lastIncrementMonth && m === lastIncrementMonth && !incrementApplied) {
+        index++;
+        incrementApplied = true;
+      }
 
       basic = getBasicFromCPC(level, index);
-
       DA = basic * (DA_percent / 100);
-      HRA = HRA_percent ? basic * (HRA_percent / 100) : 0;
+      // 🔥 APPLY HRA ONLY IF PB HAS NON-ZERO HISTORY
+      if (lastHRAValue && lastHRAValue !== 0) {
+        HRA = basic * (HRA_percent / 100);
+      } else {
+        HRA = 0;
+      };
 
       NPSE = dept !== "GO" ? (basic + DA) * 0.14 : 0;
+      NPSC = dept !== "GO" ? (basic + DA) * 0.1 : 0;
 
       let gross = basic + DA + HRA + TA + NPSE;
-      let deduction = NPSE + CGEIS + GPF + NetIT;
+      let deduction = NPSE + NPSC + CGEIS + GPF + NetIT + ProfTax;
 
-      // 🔥 retirement
-      if (
-        retirementMonth &&
-        getMonthValue(fullMonth) >= getMonthValue(retirementMonth)
-      ) {
-        basic = DA = HRA = TA = NPSE = gross = deduction = 0;
+      // 🔥 RETIREMENT FIX
+      if (retirementMonth && isAfterRetirement(fullMonth, retirementMonth)) {
+        result.push(getEmptyRow(fullMonth));
+        return;
       }
 
       result.push({
@@ -12642,19 +12794,32 @@ function getMonthValue(m) {
         "DA": Math.round(DA),
         "TA": Math.round(TA),
         "HRA": Math.round(HRA),
-        "NPSE": Math.round(NPSE),
-        "NPSE2": Math.round(NPSE), // 🔥 repeated
+        "NPSE": Math.round(NPSE),        
+        "CEA": 0,
+        "EL Encashment": 0,
+        "Bonus": 0,
+        "DAA & Arrears": 0,
+        "Uniform Allowance": 0,
         "Gross Income": Math.round(gross),
         "Net IT": NetIT,
         "GPF": GPF,
+        "NPSE2": Math.round(NPSE),
+        "NPSC": Math.round(NPSC),
         "CGEIS": CGEIS,
-        "Total Deduction": Math.round(deduction)
+        "LIC": lic,
+        "Prof Tax": ProfTax,
+        "Recovery Pay & Arr": 0
+        //"Total Deduction": Math.round(deduction)
       });
 
     } else {
 
-      let baseNPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
-      NPSE = dept !== "GO" ? baseNPSE : 0;
+      const baseNPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
+      const baseNPSC = g(pbRow, "NPSC") + g(pbRow, "DAA on NPSC");
+      const NPSE = dept !== "GO" ? baseNPSE : 0;
+      const NPSC = dept !== "GO" ? baseNPSC : 0;
+
+      const arrear = g(pbRow, "Arrears") + g(pbRow, "Total DAA");
 
       result.push({
         month: fullMonth,
@@ -12662,410 +12827,340 @@ function getMonthValue(m) {
         "DA": g(pbRow, "DA"),
         "TA": g(pbRow, "TA"),
         "HRA": g(pbRow, "HRA"),
-        "NPSE": NPSE,
-        "NPSE2": NPSE, // 🔥 repeated
+        "NPSE": NPSE,        
+        "CEA": g(pbRow, "CEA"),
+        "EL Encashment": g(pbRow, "EL Encash"),
+        "Bonus": g(pbRow, "Bonus"),
+        "DAA & Arrears": arrear,
+        "Uniform Allowance": g(pbRow, "Uni All"),
         "Gross Income": g(pbRow, "Gross Income"),
         "Net IT": g(pbRow, "Net IT"),
         "GPF": g(pbRow, "GPF"),
+        "NPSE2": NPSE,
+        "NPSC": NPSC,
         "CGEIS": g(pbRow, "CGEIS"),
-        "Total Deduction": g(pbRow, "Total Deduction")
+        "LIC": g(pbRow, "LIC"),
+        "Prof Tax": g(pbRow, "Prof Tax"),
+        "Recovery Pay & Arr": g(pbRow, "REC P & A")
+        //"Total Deduction": g(pbRow, "Total Deduction")
       });
     }
   });
 
-  return result;
+  return {
+    data: result,
+    lastPBMonth
+  };
 }
+    
 
+function renderCalculatedITTable(empName, selectedFY, mode = "calculated") {
 
-    function buildProjectedFY2(empName, selectedFY, mode = "calculated") {
+  const wrapper = document.querySelector(".ITtableWrapper");
+  if (!wrapper) return;
+  const ITfy = id("ITPage_FY").value
+  const Sal = document.querySelector("input[name='salaryMode']:checked")?.value;
+  wrapper.innerHTML = "";
 
-  if (!pbData || !pbData.rows) return [];
+  const { data, lastPBMonth } = buildProjectedFY(empName, selectedFY, mode);
 
+  if (!data.length) {
+    wrapper.innerHTML = '<h3 style="font-size:13px;background:#edebb7;width:100%;height:40px;background:#edebb7;color:red;padding-top:10px;">==============🚫 No Data 🚫==============</h3>';
+    return;
+  }
+
+  const COMPONENTS = [
+    ["Basic Pay", "Basic Pay"],
+    ["DA", "DA"],
+    ["TA", "TA"],
+    ["HRA", "HRA"],
+    ["NPSE", "NPSE"],
+    ["CEA", "CEA"],
+    ["EL Encashment", "EL Encashment"],
+    ["Bonus", "Bonus"],
+    ["DAA & Arrears", "DAA & Arrears"],
+    ["Uniform Allowance", "Uniform Allowance"],
+    ["Gross Income", "Gross Income"],
+    ["IT Recovered", "Net IT"],
+    ["GPF", "GPF"],    
+    ["NPSE", "NPSE2"],
+    ["NPSC", "NPSC"],
+    ["CGEIS", "CGEIS"],
+    ["LIC", "LIC"],
+    ["Prof Tax", "Prof Tax"],
+    ["Recovery Pay & Arr","Recovery Pay & Arr"]
+    //["Total Deduction","Total Deduction"]
+  ];
+
+  const table = document.createElement("table");
+  
+// 🔥 COLGROUP USING innerHTML
+table.innerHTML = `
+  <colgroup>
+    <col style="width:8%;">
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:7%;">  
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:7%;">
+    <col style="width:8%;">
+  </colgroup>
+`;
+
+  const thead = document.createElement("thead");
+  //${data.map(r => `<th style="text-align: left;">${r.month}</th>`).join("")}
   const h = pbData.headers;
-  const rows = pbData.rows;
-
   const nameIndex = h.indexOf("Employee Name");
   const monthIndex = h.indexOf("Salary Month");
 
-  // =========================
-  // 🔥 FILTER EMP PB DATA
-  // =========================
-  const empRows = rows.filter(r =>
-    String(r[nameIndex]).trim() === empName
+  // 🔥 ALL PAID MONTHS FOR EMPLOYEE
+  const paidMonths = new Set(
+    pbData.rows
+      .filter(r => String(r[nameIndex]).trim() === empName)
+      .map(r => String(r[monthIndex]).trim().toUpperCase())
   );
 
-  if (!empRows.length) return [];
-
-  // =========================
-  // 🔥 SORT PB DATA
-  // =========================
-  empRows.sort((a, b) => {
-    const [m1, y1] = a[monthIndex].split("-");
-    const [m2, y2] = b[monthIndex].split("-");
-    return (Number(y1) * 12 + monthOrder[m1]) -
-           (Number(y2) * 12 + monthOrder[m2]);
-  });
-
-  const lastPB = empRows[empRows.length - 1];
-
-  const g = (row, col) => {
-    const i = h.indexOf(col);
-    return i !== -1 ? Number(row[i]) || 0 : 0;
-  };
-
-  // =========================
-  // 🔥 BASE VALUES
-  // =========================
-  let DA_percent = g(lastPB, "DA%");
-  console.log("DA_percent", DA_percent)
-  let HRA = g(lastPB, "HRA");
-  let HRA_percent = id("PayBillPage_HRA%").value;
-  let TA = g(lastPB, "TA");
-  let CGEIS = g(lastPB, "CGEIS");
-  let GPF = g(lastPB, "GPF");
-  let NetIT = g(lastPB, "Net IT");
-
-  // =========================
-  // 🔥 EMP DATA
-  // =========================
-  const empHeaders = window.empCalcHeaders;
-  const empRowsData = window.empCalcRows;
-
-  const empNameIndex = empHeaders.indexOf("Employee Name");
-
-  const empRow = empRowsData.find(r =>
-    String(r[empNameIndex]).trim() === empName
-  );
-
-  if (!empRow) return [];
-
-  const emp = getEmpPayDetails(empName);
-
-  let level = emp.level;
-  let index = emp.index;
-
-  const lastIncrementMonth =
-    String(empRow[empHeaders.indexOf("Last Increment")] || "").split("-")[0];
-
-  const retirementDate =
-    empRow[empHeaders.indexOf("Superannuation")] || "";
-
-  const dept =
-  String(empRow[empHeaders.indexOf("Department")] || "").toUpperCase();
-
-  const retirementMonth = getRetirementMonth(retirementDate);
-
-  // =========================
-  // 🔁 LOOP FY
-  // =========================
-  const result = [];
-
-  FY_MONTHS.forEach((m, i) => {
-
-    const startYear = Number(selectedFY.split("-")[0]);
-    const year = (i <= 9) ? startYear : startYear + 1;
-
-    const fullMonth = `${m}-${year}`;
-
-    const pbRow = empRows.find(r =>
-      String(r[monthIndex]).trim() === fullMonth
-    );
-
-    // =========================
-    // 🔹 PAID MODE (FIXED)
-    // =========================
-    if (mode === "paid") {
-      if (!pbRow) {
-        result.push({
-          month: fullMonth,
-          "Basic Pay": 0,
-          "DA": 0,
-          "TA": 0,
-          "HRA": 0,          
-          "NPSE": 0,
-          "CEA":0,
-          "EL Encashment":0,
-          "Bonus":0,
-          "DAA & Arrears":0,
-          "Uniform Allowance":0,
-          "Gross Income": 0,
-          "Net IT": 0,    
-          "GPF": 0,      
-          "NPSC": 0,
-          "NPSE2": 0,
-          "CGEIS": 0,
-          "Prof Tax": 0,
-          "Recovery Pay & Arr": 0,
-          "Total Deduction": 0      
-        });
-        return;
-      }
-
-      const NPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
-      const NPSC = g(pbRow, "NPSC") + g(pbRow, "DAA on NPSC");
-      const Arrear = g(pbRow, "Arrears") + g(pbRow, "Total DAA");
-
-      result.push({
-        month: fullMonth,
-        "Basic Pay": g(pbRow, "Basic Pay"),
-        "DA": g(pbRow, "DA"),
-        "TA": g(pbRow, "TA"),
-        "HRA": g(pbRow, "HRA"),        
-        "NPSE": NPSE,
-        "CEA":g(pbRow, "CEA"), 
-        "EL Encashment":g(pbRow, "EL Encash"), 
-        "Bonus":g(pbRow, "Bonus"), 
-        "DAA & Arrears":Arrear,
-        "Uniform Allowance":g(pbRow, "Uni All"), 
-        "Gross Income": g(pbRow, "Gross Income"),
-        "Net IT": g(pbRow, "Net IT"),
-        "GPF": g(pbRow, "GPF"),
-        "NPSC": NPSC,
-        "NPSE2": NPSE,
-        "CGEIS": g(pbRow, "CGEIS"),
-        "Prof Tax": g(pbRow, "Prof Tax"),
-        "Recovery Pay & Arr": g(pbRow, "REC P & A"),
-        "Total Deduction": g(pbRow, "Total Deduction")
-      });
-
-      return;
-    }
-
-    // =========================
-    // 🔹 CALCULATED MODE
-    // =========================
-    let row;
-
-    if (!pbRow) {
-
-      if (m === lastIncrementMonth) index++;
-
-      let basic = getBasicFromCPC(level, index);
-      let DA = basic * (DA_percent / 100);
-      if (HRA !== 0){
-        HRA = HRA_percent ? basic * (HRA_percent / 100) : 0;
-      }else{
-        HRA = 0;
-      }
+  thead.innerHTML = `
+    <tr><th colspan="14" style="text-align:center;font-size:11px;">Salary Breakup for the Financial Year ${ITfy} for ${Sal}</th><tr>
+    <tr>
+      <th style="text-align: left;">Salary Breakup</th>
       
-      let NPSE = 0;
-      let NPSC = 0;
-      let NPS = 0;
+      ${data.map(r => {
 
-      if (dept !== "GO") {
-        NPSE = (basic + DA) * 0.14;
-        NPSC = (basic + DA) * 0.10;
-        NPS = NPSE + NPSC;
-      }
+        const isPaid = paidMonths.has(String(r.month).toUpperCase());
+        const label = isPaid ? "Paid" : "Calc";
 
-      let gross = basic + DA + HRA + TA + NPSE;
-      let deduction = NPS + CGEIS + GPF + NetIT;
+        const bg = isPaid ? "#2f9e44" : "#fbffae";
+        const cl = isPaid ? "white" : "#8b0000";
+        return `
+          <th>
+            <div>${r.month}</div>
+            <span style="
+              display:inline-block;
+              margin-top:2px;
+              padding:2px 10px;
+              font-size:10px;
+              border-radius:5px;
+              color:${cl};
+              background:${bg};
+            ">
+              ${label}
+            </span>
+          </th>
+        `;
+      }).join("")}
+      <th style="text-align: left;">Total</th>
+    </tr>
+  `;
+  table.appendChild(thead);
 
-      // 🔥 retirement
-      if (
-        retirementMonth &&
-        getMonthValue(fullMonth) >= getMonthValue(retirementMonth)
-      ) {
-        basic = DA = HRA = TA = NPSE = NPSC = NPS = gross = deduction = 0;
-      }
+  const tbody = document.createElement("tbody");
 
-      row = {
-        month: fullMonth,
-        "Basic Pay": Math.round(basic),
-        "DA": Math.round(DA),
-        "TA": Math.round(TA),
-        "HRA": Math.round(HRA),       
-        "NPSE": Math.round(NPSE), 
-        "CEA":0, 
-        "EL Encashment":0, 
-        "Bonus":0, 
-        "DAA & Arrears":0,
-        "Uniform Allowance":0, 
-        "Gross Income": Math.round(gross),
-        "Net IT": g(pbRow, "Net IT"),
-        "GPF": g(pbRow, "GPF"),
-        "NPSE2": Math.round(NPSE),
-        "NPSC": Math.round(NPSC),
-        "CGEIS": g(pbRow, "CGEIS"),
-        "Prof Tax": g(pbRow, "Prof Tax"),
-        "Recovery Pay & Arr": 0,
-        "Total Deduction": Math.round(deduction)
-      };
-
-    } else {
-
-      // 🔥 if PB exists use it directly (converted)
-      const NPSE = g(pbRow, "NPSE") + g(pbRow, "DAA on NPSE");
-      const NPSC = g(pbRow, "NPSC") + g(pbRow, "DAA on NPSC");
-      const Arrear = g(pbRow, "Arrears") + g(pbRow, "Total DAA");
-
-      row = {
-        month: fullMonth,
-        "Basic Pay": g(pbRow, "Basic Pay"),
-        "DA": g(pbRow, "DA"),
-        "TA": g(pbRow, "TA"),
-        "HRA": g(pbRow, "HRA"),        
-        "NPSE": NPSE,
-        "CEA":g(pbRow, "CEA"), 
-        "EL Encashment":g(pbRow, "EL Encash"), 
-        "Bonus":g(pbRow, "Bonus"), 
-        "DAA & Arrears":Arrear,
-        "Uniform Allowance":g(pbRow, "Uni All"), 
-        "Gross Income": g(pbRow, "Gross Income"),
-        "Net IT": g(pbRow, "Net IT"),
-        "GPF": g(pbRow, "GPF"),
-        "NPSC": NPSC,
-        "NPSE2": NPSE,
-        "CGEIS": g(pbRow, "CGEIS"),
-        "Prof Tax": g(pbRow, "Prof Tax"),
-        "Recovery Pay & Arr": g(pbRow, "REC P & A"),
-        "Total Deduction": g(pbRow, "Total Deduction")
-      };
-    }
-
-    result.push(row);
+  // 🔥 CHECK ONCE ONLY
+  const isAllZero = data.every(row => {
+    return Object.keys(row).every(key => {
+      if (key === "month") return true;
+      return row[key] === 0 || row[key] === "" || row[key] === undefined;
+    });
   });
 
-  return result;
+  if (isAllZero) {
+
+    const colSpan = data.length + 2;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td colspan="${colSpan}" 
+          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+          <h3 style="font-size:13px;background:#edebb7;">==============🚫 Employee Retired 🚫==============</h3>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+
+    table.appendChild(tbody);
+    wrapper.appendChild(table);
+
+    return; // 🔥 VERY IMPORTANT (stops further rows)
+  }
+
+  COMPONENTS.forEach(([label, key]) => {
+
+    let total = 0;
+    let rowHTML = `<td><b>${label}</b></td>`;
+
+    data.forEach(r => {
+      const val = r[key] !== undefined && r[key] !== "" ? Number(r[key]) : 0;
+      total += val;
+      //rowHTML += `<td>${val ? "₹ " + val.toLocaleString() : ""}</td>`;
+      const isFuture =
+        getMonthValue(r.month) > getMonthValue(lastPBMonth);
+
+      const style = isFuture
+        ? "color:#8b0000;"
+        : "";
+
+      rowHTML += `<td style="${style}">
+        ${val ? formatCurrency(val) : ""}
+      </td>`;
+    });
+
+    // 🔥 HIDE ROW IF TOTAL = 0
+    if (total === 0) return;
+
+    rowHTML += `<td><b>${formatCurrency(total)}</b></td>`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = rowHTML;
+    tbody.appendChild(tr);
+  });
+
+  // =========================
+// 🔥 ADD TAX TABLE ROW
+// =========================
+
+const taxRow = document.createElement("tr");
+
+// =========================
+// 🔥 CALCULATIONS
+// =========================
+
+let adjGrossTotal = 0;
+let elihra = 0;
+
+let ded80C_raw = 0;
+let ded80C = 0;
+
+let elinpse = 0;
+let elinpsc = 0;
+
+let elipf = 0;
+let taxableIncome = 0;
+
+data.forEach(r => {
+
+  const bp = Number(r["Basic Pay"]) || 0;
+  const da = Number(r["DA"]) || 0;
+
+  const gross = Number(r["Gross Income"]) || 0;
+  const recovery = Number(r["Recovery Pay & Arr"]) || 0;
+
+  const hra = Number(r["HRA"]) || 0;
+
+  const npse = Number(r["NPSE"]) || 0;
+  const npsc = Number(r["NPSC"]) || 0;
+
+  const gpf = Number(r["GPF"]) || 0;
+  const lic = Number(r["LIC"]) || 0;
+  const cgis = Number(r["CGEIS"]) || 0;
+
+  const pf = Number(r["Prof Tax"]) || 0;
+
+  // 🔥 Adjusted Gross
+  adjGrossTotal += (gross - recovery);
+
+  // 🔥 HRA accumulation
+  elihra += hra;
+
+  // 🔥 80C raw (NO CAP HERE)
+  elinpsc = Math.min(npsc, 0.10 * (bp + da));
+  ded80C_raw += (gpf + elinpsc + lic + cgis);
+
+  // 🔥 NPSE (80CCD(2))
+  elinpse += Math.min(npse, 0.14 * (bp + da));
+
+  // 🔥 Professional Tax
+  elipf += Math.min(2500, pf);
+});
+
+// 🔥 APPLY CAPS AFTER LOOP
+ded80C = Math.min(150000, ded80C_raw);
+
+// 🔥 STANDARD DEDUCTION
+const standardDeduction = 50000;
+
+// 🔥 FINAL TAXABLE INCOME (OLD REGIME)
+taxableIncome =
+  adjGrossTotal
+  - standardDeduction
+  - elihra
+  - ded80C
+  - elipf
+  - elinpse;
+
+// 🔥 SAFETY (NO NEGATIVE)
+taxableIncome = Math.max(0, taxableIncome);
+
+taxRow.innerHTML = `
+  <td colspan="${Math.floor((data.length + 2) / 2)}" style="padding:10px;">
+    
+    <table style="width:100%; border-collapse:collapse; border:1px solid #ccc;">
+      <colgroup>
+        <col style="width:60%">
+        <col style="width:10%">
+        <col style="width:30%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th colspan="3" style="background:#dee2e6; text-align:center; font-size:12px;color:black">
+            Old Tax Regime
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="2">Gross Income</td><td style="text-align:right;">${formatCurrency(adjGrossTotal)}</td></tr>
+        <tr><td colspan="2">Standard Deduction</td><td style="text-align:right;">${formatCurrency(standardDeduction)}</td></tr>
+        <tr><td colspan="2">HRA Rebate</td><td style="text-align:right;">${formatCurrency(elihra)}</td></tr>
+        <tr><td colspan="2">Disability Rebate</td><td style="text-align:right;">${formatCurrency(adjGrossTotal)}</td></tr>
+        <tr><td colspan="2">Professional Tax</td><td style="text-align:right;">${formatCurrency(elipf)}</td></tr>
+        <tr><td colspan="2">Deduction Eligible under GPF  / NPSC (Employee Contribution) / CGEIS / LIC </td><td style="text-align:right;">${formatCurrency(ded80C)}</td></tr>
+        <tr><td colspan="2">Deduction Eligible under NPSE (Govt. Contribution)</td><td style="text-align:right;">${formatCurrency(elinpse)}</td></tr>
+        <tr><td colspan="2"><b>Taxable Gross Income</b></td><td style="text-align:right;"><b>${formatCurrency(taxableIncome)}</b></td></tr>
+        <tr><td colspan="3">Tax Slab under Old Tax Regime for FY ${ITfy}</td></tr>
+      </tbody>
+    </table>
+
+  </td>
+
+  <td colspan="${Math.ceil((data.length + 2) / 2)}" style="padding:10px;">
+    
+    <table style="width:100%; border-collapse:collapse; border:1px solid #ccc;">
+      <colgroup>
+        <col style="width:60%">
+        <col style="width:10%">
+        <col style="width:30%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th colspan="3" style="background:#dee2e6; text-align:center; font-size:12px;color:black">
+            New Tax Regime
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="2">Gross Income</td><td style="text-align:right;">${formatCurrency(adjGrossTotal)}</td></tr>
+        <tr><td colspan="2">Standard Deduction</td><td style="text-align:right;">Standard Deduction</td></tr>
+        <tr><td colspan="2">Deduction Eligible under NPSE (Govt. Contribution)</td><td style="text-align:right;">80CC2</td></tr>
+        <tr><td colspan="2"><b>Taxable Gross Income</b></td><td style="text-align:right;"><b>Taxable Income</b></td></tr>
+        <tr><td colspan="3">Tax Slab under New Tax Regime for FY ${ITfy}</td></tr>
+      </tbody>
+    </table>
+
+  </td>
+`;
+
+  tbody.appendChild(taxRow);
+  table.appendChild(tbody);
+  wrapper.appendChild(table);
 }
 
-
-    
-    function renderCalculatedITTable(empName, selectedFY) {
-
-      const wrapper = document.querySelector(".ITtableWrapper");
-      if (!wrapper) return;
-
-      wrapper.innerHTML = ""; // 🔥 clear previous
-
-      const data = buildProjectedFY(empName, selectedFY, "calculated")
-      const h = pbData.headers;
-
-      if (!data.length) {
-        wrapper.innerHTML = `
-      <div style="text-align:center;padding:20px;color:red;font-weight:bold;">
-        🚫 No Data 🚫
-      </div>
-    `;
-        return;
-      }
-
-      // =========================
-      // 🔥 COMPONENTS
-      // =========================
-      const COMPONENTS = [
-        ["Basic Pay", "Basic Pay"],
-        ["DA", "DA"],
-        ["TA", "TA"],
-        ["HRA", "HRA"],
-        ["NPSE", "NPSE"],
-        ["NPSE2", "NPSE"],
-        ["NPSC", "NPSC"],
-        ["CEA", "CEA"],
-        ["EL Encashment", "EL Encash"],
-        ["Bonus", "Bonus"],
-        ["DAA & Arrears", "Total DAA"],
-        ["Uniform Allowance", "Uni All"],
-        ["Gross Income", "Gross Income"],
-        ["IT Recovered", "Net IT"],
-        ["NPS (Total Contri.)", "NPS"],
-        ["Prof Tax", "Prof Tax"],
-        ["Recovery Pay & Arr","REC P & A"]
-      ];
-
-      const g = (row, col) => {
-        const i = h.indexOf(col);
-        return i !== -1 ? Number(row[i]) || 0 : 0;
-      };
-
-      // =========================
-      // 🔥 CREATE TABLE
-      // =========================
-      const table = document.createElement("table");
-
-      table.style.width = "100%";
-      table.style.borderCollapse = "collapse";
-      table.style.fontSize = "12px";
-
-      // =========================
-      // 🔥 HEADER
-      // =========================
-      const thead = document.createElement("thead");
-
-      const headRow = document.createElement("tr");
-
-      headRow.innerHTML = `
-    <th>Salary Breakup</th>
-    ${data.map(r => `<th>${r.month}</th>`).join("")}
-    <th>Total</th>
-  `;
-
-      thead.appendChild(headRow);
-      table.appendChild(thead);
-
-      // =========================
-      // 🔥 BODY
-      // =========================
-      const tbody = document.createElement("tbody");
-
-      COMPONENTS.forEach(([label, colName]) => {
-
-        let total = 0;
-
-        const tr = document.createElement("tr");
-
-        let html = `<td><b>${label}</b></td>`;
-
-        data.forEach(row => {
-          const val = row[colName] ?? 0;
-          total += val;
-
-          html += `
-        <td style="text-align:right">
-          ${val ? "₹ " + val.toLocaleString() : ""}
-        </td>
-      `;
-        });
-
-        html += `
-      <td style="text-align:right"><b>₹ ${total.toLocaleString()}</b></td>
-    `;
-
-        tr.innerHTML = html;
-        tbody.appendChild(tr);
-      });
-
-      // =========================
-      // 🔻 QUARTER TOTAL
-      // =========================
-      function sumRange(start, end, col) {
-        return data.slice(start, end).reduce((s, r) => s + g(r, col), 0);
-      }
-
-      const qtrRow = document.createElement("tr");
-
-      qtrRow.innerHTML = `
-    <td><b>Qtr Gross Income</b></td>
-    ${data.map((_, i) => {
-        if (i % 3 === 2) {
-          const sum = sumRange(i - 2, i + 1, "Gross Income");
-          return `<td style="text-align:right"><b>₹ ${sum.toLocaleString()}</b></td>`;
-        }
-        return `<td></td>`;
-      }).join("")}
-    <td><b>₹ ${sumRange(0, data.length, "Gross Income").toLocaleString()}</b></td>
-  `;
-
-      tbody.appendChild(qtrRow);
-
-      table.appendChild(tbody);
-
-      // =========================
-      // 🔥 APPEND
-      // =========================
-      wrapper.appendChild(table);
-    }
-    
 
 
    ["ITPage_Station", "ITPage_Emp", "ITPage_FY"]
@@ -13102,6 +13197,6 @@ function getMonthValue(m) {
 });
   </script>
 
-</body>
+  </body>
 
 </html>
