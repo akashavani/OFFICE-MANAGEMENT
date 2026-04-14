@@ -2726,6 +2726,7 @@
               </div>
             </div>
           </div>
+          <input type="hidden" id="paidMonthCountInput">
           <div class="ITtableWrapper"></div>
         </div>
 
@@ -13489,6 +13490,9 @@
         let oldTaxableIncome = 0;
         let newTaxableIncome = 0;
 
+        let totalTDS = 0;
+        let paidMonthCount = 0;
+
         // 🔥 GET DISABILITY VALUE (STRING)
         let disabilityVal = "";
 
@@ -13539,7 +13543,7 @@
           const lic = Number(r["LIC"]) || 0;
           const cgis = Number(r["CGEIS"]) || 0;
 
-          const pf = Number(r["Prof Tax"]) || 0;
+          const pf = Number(r["Prof Tax"]) || 0;          
 
           // 🔥 Adjusted Gross
           adjGrossTotal += gross - recovery;
@@ -13566,6 +13570,18 @@
 
           // 🔥 Professional Tax
           elipf += pf;
+
+          const month = String(r.month).toUpperCase();
+          const isPaid = paidMonths.has(month);
+
+          if (!isPaid) return;
+
+          // ✅ COUNT MONTH
+          paidMonthCount++;
+          document.getElementById("paidMonthCountInput").value = paidMonthCount;
+
+          // ✅ ADD TDS
+          totalTDS += Number(r["Net IT"]) || 0;
         });
 
         elipf = Math.min(2500, elipf);
@@ -13590,6 +13606,9 @@
           oldRegime,
           "Standard Deduction",
         );
+        const oldRebateUpto = getITValue(selectedFY, oldRegime, "Rebate Upto");
+        const oldRebate = getITValue(selectedFY, oldRegime, "Rebate");
+        
         oldTaxableIncome =
           adjGrossTotal -
           oldStandardDeduction -
@@ -13605,6 +13624,20 @@
           oldTaxableIncome,
         );
 
+        let oldTotalTax = oldSlabData.total;
+        let oldRebateApplied = 0;
+
+        if (oldTaxableIncome <= oldRebateUpto) {
+          oldRebateApplied = Math.min(oldRebate, oldTotalTax);
+        }
+        const oldFinalTax = oldTotalTax - oldRebateApplied;
+
+        const oldFinalTaxCess = Math.round(oldFinalTax * 0.04, 0);
+        const oldNetTax = oldFinalTax + oldFinalTaxCess;
+
+        const oldPendingTDS = oldNetTax - totalTDS;
+        const oldcalcTDSperMonth = Math.round(oldPendingTDS/(12 - paidMonthCount), 0);
+
         let oldSlabHTML = "";
 
         oldSlabData.rows.forEach((s) => {
@@ -13619,8 +13652,66 @@
 
         oldSlabHTML += `
           <tr>
-            <td colspan="2"><b>Total Tax</b></td>
-            <td style="text-align:right;"><b>${formatCurrency(oldSlabData.total)}</b></td>
+            <td colspan="2">Calculated Tax</td>
+            <td style="text-align:right;">${formatCurrency(oldSlabData.total)}</td>
+          </tr>
+        `;
+
+        oldSlabHTML += `
+          <tr>
+            <td colspan="2">Rebate u/s 87A</td>
+            <td style="text-align:right;">
+              ${formatCurrency(oldRebateApplied)}
+            </td>
+          </tr>
+        `;
+          
+        oldSlabHTML += `
+          <tr>
+            <td colspan="2">Tax After Rebate</td>
+            <td style="text-align:right;">
+              ${formatCurrency(oldFinalTax)}
+            </td>
+          </tr>
+        `;
+         
+        oldSlabHTML += `
+          <tr>
+            <td colspan="2">Education Cess @4%</td>
+            <td style="text-align:right;">
+              ${formatCurrency(oldFinalTaxCess)}
+            </td>
+          </tr>
+        `;
+
+        oldSlabHTML += `
+          <tr style="background:#dee2e6;">
+            <td colspan="2"><b>Net Income Tax</b></td>
+            <td style="text-align:right;">
+              <b>${formatCurrency(oldNetTax)}</b>
+            </td>
+          </tr>
+        `;
+
+        oldSlabHTML += `
+          <tr>
+            <td colspan="2">
+              TDS Deducted (${paidMonthCount} Months)
+            </td>
+            <td style="text-align:right;">
+              -${formatCurrency(totalTDS)}
+            </td>
+          </tr>
+        `;
+
+         oldSlabHTML += `
+          <tr>
+            <td colspan="2">
+              Tax to be recovered
+            </td>
+            <td style="text-align:right;">
+              ${formatCurrency(oldPendingTDS)}
+            </td>
           </tr>
         `;
 
@@ -13630,6 +13721,8 @@
           newRegime,
           "Standard Deduction",
         );
+        const newRebateUpto = getITValue(selectedFY, newRegime, "Rebate Upto");
+        const newRebate = getITValue(selectedFY, newRegime, "Rebate");
         newTaxableIncome = adjGrossTotal - newStandardDeduction - elinpse;
         newTaxableIncome = Math.max(0, newTaxableIncome);
         const newSlabData = calculateTaxSlabs(
@@ -13637,6 +13730,18 @@
           "New Regime",
           newTaxableIncome,
         );
+
+        let newTotalTax = newSlabData.total;
+        let newRebateApplied = 0;
+
+        if (newTaxableIncome <= newRebateUpto) {
+          newRebateApplied = Math.min(newRebate, newTotalTax);
+        }
+        const newFinalTax = newTotalTax - newRebateApplied;
+        const newFinalTaxCess = Math.round(newFinalTax * 0.04, 0);
+        const newNetTax = newFinalTax + newFinalTaxCess;
+        const newPendingTDS = newNetTax - totalTDS;
+        const newcalcTDSperMonth = Math.round(newPendingTDS/(12 - paidMonthCount), 0)
 
         let newSlabHTML = "";
 
@@ -13652,14 +13757,71 @@
 
         newSlabHTML += `
           <tr>
-            <td colspan="2"><b>Total Tax</b></td>
-            <td style="text-align:right;"><b>${formatCurrency(newSlabData.total)}</b></td>
+            <td colspan="2">Calculated Tax</td>
+            <td style="text-align:right;">${formatCurrency(newSlabData.total)}</td>
+          </tr>
+        `;
+
+        newSlabHTML += `
+          <tr style="background:#e8f5e9;">
+            <td colspan="2">Rebate u/s 87A</td>
+            <td style="text-align:right;">
+              ${formatCurrency(newRebateApplied)}
+            </td>
+          </tr>
+        `;
+          
+        newSlabHTML += `
+          <tr>
+            <td colspan="2">Tax After Rebate</td>
+            <td style="text-align:right;">
+              ${formatCurrency(newFinalTax)}
+            </td>
+          </tr>
+        `;
+         
+        newSlabHTML += `
+          <tr>
+            <td colspan="2">Education Cess @4%</td>
+            <td style="text-align:right;">
+              ${formatCurrency(newFinalTaxCess)}
+            </td>
+          </tr>
+        `;
+
+        newSlabHTML += `
+          <tr style="background:#dee2e6;">
+            <td colspan="2"><b>Net Income Tax</b></td>
+            <td style="text-align:right;">
+              <b>${formatCurrency(newNetTax)}</b>
+            </td>
+          </tr>
+        `;
+
+        newSlabHTML += `
+          <tr>
+            <td colspan="2">
+              TDS Deducted (${paidMonthCount} Months)
+            </td>
+            <td style="text-align:right;">
+              ${formatCurrency(totalTDS)}
+            </td>
+          </tr>
+        `;
+
+        newSlabHTML += `
+          <tr>
+            <td colspan="2">
+              Tax to be recovered
+            </td>
+            <td style="text-align:right;">
+              ${formatCurrency(newPendingTDS)}
+            </td>
           </tr>
         `;
 
         taxRow.innerHTML = `
   <td colspan="${Math.floor((data.length + 2) / 2)}" style="padding:10px;">
-    
     <table style="width:100%; border-collapse:collapse; border:1px solid #ccc;">
       <colgroup>
         <col style="width:60%">
@@ -13723,7 +13885,9 @@
         </tr>
 
         <tr><td colspan="3">Tax Slab under Old Tax Regime for FY ${ITfy}</td></tr>
-        ${oldSlabHTML}
+        <tbody id="oldSlabBody">
+          ${oldSlabHTML}
+        </tbody>
       </tbody>
     </table>
   </td>
@@ -13765,58 +13929,125 @@
           if (!rentInput) return;
 
           rentInput.addEventListener("input", () => {
+
             let BP = 0;
             let DA = 0;
             let HRA = 0;
-            let totalSalary = 0;
-            let elihra = 0;
 
             data.forEach((r) => {
-              const bp = Number(r["Basic Pay"]) || 0;
-              const da = Number(r["DA"]) || 0;
-              const hra = Number(r["HRA"]) || 0;
-              const rent = Number(rentInput.value) || 0;
-
-              BP += bp;
-              DA += da;
-              totalSalary = BP + DA;
-
-              HRA += hra;
-
-              const elihra1 = HRA;
-
-              const elihra2 = Math.max(0, rent - Math.round(0.1 * totalSalary));
-
-              const elihra3 = Math.round(HRA_rate * totalSalary);
-
-              elihra = Math.min(HRA, elihra2, elihra3);
-              console.log(
-                "totalSalary",
-                totalSalary,
-                elihra1,
-                elihra2,
-                elihra3,
-              );
+              BP += Number(r["Basic Pay"]) || 0;
+              DA += Number(r["DA"]) || 0;
+              HRA += Number(r["HRA"]) || 0;
             });
 
-            // 🔥 UPDATE HRA
+            const totalSalary = BP + DA;
+            const rent = Number(rentInput.value) || 0;
+
+            const elihra1 = HRA;
+            const elihra2 = Math.max(0, rent - Math.round(0.1 * totalSalary));
+            const elihra3 = Math.round(HRA_rate * totalSalary);
+
+            const elihra = Math.min(elihra1, elihra2, elihra3);
+
+            // ✅ UPDATE HRA
             document.getElementById("hraValue").innerHTML =
               formatCurrency(elihra);
 
-            // 🔥 RECALCULATE TAXABLE
-            let newTaxable =
+            // ✅ RECALCULATE TAXABLE
+            let ReOldTaxable =
               adjGrossTotal -
-              standardDeduction -
+              oldStandardDeduction -
               elihra -
               ded80C -
               elipf -
               elinpse -
               disabilityDeduction;
 
-            newTaxable = Math.max(0, newTaxable);
+            ReOldTaxable = Math.max(0, ReOldTaxable);
 
             document.getElementById("taxableVal").innerHTML =
-              "<b>" + formatCurrency(newTaxable) + "</b>";
+              "<b>" + formatCurrency(ReOldTaxable) + "</b>";
+
+            // ✅ SLAB CALC
+            const oldSlabData = calculateTaxSlabs(
+              selectedFY,
+              "Old Regime",
+              ReOldTaxable
+            );
+
+            let reOldTotalTax = oldSlabData.total;
+
+            // ✅ FIXED REBATE
+            let reOldRebateApplied = 0;
+
+            if (ReOldTaxable <= oldRebateUpto) {
+              reOldRebateApplied = Math.min(oldRebate, reOldTotalTax);
+            }
+
+            const oldFinalTax = reOldTotalTax - reOldRebateApplied;
+            const oldFinalTaxCess = Math.round(oldFinalTax * 0.04);
+            const oldNetTax = oldFinalTax + oldFinalTaxCess;
+
+            // ✅ BUILD HTML
+            let oldSlabHTML = "";
+
+            oldSlabData.rows.forEach((s) => {
+              oldSlabHTML += `
+                <tr>
+                  <td>${s.range}</td>
+                  <td style="text-align:center;">${s.rate}</td>
+                  <td style="text-align:right;">${formatCurrency(s.tax)}</td>
+                </tr>
+              `;
+            });
+
+            oldSlabHTML += `
+              <tr>
+                <td colspan="2"><b>Calculated Tax</b></td>
+                <td style="text-align:right;"><b>${formatCurrency(reOldTotalTax)}</b></td>
+              </tr>
+
+              <tr style="background:#e8f5e9;">
+                <td colspan="2"><b>Rebate u/s 87A</b></td>
+                <td style="text-align:right;color:green;">
+                  -${formatCurrency(reOldRebateApplied)}
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="2">Tax After Rebate</td>
+                <td style="text-align:right;">
+                  ${formatCurrency(oldFinalTax)}
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="2">Education Cess @4%</td>
+                <td style="text-align:right;">
+                  ${formatCurrency(oldFinalTaxCess)}
+                </td>
+              </tr>
+
+              <tr style="background:#dee2e6;">
+                <td colspan="2"><b>Net Income Tax</b></td>
+                <td style="text-align:right;">
+                  <b>${formatCurrency(oldNetTax)}</b>
+                </td>
+              </tr>
+
+               <tr>
+                <td colspan="2">
+                  TDS Deducted (${paidMonthCount} Months)
+                </td>
+                <td style="text-align:right;">
+                  -${formatCurrency(totalTDS)}
+                </td>
+              </tr>
+            `;
+
+            // ✅ UPDATE TABLE
+            document.getElementById("oldSlabBody").innerHTML = oldSlabHTML;
+
           });
         }, 100);
       }
