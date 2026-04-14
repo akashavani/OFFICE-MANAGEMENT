@@ -1637,7 +1637,7 @@
         margin: 4px;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 120px);
+        height: calc(100vh - 100px);
         min-height: 0;
         gap: 10px;
         text-align: center;
@@ -13210,7 +13210,9 @@
           const tax = slabAmount * (rate / 100);
 
           result.push({
-            range: `${formatCurrency(lower)} - ${upper === Infinity ? "Above" : formatCurrency(upper)}`,
+            range: upper === Infinity
+            ? `Tax Above ${formatCurrency(lower)}`
+            : `Tax Between ${formatCurrency(lower)} to ${formatCurrency(upper)}`,
             rate: rate + "%",
             tax: Math.round(tax),
           });
