@@ -13268,8 +13268,8 @@
 
           result.push({
             range: upper === Infinity
-              ? `Above ${formatCurrency(lower)}`
-              : `${formatCurrency(lower)} - ${formatCurrency(upper)}`,
+              ? `Tax Above ${formatCurrency(lower)}`
+              : `Tax Between ${formatCurrency(lower)} to ${formatCurrency(upper)}`,
             rate: rate + "%",
             income: slabAmount,
             tax: Math.round(tax),
