@@ -1529,7 +1529,7 @@
         height: 22px;
       }
 
-      #SalarySlipLogo {
+      #SalarySlipLogo, #ITLogo {
         height: 60px;
       }
 
@@ -1666,20 +1666,22 @@
         color: #ffffff;
       }
 
-      .ITpanelDiv{
-        display: flex;flex-direction:column;
-        text-align: center;justify-content: center;
+      .ITpanelDiv {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
         box-shadow: 0px 0px 2px 1px gray;
         border-radius: 8px;
         width: 280px;
         padding: 2px;
       }
-      .ITpanelDiv label{
+      .ITpanelDiv label {
         font-weight: bold;
         font-size: 11px;
       }
 
-      .ITpanelDiv span{
+      .ITpanelDiv span {
         text-align: center;
         font-size: 15px;
         font-weight: bold;
@@ -2746,16 +2748,24 @@
               </div>
             </div>
           </div>
-          <input type="hidden" id="paidMonthCountInput">
-          <div style="display: flex;flex-direction:row;gap: 10px;justify-content: space-between;margin: 4px;">
+          <input type="hidden" id="paidMonthCountInput" />
+          <div
+            style="
+              display: flex;
+              flex-direction: row;
+              gap: 10px;
+              justify-content: space-between;
+              margin: 4px;
+            "
+          >
             <div class="ITpanelDiv">
               <label>Best Regime Option</label>
-              <span id="PanelRegime">0</span> 
-            </div>  
+              <span id="PanelRegime">0</span>
+            </div>
             <div class="ITpanelDiv">
               <label>Calculated Gross Income</label>
               <span id="PanelGross">0</span>
-            </div>                      
+            </div>
             <div class="ITpanelDiv">
               <label>Calculated Income Tax</label>
               <span id="PanelCalcIT">0</span>
@@ -5466,7 +5476,6 @@
 
               td.appendChild(input);
             } else if (dropdownCols[colName]) {
-
               /* Dropdown */
               const options = dropdownCols[colName]();
 
@@ -5526,17 +5535,17 @@
               });
 
               td.appendChild(input);
-              } else if (
-                colName === "Arrears Details" ||
-                colName === "Recovery Details"
-              ) {
-                const textarea = createEl("textarea");
+            } else if (
+              colName === "Arrears Details" ||
+              colName === "Recovery Details"
+            ) {
+              const textarea = createEl("textarea");
 
-                // 🔥 DO NOT COPY PREVIOUS DATA
-                textarea.value = "";
+              // 🔥 DO NOT COPY PREVIOUS DATA
+              textarea.value = "";
 
-                td.appendChild(textarea);
-              } else {
+              td.appendChild(textarea);
+            } else {
               /* Default input */
               const input = createEl("input", {
                 type: "text",
@@ -5640,7 +5649,6 @@
         applyTableColumnRules(table, selectedHeaders, tableId);
         recalculateAllTotals();
       }
-
 
       function getBasicPay(payLevel, index) {
         if (!cpcData || !cpcData.headers || !cpcData.rows) return 0;
@@ -6831,39 +6839,38 @@
       }
 
       function calculateMonthlyIT(empName, selectedFY, regime, currentMonth) {
+        // 🔥 STEP 1: Get tax calculation (you already have this logic somewhere)
+        const taxData = calculateEmployeeTax(empName, selectedFY, regime);
 
-  // 🔥 STEP 1: Get tax calculation (you already have this logic somewhere)
-  const taxData = calculateEmployeeTax(empName, selectedFY, regime);
+        const totalTDS = taxData.totalTDS || 0;
+        const netTax = taxData.netTax || 0;
+        const paidMonthCount = taxData.paidMonthCount || 0;
 
-  const totalTDS = taxData.totalTDS || 0;
-  const netTax = taxData.netTax || 0;
-  const paidMonthCount = taxData.paidMonthCount || 0;
+        // 🔥 STEP 2: Pending Tax
+        const pendingTDS = netTax - totalTDS;
 
-  // 🔥 STEP 2: Pending Tax
-  const pendingTDS = netTax - totalTDS;
+        const remainingMonths = 12 - paidMonthCount;
 
-  const remainingMonths = 12 - paidMonthCount;
+        // 🔥 EDGE CASES
+        if (remainingMonths <= 0 || pendingTDS <= 0) {
+          return {
+            it: 0,
+            cess: 0,
+            total: 0,
+          };
+        }
 
-  // 🔥 EDGE CASES
-  if (remainingMonths <= 0 || pendingTDS <= 0) {
-    return {
-      it: 0,
-      cess: 0,
-      total: 0
-    };
-  }
+        // 🔥 STEP 3: MONTHLY CALCULATION (YOUR FORMULA)
+        const it = Math.round(pendingTDS / (1.04 * remainingMonths), 0);
+        const cess = Math.round(it * 0.04, 0);
+        const total = it + cess;
 
-  // 🔥 STEP 3: MONTHLY CALCULATION (YOUR FORMULA)
-  const it = Math.round(pendingTDS / (1.04 * remainingMonths), 0);
-  const cess = Math.round(it * 0.04, 0);
-  const total = it + cess;
-
-  return {
-    it,
-    cess,
-    total
-  };
-}
+        return {
+          it,
+          cess,
+          total,
+        };
+      }
 
       function calculateMonthlyIT2(empName, selectedFY, regime, currentMonth) {
         // 🔥 FIX MONTH INPUT
@@ -8042,10 +8049,7 @@
           if (!cell) return "";
 
           // 🔹 TEXTAREA (Arrears / Recovery)
-          if (
-            colName === "Arrears Details" ||
-            colName === "Recovery Details"
-          ) {
+          if (colName === "Arrears Details" || colName === "Recovery Details") {
             const textarea = cell.querySelector("textarea");
             return textarea ? textarea.value.trim() : "";
           }
@@ -8173,14 +8177,12 @@
 
             // 🔥 STEP 3: SMALL DELAY (ensures pbData updated)
             setTimeout(() => {
-
               const empName = id("ITPage_Emp")?.value;
               const selectedFY = id("ITPage_FY")?.value;
 
               if (!empName || !selectedFY) return;
 
               renderCalculatedITTable(empName, selectedFY, "calculated");
-
             }, 100);
 
             //console.log("✅ Full UI refreshed");
@@ -8191,7 +8193,6 @@
           console.error(err);
           alert("❌ Server error");
         }
-
       }
 
       const daInput = id("PayBillPage_DA%");
@@ -12702,7 +12703,7 @@
       //                🔥🔥🔥🔥🔥INCOME TAX SCRIPT🔥🔥🔥🔥🔥
       //=============================================================================//
 
-          // =========================
+      // =========================
       // 🔥 CONSTANTS
       // =========================
       const monthOrder = {
@@ -12887,13 +12888,11 @@
         if (isAddMode) {
           const currentMonth = id("PayBillPage_SalMonth")?.value;
 
-          rows = rows.filter(r => {
+          rows = rows.filter((r) => {
             const m = String(r[monthIndex]).trim();
             return m !== currentMonth; // ❌ remove newly added month
           });
         }
-
-        
 
         const empRows = rows.filter(
           (r) => String(r[nameIndex]).trim() === empName,
@@ -13172,8 +13171,6 @@
         return 0;
       }
 
-
-      
       function calculateTaxSlabs(selectedFY, regime, taxableIncome) {
         if (!itData || !itData.rows) return [];
 
@@ -13211,9 +13208,10 @@
           const tax = slabAmount * (rate / 100);
 
           result.push({
-            range: upper === Infinity
-              ? `Tax Above ${formatCurrency(lower)}`
-              : `Tax Between ${formatCurrency(lower)} to ${formatCurrency(upper)}`,
+            range:
+              upper === Infinity
+                ? `Tax Above ${formatCurrency(lower)}`
+                : `Tax Between ${formatCurrency(lower)} to ${formatCurrency(upper)}`,
             rate: rate + "%",
             income: slabAmount,
             tax: Math.round(tax),
@@ -13255,31 +13253,31 @@
         }
 
         const COMPONENTS = [
-          ["Basic Pay", "Basic Pay"],
+          ["Basic", "Basic Pay"],
           ["DA", "DA"],
           ["TA", "TA"],
           ["HRA", "HRA"],
           ["NPSE", "NPSE"],
           ["CEA", "CEA"],
-          ["EL Encashment", "EL Encashment"],
+          ["EL Encash", "EL Encashment"],
           ["Bonus", "Bonus"],
-          ["DAA & Arrears", "DAA & Arrears"],
-          ["Uniform Allowance", "Uniform Allowance"],
-          ["Gross Income", "Gross Income"],
-          ["IT Recovered", "Net IT"],
+          ["DAA & Arr.", "DAA & Arrears"],
+          ["Uni. All.", "Uniform Allowance"],
+          ["Gross", "Gross Income"],
+          ["TDS", "Net IT"],
           ["GPF", "GPF"],
           ["NPSE", "NPSE2"],
           ["NPSC", "NPSC"],
           ["CGEIS", "CGEIS"],
           ["LIC", "LIC"],
           ["Prof Tax", "Prof Tax"],
-          ["Recovery Pay & Arr", "Recovery Pay & Arr"],
+          ["Rec. P & A", "Recovery Pay & Arr"],
           //["Total Deduction","Total Deduction"]
         ];
 
         const empDB = window.empCalcHeaders;
 
-        if (!window.empCalcHeaders|| !window.empCalcRows) {
+        if (!window.empCalcHeaders || !window.empCalcRows) {
           console.error("empCalcHeaders not loaded");
           return;
         }
@@ -13292,8 +13290,8 @@
         const hrisIndex = empHead.indexOf("HRIS");
         const panIndex = empHead.indexOf("PAN");
 
-        const empRow = window.empCalcRows.find(r =>
-          String(r[empnameIndex]).trim() === empName
+        const empRow = window.empCalcRows.find(
+          (r) => String(r[empnameIndex]).trim() === empName,
         );
 
         const designation = empRow?.[desigIndex] || "";
@@ -13301,15 +13299,60 @@
         const hris = empRow?.[hrisIndex] || "";
         const pan = empRow?.[panIndex] || "";
 
+        const headerTable = document.createElement("table");
+
+        headerTable.style.width = "100%";
+        headerTable.style.borderCollapse = "collapse";
+        headerTable.style.marginBottom = "5px";
+
+        headerTable.innerHTML = `
+        <tr>
+          <th colspan="14" style="border:none;background:white;padding:1px 3px;">
+            <div
+              style="
+                border: solid 2px black;
+                gap: 4px;
+                display: flex;
+                flex-direction: row;
+                padding: 8px 2px;
+              "
+            >
+              <img
+                id="ITLogo"
+                src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+              />
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  margin: auto;
+                  text-align:center;
+                  color:black;
+                "
+              >
+                <h3 style="margin: 0;font-size:12px;">PRASAR BHARATI</h3>
+                <h3 style="margin: 0;font-size:12px;">
+                  INDIA'S PUBLIC SERVICE BROADCASTER
+                </h3>
+                <h3 style="margin: 0;font-size:12px;">AIR Dharwad</h3>
+                <h3 style="margin: 0;font-size:12px;">ALL INDIA RADIO</h3>
+              </div>
+            </div>
+          </th>
+        </tr>
+        `;
+
+        wrapper.appendChild(headerTable);
+
         const infoTable = document.createElement("table");
 
-          infoTable.style.width = "100%";
-          infoTable.style.borderCollapse = "collapse";
-          infoTable.style.marginBottom = "8px";
-          infoTable.style.fontSize = "11px";
-          infoTable.style.border = "1px solid #ccc";
+        infoTable.style.width = "100%";
+        infoTable.style.borderCollapse = "collapse";
+        infoTable.style.marginBottom = "8px";
+        infoTable.style.fontSize = "11px";
+        infoTable.style.border = "1px solid #ccc";
 
-          infoTable.innerHTML = `
+        infoTable.innerHTML = `
             <tr style="background:#e9ecef;">
               <th colspan="14" style="padding:6px;text-align:center;">
                 INCOME TAX CALCULATION DETAILS
@@ -13545,7 +13588,7 @@
           const lic = Number(r["LIC"]) || 0;
           const cgis = Number(r["CGEIS"]) || 0;
 
-          const pf = Number(r["Prof Tax"]) || 0;          
+          const pf = Number(r["Prof Tax"]) || 0;
 
           // 🔥 Adjusted Gross
           adjGrossTotal += gross - recovery;
@@ -13610,7 +13653,7 @@
         );
         const oldRebateUpto = getITValue(selectedFY, oldRegime, "Rebate Upto");
         const oldRebate = getITValue(selectedFY, oldRegime, "Rebate");
-        
+
         oldTaxableIncome =
           adjGrossTotal -
           oldStandardDeduction -
@@ -13671,7 +13714,6 @@
           </tr>
         `;
 
-
         // 🔥 NEW REGIME TAX
         const newStandardDeduction = getITValue(
           selectedFY,
@@ -13705,22 +13747,21 @@
         const newCalcTDSperMonth = Math.max(0, newTDSData.TDS);
 
         //Calcuklation for Panel Display
-        const bestGross = Math.min(newTaxableIncome ,oldTaxableIncome);
-        const bestIT = Math.min(newNetTax ,oldNetTax);
-        let bestRegime ="";
-        if (newNetTax >= oldNetTax){
-          bestRegime = "Old Tax Regime"
-        }else if (newNetTax < oldNetTax){
-          bestRegime = "New Tax Regime"
+        const bestGross = Math.min(newTaxableIncome, oldTaxableIncome);
+        const bestIT = Math.min(newNetTax, oldNetTax);
+        let bestRegime = "";
+        if (newNetTax >= oldNetTax) {
+          bestRegime = "Old Tax Regime";
+        } else if (newNetTax < oldNetTax) {
+          bestRegime = "New Tax Regime";
         }
-        const panelITtobeRecovered = Math.min(newPendingTDS ,oldPendingTDS);
+        const panelITtobeRecovered = Math.min(newPendingTDS, oldPendingTDS);
 
-        if (panelITtobeRecovered <= 0){
-          id("PanelITHighlight").style.background = "#8cffb8"
-        }else if (panelITtobeRecovered > 0){
-          id("PanelITHighlight").style.background = "#ffb18c"
+        if (panelITtobeRecovered <= 0) {
+          id("PanelITHighlight").style.background = "#8cffb8";
+        } else if (panelITtobeRecovered > 0) {
+          id("PanelITHighlight").style.background = "#ffb18c";
         }
-        
 
         id("PanelGross").innerText = formatCurrency(bestGross);
         id("PanelRegime").innerText = bestRegime;
@@ -13862,16 +13903,58 @@
   </td>
 `;
 
+        // =========================
+        // 🔥 FINAL APPEND (NO GAP / NO EXTRA ROW)
+        // =========================
+
         tbody.appendChild(taxRow);
         table.appendChild(tbody);
-        wrapper.appendChild(table);
+
+        // 🔥 RESET WRAPPER
+        wrapper.innerHTML = "";
+
+        // 🔥 MAIN WRAPPER TABLE (SINGLE TABLE STRUCTURE)
+        const mainTable = document.createElement("table");
+
+        mainTable.style.width = "100%";
+        mainTable.style.borderCollapse = "collapse";
+        mainTable.style.margin = "0";
+        mainTable.style.padding = "0";
+
+        // 🔥 BUILD STRUCTURE
+        mainTable.innerHTML = `
+
+          <!-- 🔴 HEADER -->
+          <tr>
+            <td colspan="14" style="padding:2px;border:none;">
+              ${headerTable.innerHTML}
+            </td>
+          </tr>
+
+          <!-- 🔴 INFO -->
+          <tr>
+            <td colspan="14" style="padding:0;border:none;">
+              ${infoTable.outerHTML}
+            </td>
+          </tr>
+
+          <!-- 🔴 MAIN TABLE -->
+          <tr>
+            <td colspan="14" style="padding:0;border:none;">
+              ${table.outerHTML}
+            </td>
+          </tr>
+
+        `;
+
+        // 🔥 APPEND FINAL
+        wrapper.appendChild(mainTable);
 
         setTimeout(() => {
           const rentInput = document.getElementById("rentInput");
           if (!rentInput) return;
 
           rentInput.addEventListener("input", () => {
-
             let BP = 0;
             let DA = 0;
             let HRA = 0;
@@ -13914,7 +13997,7 @@
             const oldSlabData = calculateTaxSlabs(
               selectedFY,
               "Old Regime",
-              ReOldTaxable
+              ReOldTaxable,
             );
 
             let reOldTotalTax = oldSlabData.total;
@@ -13931,12 +14014,14 @@
             const oldNetTax = oldFinalTax + oldFinalTaxCess;
 
             const oldPendingTDS = oldNetTax - totalTDS;
-            const oldTDSData = calculateMonthlyTDS(oldPendingTDS, paidMonthCount);
+            const oldTDSData = calculateMonthlyTDS(
+              oldPendingTDS,
+              paidMonthCount,
+            );
 
             const oldCalcITperMonth = oldTDSData.IT;
             const oldCalcITCessperMonth = oldTDSData.Cess;
             const oldCalcTDSperMonth = oldTDSData.TDS;
-
 
             // ✅ BUILD HTML
             let oldSlabHTML = "";
@@ -13963,31 +14048,30 @@
             `;
 
             //Calcuklation for Panel Display
-              const bestGross = Math.min(newTaxableIncome ,oldTaxableIncome);
-              const bestIT = Math.min(newNetTax ,oldNetTax);
-              let bestRegime ="";
-              if (newNetTax >= oldNetTax){
-                bestRegime = "Old Tax Regime"
-              }else if (newNetTax < oldNetTax){
-                bestRegime = "New Tax Regime"
-              }
-              const panelITtobeRecovered = Math.min(newPendingTDS ,oldPendingTDS);
+            const bestGross = Math.min(newTaxableIncome, oldTaxableIncome);
+            const bestIT = Math.min(newNetTax, oldNetTax);
+            let bestRegime = "";
+            if (newNetTax >= oldNetTax) {
+              bestRegime = "Old Tax Regime";
+            } else if (newNetTax < oldNetTax) {
+              bestRegime = "New Tax Regime";
+            }
+            const panelITtobeRecovered = Math.min(newPendingTDS, oldPendingTDS);
 
-              id("PanelGross").innerText = formatCurrency(bestGross);
-              id("PanelRegime").innerText = bestRegime;
-              id("PanelCalcIT").innerText = formatCurrency(bestIT);
-              id("PanelTDS").innerText = formatCurrency(totalTDS);
-              id("PanelIT").innerText = formatCurrency(panelITtobeRecovered);
+            id("PanelGross").innerText = formatCurrency(bestGross);
+            id("PanelRegime").innerText = bestRegime;
+            id("PanelCalcIT").innerText = formatCurrency(bestIT);
+            id("PanelTDS").innerText = formatCurrency(totalTDS);
+            id("PanelIT").innerText = formatCurrency(panelITtobeRecovered);
 
-              if (panelITtobeRecovered <= 0){
-                id("PanelITHighlight").style.background = "#8cffb8"
-              }else if (panelITtobeRecovered > 0){
-                id("PanelITHighlight").style.background = "#ffb18c"
-              }
+            if (panelITtobeRecovered <= 0) {
+              id("PanelITHighlight").style.background = "#8cffb8";
+            } else if (panelITtobeRecovered > 0) {
+              id("PanelITHighlight").style.background = "#ffb18c";
+            }
 
             // ✅ UPDATE TABLE
             document.getElementById("oldSlabBody").innerHTML = oldSlabHTML;
-
           });
         }, 100);
       }
@@ -14063,579 +14147,675 @@
         renderCalculatedITTable(empName, selectedFY, mode);
       }
 
-
       function calculateMonthlyTDS(newPendingTDS, paidMonthCount) {
-
-  const remainingMonths = 12 - paidMonthCount;
-
-  if (remainingMonths <= 0) {
-    return {
-      IT: 0,
-      Cess: 0,
-      TDS: 0
-    };
-  }
-
-  const IT = Math.round(newPendingTDS / (1.04 * remainingMonths), 0);
-  const Cess = Math.round(IT * 0.04, 0);
-  const TDS = IT + Cess;
-
-  return {
-    IT,
-    Cess,
-    TDS
-  };
-}
-
-function calculateEmployeeTax(empName, selectedFY, regime) {
-
-  const { data, lastPBMonth } = buildProjectedFY(empName, selectedFY, "calculated");
-
-  if (!data || !data.length) {
-    return {
-      netTax: 0,
-      totalTDS: 0,
-      paidMonthCount: 0
-    };
-  }
-
-  const h = pbData.headers;
-  const nameIndex = h.indexOf("Employee Name");
-  const monthIndex = h.indexOf("Salary Month");
-
-  // 🔥 Paid Months
-  //const paidMonths = new Set(
-  //  pbData.rows
-  //    .filter(r => String(r[nameIndex]).trim() === empName)
-  //    .map(r => String(r[monthIndex]).trim().toUpperCase())
-  //);
-
-  let validRows = pbData.rows;
-
-    if (isAddMode) {
-      const currentMonth = id("PayBillPage_SalMonth")?.value;
-
-      validRows = validRows.filter(r => {
-        const m = String(r[monthIndex]).trim();
-        return m !== currentMonth;
-      });
-    }
-
-    const paidMonths = new Set(
-      validRows
-        .filter(r => String(r[nameIndex]).trim() === empName)
-        .map(r => String(r[monthIndex]).trim().toUpperCase())
-    );
-
-  let adjGrossTotal = 0;
-  let totalTDS = 0;
-  let paidMonthCount = 0;
-
-  let BP = 0, DA = 0, HRA = 0;
-  let ded80C_raw = 0, ded80C = 0;
-  let elinpse = 0, elipf = 0;
-
-  // 🔥 Disability
-  let disabilityVal = "";
-  for (let i = pbData.rows.length - 1; i >= 0; i--) {
-    const r = pbData.rows[i];
-    if (String(r[nameIndex]).trim() !== empName) continue;
-
-    const val = r[h.indexOf("Level of Disability")];
-    if (val) {
-      disabilityVal = String(val).trim();
-      break;
-    }
-  }
-
-  const station = (id("SalSlipPage_Station")?.value || "").toLowerCase();
-  const isMetro = ["bangalore","bengaluru","delhi","mumbai","kolkata"].some(c => station.includes(c));
-  const HRA_rate = isMetro ? 0.5 : 0.4;
-
-  data.forEach(r => {
-
-    const bp = Number(r["Basic Pay"]) || 0;
-    const da = Number(r["DA"]) || 0;
-    const hra = Number(r["HRA"]) || 0;
-
-    BP += bp;
-    DA += da;
-    HRA += hra;
-
-    const gross = Number(r["Gross Income"]) || 0;
-    const recovery = Number(r["Recovery Pay & Arr"]) || 0;
-
-    const npse = Number(r["NPSE"]) || 0;
-    const npsc = Number(r["NPSC"]) || 0;
-
-    const gpf = Number(r["GPF"]) || 0;
-    const lic = Number(r["LIC"]) || 0;
-    const cgis = Number(r["CGEIS"]) || 0;
-
-    const pf = Number(r["Prof Tax"]) || 0;
-
-    // 🔥 Gross
-    adjGrossTotal += (gross - recovery);
-
-    const totalSalary = BP + DA;
-
-    // 🔥 80C
-    const elinpsc = Math.min(npsc, Math.round(0.1 * totalSalary));
-    ded80C_raw += gpf + elinpsc + lic + cgis;
-
-    // 🔥 NPSE
-    elinpse += Math.min(npse, Math.round(0.14 * totalSalary));
-
-    // 🔥 Prof Tax
-    elipf += pf;
-
-    // 🔥 Paid months + TDS
-    const month = String(r.month).toUpperCase();
-    if (paidMonths.has(month)) {
-      paidMonthCount++;
-      totalTDS += Number(r["Net IT"]) || 0;
-    }
-  });
-
-  // 🔥 Caps
-  ded80C = Math.min(150000, ded80C_raw);
-  elipf = Math.min(2500, elipf);
-
-  // 🔥 Disability
-  let disabilityDeduction = 0;
-  if (disabilityVal === ">80%") disabilityDeduction = 125000;
-  else if (disabilityVal === ">40%") disabilityDeduction = 75000;
-
-  // =========================
-  // 🔥 TAX CALCULATION
-  // =========================
-
-  const stdDeduction = getITValue(selectedFY, regime, "Standard Deduction");
-  const rebateUpto = getITValue(selectedFY, regime, "Rebate Upto");
-  const rebate = getITValue(selectedFY, regime, "Rebate");
-
-  let taxableIncome = 0;
-
-  if (regime === "Old Regime") {
-
-    // 🔥 HRA (simplified same as your logic)
-    const totalSalary = BP + DA;
-    const elihra = Math.min(
-      HRA,
-      Math.round(HRA_rate * totalSalary)
-    );
-
-    taxableIncome =
-      adjGrossTotal -
-      stdDeduction -
-      elihra -
-      ded80C -
-      elipf -
-      elinpse -
-      disabilityDeduction;
-
-  } else {
-
-    taxableIncome =
-      adjGrossTotal -
-      stdDeduction -
-      elinpse;
-
-  }
-
-  taxableIncome = Math.max(0, taxableIncome);
-
-  // 🔥 Slab
-  const slabData = calculateTaxSlabs(selectedFY, regime, taxableIncome);
-
-  let totalTax = slabData.total;
-
-  // 🔥 Rebate
-  let rebateApplied = 0;
-  if (taxableIncome <= rebateUpto) {
-    rebateApplied = Math.min(rebate, totalTax);
-  }
-
-  const finalTax = totalTax - rebateApplied;
-  const cess = Math.round(finalTax * 0.04);
-  const netTax = finalTax + cess;
-
-  return {
-    netTax,
-    totalTDS,
-    paidMonthCount
-  };
-}
-
-
-async function exportITExcel(mode = "single") {
-  const workbook = new ExcelJS.Workbook();
-
-  const wrapper = document.querySelector(".ITtableWrapper"); // ✅ FIXED
-  const station = id("ITPage_Station")?.value;
-  const selectedFY = id("ITPage_FY")?.value;
-  const selectedEmp = id("ITPage_Emp")?.value;
-
-  if (!selectedFY || !selectedEmp) return;
-
-  const h = pbData.headers;
-  const nameIndex = h.indexOf("Employee Name");
-  const stationIndex = h.indexOf("Pay Drawn Station");
-  const monthIndex = h.indexOf("Salary Month");
-
-  // =========================
-  // 🔥 HELPERS
-  // =========================
-  function isValidFill(bg) {
-  if (!bg) return false;
-  if (bg === "transparent") return false;
-  if (bg.includes("rgba") && bg.endsWith(", 0)")) return false;
-
-  const m = bg.match(/\d+/g);
-  if (!m || m.length < 3) return false;
-
-  const [r, g, b] = m.map(Number);
-
-  // ❌ skip black
-  if (r === 0 && g === 0 && b === 0) return false;
-
-  return true;
-}
-
-  function rgbToARGB(rgb) {
-  const m = rgb.match(/\d+/g);
-  if (!m || m.length < 3) return null;
-
-  const [r, g, b] = m.map(Number);
-
-  // ❌ skip black
-  if (r === 0 && g === 0 && b === 0) return null;
-
-  return (
-    "FF" +
-    [r, g, b]
-      .map((x) => x.toString(16).padStart(2, "0"))
-      .join("")
-  );
-}
-
-  function getFontColor(color) {
-  const m = color?.match(/\d+/g);
-  if (!m || m.length < 3) return undefined;
-
-  const [r, g, b] = m.map(Number);
-
-  // skip black (default)
-  if (r === 0 && g === 0 && b === 0) return undefined;
-
-  return {
-    argb:
-      "FF" +
-      [r, g, b]
-        .map((x) => x.toString(16).padStart(2, "0"))
-        .join(""),
-  };
-}
-
-  function parseValue(text) {
-    if (!text) return " ";
-    const clean = text.replace(/[,₹\s]/g, "");
-    return !isNaN(clean) && clean !== "" ? Number(clean) : text;
-  }
-
-  // =========================
-  // 🔥 UPDATED PROCESS FUNCTION
-  // =========================
-
-    function processITTable(sheet, table, startRow = 1) {
-  let currentRow = startRow;
-  if (!sheet._itHeaderSeen) sheet._itHeaderSeen = false;
-  const rows = table.querySelectorAll(
-    ":scope > thead > tr, :scope > tbody > tr, :scope > tr"
-  );
-
-  rows.forEach((tr) => {
-
-    const rawText = tr.innerText || "";
-    const cells = tr.querySelectorAll(":scope > th, :scope > td");
-
-    // =========================
-    // 🔥 SKIP WRAPPER ROW (ONLY NESTED TABLE)
-    // =========================
-const hasOnlyNested = Array.from(cells).every(cell => {
-  const hasTable = cell.querySelector("table");
-  const text = cell.innerText.replace(/\s+/g, "").trim();
-
-  return hasTable && text === ""; // only table, no real text
-});
-
-if (hasOnlyNested) {
-  const nestedTables = tr.querySelectorAll(":scope table");
-  nestedTables.forEach((tbl) => {
-    currentRow = processITTable(sheet, tbl, currentRow);
-  });
-  return;
-}
-
-if (window.isExcelExport && isHeader) {
-  if (sheet._itHeaderSeen) return; // ❌ skip extra
-  sheet._itHeaderSeen = true;      // ✅ keep first
-}
-
-    // =========================
-    // 🔥 SKIP DUPLICATE HEADER
-    // =========================
-    if (
-      window.isExcelExport &&
-      text.includes("old tax regime") &&
-      text.includes("new tax regime")
-    ) {
-      if (sheet._headerSeen) return;
-      sheet._headerSeen = true;
-    }
-
-    let colIndex = 1;
-    const excelRow = sheet.getRow(currentRow);
-    
-    cells.forEach((cell) => {
-
-      const text = cell.innerText.trim();
-      const cs = window.getComputedStyle(cell);
-
-      const colSpan = cell.colSpan || 1;
-      const rowSpan = cell.rowSpan || 1;
-
-      const excelCell = excelRow.getCell(colIndex);
-
-      // =========================
-      // 🔥 VALUE
-      // =========================
-      const clean = text.replace(/[,₹\s]/g, "");
-      excelCell.value =
-        !isNaN(clean) && clean !== "" ? Number(clean) : text;
-
-      // =========================
-      // 🔥 FONT
-      // =========================
-      excelCell.font = {
-        name: "Calibri",
-        size: 11,
-        bold:
-          cs.fontWeight === "bold" ||
-          parseInt(cs.fontWeight) >= 600 ||
-          cell.querySelector("b, strong"),
-        color: getFontColor(cs.color),
-      };
-
-      // =========================
-      // 🔥 ALIGNMENT
-      // =========================
-      excelCell.alignment = {
-        horizontal: cs.textAlign || "left",
-        vertical: "middle",
-        wrapText: true,
-      };
-
-      // =========================
-      // 🔥 BACKGROUND COLOR
-      // =========================
-      const bg = cs.backgroundColor;
-
-      if (isValidFill(bg)) {
-        const argb = rgbToARGB(bg);
-
-        if (argb) {
-          excelCell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb },
+        const remainingMonths = 12 - paidMonthCount;
+
+        if (remainingMonths <= 0) {
+          return {
+            IT: 0,
+            Cess: 0,
+            TDS: 0,
           };
         }
+
+        const IT = Math.round(newPendingTDS / (1.04 * remainingMonths), 0);
+        const Cess = Math.round(IT * 0.04, 0);
+        const TDS = IT + Cess;
+
+        return {
+          IT,
+          Cess,
+          TDS,
+        };
       }
 
-      // =========================
-      // 🔥 BORDER
-      // =========================
-      excelCell.border = {
-        top: { style: "thin" },
-        bottom: { style: "thin" },
-        left: { style: "thin" },
-        right: { style: "thin" },
-      };
-
-      // =========================
-      // 🔥 MERGE
-      // =========================
-      if (rowSpan > 1 || colSpan > 1) {
-        sheet.mergeCells(
-          currentRow,
-          colIndex,
-          currentRow + rowSpan - 1,
-          colIndex + colSpan - 1
+      function calculateEmployeeTax(empName, selectedFY, regime) {
+        const { data, lastPBMonth } = buildProjectedFY(
+          empName,
+          selectedFY,
+          "calculated",
         );
+
+        if (!data || !data.length) {
+          return {
+            netTax: 0,
+            totalTDS: 0,
+            paidMonthCount: 0,
+          };
+        }
+
+        const h = pbData.headers;
+        const nameIndex = h.indexOf("Employee Name");
+        const monthIndex = h.indexOf("Salary Month");
+
+        // 🔥 Paid Months
+        //const paidMonths = new Set(
+        //  pbData.rows
+        //    .filter(r => String(r[nameIndex]).trim() === empName)
+        //    .map(r => String(r[monthIndex]).trim().toUpperCase())
+        //);
+
+        let validRows = pbData.rows;
+
+        if (isAddMode) {
+          const currentMonth = id("PayBillPage_SalMonth")?.value;
+
+          validRows = validRows.filter((r) => {
+            const m = String(r[monthIndex]).trim();
+            return m !== currentMonth;
+          });
+        }
+
+        const paidMonths = new Set(
+          validRows
+            .filter((r) => String(r[nameIndex]).trim() === empName)
+            .map((r) => String(r[monthIndex]).trim().toUpperCase()),
+        );
+
+        let adjGrossTotal = 0;
+        let totalTDS = 0;
+        let paidMonthCount = 0;
+
+        let BP = 0,
+          DA = 0,
+          HRA = 0;
+        let ded80C_raw = 0,
+          ded80C = 0;
+        let elinpse = 0,
+          elipf = 0;
+
+        // 🔥 Disability
+        let disabilityVal = "";
+        for (let i = pbData.rows.length - 1; i >= 0; i--) {
+          const r = pbData.rows[i];
+          if (String(r[nameIndex]).trim() !== empName) continue;
+
+          const val = r[h.indexOf("Level of Disability")];
+          if (val) {
+            disabilityVal = String(val).trim();
+            break;
+          }
+        }
+
+        const station = (id("SalSlipPage_Station")?.value || "").toLowerCase();
+        const isMetro = [
+          "bangalore",
+          "bengaluru",
+          "delhi",
+          "mumbai",
+          "kolkata",
+        ].some((c) => station.includes(c));
+        const HRA_rate = isMetro ? 0.5 : 0.4;
+
+        data.forEach((r) => {
+          const bp = Number(r["Basic Pay"]) || 0;
+          const da = Number(r["DA"]) || 0;
+          const hra = Number(r["HRA"]) || 0;
+
+          BP += bp;
+          DA += da;
+          HRA += hra;
+
+          const gross = Number(r["Gross Income"]) || 0;
+          const recovery = Number(r["Recovery Pay & Arr"]) || 0;
+
+          const npse = Number(r["NPSE"]) || 0;
+          const npsc = Number(r["NPSC"]) || 0;
+
+          const gpf = Number(r["GPF"]) || 0;
+          const lic = Number(r["LIC"]) || 0;
+          const cgis = Number(r["CGEIS"]) || 0;
+
+          const pf = Number(r["Prof Tax"]) || 0;
+
+          // 🔥 Gross
+          adjGrossTotal += gross - recovery;
+
+          const totalSalary = BP + DA;
+
+          // 🔥 80C
+          const elinpsc = Math.min(npsc, Math.round(0.1 * totalSalary));
+          ded80C_raw += gpf + elinpsc + lic + cgis;
+
+          // 🔥 NPSE
+          elinpse += Math.min(npse, Math.round(0.14 * totalSalary));
+
+          // 🔥 Prof Tax
+          elipf += pf;
+
+          // 🔥 Paid months + TDS
+          const month = String(r.month).toUpperCase();
+          if (paidMonths.has(month)) {
+            paidMonthCount++;
+            totalTDS += Number(r["Net IT"]) || 0;
+          }
+        });
+
+        // 🔥 Caps
+        ded80C = Math.min(150000, ded80C_raw);
+        elipf = Math.min(2500, elipf);
+
+        // 🔥 Disability
+        let disabilityDeduction = 0;
+        if (disabilityVal === ">80%") disabilityDeduction = 125000;
+        else if (disabilityVal === ">40%") disabilityDeduction = 75000;
+
+        // =========================
+        // 🔥 TAX CALCULATION
+        // =========================
+
+        const stdDeduction = getITValue(
+          selectedFY,
+          regime,
+          "Standard Deduction",
+        );
+        const rebateUpto = getITValue(selectedFY, regime, "Rebate Upto");
+        const rebate = getITValue(selectedFY, regime, "Rebate");
+
+        let taxableIncome = 0;
+
+        if (regime === "Old Regime") {
+          // 🔥 HRA (simplified same as your logic)
+          const totalSalary = BP + DA;
+          const elihra = Math.min(HRA, Math.round(HRA_rate * totalSalary));
+
+          taxableIncome =
+            adjGrossTotal -
+            stdDeduction -
+            elihra -
+            ded80C -
+            elipf -
+            elinpse -
+            disabilityDeduction;
+        } else {
+          taxableIncome = adjGrossTotal - stdDeduction - elinpse;
+        }
+
+        taxableIncome = Math.max(0, taxableIncome);
+
+        // 🔥 Slab
+        const slabData = calculateTaxSlabs(selectedFY, regime, taxableIncome);
+
+        let totalTax = slabData.total;
+
+        // 🔥 Rebate
+        let rebateApplied = 0;
+        if (taxableIncome <= rebateUpto) {
+          rebateApplied = Math.min(rebate, totalTax);
+        }
+
+        const finalTax = totalTax - rebateApplied;
+        const cess = Math.round(finalTax * 0.04);
+        const netTax = finalTax + cess;
+
+        return {
+          netTax,
+          totalTDS,
+          paidMonthCount,
+        };
       }
 
-      colIndex += colSpan;
-    });
+      async function exportITExcel(mode = "single") {
+        const workbook = new ExcelJS.Workbook();
 
-    excelRow.commit();
-    currentRow++;
+        const wrapper = document.querySelector(".ITtableWrapper"); // ✅ FIXED
+        const station = id("ITPage_Station")?.value;
+        const selectedFY = id("ITPage_FY")?.value;
+        const selectedEmp = id("ITPage_Emp")?.value;
 
-    // =========================
-    // 🔥 PROCESS NESTED TABLES AFTER ROW
-    // =========================
-    const nestedTables = tr.querySelectorAll(":scope > td > table");
+        if (!selectedFY || !selectedEmp) return;
 
-    nestedTables.forEach((tbl) => {
-      currentRow = processITTable(sheet, tbl, currentRow);
-    });
+        const h = pbData.headers;
+        const nameIndex = h.indexOf("Employee Name");
+        const stationIndex = h.indexOf("Pay Drawn Station");
+        const monthIndex = h.indexOf("Salary Month");
 
-  });
+        // =========================
+        // 🔥 HELPERS
+        // =========================
+        function isValidFill(bg) {
+          if (!bg) return false;
+          if (bg === "transparent") return false;
+          if (bg.includes("rgba") && bg.endsWith(", 0)")) return false;
 
-  return currentRow;
-}
+          const m = bg.match(/\d+/g);
+          if (!m || m.length < 3) return false;
 
-  // =========================
-  // 🔥 EMPLOYEE LIST
-  // =========================
-  let employees = [];
+          const [r, g, b] = m.map(Number);
 
-  if (mode === "single") {
-    employees = [selectedEmp];
-  } else {
-    employees = [
-      ...new Set(
-        pbData.rows
-          .filter(
-            (r) =>
-              String(r[stationIndex]).trim() === station
-          )
-          .map((r) => r[nameIndex])
-      ),
-    ];
-  }
+          // ❌ skip black
+          if (r === 0 && g === 0 && b === 0) return false;
 
-  // =========================
-  // 🔁 LOOP
-  // =========================
-  for (const empName of employees) {
+          return true;
+        }
 
-    // 🔥 RENDER UI FIRST (IMPORTANT)
-    renderCalculatedITTable(empName, selectedFY, "calculated");
+        function rgbToARGB(rgb) {
+          const m = rgb.match(/\d+/g);
+          if (!m || m.length < 3) return null;
 
-    const wrapper = document.querySelector(".ITtableWrapper");
-    if (!wrapper) continue;
+          const [r, g, b] = m.map(Number);
 
-    const sheet = workbook.addWorksheet(
-      mode === "single"
-        ? "IT Calculation"
-        : String(empName).substring(0, 25)
-    );
+          // ❌ skip black
+          if (r === 0 && g === 0 && b === 0) return null;
 
-    // 🔥 PROCESS ALL TABLES INSIDE WRAPPER
-    
-    const tables = wrapper.querySelectorAll(":scope > table");
-    let currentRow = 1;
+          return (
+            "FF" +
+            [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")
+          );
+        }
 
-    tables.forEach((tbl, index) => {
-      currentRow = processITTable(sheet, tbl, currentRow);
+        function getFontColor(color) {
+          const m = color?.match(/\d+/g);
+          if (!m || m.length < 3) return undefined;
 
-      if (index < tables.length - 1) {
-        currentRow += 1;
+          const [r, g, b] = m.map(Number);
+
+          // skip black (default)
+          if (r === 0 && g === 0 && b === 0) return undefined;
+
+          return {
+            argb:
+              "FF" +
+              [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join(""),
+          };
+        }
+
+        function parseValue(text) {
+          if (!text) return " ";
+          const clean = text.replace(/[,₹\s]/g, "");
+          return !isNaN(clean) && clean !== "" ? Number(clean) : text;
+        }     
+
+        // =========================
+        // 🔥 UPDATED PROCESS FUNCTION
+        // =========================
+
+        function processITTable(sheet, table, startRow = 1, depth = 0) {
+
+          let currentRow = startRow;
+
+          const rows = table.querySelectorAll(
+            ":scope > thead > tr, :scope > tbody > tr, :scope > tr"
+          );
+
+          rows.forEach((tr) => {
+            const cells = tr.querySelectorAll(":scope > th, :scope > td");
+            if (!cells.length) return;
+
+            // =========================
+            // 🔥 KEY FIX: IF ROW CONTAINS TABLE → DO NOT WRITE IT
+            // =========================
+            const hasNestedTable = tr.querySelector("table");
+
+            if (hasNestedTable) {
+              const nestedTables = tr.querySelectorAll(":scope > td > table");
+
+              nestedTables.forEach((tbl) => {
+                currentRow = processITTable(sheet, tbl, currentRow, depth + 1);
+              });
+
+              return; // ❌ skip writing this row completely
+            }
+
+            // =========================
+            // 🔥 WRITE NORMAL ROW
+            // =========================
+            let colIndex = 1;
+            const excelRow = sheet.getRow(currentRow);
+
+            cells.forEach((cell) => {
+              const text = cell.innerText.trim();
+              const cs = window.getComputedStyle(cell);
+
+              const colSpan = cell.colSpan || 1;
+              const rowSpan = cell.rowSpan || 1;
+
+              const excelCell = excelRow.getCell(colIndex);
+
+              // VALUE
+              const clean = text.replace(/[,₹\s]/g, "");
+              excelCell.value =
+                !isNaN(clean) && clean !== "" ? Number(clean) : text;
+
+              // FONT
+              excelCell.font = {
+                name: "Calibri",
+                size: 11,
+                bold:
+                  cs.fontWeight === "bold" ||
+                  parseInt(cs.fontWeight) >= 600 ||
+                  cell.querySelector("b, strong"),
+                color: getFontColor(cs.color),
+              };
+
+              // ALIGNMENT
+              excelCell.alignment = {
+                horizontal: cs.textAlign || "left",
+                vertical: "middle",
+                wrapText: true,
+              };
+
+              // BACKGROUND
+              function getEffectiveBackground(cell) {
+
+                // 1️⃣ cell background
+                let bg = window.getComputedStyle(cell).backgroundColor;
+
+                if (bg && bg !== "transparent" && !bg.includes("rgba(0, 0, 0, 0)")) {
+                  return bg;
+                }
+
+                // 2️⃣ row background
+                const tr = cell.closest("tr");
+                if (tr) {
+                  bg = window.getComputedStyle(tr).backgroundColor;
+                  if (bg && bg !== "transparent" && !bg.includes("rgba(0, 0, 0, 0)")) {
+                    return bg;
+                  }
+                }
+
+                // 3️⃣ table background
+                const table = cell.closest("table");
+                if (table) {
+                  bg = window.getComputedStyle(table).backgroundColor;
+                  if (bg && bg !== "transparent" && !bg.includes("rgba(0, 0, 0, 0)")) {
+                    return bg;
+                  }
+                }
+
+                return null;
+              }
+
+              const bg = getEffectiveBackground(cell);
+
+              if (isValidFill(bg)) {
+                const argb = rgbToARGB(bg);
+                if (argb) {
+                  excelCell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb },
+                  };
+                }
+              }
+
+              // BORDER
+              excelCell.border = {
+                top: { style: "thin" },
+                bottom: { style: "thin" },
+                left: { style: "thin" },
+                right: { style: "thin" },
+              };
+
+              // 🔥 ONLY HANDLE COLSPAN (NO ROWSPAN)
+              if (colSpan > 1) {
+                sheet.mergeCells(
+                  currentRow,
+                  colIndex,
+                  currentRow,
+                  colIndex + colSpan - 1
+                );
+              }
+
+              colIndex += colSpan;
+            });
+
+            excelRow.commit();
+            currentRow++;
+          });
+
+          return currentRow;
+        }
+              
+        // =========================
+        // 🔥 EMPLOYEE LIST
+        // =========================
+        let employees = [];
+
+        if (mode === "single") {
+          employees = [selectedEmp];
+        } else {
+          employees = [
+            ...new Set(
+              pbData.rows
+                .filter((r) => String(r[stationIndex]).trim() === station)
+                .map((r) => r[nameIndex]),
+            ),
+          ];
+        }       
+       
+        // =========================
+        // 🔁 LOOP
+        // =========================
+        for (const empName of employees) {
+          // 🔥 RENDER UI FIRST (IMPORTANT)
+          renderCalculatedITTable(empName, selectedFY, "calculated");
+
+          const wrapper = document.querySelector(".ITtableWrapper");
+          if (!wrapper) continue;
+
+          const sheet = workbook.addWorksheet(
+            mode === "single"
+              ? "IT Calculation"
+              : String(empName).substring(0, 25),
+          );
+
+          // =========================
+          // 🔥 ADD IMAGE + HEADER TEXT
+          // =========================
+
+          const img = wrapper.querySelector("#ITLogo");
+
+          if (img && img.src) {
+
+            const base64 = await getBase64Image(img.src);
+
+            const imageId = workbook.addImage({
+              base64: base64,
+              extension: "png",
+            });
+
+            // 🔥 HEADER TEXT (ONE CELL WITH LINE BREAK)
+            sheet.getCell("A1").value = {
+              richText: [
+                { text: "PRASAR BHARATI\n", font: { bold: true, size: 12 } },
+                { text: "INDIA'S PUBLIC SERVICE BROADCASTER\n", font: { size: 12 } },
+                { text: "AIR Dharwad\n", font: { size: 12 } },
+                { text: "ALL INDIA RADIO", font: { size: 12 } }
+              ],
+            };
+
+            sheet.getCell("A1").alignment = {
+              horizontal: "center",
+              vertical: "middle",
+              wrapText: true,
+            };
+
+            // 🔥 MERGE FULL WIDTH (IMPORTANT)
+            sheet.mergeCells("A1:N1");
+
+            // 🔥 ROW HEIGHT
+            sheet.getRow(1).height = 65;
+
+            // 🔥 ADD IMAGE (LEFT SIDE)
+            sheet.addImage(imageId, {
+              tl: { col: 0.2, row: 0.2 },
+              ext: { width: 75, height: 55 },
+            });
+          }
+          // 🔥 PROCESS ALL TABLES INSIDE WRAPPER
+
+          const tables = [wrapper.querySelector("table")];        
+
+          let currentRow = 2;
+
+          tables.forEach((tbl, index) => {
+            currentRow = processITTable(sheet, tbl, currentRow);
+          });
+          
+          const lastRow = currentRow - 1;
+
+          // =========================
+          // 🔧 SHEET SETTINGS
+          // =========================
+          sheet.views = [{ showGridLines: false }];
+
+          sheet.columns = [
+            { width: 15 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 10 },
+            { width: 12 }
+          ];
+
+          sheet.pageSetup = {
+            paperSize: 9, // 🔥 A4
+            orientation: "landscape",
+            //scale: 100,
+            horizontalCentered: true,
+            verticalCentered: false,
+            fitToPage: true,
+            fitToWidth: 1,
+            //fitToHeight: false,
+            fitToHeight: 999,
+            margins: {
+              left: 0.3,
+              right: 0.3,
+              top: 0.5,
+              bottom: 0.5,
+              header: 0.3,
+              footer: 0.3,
+            },
+            printArea:`A1:N${lastRow}`
+          };
+        }
+
+        // =========================
+        // 📥 DOWNLOAD
+        // =========================
+        const buffer = await workbook.xlsx.writeBuffer();
+
+        const fileName =
+          mode === "single" ? `${selectedEmp}_IT.xlsx` : `${station}_IT.xlsx`;
+
+        saveAs(new Blob([buffer]), fileName);
       }
-    });
-
-    // =========================
-    // 🔧 SHEET SETTINGS
-    // =========================
-    sheet.views = [{ showGridLines: false }];
-
-    sheet.columns = [
-      { width: 20 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-    ];
-  }
-
-  // =========================
-  // 📥 DOWNLOAD
-  // =========================
-  const buffer = await workbook.xlsx.writeBuffer();
-
-  const fileName =
-    mode === "single"
-      ? `${selectedEmp}_IT.xlsx`
-      : `${station}_IT.xlsx`;
-
-  saveAs(new Blob([buffer]), fileName);
-}
 
 
-function buildITHTML(mode = "single") {
+      function removeNumberFormatting(root) {
+          const cells = root.querySelectorAll("td, th");
 
-  const wrapper = document.querySelector(".ITtableWrapper");
-  const station = id("ITPage_Station")?.value;
-  const selectedFY = id("ITPage_FY")?.value;
-  const selectedEmp = id("ITPage_Emp")?.value;
+          cells.forEach(cell => {
+            const text = cell.innerText;
 
-  if (!wrapper || !selectedFY) return "";
+            // Store original
+            cell.dataset.originalValue = text;
 
-  const h = pbData.headers;
-  const nameIndex = h.indexOf("Employee Name");
-  const stationIndex = h.indexOf("Pay Drawn Station");
+            // Remove ₹ and commas
+            const clean = text.replace(/[₹,]/g, "").trim();
 
-  // =========================
-  // 🔥 EMPLOYEE LIST
-  // =========================
-  let employees = [];
+            if (!isNaN(clean) && clean !== "") {
+              cell.innerText = clean;
+            }
+          });
+        }
 
-  if (mode === "single") {
-    if (!selectedEmp) return "";
-    employees = [selectedEmp];
-  } else {
-    employees = [
-      ...new Set(
-        pbData.rows
-          .filter(
-            (r) => String(r[stationIndex]).trim() === station
-          )
-          .map((r) => r[nameIndex])
-      ),
-    ];
+        function restoreNumberFormatting(root) {
+          const cells = root.querySelectorAll("td, th");
 
-    if (!employees.length) {
-      alert("No employees found");
-      return "";
-    }
-  }
+          cells.forEach(cell => {
+            if (cell.dataset.originalValue !== undefined) {
+              cell.innerText = cell.dataset.originalValue;
+            }
+          });
+        }
 
-  // =========================
-  // 🔥 CREATE DOCUMENT
-  // =========================
-  const doc = document.implementation.createHTMLDocument("IT Calculation");
+        function stripFormattingFromClone(root) {
+          const cells = root.querySelectorAll("td, th");
 
-  // =========================
-  // 🔥 COPY STYLES
-  // =========================
-  document
-    .querySelectorAll("style, link[rel='stylesheet']")
-    .forEach((el) => {
-      try {
-        doc.head.appendChild(el.cloneNode(true));
-      } catch (e) {}
-    });
+          cells.forEach(cell => {
+            const text = cell.textContent;
 
-  // =========================
-  // 🔥 PRINT CSS
-  // =========================
-  const style = doc.createElement("style");
+            const clean = text.replace(/[₹,]/g, "").trim();
 
-  style.textContent = `
+            if (!isNaN(clean) && clean !== "") {
+              cell.textContent = clean;
+            }
+          });
+        }
+
+
+      function buildITHTML(mode = "single") {
+
+        
+        const wrapper = document.querySelector(".ITtableWrapper");
+        // 🔥 REMOVE FORMATTING
+        removeNumberFormatting(wrapper);
+        const station = id("ITPage_Station")?.value;
+        const selectedFY = id("ITPage_FY")?.value;
+        const selectedEmp = id("ITPage_Emp")?.value;
+
+        if (!wrapper || !selectedFY) return "";
+
+        const h = pbData.headers;
+        const nameIndex = h.indexOf("Employee Name");
+        const stationIndex = h.indexOf("Pay Drawn Station");
+
+        // =========================
+        // 🔥 EMPLOYEE LIST
+        // =========================
+        let employees = [];
+
+        if (mode === "single") {
+          if (!selectedEmp) return "";
+          employees = [selectedEmp];
+        } else {
+          employees = [
+            ...new Set(
+              pbData.rows
+                .filter((r) => String(r[stationIndex]).trim() === station)
+                .map((r) => r[nameIndex]),
+            ),
+          ];
+
+          if (!employees.length) {
+            alert("No employees found");
+            return "";
+          }
+        }
+
+        // =========================
+        // 🔥 CREATE DOCUMENT
+        // =========================
+        const doc =
+          document.implementation.createHTMLDocument("IT Calculation");
+
+        // =========================
+        // 🔥 COPY STYLES
+        // =========================
+        document
+          .querySelectorAll("style, link[rel='stylesheet']")
+          .forEach((el) => {
+            try {
+              doc.head.appendChild(el.cloneNode(true));
+            } catch (e) {}
+          });
+
+        // =========================
+        // 🔥 PRINT CSS
+        // =========================
+        const style = doc.createElement("style");
+
+        style.textContent = `
     @page {
       size: A4 portrait;
       margin: 5mm;
@@ -14659,7 +14839,6 @@ function buildITHTML(mode = "single") {
       overflow: visible !important;
       max-height: none !important;
       height: auto !important;
-      background: white;
     }
 
     table {
@@ -14667,38 +14846,49 @@ function buildITHTML(mode = "single") {
       border-collapse: collapse;
     }
 
+    img {
+      max-width: 60px !important;
+      max-height: 60px !important;
+    }
+
     tr {
       page-break-inside: avoid;
     }
+
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
   `;
 
-  doc.head.appendChild(style);
+        doc.head.appendChild(style);
 
-  // =========================
-  // 🔁 LOOP EMPLOYEES
-  // =========================
-  employees.forEach((empName) => {
+        // =========================
+        // 🔁 LOOP EMPLOYEES
+        // =========================
+        employees.forEach((empName) => {
+          // 🔥 IMPORTANT → RENDER IT UI FIRST
+          renderCalculatedITTable(empName, selectedFY, "calculated");
 
-    // 🔥 IMPORTANT → RENDER IT UI FIRST
-    renderCalculatedITTable(empName, selectedFY, "calculated");
+          const wrapper = document.querySelector(".ITtableWrapper");
+          if (!wrapper) return;
 
-    const wrapper = document.querySelector(".ITtableWrapper");
-    if (!wrapper) return;
+          // 🔥 CLONE FULL WRAPPER (ALL TABLES)
+          const clone = wrapper.cloneNode(true);
+          stripFormattingFromClone(clone);
 
-    // 🔥 CLONE FULL WRAPPER (ALL TABLES)
-    const clone = wrapper.cloneNode(true);
+          const page = doc.createElement("div");
+          page.className = "page";
+          page.appendChild(clone);
 
-    const page = doc.createElement("div");
-    page.className = "page";
-    page.appendChild(clone);
+          doc.body.appendChild(page);
+        });
 
-    doc.body.appendChild(page);
-  });
+        return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+      }
 
-  return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-}
-
-  const itmenu = id("ITprintMenu");
+      const itmenu = id("ITprintMenu");
       const itprintBtn = id("ITprintBtn");
       const itexcelBtn = id("ITexcelBtn");
 
@@ -14718,6 +14908,7 @@ function buildITHTML(mode = "single") {
         itmenu.classList.add("show"); // ✅ ALWAYS OPEN
       });
 
+
       // 🔹 EXCEL BUTTON
       itexcelBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -14733,6 +14924,7 @@ function buildITHTML(mode = "single") {
 
         itmenu.classList.add("show"); // ✅ ALWAYS OPEN
       });
+
 
       document.addEventListener("click", () => {
         itmenu.classList.remove("show");
@@ -14754,7 +14946,6 @@ function buildITHTML(mode = "single") {
           }
         });
       }
-      
 
       document.querySelectorAll("input[name='salaryMode']").forEach((radio) => {
         radio.addEventListener("change", () => {
@@ -14778,21 +14969,23 @@ function buildITHTML(mode = "single") {
         });
       });
 
-
       document.querySelectorAll(".menu-option").forEach((opt) => {
         opt.addEventListener("click", function () {
           const type = this.dataset.type;
+          const wrapper = document.querySelector(".ITtableWrapper");
 
           itmenu.classList.remove("show");
 
           // =====SALARY SLIP PRINT =====
           if (type === "pdf-singleIT") {
             openPrintWindow(buildITHTML("single"));
+            restoreNumberFormatting(wrapper);
           }
 
           // ===== ALL SALARY SLIP PRINT =====
           if (type === "pdf-allIT") {
             openPrintWindow(buildITHTML("all"));
+            restoreNumberFormatting(wrapper);
           }
 
           // ===== SALARY SLIP EXCEL ✅ FIXED =====
@@ -14806,8 +14999,6 @@ function buildITHTML(mode = "single") {
           }
         });
       });
-
-
     </script>
   </body>
 </html>
