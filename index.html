@@ -1529,7 +1529,8 @@
         height: 22px;
       }
 
-      #SalarySlipLogo, #ITLogo {
+      #SalarySlipLogo,
+      #ITLogo {
         height: 60px;
       }
 
@@ -14424,18 +14425,56 @@
           if (!text) return " ";
           const clean = text.replace(/[,₹\s]/g, "");
           return !isNaN(clean) && clean !== "" ? Number(clean) : text;
-        }     
+        }
+
+        function isMerged(sheet, row, col) {
+          const cell = sheet.getCell(row, col);
+          return !!cell.master && cell.master !== cell;
+        }
+
+        function getEffectiveBackground(cell) {
+          let bg = window.getComputedStyle(cell).backgroundColor;
+
+          if (bg && bg !== "transparent" && !bg.includes("rgba(0, 0, 0, 0)")) {
+            return bg;
+          }
+
+          const tr = cell.closest("tr");
+          if (tr) {
+            bg = window.getComputedStyle(tr).backgroundColor;
+            if (
+              bg &&
+              bg !== "transparent" &&
+              !bg.includes("rgba(0, 0, 0, 0)")
+            ) {
+              return bg;
+            }
+          }
+
+          const table = cell.closest("table");
+          if (table) {
+            bg = window.getComputedStyle(table).backgroundColor;
+            if (
+              bg &&
+              bg !== "transparent" &&
+              !bg.includes("rgba(0, 0, 0, 0)")
+            ) {
+              return bg;
+            }
+          }
+
+          return null;
+        }
 
         // =========================
         // 🔥 UPDATED PROCESS FUNCTION
         // =========================
 
-        function processITTable(sheet, table, startRow = 1, depth = 0) {
-
+        function processITTable2(sheet, table, startRow = 1, depth = 0) {
           let currentRow = startRow;
 
           const rows = table.querySelectorAll(
-            ":scope > thead > tr, :scope > tbody > tr, :scope > tr"
+            ":scope > thead > tr, :scope > tbody > tr, :scope > tr",
           );
 
           rows.forEach((tr) => {
@@ -14443,32 +14482,32 @@
             if (!cells.length) return;
 
             // =========================
-            // 🔥 KEY FIX: IF ROW CONTAINS TABLE → DO NOT WRITE IT
+            // 🔥 IF ROW HAS DIRECT CHILD TABLE → PROCESS ONLY THAT
             // =========================
-            const hasNestedTable = tr.querySelector("table");
+            const nestedTables = tr.querySelectorAll(":scope > td > table");
 
-            if (hasNestedTable) {
-              const nestedTables = tr.querySelectorAll(":scope > td > table");
-
+            if (nestedTables.length > 0) {
               nestedTables.forEach((tbl) => {
                 currentRow = processITTable(sheet, tbl, currentRow, depth + 1);
               });
-
-              return; // ❌ skip writing this row completely
+              return; // ❌ do NOT write wrapper row
             }
 
             // =========================
-            // 🔥 WRITE NORMAL ROW
+            // 🔥 WRITE ROW ONLY IF IT HAS REAL DATA
             // =========================
             let colIndex = 1;
             const excelRow = sheet.getRow(currentRow);
 
+            let hasValue = false;
+
             cells.forEach((cell) => {
               const text = cell.innerText.trim();
+              if (text) hasValue = true;
+
               const cs = window.getComputedStyle(cell);
 
               const colSpan = cell.colSpan || 1;
-              const rowSpan = cell.rowSpan || 1;
 
               const excelCell = excelRow.getCell(colIndex);
 
@@ -14497,28 +14536,36 @@
 
               // BACKGROUND
               function getEffectiveBackground(cell) {
-
-                // 1️⃣ cell background
                 let bg = window.getComputedStyle(cell).backgroundColor;
 
-                if (bg && bg !== "transparent" && !bg.includes("rgba(0, 0, 0, 0)")) {
+                if (
+                  bg &&
+                  bg !== "transparent" &&
+                  !bg.includes("rgba(0, 0, 0, 0)")
+                ) {
                   return bg;
                 }
 
-                // 2️⃣ row background
                 const tr = cell.closest("tr");
                 if (tr) {
                   bg = window.getComputedStyle(tr).backgroundColor;
-                  if (bg && bg !== "transparent" && !bg.includes("rgba(0, 0, 0, 0)")) {
+                  if (
+                    bg &&
+                    bg !== "transparent" &&
+                    !bg.includes("rgba(0, 0, 0, 0)")
+                  ) {
                     return bg;
                   }
                 }
 
-                // 3️⃣ table background
                 const table = cell.closest("table");
                 if (table) {
                   bg = window.getComputedStyle(table).backgroundColor;
-                  if (bg && bg !== "transparent" && !bg.includes("rgba(0, 0, 0, 0)")) {
+                  if (
+                    bg &&
+                    bg !== "transparent" &&
+                    !bg.includes("rgba(0, 0, 0, 0)")
+                  ) {
                     return bg;
                   }
                 }
@@ -14547,26 +14594,270 @@
                 right: { style: "thin" },
               };
 
-              // 🔥 ONLY HANDLE COLSPAN (NO ROWSPAN)
+              // 🔥 ONLY COLSPAN (NO ROWSPAN)
               if (colSpan > 1) {
-                sheet.mergeCells(
-                  currentRow,
-                  colIndex,
-                  currentRow,
-                  colIndex + colSpan - 1
-                );
+                let canMerge = true;
+
+                for (let c = colIndex; c < colIndex + colSpan; c++) {
+                  if (isMerged(sheet, currentRow, c)) {
+                    canMerge = false;
+                    break;
+                  }
+                }
+
+                if (canMerge) {
+                  sheet.mergeCells(
+                    currentRow,
+                    colIndex,
+                    currentRow,
+                    colIndex + colSpan - 1,
+                  );
+                }
               }
 
               colIndex += colSpan;
             });
 
-            excelRow.commit();
-            currentRow++;
+            // ✅ ONLY MOVE ROW IF DATA EXISTS
+            if (hasValue) {
+              excelRow.commit();
+              currentRow++;
+            }
           });
 
           return currentRow;
         }
-              
+
+        function processITTable(sheet, table, startRow = 1, depth = 0) {
+          let currentRow = startRow;
+
+          const rows = table.querySelectorAll(
+            ":scope > thead > tr, :scope > tbody > tr, :scope > tr",
+          );
+
+          rows.forEach((tr) => {
+            const cells = tr.querySelectorAll(":scope > th, :scope > td");
+            if (!cells.length) return;
+
+            const nestedTables = tr.querySelectorAll(":scope > td > table");
+
+            // =========================
+            // 🔥 SIDE BY SIDE (OLD + NEW)
+            // =========================
+            if (nestedTables.length === 2) {
+              let leftEnd = processITTable(
+                sheet,
+                nestedTables[0],
+                currentRow,
+                depth + 1,
+              );
+
+              let rightEnd = processITTableSide(
+                sheet,
+                nestedTables[1],
+                currentRow,
+                8, // 🔥 start column for right table
+                depth + 1,
+              );
+
+              currentRow = Math.max(leftEnd, rightEnd);
+              return;
+            }
+
+            // =========================
+            // 🔥 SINGLE NESTED TABLE
+            // =========================
+            if (nestedTables.length === 1) {
+              currentRow = processITTable(
+                sheet,
+                nestedTables[0],
+                currentRow,
+                depth + 1,
+              );
+              return;
+            }
+
+            // =========================
+            // 🔥 NORMAL ROW
+            // =========================
+            let colIndex = 1;
+            const excelRow = sheet.getRow(currentRow);
+
+            let hasValue = false;
+
+            cells.forEach((cell) => {
+              const text = cell.innerText.trim();
+              if (text) hasValue = true;
+
+              const cs = window.getComputedStyle(cell);
+              const colSpan = cell.colSpan || 1;
+
+              const excelCell = excelRow.getCell(colIndex);
+
+              const clean = text.replace(/[,₹\s]/g, "");
+              excelCell.value =
+                !isNaN(clean) && clean !== "" ? Number(clean) : text;
+
+              excelCell.font = {
+                name: "Calibri",
+                size: 11,
+                bold:
+                  cs.fontWeight === "bold" ||
+                  parseInt(cs.fontWeight) >= 600 ||
+                  cell.querySelector("b, strong"),
+                color: getFontColor(cs.color),
+              };
+
+              excelCell.alignment = {
+                horizontal: cs.textAlign || "left",
+                vertical: "middle",
+                wrapText: true,
+              };
+
+              // 🔥 BACKGROUND FIX
+
+              const bg = getEffectiveBackground(cell);
+
+              if (isValidFill(bg)) {
+                const argb = rgbToARGB(bg);
+                if (argb) {
+                  excelCell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb },
+                  };
+                }
+              }
+
+              // 🔥 BORDER
+              excelCell.border = {
+                top: { style: "thin" },
+                bottom: { style: "thin" },
+                left: { style: "thin" },
+                right: { style: "thin" },
+              };
+
+              // 🔥 SAFE MERGE
+              if (colSpan > 1) {
+                try {
+                  sheet.mergeCells(
+                    currentRow,
+                    colIndex,
+                    currentRow,
+                    colIndex + colSpan - 1,
+                  );
+                } catch (e) {}
+              }
+
+              colIndex += colSpan;
+            });
+
+            if (hasValue) {
+              excelRow.commit();
+              currentRow++;
+            }
+          });
+
+          return currentRow;
+        }
+
+        function processITTableSide(
+          sheet,
+          table,
+          startRow,
+          startCol = 8,
+          depth = 0,
+        ) {
+          let currentRow = startRow;
+
+          const rows = table.querySelectorAll(
+            ":scope > thead > tr, :scope > tbody > tr, :scope > tr",
+          );
+
+          rows.forEach((tr) => {
+            const cells = tr.querySelectorAll(":scope > th, :scope > td");
+            if (!cells.length) return;
+
+            let colIndex = startCol;
+            const excelRow = sheet.getRow(currentRow);
+
+            let hasValue = false;
+
+            cells.forEach((cell) => {
+              const text = cell.innerText.trim();
+              if (text) hasValue = true;
+
+              const cs = window.getComputedStyle(cell);
+              const colSpan = cell.colSpan || 1;
+
+              const excelCell = excelRow.getCell(colIndex);
+
+              const clean = text.replace(/[,₹\s]/g, "");
+              excelCell.value =
+                !isNaN(clean) && clean !== "" ? Number(clean) : text;
+
+              excelCell.font = {
+                name: "Calibri",
+                size: 11,
+                bold:
+                  cs.fontWeight === "bold" ||
+                  parseInt(cs.fontWeight) >= 600 ||
+                  cell.querySelector("b, strong"),
+                color: getFontColor(cs.color),
+              };
+
+              excelCell.alignment = {
+                horizontal: cs.textAlign || "left",
+                vertical: "middle",
+                wrapText: true,
+              };
+
+              // 🔥 BACKGROUND
+
+              const bg = getEffectiveBackground(cell);
+
+              if (isValidFill(bg)) {
+                const argb = rgbToARGB(bg);
+                if (argb) {
+                  excelCell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb },
+                  };
+                }
+              }
+
+              excelCell.border = {
+                top: { style: "thin" },
+                bottom: { style: "thin" },
+                left: { style: "thin" },
+                right: { style: "thin" },
+              };
+
+              // 🔥 SAFE MERGE
+              if (colSpan > 1) {
+                try {
+                  sheet.mergeCells(
+                    currentRow,
+                    colIndex,
+                    currentRow,
+                    colIndex + colSpan - 1,
+                  );
+                } catch (e) {}
+              }
+
+              colIndex += colSpan;
+            });
+
+            if (hasValue) {
+              excelRow.commit();
+              currentRow++;
+            }
+          });
+
+          return currentRow;
+        }
+
         // =========================
         // 🔥 EMPLOYEE LIST
         // =========================
@@ -14582,8 +14873,8 @@
                 .map((r) => r[nameIndex]),
             ),
           ];
-        }       
-       
+        }
+
         // =========================
         // 🔁 LOOP
         // =========================
@@ -14607,7 +14898,6 @@
           const img = wrapper.querySelector("#ITLogo");
 
           if (img && img.src) {
-
             const base64 = await getBase64Image(img.src);
 
             const imageId = workbook.addImage({
@@ -14619,9 +14909,12 @@
             sheet.getCell("A1").value = {
               richText: [
                 { text: "PRASAR BHARATI\n", font: { bold: true, size: 12 } },
-                { text: "INDIA'S PUBLIC SERVICE BROADCASTER\n", font: { size: 12 } },
-                { text: "AIR Dharwad\n", font: { size: 12 } },
-                { text: "ALL INDIA RADIO", font: { size: 12 } }
+                {
+                  text: "INDIA'S PUBLIC SERVICE BROADCASTER\n",
+                  font: { bold: true, size: 12 },
+                },
+                { text: "AIR Dharwad\n", font: { bold: true, size: 12 } },
+                { text: "ALL INDIA RADIO", font: { bold: true, size: 12 } },
               ],
             };
 
@@ -14640,19 +14933,19 @@
             // 🔥 ADD IMAGE (LEFT SIDE)
             sheet.addImage(imageId, {
               tl: { col: 0.2, row: 0.2 },
-              ext: { width: 75, height: 55 },
+              ext: { width: 75, height: 65 },
             });
           }
           // 🔥 PROCESS ALL TABLES INSIDE WRAPPER
 
-          const tables = [wrapper.querySelector("table")];        
+          const tables = [wrapper.querySelector("table")];
 
           let currentRow = 2;
 
           tables.forEach((tbl, index) => {
             currentRow = processITTable(sheet, tbl, currentRow);
           });
-          
+
           const lastRow = currentRow - 1;
 
           // =========================
@@ -14674,7 +14967,7 @@
             { width: 10 },
             { width: 10 },
             { width: 10 },
-            { width: 12 }
+            { width: 12 },
           ];
 
           sheet.pageSetup = {
@@ -14695,7 +14988,7 @@
               header: 0.3,
               footer: 0.3,
             },
-            printArea:`A1:N${lastRow}`
+            printArea: `A1:N${lastRow}`,
           };
         }
 
@@ -14710,53 +15003,49 @@
         saveAs(new Blob([buffer]), fileName);
       }
 
-
       function removeNumberFormatting(root) {
-          const cells = root.querySelectorAll("td, th");
+        const cells = root.querySelectorAll("td, th");
 
-          cells.forEach(cell => {
-            const text = cell.innerText;
+        cells.forEach((cell) => {
+          const text = cell.innerText;
 
-            // Store original
-            cell.dataset.originalValue = text;
+          // Store original
+          cell.dataset.originalValue = text;
 
-            // Remove ₹ and commas
-            const clean = text.replace(/[₹,]/g, "").trim();
+          // Remove ₹ and commas
+          const clean = text.replace(/[₹,]/g, "").trim();
 
-            if (!isNaN(clean) && clean !== "") {
-              cell.innerText = clean;
-            }
-          });
-        }
+          if (!isNaN(clean) && clean !== "") {
+            cell.innerText = clean;
+          }
+        });
+      }
 
-        function restoreNumberFormatting(root) {
-          const cells = root.querySelectorAll("td, th");
+      function restoreNumberFormatting(root) {
+        const cells = root.querySelectorAll("td, th");
 
-          cells.forEach(cell => {
-            if (cell.dataset.originalValue !== undefined) {
-              cell.innerText = cell.dataset.originalValue;
-            }
-          });
-        }
+        cells.forEach((cell) => {
+          if (cell.dataset.originalValue !== undefined) {
+            cell.innerText = cell.dataset.originalValue;
+          }
+        });
+      }
 
-        function stripFormattingFromClone(root) {
-          const cells = root.querySelectorAll("td, th");
+      function stripFormattingFromClone(root) {
+        const cells = root.querySelectorAll("td, th");
 
-          cells.forEach(cell => {
-            const text = cell.textContent;
+        cells.forEach((cell) => {
+          const text = cell.textContent;
 
-            const clean = text.replace(/[₹,]/g, "").trim();
+          const clean = text.replace(/[₹,]/g, "").trim();
 
-            if (!isNaN(clean) && clean !== "") {
-              cell.textContent = clean;
-            }
-          });
-        }
-
+          if (!isNaN(clean) && clean !== "") {
+            cell.textContent = clean;
+          }
+        });
+      }
 
       function buildITHTML(mode = "single") {
-
-        
         const wrapper = document.querySelector(".ITtableWrapper");
         // 🔥 REMOVE FORMATTING
         removeNumberFormatting(wrapper);
@@ -14908,7 +15197,6 @@
         itmenu.classList.add("show"); // ✅ ALWAYS OPEN
       });
 
-
       // 🔹 EXCEL BUTTON
       itexcelBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -14924,7 +15212,6 @@
 
         itmenu.classList.add("show"); // ✅ ALWAYS OPEN
       });
-
 
       document.addEventListener("click", () => {
         itmenu.classList.remove("show");
