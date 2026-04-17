@@ -1673,7 +1673,7 @@
         border-right: solid 1px #94a3b8;
       }
 
-      .ITtableWrapper table tr:last-child td{
+      .ITtableWrapper table tr:last-child td {
         border-bottom: solid 1px #94a3b8;
       }
 
@@ -4473,28 +4473,33 @@
         });
       }
 
-      function copyPreviousMonthData(nextMonth, station) {
-        if (!pbData || !empData) return;
+      function addNewEmployeesFromEmpDB(nextMonth, station) {
+        if (!pbData) return;
 
-        const headers = pbData.headers;
-        const rows = pbData.rows;
+        const pbHeaders = pbData.headers;
+        const pbRows = pbData.rows;
 
-        const nameIdx = headers.indexOf("Employee Name");
-        const stationIdx = headers.indexOf("Pay Drawn Station");
-        const monthIdx = headers.indexOf("Salary Month");
-
+        // ✅ SINGLE SOURCE
         const calcHeaders = window.empCalcHeaders || [];
         const calcRows = window.empCalcRows || [];
 
+        const namePB = getColIndex(pbHeaders, "Employee Name");
+        const stationPB = getColIndex(pbHeaders, "Pay Drawn Station");
+        const monthPB = getColIndex(pbHeaders, "Salary Month");
+
         const nameCalc = getColIndex(calcHeaders, "Employee Name");
         const stationCalc = getColIndex(calcHeaders, "Station");
-        const dorIdx = getColIndex(calcHeaders, "Superannuation");
 
-        const prevMonth = getPreviousMonthStr(nextMonth);
+        const dorIdx = getColIndex(calcHeaders, "Superannuation");
+        const statusIdx = getColIndex(calcHeaders, "Status");
+        const vrsIdx = getColIndex(calcHeaders, "VRS / Deceased Date");
+
         const nextVal = parseMonthYear(nextMonth);
         const prevMonthVal = nextVal - 1;
 
-        /* 🔹 PARSE DOR */
+        // =========================
+        // 🔹 PARSE DATE
+        // =========================
         function parseDOR(dorStr) {
           if (!dorStr) return 0;
 
@@ -4517,14 +4522,28 @@
           if (parts.length !== 2) return 0;
 
           const year = parseInt(parts[1].trim());
-          const monPart = parts[0].split("-")[0];
+          const monPart = parts[0].split("-")[0].trim();
           const month = months[monPart];
 
           return year * 100 + month;
         }
 
-        /* 🔹 GET DOR FROM CALCULATED DATA */
+        // =========================
+        // 🔹 GET DOR
+        // =========================
         function getEmpDOR(empName, station) {
+          const row = calcRows.find(
+            (r) =>
+              String(r[nameCalc]).trim() === String(empName).trim() &&
+              String(r[stationCalc]).trim() === String(station).trim(),
+          );
+          return row ? parseDOR(row[dorIdx]) : 0;
+        }
+
+        // =========================
+        // 🔹 GET VRS
+        // =========================
+        function getEmpVRS(empName, station) {
           const row = calcRows.find(
             (r) =>
               String(r[nameCalc]).trim() === String(empName).trim() &&
@@ -4533,51 +4552,301 @@
 
           if (!row) return 0;
 
-          return parseDOR(row[dorIdx]);
+          const status = String(row[statusIdx] || "")
+            .trim()
+            .toUpperCase();
+          if (!["VRS", "DECEASED"].includes(status)) return 0;
+
+          return parseDOR(row[vrsIdx]);
         }
 
-        /* 🔹 DUPLICATE CHECK */
-        const exists = (name) => {
-          return rows.some(
+        // =========================
+        // 🔥 REMOVE DUPLICATES
+        // =========================
+        const seen = new Set();
+
+        for (let i = pbRows.length - 1; i >= 0; i--) {
+          const r = pbRows[i];
+
+          const key =
+            String(r[namePB]).trim() +
+            "|" +
+            String(r[stationPB]).trim() +
+            "|" +
+            parseMonthYear(r[monthPB]);
+
+          if (seen.has(key)) {
+            pbRows.splice(i, 1);
+          } else {
+            seen.add(key);
+          }
+        }
+
+        // =========================
+        // 🔥 REMOVE INVALID (DOR + VRS)
+        // =========================
+        for (let i = pbRows.length - 1; i >= 0; i--) {
+          const r = pbRows[i];
+
+          if (
+            String(r[stationPB]).trim() === String(station).trim() &&
+            parseMonthYear(r[monthPB]) === nextVal
+          ) {
+            const empName = String(r[namePB]).trim();
+
+            const dorVal = getEmpDOR(empName, station);
+            const vrsVal = getEmpVRS(empName, station);
+
+            // ❌ remove if BEFORE current month
+            if ((dorVal && dorVal < nextVal) || (vrsVal && vrsVal < nextVal)) {
+              pbRows.splice(i, 1);
+            }
+          }
+        }
+
+        // =========================
+        // 🔹 PREVIOUS MONTH EMPLOYEES
+        // =========================
+        const prevEmployees = new Set();
+
+        pbRows.forEach((r) => {
+          if (
+            String(r[stationPB]).trim() === String(station).trim() &&
+            parseMonthYear(r[monthPB]) === prevMonthVal
+          ) {
+            prevEmployees.add(String(r[namePB]).trim());
+          }
+        });
+
+        // =========================
+        // 🔹 EXISTING SET
+        // =========================
+        const existingSet = new Set();
+
+        pbRows.forEach((r) => {
+          if (
+            String(r[stationPB]).trim() === String(station).trim() &&
+            parseMonthYear(r[monthPB]) === nextVal
+          ) {
+            existingSet.add(String(r[namePB]).trim());
+          }
+        });
+
+        let count = 0;
+
+        // =========================
+        // 🔹 ADD EMPLOYEES
+        // =========================
+        calcRows.forEach((emp) => {
+          const empName = String(emp[nameCalc] || "").trim();
+          const empStation = String(emp[stationCalc] || "").trim();
+
+          if (!empName || empStation !== String(station).trim()) return;
+
+          if (!prevEmployees.has(empName)) return;
+          if (existingSet.has(empName)) return;
+
+          const dorVal = getEmpDOR(empName, station);
+          const vrsVal = getEmpVRS(empName, station);
+
+          // ❌ skip ONLY if BEFORE this month
+          if ((dorVal && dorVal < nextVal) || (vrsVal && vrsVal < nextVal))
+            return;
+
+          const row = new Array(pbHeaders.length).fill("");
+
+          row[namePB] = empName;
+          row[stationPB] = station;
+          row[monthPB] = nextMonth;
+
+          const set = (col, val) => {
+            const i = getColIndex(pbHeaders, col);
+            if (i !== -1) row[i] = val;
+          };
+
+          set("Pay Level", 1);
+          set("7CPC Index", 1);
+          set("HRA Entitled", true);
+          set("TA Entitled", true);
+
+          pbRows.push(row);
+          existingSet.add(empName);
+
+          count++;
+        });
+
+        console.log("✅ Added Employees:", count);
+      }
+
+      function copyPreviousMonthData(nextMonth, station) {
+        if (!pbData) return;
+
+        const headers = pbData.headers;
+        const rows = pbData.rows;
+
+        const nameIdx = headers.indexOf("Employee Name");
+        const stationIdx = headers.indexOf("Pay Drawn Station");
+        const monthIdx = headers.indexOf("Salary Month");
+
+        const calcHeaders = window.empCalcHeaders || [];
+        const calcRows = window.empCalcRows || [];
+
+        const nameCalc = getColIndex(calcHeaders, "Employee Name");
+        const stationCalc = getColIndex(calcHeaders, "Station");
+
+        const dorIdx = getColIndex(calcHeaders, "Superannuation");
+        const statusIdx = getColIndex(calcHeaders, "Status");
+        const vrsIdx = getColIndex(calcHeaders, "VRS / Deceased Date");
+
+        const prevMonth = getPreviousMonthStr(nextMonth);
+        const nextVal = parseMonthYear(nextMonth);
+        const prevMonthVal = nextVal - 1;
+
+        // =========================
+        // 🔹 PARSE DATE
+        // =========================
+        function parseDOR(dorStr) {
+          if (!dorStr) return 0;
+
+          const months = {
+            Jan: 1,
+            Feb: 2,
+            Mar: 3,
+            Apr: 4,
+            May: 5,
+            Jun: 6,
+            Jul: 7,
+            Aug: 8,
+            Sep: 9,
+            Oct: 10,
+            Nov: 11,
+            Dec: 12,
+          };
+
+          const parts = String(dorStr).split(",");
+          if (parts.length !== 2) return 0;
+
+          const year = parseInt(parts[1].trim());
+          const monPart = parts[0].split("-")[0].trim();
+          const month = months[monPart];
+
+          return year * 100 + month;
+        }
+
+        // =========================
+        // 🔹 GET DOR
+        // =========================
+        function getEmpDOR(empName, station) {
+          const row = calcRows.find(
             (r) =>
-              String(r[stationIdx]).trim() === String(station).trim() &&
-              String(r[monthIdx]).trim() === String(nextMonth).trim() &&
-              String(r[nameIdx]).trim() === String(name).trim(),
+              String(r[nameCalc]).trim() === String(empName).trim() &&
+              String(r[stationCalc]).trim() === String(station).trim(),
           );
-        };
+          return row ? parseDOR(row[dorIdx]) : 0;
+        }
+
+        // =========================
+        // 🔹 GET VRS
+        // =========================
+        function getEmpVRS(empName, station) {
+          const row = calcRows.find(
+            (r) =>
+              String(r[nameCalc]).trim() === String(empName).trim() &&
+              String(r[stationCalc]).trim() === String(station).trim(),
+          );
+
+          if (!row) return 0;
+
+          const status = String(row[statusIdx] || "")
+            .trim()
+            .toUpperCase();
+          if (!["VRS", "DECEASED"].includes(status)) return 0;
+
+          return parseDOR(row[vrsIdx]);
+        }
+
+        // =========================
+        // 🔹 DUPLICATE CHECK
+        // =========================
+        const existingSet = new Set();
+
+        rows.forEach((r) => {
+          if (
+            String(r[stationIdx]).trim() === String(station).trim() &&
+            parseMonthYear(r[monthIdx]) === nextVal
+          ) {
+            existingSet.add(String(r[nameIdx]).trim());
+          }
+        });
 
         let newRows = [];
 
-        rows.forEach((row) => {
+        // =========================
+        // 🔹 COPY LOGIC
+        // =========================
+        const sourceRows = [...rows];
+
+        sourceRows.forEach((row) => {
           const rowStation = String(row[stationIdx]).trim();
           const rowMonth = String(row[monthIdx]).trim();
 
-          // 🔹 Only previous month rows
           if (rowStation === String(station).trim() && rowMonth === prevMonth) {
             const empName = String(row[nameIdx]).trim();
 
             // ❌ Skip duplicate
-            if (exists(empName)) return;
+            if (existingSet.has(empName)) return;
 
             const dorVal = getEmpDOR(empName, station);
+            const vrsVal = getEmpVRS(empName, station);
 
-            // ❌ Skip if retired in CURRENT month
-            if (dorVal && dorVal === prevMonthVal) {
+            // ❌ Skip ONLY if BEFORE prev month
+            if (
+              (dorVal && dorVal < prevMonthVal) ||
+              (vrsVal && vrsVal < prevMonthVal)
+            ) {
+              console.log("❌ SKIPPED:", empName);
               return;
             }
 
-            // ✅ Copy row
+            // ✅ Copy
             const newRow = [...row];
             newRow[monthIdx] = nextMonth;
 
             newRows.push(newRow);
+            existingSet.add(empName);
           }
         });
 
-        // 🔥 PUSH AFTER LOOP
+        // =========================
+        // 🔥 ADD NEW ROWS
+        // =========================
         rows.push(...newRows);
 
-        //console.log("✅ Copied rows:", newRows.length);
+        // =========================
+        // 🔥 CLEANUP (FINAL SAFETY)
+        // =========================
+        pbData.rows = rows.filter((row) => {
+          const empName = String(row[nameIdx]).trim();
+          const rowStation = String(row[stationIdx]).trim();
+          const rowMonth = String(row[monthIdx]).trim();
+
+          if (!empName) return false;
+
+          const rowVal = parseMonthYear(rowMonth);
+
+          const dorVal = getEmpDOR(empName, rowStation);
+          const vrsVal = getEmpVRS(empName, rowStation);
+
+          // ❌ remove only if BEFORE that month
+          if ((dorVal && dorVal < rowVal) || (vrsVal && vrsVal < rowVal)) {
+            console.log("🗑 REMOVED:", empName);
+            return false;
+          }
+
+          return true;
+        });
+
+        console.log("✅ Copied:", newRows.length);
       }
 
       // 🔥============== PAY BILL VIEW TABLE ===========================
@@ -5018,7 +5287,7 @@
 
         const result = [];
 
-        for (let i = 3; i < rows.length; i++) {
+        for (let i = 2; i < rows.length - 2; i++) {
           const row = rows[i];
 
           if (row[colIndex] !== "" && row[colIndex] != null) {
@@ -7156,36 +7425,36 @@
         });
 
         // 🔥 FINAL DEBUG OUTPUT
-        if (empName === DEBUG_EMP) {
-          console.log("==== FY COMPONENT SUMMARY ====");
-          console.table({
-            Basic: sum.basic,
-            DA: sum.da,
-            HRA: sum.hra,
-            TA: sum.ta,
-            NPSE: sum.npse,
+        //if (empName === DEBUG_EMP) {
+        //  console.log("==== FY COMPONENT SUMMARY ====");
+        //  console.table({
+        //    Basic: sum.basic,
+        //    DA: sum.da,
+        //    HRA: sum.hra,
+        //    TA: sum.ta,
+        //    NPSE: sum.npse,
 
-            Bonus: sum.bonus,
-            "Total DAA": sum.daa,
-            Arrears: sum.arrears,
-            CEA: sum.cea,
-            "EL Encash": sum.el,
-            UniAll: sum.uni,
+        //    Bonus: sum.bonus,
+        //    "Total DAA": sum.daa,
+        //    Arrears: sum.arrears,
+        //    CEA: sum.cea,
+        //    "EL Encash": sum.el,
+        //    UniAll: sum.uni,
 
-            "Gross Income": sum.gross,
+        //    "Gross Income": sum.gross,
 
-            "NPSE Ded": sum.npseDed,
-            "DAA on NPSE": sum.daaNpse,
-            NPSC: sum.npsc,
-            GPF: sum.gpf,
-            CGEIS: sum.cgeis,
-            "Prof Tax": sum.pt,
+        //    "NPSE Ded": sum.npseDed,
+        //    "DAA on NPSE": sum.daaNpse,
+        //    NPSC: sum.npsc,
+        //    GPF: sum.gpf,
+        //    CGEIS: sum.cgeis,
+        //   "Prof Tax": sum.pt,
 
-            "Total Deductions": sum.deductions,
-            "Net Taxable": sum.net,
-            "FY Total (Projected)": total,
-          });
-        }
+        //    "Total Deductions": sum.deductions,
+        //    "Net Taxable": sum.net,
+        //    "FY Total (Projected)": total,
+        //  });
+        //}
 
         return {
           total: Math.round(total),
@@ -7744,159 +8013,6 @@
         }
 
         fyEl.value = fy;
-      }
-
-      function addNewEmployeesFromEmpDB(nextMonth, station) {
-        if (!pbData || !empData) return;
-
-        const pbHeaders = pbData.headers;
-        const pbRows = pbData.rows;
-
-        const empHeaders = empData.headers;
-        const empRows = empData.rows;
-
-        const namePB = getColIndex(pbHeaders, "Employee Name");
-        const stationPB = getColIndex(pbHeaders, "Pay Drawn Station");
-        const monthPB = getColIndex(pbHeaders, "Salary Month");
-
-        const nameEmp = getColIndex(empHeaders, "Employee Name");
-        const stationEmp = getColIndex(empHeaders, "Station");
-
-        const calcHeaders = window.empCalcHeaders || [];
-        const calcRows = window.empCalcRows || [];
-
-        const nameCalc = getColIndex(calcHeaders, "Employee Name");
-        const stationCalc = getColIndex(calcHeaders, "Station");
-        const dorIdx = getColIndex(calcHeaders, "Superannuation");
-
-        const nextVal = parseMonthYear(nextMonth);
-        const prevMonthVal = nextVal - 1;
-
-        /* 🔹 PARSE DOR */
-        function parseDOR(dorStr) {
-          if (!dorStr) return 0;
-
-          const months = {
-            Jan: 1,
-            Feb: 2,
-            Mar: 3,
-            Apr: 4,
-            May: 5,
-            Jun: 6,
-            Jul: 7,
-            Aug: 8,
-            Sep: 9,
-            Oct: 10,
-            Nov: 11,
-            Dec: 12,
-          };
-
-          const parts = String(dorStr).split(",");
-          if (parts.length !== 2) return 0;
-
-          const year = parseInt(parts[1].trim());
-          const monPart = parts[0].split("-")[0];
-          const month = months[monPart];
-
-          return year * 100 + month;
-        }
-
-        /* 🔹 GET DOR FROM CALCULATED DATA */
-        function getEmpDOR(empName, station) {
-          const row = calcRows.find(
-            (r) =>
-              String(r[nameCalc]).trim() === String(empName).trim() &&
-              String(r[stationCalc]).trim() === String(station).trim(),
-          );
-
-          if (!row) return 0;
-
-          return parseDOR(row[dorIdx]);
-        }
-
-        /* 🔥 STEP 1: REMOVE employees retiring THIS month */
-        for (let i = pbRows.length - 1; i >= 0; i--) {
-          const r = pbRows[i];
-
-          if (
-            String(r[stationPB]).trim() === String(station).trim() &&
-            parseMonthYear(r[monthPB]) === nextVal
-          ) {
-            const empName = String(r[namePB]).trim();
-            const dorVal = getEmpDOR(empName, station);
-
-            // ❌ DELETE if retired in CURRENT month
-            if (dorVal && dorVal === prevMonthVal) {
-              pbRows.splice(i, 1);
-            }
-          }
-        }
-
-        /* 🔹 PREVIOUS MONTH EMPLOYEES */
-        const prevEmployees = new Set();
-
-        pbRows.forEach((r) => {
-          if (
-            String(r[stationPB]).trim() === String(station).trim() &&
-            parseMonthYear(r[monthPB]) === prevMonthVal
-          ) {
-            prevEmployees.add(String(r[namePB]).trim());
-          }
-        });
-
-        /* 🔹 EXIST CHECK */
-        const exists = (name) =>
-          pbRows.some((r) => {
-            return (
-              String(r[stationPB]).trim() === String(station).trim() &&
-              parseMonthYear(r[monthPB]) === nextVal &&
-              String(r[namePB]).trim() === name
-            );
-          });
-
-        let count = 0;
-
-        /* 🔹 ADD EMPLOYEES */
-        empRows.forEach((emp) => {
-          const empName = String(emp[nameEmp] || "").trim();
-          const empStation = String(emp[stationEmp] || "").trim();
-
-          if (!empName || empStation !== String(station).trim()) return;
-
-          // ✅ MUST EXIST IN PREVIOUS MONTH
-          if (!prevEmployees.has(empName)) return;
-
-          // ❌ ALREADY EXISTS
-          if (exists(empName)) return;
-
-          const dorVal = getEmpDOR(empName, station);
-
-          // ❌ DO NOT ADD if retiring THIS month
-          if (dorVal && dorVal === prevMonthVal) return;
-
-          /* 🔹 CREATE ROW */
-          const row = new Array(pbHeaders.length).fill("");
-
-          row[namePB] = empName;
-          row[stationPB] = station;
-          row[monthPB] = nextMonth;
-
-          const set = (col, val) => {
-            const i = getColIndex(pbHeaders, col);
-            if (i !== -1) row[i] = val;
-          };
-
-          // 🔥 DEFAULT VALUES
-          set("Pay Level", 1);
-          set("7CPC Index", 1);
-          set("HRA Entitled", true);
-          set("TA Entitled", true);
-
-          pbRows.push(row);
-          count++;
-        });
-
-        //console.log("✅ Added Employees:", count);
       }
 
       function refreshPBView(forceMode = null) {
@@ -9220,7 +9336,6 @@
           });
 
           return total;
-          console.log("DAA Total", total)
         }
 
         const goTotal = getTotal("PB_GOViewTbl");
@@ -13831,9 +13946,11 @@
         <tr>
           <th colspan="7" style="background: #1f4e79; text-align:center; font-size:11px; color:white;padding:10px;">
             Old Tax Regime Calculation
-            ${bestRegime === "Old Tax Regime"
-              ? "<span style='margin-left:8px; color:green; font-weight:bold;border:1px solid green;border-radius:4px;color:green;background:#baffba;box-shadow:0px 0px 2px 1px #00ff00;padding:3px;'>✅ Selected</span>"
-              : ""}
+            ${
+              bestRegime === "Old Tax Regime"
+                ? "<span style='margin-left:8px; color:green; font-weight:bold;border:1px solid green;border-radius:4px;color:green;background:#baffba;box-shadow:0px 0px 2px 1px #00ff00;padding:3px;'>✅ Selected</span>"
+                : ""
+            }
           </th>
         </tr>
       </thead>
@@ -13911,9 +14028,11 @@
         <tr>
           <th colspan="7" style="background: #1f4e79; text-align:center; font-size:11px; color:white;padding:10px;">
             New Tax Regime Calculation
-            ${bestRegime === "New Tax Regime"
-              ? "<span style='margin-left:8px; color:green; font-weight:bold;border:1px solid green;border-radius:4px;color:green;background:#baffba;box-shadow:0px 0px 2px 1px #00ff00;padding:4px;'>✅ Selected</span>"
-              : ""}
+            ${
+              bestRegime === "New Tax Regime"
+                ? "<span style='margin-left:8px; color:green; font-weight:bold;border:1px solid green;border-radius:4px;color:green;background:#baffba;box-shadow:0px 0px 2px 1px #00ff00;padding:4px;'>✅ Selected</span>"
+                : ""
+            }
           </th>
         </tr>
       </thead>
@@ -14149,7 +14268,6 @@
           handleSalarySlipChange();
         }, 0);
       }
-
 
       function updateITPrintMenuState() {
         const hasEmp = id("ITPage_Emp")?.value;
@@ -14822,46 +14940,46 @@
                 "AIR Dharwad",
                 "ALL INDIA RADIO",
               ],
-              logo: "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+              logo: "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
             };
-          }                                      
-           const header = getHeaderData();
+          }
+          const header = getHeaderData();
 
-            // ✅ Merge
-            sheet.mergeCells("A1:N1");
+          // ✅ Merge
+          sheet.mergeCells("A1:N1");
 
-            const cell = sheet.getCell("A1");
+          const cell = sheet.getCell("A1");
 
-            cell.value = {
-              richText: header.lines.map((line, i) => ({
-                text: line + (i !== header.lines.length - 1 ? "\n" : ""),
-                font: { bold: true, size: 12 } // ✅ FIXED
-              }))
-            };
+          cell.value = {
+            richText: header.lines.map((line, i) => ({
+              text: line + (i !== header.lines.length - 1 ? "\n" : ""),
+              font: { bold: true, size: 12 }, // ✅ FIXED
+            })),
+          };
 
-            cell.alignment = {
-              horizontal: "center",
-              vertical: "middle",
-              wrapText: true,
-            };
+          cell.alignment = {
+            horizontal: "center",
+            vertical: "middle",
+            wrapText: true,
+          };
 
-            // 🔥 ROW HEIGHT
-            sheet.getRow(1).height = 65;
+          // 🔥 ROW HEIGHT
+          sheet.getRow(1).height = 65;
 
           // =========================
           // 🔥 ADD LOGO
-          // =========================            
-            const base64 = await urlToBase64(header.logo);
+          // =========================
+          const base64 = await urlToBase64(header.logo);
 
-            const imageId = workbook.addImage({
-              base64,
-              extension: "png",
-            });
+          const imageId = workbook.addImage({
+            base64,
+            extension: "png",
+          });
 
-            sheet.addImage(imageId, {
-              tl: { col: 0.2, row: 0.2 },
-              ext: { width: 65, height: 65 },
-            });
+          sheet.addImage(imageId, {
+            tl: { col: 0.2, row: 0.2 },
+            ext: { width: 65, height: 65 },
+          });
           // 🔥 PROCESS ALL TABLES INSIDE WRAPPER
 
           const tables = [wrapper.querySelector("table")];
@@ -14924,11 +15042,12 @@
         const buffer = await workbook.xlsx.writeBuffer();
 
         const fileName =
-          mode === "single" ? `${selectedEmp}_IT Calculation.xlsx` : `${station}_IT Calculations.xlsx`;
+          mode === "single"
+            ? `${selectedEmp}_IT Calculation.xlsx`
+            : `${station}_IT Calculations.xlsx`;
 
         saveAs(new Blob([buffer]), fileName);
       }
-
 
       async function urlToBase64(url) {
         const response = await fetch(url);
@@ -14941,10 +15060,8 @@
         });
       }
 
-
       function removeNumberFormatting(root) {
-        root.querySelectorAll("td, th").forEach(cell => {
-
+        root.querySelectorAll("td, th").forEach((cell) => {
           // ✅ If cell contains <b> or <strong>, handle differently
           const boldEl = cell.querySelector("b, strong");
 
@@ -14972,10 +15089,8 @@
           } else {
             cell.textContent = text.replace(/[₹,]/g, "");
           }
-
         });
       }
-
 
       function restoreNumberFormatting(root) {
         const cells = root.querySelectorAll("td, th");
@@ -14987,9 +15102,7 @@
         });
       }
 
-      
       function buildPrintHeader(doc) {
-
         const header = doc.createElement("table");
         header.style.width = "100%";
         header.style.borderCollapse = "collapse";
@@ -15020,7 +15133,6 @@
 
         return header;
       }
-
 
       function buildITHTML(mode = "single") {
         const wrapper = document.querySelector(".ITtableWrapper");
@@ -15149,32 +15261,29 @@
         // 🔁 LOOP EMPLOYEES
         // =========================
         employees.forEach((empName) => {
+          renderCalculatedITTable(empName, selectedFY, "calculated");
 
-        renderCalculatedITTable(empName, selectedFY, "calculated");
+          const wrapper = document.querySelector(".ITtableWrapper");
+          if (!wrapper) return;
 
-        const wrapper = document.querySelector(".ITtableWrapper");
-        if (!wrapper) return;
+          const clone = wrapper.cloneNode(true);
+          removeNumberFormatting(clone);
 
-        const clone = wrapper.cloneNode(true);
-        removeNumberFormatting(clone);
+          const page = doc.createElement("div");
+          page.className = "page";
 
-        const page = doc.createElement("div");
-        page.className = "page";
+          // ✅ ADD HEADER FIRST (NEW)
+          const header = buildPrintHeader(doc);
+          page.appendChild(header);
 
-        // ✅ ADD HEADER FIRST (NEW)
-        const header = buildPrintHeader(doc);
-        page.appendChild(header);
+          // ✅ ADD CONTENT
+          page.appendChild(clone);
 
-        // ✅ ADD CONTENT
-        page.appendChild(clone);
-
-        doc.body.appendChild(page);
-      });
+          doc.body.appendChild(page);
+        });
 
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
-
-
 
       const itmenu = id("ITprintMenu");
       const itprintBtn = id("ITprintBtn");
@@ -15216,7 +15325,6 @@
         itmenu.classList.remove("show");
       });
 
-      
       document.querySelectorAll("input[name='salaryMode']").forEach((radio) => {
         radio.addEventListener("change", () => {
           const empName = id("ITPage_Emp")?.value;
@@ -15238,7 +15346,6 @@
           renderCalculatedITTable(empName, selectedFY, mode);
         });
       });
-
 
       document.querySelectorAll(".menu-option").forEach((opt) => {
         opt.addEventListener("click", function () {
@@ -15267,7 +15374,6 @@
           // ===== ALL SALARY SLIP EXCEL =====
           if (type === "excel-allIT") {
             exportITExcel("all");
-            
           }
         });
       });
