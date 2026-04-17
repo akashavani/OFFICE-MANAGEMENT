@@ -1662,6 +1662,21 @@
         border-right: dotted 1px #d7dae0;
         text-align: left;
       }
+
+      .ITtableWrapper table th:first-child,
+      .ITtableWrapper table td:first-child {
+        border-left: solid 1px #94a3b8;
+      }
+
+      .ITtableWrapper table th:last-child,
+      .ITtableWrapper table td:last-child {
+        border-right: solid 1px #94a3b8;
+      }
+
+      .ITtableWrapper table tr:last-child td{
+        border-bottom: solid 1px #94a3b8;
+      }
+
       .ITtableWrapper table th {
         background: #1f4e79;
         color: #ffffff;
@@ -3050,6 +3065,9 @@
         });
         on("PayBillPage_Station", "change", setDAPercent);
         document.querySelectorAll(".SSaction-group button").forEach((btn) => {
+          btn.disabled = true;
+        });
+        document.querySelectorAll(".ITaction-group button").forEach((btn) => {
           btn.disabled = true;
         });
       });
@@ -12014,7 +12032,7 @@
           return i !== -1 ? Number(row[i]) || 0 : 0;
         };
 
-        let rowsData = []; // 🔥 store rows
+        let rowsData = [];
         let totalGross = 0;
         let totalTDS = 0;
         let totalArrear = 0;
@@ -12030,18 +12048,40 @@
           const rowYear = Number(ry);
           const rMonth = monthOrder[rm];
 
-          let show = false;
+          let include = false;
 
+          // =========================
+          // ✅ CASE 1: MARCH → FULL PREVIOUS FY
+          // =========================
           if (sm === "Mar") {
             const prevYear = selectedYear - 1;
-            if (rowYear === prevYear && rMonth >= 3) show = true;
-            if (rowYear === selectedYear && rMonth <= 2) show = true;
-          } else {
-            if (rowYear < selectedYear) show = true;
-            else if (rowYear === selectedYear && rMonth < sMonth) show = true;
+
+            if (
+              (rowYear === prevYear && rMonth >= 3) || // Mar–Dec prev year
+              (rowYear === selectedYear && rMonth <= 2) // Jan–Feb current year
+            ) {
+              include = true;
+            }
           }
 
-          if (!show) return;
+          // =========================
+          // ✅ CASE 2: AFTER MARCH → ROLLING CURRENT FY
+          // =========================
+          else {
+            const fyStartYear = selectedYear;
+
+            // Mar → previous month
+            if (rowYear === fyStartYear && rMonth >= 3 && rMonth < sMonth) {
+              include = true;
+            }
+
+            // Handle Jan/Feb (cross year)
+            if (sMonth <= 2 && rowYear === fyStartYear + 1 && rMonth < sMonth) {
+              include = true;
+            }
+          }
+
+          if (!include) return;
 
           const arrear = g(row, "Total DAA") + g(row, "Arrears");
           const recovery = g(row, "REC P & A") + g(row, "Recovery");
@@ -12054,6 +12094,7 @@
             row[h.indexOf("Arrears Details")] || "",
             "Arr.",
           );
+
           const recoveryType = formatTypeText(
             row[h.indexOf("Recovery Details")] || "",
             "Rec.",
@@ -12076,7 +12117,7 @@
         });
 
         // =========================
-        // 🔥 NO DATA CASE
+        // ❌ NO DATA
         // =========================
         if (!rowsData.length) {
           renderFYBreakup([], 0, 0, 0, 0, true);
@@ -12084,7 +12125,31 @@
         }
 
         // =========================
-        // 🔥 NORMAL CASE
+        // ✅ SORT (Mar → Feb)
+        // =========================
+        const fySortOrder = {
+          Mar: 1,
+          Apr: 2,
+          May: 3,
+          Jun: 4,
+          Jul: 5,
+          Aug: 6,
+          Sep: 7,
+          Oct: 8,
+          Nov: 9,
+          Dec: 10,
+          Jan: 11,
+          Feb: 12,
+        };
+
+        rowsData.sort((a, b) => {
+          const [m1] = a.month.split("-");
+          const [m2] = b.month.split("-");
+          return fySortOrder[m1] - fySortOrder[m2];
+        });
+
+        // =========================
+        // ✅ RENDER
         // =========================
         renderFYBreakup(
           rowsData,
@@ -13300,51 +13365,6 @@
         const hris = empRow?.[hrisIndex] || "";
         const pan = empRow?.[panIndex] || "";
 
-        const headerTable = document.createElement("table");
-
-        headerTable.style.width = "100%";
-        headerTable.style.borderCollapse = "collapse";
-        headerTable.style.marginBottom = "5px";
-
-        headerTable.innerHTML = `
-        <tr>
-          <th colspan="14" style="border:none;background:white;padding:1px 3px;">
-            <div
-              style="
-                border: solid 2px black;
-                gap: 4px;
-                display: flex;
-                flex-direction: row;
-                padding: 8px 2px;
-              "
-            >
-              <img
-                id="ITLogo"
-                src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-              />
-              <div
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  margin: auto;
-                  text-align:center;
-                  color:black;
-                "
-              >
-                <h3 style="margin: 0;font-size:12px;">PRASAR BHARATI</h3>
-                <h3 style="margin: 0;font-size:12px;">
-                  INDIA'S PUBLIC SERVICE BROADCASTER
-                </h3>
-                <h3 style="margin: 0;font-size:12px;">AIR Dharwad</h3>
-                <h3 style="margin: 0;font-size:12px;">ALL INDIA RADIO</h3>
-              </div>
-            </div>
-          </th>
-        </tr>
-        `;
-
-        wrapper.appendChild(headerTable);
-
         const infoTable = document.createElement("table");
 
         infoTable.style.width = "100%";
@@ -13465,7 +13485,7 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
       <td colspan="${colSpan}" 
-          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:12px;background:#edebb7">
           <h3 style="font-size:12px;background:#edebb7;">==============🚫 Employee Retired 🚫==============</h3>
       </td>
     `;
@@ -13701,12 +13721,12 @@
         });
 
         oldSlabHTML += `
-          <tr style="background:#adffeb;"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
-          <tr><td colspan="5">Calculated Tax</td><td style="text-align:right;" colspan="2">${formatCurrency(oldSlabData.total)}</td></tr>
+          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
+          <tr><td colspan="5"><b>Calculated Income Tax (Slab Total)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldSlabData.total)}</b></td></tr>
           <tr><td colspan="5">Rebate u/s 87A (Taxable Gross Income <= ${formatCurrency(oldRebateUpto)})</td><td style="text-align:right;" colspan="2">${formatCurrency(oldRebateApplied)}</td></tr>
           <tr><td colspan="5">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTax)}</td></tr>
           <tr><td colspan="5">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTaxCess)}</td></tr>
-          <tr><td colspan="5"><b>Net Income Tax</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldNetTax)}</b></td></tr>
+          <tr style="background:#adffeb;"><td colspan="5"><b>Net Income Tax</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldNetTax)}</b></td></tr>
           <tr><td colspan="5">TDS Deducted (${paidMonthCount} Months)</td><td style="text-align:right;" colspan="2">${formatCurrency(totalTDS)}</td></tr>
           <tr><td colspan="5"><b>Tax to be recovered ( - Refund / + Payable)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldPendingTDS)}</b></td></tr>
           <tr>
@@ -13783,19 +13803,19 @@
         });
 
         newSlabHTML += `
-          <tr style="background:#adffeb;"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
-          <tr><td colspan="5">Calculated Tax</td><td style="text-align:right;" colspan="2">${formatCurrency(newSlabData.total)}</td></tr>
+          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
+          <tr><td colspan="5"><b>Calculated Income Tax (Slab Total)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(newSlabData.total)}</b></td></tr>
           <tr><td colspan="5">Rebate u/s 87A (Taxable Gross Income <= ${formatCurrency(newRebateUpto)})</td><td style="text-align:right;" colspan="2">${formatCurrency(newRebateApplied)}</td></tr>
           <tr><td colspan="5">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(newFinalTax)}</td></tr>
           <tr><td colspan="5">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(newFinalTaxCess)}</td></tr>
-          <tr><td colspan="5"><b>Net Income Tax</b></td><td style="text-align:right;" id="NewTax" colspan="2"><b>${formatCurrency(newNetTax)}</b></td></tr>
+          <tr style="background:#adffeb;"><td colspan="5"><b>Net Income Tax</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(newNetTax)}</b></td></tr>
           <tr><td colspan="5">TDS Deducted (${paidMonthCount} Months)</td><td style="text-align:right;" id="NewTaxTDS" colspan="2">${formatCurrency(totalTDS)}</td></tr>
           <tr><td colspan="5"><b>Tax to be recovered ( - Refund / + Payable)</b></td><td style="text-align:right;" id="NewTaxPending" colspan="2"><b>${formatCurrency(newPendingTDS)}</b></td></tr>
           <tr><td colspan="5"><b>Monthly TDS [ ${formatCurrency(newCalcITperMonth)} (IT) + ${formatCurrency(newCalcITCessperMonth)} (Cess) ]</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(newCalcTDSperMonth)}</b></td></tr>
         `;
 
         taxRow.innerHTML = `
-  <td colspan="7" style="padding:10px;">
+  <td colspan="7" style="padding:10px;vertical-align: top;border-right:none;">
     <table style="width:100%; border-collapse:collapse; border:1px solid #ccc;" id="oldRegimeTable">
       <colgroup>
         <col style="width:20%">
@@ -13808,16 +13828,19 @@
       </colgroup>
       <thead>
         <tr>
-          <th colspan="7" style="background:#dee2e6; text-align:center; font-size:11px;color:black">
+          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:11px; color:white;padding:10px;">
             Old Tax Regime Calculation
+            ${bestRegime === "Old Tax Regime"
+              ? "<span style='margin-left:8px; color:green; font-weight:bold;border:1px solid green;border-radius:4px;color:green;background:#baffba;box-shadow:0px 0px 2px 1px #00ff00;padding:3px;'>✅ Selected</span>"
+              : ""}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr style="background:#adffeb;"><td colspan="7" style="text-align:center;"><b>Calculation of Gross Income</b></td></tr>
+        <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Gross Income</b></td></tr>
         <tr>
-          <td colspan="5">Gross Income</td>
-          <td style="text-align:right;" colspan="2">${formatCurrency(adjGrossTotal)}</td>
+          <td colspan="5"><b>Gross Income</b></td>
+          <td style="text-align:right;" colspan="2"><b>${formatCurrency(adjGrossTotal)}</b></td>
         </tr>
 
         <tr>
@@ -13830,8 +13853,8 @@
           <td colspan="5" style="padding:
           0px 8px">
             HRA Rebate
-            <label style="margin-left:20px;color:gray;font-style:italic;">House Rent Paid for the FY :
-            <input type="number" id="rentInput" value ="0" placeholder="Enter Rent" style="width:120px;margin-left:5px"></label>
+            <label style="margin-left:10px;color:gray;font-style:italic;">(House Rent for FY :
+            <input type="number" id="rentInput" min="0" value ="0" placeholder="Enter Rent" style="width:120px;margin-left:5px">)</label>
           </td>
           <td id="hraValue" style="text-align:right;" colspan="2"> ${formatCurrency(elihra)}</td>
         </tr>
@@ -13863,7 +13886,7 @@
           </td>
         </tr>
 
-        <tr style="background:#adffeb;"><td colspan="7" style="text-align:center;"><b>Tax Slab under Old Tax Regime for FY ${ITfy}</b></td></tr>
+        <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Tax Slab under Old Tax Regime for FY ${ITfy}</b></td></tr>
         <tbody id="oldSlabBody">
           ${oldSlabHTML}
         </tbody>
@@ -13871,7 +13894,7 @@
     </table>
   </td>
 
-  <td colspan="7" style="padding:10px;">
+  <td colspan="7" style="padding:10px;vertical-align: top;border-left:none;">
     
     <table style="width:100%; border-collapse:collapse; border:1px solid #ccc;" id="newRegimeTable">
       <colgroup>
@@ -13885,18 +13908,21 @@
       </colgroup>
       <thead>
         <tr>
-          <th colspan="7" style="background:#dee2e6; text-align:center; font-size:11px;color:black">
+          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:11px; color:white;padding:10px;">
             New Tax Regime Calculation
+            ${bestRegime === "New Tax Regime"
+              ? "<span style='margin-left:8px; color:green; font-weight:bold;border:1px solid green;border-radius:4px;color:green;background:#baffba;box-shadow:0px 0px 2px 1px #00ff00;padding:4px;'>✅ Selected</span>"
+              : ""}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr style="background:#adffeb;"><td colspan="7" style="text-align:center;"><b>Calculation of Gross Income</b></td></tr>
-        <tr><td colspan="5">Gross Income</td><td style="text-align:right;" colspan="2">${formatCurrency(adjGrossTotal)}</td></tr>
+        <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Gross Income</b></td></tr>
+        <tr><td colspan="5"><b>Gross Income</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(adjGrossTotal)}</b></td></tr>
         <tr><td colspan="5">Standard Deduction</td><td style="text-align:right;" colspan="2">${formatCurrency(newStandardDeduction)}</td></tr>
         <tr><td colspan="5">Deduction Eligible under NPSE</td><td style="text-align:right;" colspan="2">${formatCurrency(elinpse)}</td></tr>
         <tr><td colspan="5"><b>Taxable Gross Income</b></td><td style="text-align:right;" id="NewTaxGross" colspan="2"><b>${formatCurrency(newTaxableIncome)}</b></td></tr>
-        <tr style="background:#adffeb;"><td colspan="7" style="text-align:center;""><b>Tax Slab under New Tax Regime for FY ${ITfy}</b></td></tr>
+        <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;""><b>Tax Slab under New Tax Regime for FY ${ITfy}</b></td></tr>
         ${newSlabHTML}
       </tbody>
     </table>
@@ -13924,14 +13950,6 @@
 
         // 🔥 BUILD STRUCTURE
         mainTable.innerHTML = `
-
-          <!-- 🔴 HEADER -->
-          <tr>
-            <td colspan="14" style="padding:2px;border:none;">
-              ${headerTable.innerHTML}
-            </td>
-          </tr>
-
           <!-- 🔴 INFO -->
           <tr>
             <td colspan="14" style="padding:0;border:none;">
@@ -14038,14 +14056,14 @@
             });
 
             oldSlabHTML += `
-              <tr><td colspan="2">Calculated Tax</td><td style="text-align:right;" colspan="2">${formatCurrency(reOldTotalTax)}</td></tr>
-              <tr><td colspan="2">Rebate u/s 87A</td><td style="text-align:right;" colspan="2">${formatCurrency(reOldRebateApplied)}</td></tr>
-              <tr> <td colspan="2">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTax)}</td></tr>
-              <tr><td colspan="2">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTaxCess)}</td></tr>
-              <tr style="background:#dee2e6;"><td colspan="2"><b>Net Income Tax</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldNetTax)}</b></td></tr>
-              <tr><td colspan="2">TDS Deducted (${paidMonthCount} Months)</td><td style="text-align:right;" colspan="2">${formatCurrency(totalTDS)}</td></tr>
-              <tr><td colspan="2"><b>Tax to be recovered ( - Refund / + Payable)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldPendingTDS)}</b></td></tr>
-              <tr><td colspan="2"><b>Monthly TDS (${oldCalcITperMonth} (IT) + ${oldCalcITCessperMonth} (Cess))</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldCalcTDSperMonth)}</b></td></tr>
+              <tr><td colspan="5"><b>Calculated Income Tax (Slab Total)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(reOldTotalTax)}</b></td></tr>
+              <tr><td colspan="5">Rebate u/s 87A</td><td style="text-align:right;" colspan="2">${formatCurrency(reOldRebateApplied)}</td></tr>
+              <tr> <td colspan="5">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTax)}</td></tr>
+              <tr><td colspan="5">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTaxCess)}</td></tr>
+              <tr style="background:#adffeb;"><td colspan="5"><b>Net Income Tax</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldNetTax)}</b></td></tr>
+              <tr><td colspan="5">TDS Deducted (${paidMonthCount} Months)</td><td style="text-align:right;" colspan="2">${formatCurrency(totalTDS)}</td></tr>
+              <tr><td colspan="5"><b>Tax to be recovered ( - Refund / + Payable)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldPendingTDS)}</b></td></tr>
+              <tr><td colspan="5"><b>Monthly TDS (${oldCalcITperMonth} (IT) + ${oldCalcITCessperMonth} (Cess))</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldCalcTDSperMonth)}</b></td></tr>
             `;
 
             //Calcuklation for Panel Display
@@ -14079,47 +14097,17 @@
 
       ["ITPage_Station", "ITPage_Emp", "ITPage_FY"].forEach((idName) => {
         id(idName)?.addEventListener("change", () => {
-          const empName = id("ITPage_Emp")?.value;
-          const selectedFY = id("ITPage_FY")?.value;
-
-          if (!empName || !selectedFY) return;
-
-          // =========================
-          // 🔥 GET CURRENT MODE
-          // =========================
-          const selectedModeEl = document.querySelector(
-            "input[name='salaryMode']:checked",
-          );
-          const mode =
-            selectedModeEl?.id === "calcSalary" ? "calculated" : "paid";
-
-          console.log(`🔄 Dropdown Changed → ${mode}`);
-
-          // =========================
-          // 🔄 LOADING STATE
-          // =========================
-          const wrapper = document.querySelector(".ITtableWrapper");
-          if (wrapper) wrapper.innerHTML = "Loading...";
-
-          // =========================
-          // 🔥 RENDER
-          // =========================
-          renderCalculatedITTable(empName, selectedFY, mode);
+          handleITChange();
         });
       });
 
-      function SyncAllPage() {
-        //================== Pay Bill Change ==================//
-        refreshPBView();
-        setDAPercent();
-        updateEmolumentTable();
+      function handleITChange() {
+        document.querySelectorAll(".ITaction-group button").forEach((btn) => {
+          btn.disabled = false;
+        });
 
-        //================== Salary Slip Change ==================//
-        setTimeout(() => {
-          handleSalarySlipChange(); // ✅ now reads updated value
-        }, 0);
+        updateITPrintMenuState();
 
-        //================== Income Tax Change ==================//
         const empName = id("ITPage_Emp")?.value;
         const selectedFY = id("ITPage_FY")?.value;
 
@@ -14146,6 +14134,37 @@
         // 🔥 RENDER
         // =========================
         renderCalculatedITTable(empName, selectedFY, mode);
+      }
+
+      function SyncAllPage() {
+        //================== Pay Bill Change ==================//
+        refreshPBView();
+        setDAPercent();
+        updateEmolumentTable();
+        handleITChange();
+        //================== Salary Slip Change ==================//
+        setTimeout(() => {
+          handleSalarySlipChange();
+        }, 0);
+      }
+
+
+      function updateITPrintMenuState() {
+        const hasEmp = id("ITPage_Emp")?.value;
+        const hasFY = id("ITPage_FY")?.value;
+
+        const printIT = id("itPrintOption");
+        const excelIT = id("itExcelOption");
+
+        [printIT, excelIT].forEach((opt) => {
+          if (!opt) return;
+
+          if (hasEmp && hasFY) {
+            opt.classList.remove("disabled");
+          } else {
+            opt.classList.add("disabled");
+          }
+        });
       }
 
       function calculateMonthlyTDS(newPendingTDS, paidMonthCount) {
@@ -14364,7 +14383,9 @@
         const selectedFY = id("ITPage_FY")?.value;
         const selectedEmp = id("ITPage_Emp")?.value;
 
-        if (!selectedFY || !selectedEmp) return;
+        if (!selectedFY) return;
+
+        if (mode === "single" && !selectedEmp) return;
 
         const h = pbData.headers;
         const nameIndex = h.indexOf("Employee Name");
@@ -14469,165 +14490,6 @@
         // =========================
         // 🔥 UPDATED PROCESS FUNCTION
         // =========================
-
-        function processITTable2(sheet, table, startRow = 1, depth = 0) {
-          let currentRow = startRow;
-
-          const rows = table.querySelectorAll(
-            ":scope > thead > tr, :scope > tbody > tr, :scope > tr",
-          );
-
-          rows.forEach((tr) => {
-            const cells = tr.querySelectorAll(":scope > th, :scope > td");
-            if (!cells.length) return;
-
-            // =========================
-            // 🔥 IF ROW HAS DIRECT CHILD TABLE → PROCESS ONLY THAT
-            // =========================
-            const nestedTables = tr.querySelectorAll(":scope > td > table");
-
-            if (nestedTables.length > 0) {
-              nestedTables.forEach((tbl) => {
-                currentRow = processITTable(sheet, tbl, currentRow, depth + 1);
-              });
-              return; // ❌ do NOT write wrapper row
-            }
-
-            // =========================
-            // 🔥 WRITE ROW ONLY IF IT HAS REAL DATA
-            // =========================
-            let colIndex = 1;
-            const excelRow = sheet.getRow(currentRow);
-
-            let hasValue = false;
-
-            cells.forEach((cell) => {
-              const text = cell.innerText.trim();
-              if (text) hasValue = true;
-
-              const cs = window.getComputedStyle(cell);
-
-              const colSpan = cell.colSpan || 1;
-
-              const excelCell = excelRow.getCell(colIndex);
-
-              // VALUE
-              const clean = text.replace(/[,₹\s]/g, "");
-              excelCell.value =
-                !isNaN(clean) && clean !== "" ? Number(clean) : text;
-
-              // FONT
-              excelCell.font = {
-                name: "Calibri",
-                size: 11,
-                bold:
-                  cs.fontWeight === "bold" ||
-                  parseInt(cs.fontWeight) >= 600 ||
-                  cell.querySelector("b, strong"),
-                color: getFontColor(cs.color),
-              };
-
-              // ALIGNMENT
-              excelCell.alignment = {
-                horizontal: cs.textAlign || "left",
-                vertical: "middle",
-                wrapText: true,
-              };
-
-              // BACKGROUND
-              function getEffectiveBackground(cell) {
-                let bg = window.getComputedStyle(cell).backgroundColor;
-
-                if (
-                  bg &&
-                  bg !== "transparent" &&
-                  !bg.includes("rgba(0, 0, 0, 0)")
-                ) {
-                  return bg;
-                }
-
-                const tr = cell.closest("tr");
-                if (tr) {
-                  bg = window.getComputedStyle(tr).backgroundColor;
-                  if (
-                    bg &&
-                    bg !== "transparent" &&
-                    !bg.includes("rgba(0, 0, 0, 0)")
-                  ) {
-                    return bg;
-                  }
-                }
-
-                const table = cell.closest("table");
-                if (table) {
-                  bg = window.getComputedStyle(table).backgroundColor;
-                  if (
-                    bg &&
-                    bg !== "transparent" &&
-                    !bg.includes("rgba(0, 0, 0, 0)")
-                  ) {
-                    return bg;
-                  }
-                }
-
-                return null;
-              }
-
-              const bg = getEffectiveBackground(cell);
-
-              if (isValidFill(bg)) {
-                const argb = rgbToARGB(bg);
-                if (argb) {
-                  excelCell.fill = {
-                    type: "pattern",
-                    pattern: "solid",
-                    fgColor: { argb },
-                  };
-                }
-              }
-
-              // BORDER
-              excelCell.border = {
-                top: { style: "thin" },
-                bottom: { style: "thin" },
-                left: { style: "thin" },
-                right: { style: "thin" },
-              };
-
-              // 🔥 ONLY COLSPAN (NO ROWSPAN)
-              if (colSpan > 1) {
-                let canMerge = true;
-
-                for (let c = colIndex; c < colIndex + colSpan; c++) {
-                  if (isMerged(sheet, currentRow, c)) {
-                    canMerge = false;
-                    break;
-                  }
-                }
-
-                if (canMerge) {
-                  sheet.mergeCells(
-                    currentRow,
-                    colIndex,
-                    currentRow,
-                    colIndex + colSpan - 1,
-                  );
-                }
-              }
-
-              colIndex += colSpan;
-            });
-
-            // ✅ ONLY MOVE ROW IF DATA EXISTS
-            if (hasValue) {
-              excelRow.commit();
-              currentRow++;
-            }
-          });
-
-          return currentRow;
-        }
-
         function processITTable(sheet, table, startRow = 1, depth = 0) {
           let currentRow = startRow;
 
@@ -14656,7 +14518,7 @@
                 sheet,
                 nestedTables[1],
                 currentRow,
-                8, // 🔥 start column for right table
+                8,
                 depth + 1,
               );
 
@@ -14680,6 +14542,11 @@
             // =========================
             // 🔥 NORMAL ROW
             // =========================
+
+            // ✅ Calculate TRUE total columns (with colspan)
+            let totalCols = 0;
+            cells.forEach((c) => (totalCols += c.colSpan || 1));
+
             let colIndex = 1;
             const excelRow = sheet.getRow(currentRow);
 
@@ -14708,16 +14575,35 @@
                 color: getFontColor(cs.color),
               };
 
-              excelCell.alignment = {
-                horizontal: cs.textAlign || "left",
-                vertical: "middle",
-                wrapText: true,
-              };
+              // ✅ Detect last column
+              const isLastColumn = colIndex + colSpan - 1 === totalCols;
 
-              // 🔥 BACKGROUND FIX
+              // ✅ Detect merged cell
+              const isMergedCell = colSpan >= 7;
+              const isFirstColumn = colIndex === 1;
+              // =========================
+              // 🔥 FINAL ALIGNMENT RULE
+              // =========================
+              if (isMergedCell) {
+                // ❌ DO NOTHING — keep original alignment only
+                excelCell.alignment = {
+                  horizontal: cs.textAlign || "left",
+                  vertical: "middle",
+                  wrapText: true,
+                };
+              } else {
+                // ✅ Only apply padding to last column
 
+                excelCell.alignment = {
+                  horizontal: isLastColumn ? "right" : cs.textAlign || "left",
+                  vertical: "middle",
+                  wrapText: true,
+                  indent: isFirstColumn || isLastColumn ? 2 : 0, // ✅ added first column
+                };
+              }
+
+              // 🔥 BACKGROUND
               const bg = getEffectiveBackground(cell);
-
               if (isValidFill(bg)) {
                 const argb = rgbToARGB(bg);
                 if (argb) {
@@ -14730,12 +14616,20 @@
               }
 
               // 🔥 BORDER
-              excelCell.border = {
-                top: { style: "thin" },
-                bottom: { style: "thin" },
-                left: { style: "thin" },
-                right: { style: "thin" },
-              };
+              if (currentRow === 2) {
+                // ✅ Only bottom border for 2nd row
+                excelCell.border = {
+                  bottom: { style: "thin" },
+                };
+              } else {
+                // ✅ Normal borders for other rows
+                excelCell.border = {
+                  top: { style: "thin" },
+                  bottom: { style: "thin" },
+                  left: { style: "thin" },
+                  right: { style: "thin" },
+                };
+              }
 
               // 🔥 SAFE MERGE
               if (colSpan > 1) {
@@ -14806,11 +14700,35 @@
                 color: getFontColor(cs.color),
               };
 
-              excelCell.alignment = {
-                horizontal: cs.textAlign || "left",
-                vertical: "middle",
-                wrapText: true,
-              };
+              // ✅ Calculate TRUE total columns (same as main table)
+              let totalCols = 0;
+              cells.forEach((c) => (totalCols += c.colSpan || 1));
+
+              // ✅ Detect positions
+              const isFirstColumn = colIndex === startCol;
+              const isLastColumn =
+                colIndex + colSpan - 1 === startCol + totalCols - 1;
+
+              // ✅ Detect merged cells (same rule you used)
+              const isMergedCell = colSpan >= 7;
+
+              // =========================
+              // 🔥 FINAL ALIGNMENT (MATCHES MAIN TABLE)
+              // =========================
+              if (isMergedCell) {
+                excelCell.alignment = {
+                  horizontal: cs.textAlign || "left",
+                  vertical: "middle",
+                  wrapText: true,
+                };
+              } else {
+                excelCell.alignment = {
+                  horizontal: isLastColumn ? "right" : cs.textAlign || "left",
+                  vertical: "middle",
+                  wrapText: true,
+                  indent: isFirstColumn || isLastColumn ? 2 : 0,
+                };
+              }
 
               // 🔥 BACKGROUND
 
@@ -14892,50 +14810,56 @@
           );
 
           // =========================
-          // 🔥 ADD IMAGE + HEADER TEXT
+          // 🔥 ADD HEADER TEXT
           // =========================
-
-          const img = wrapper.querySelector("#ITLogo");
-
-          if (img && img.src) {
-            const base64 = await getBase64Image(img.src);
-
-            const imageId = workbook.addImage({
-              base64: base64,
-              extension: "png",
-            });
-
-            // 🔥 HEADER TEXT (ONE CELL WITH LINE BREAK)
-            sheet.getCell("A1").value = {
-              richText: [
-                { text: "PRASAR BHARATI\n", font: { bold: true, size: 12 } },
-                {
-                  text: "INDIA'S PUBLIC SERVICE BROADCASTER\n",
-                  font: { bold: true, size: 12 },
-                },
-                { text: "AIR Dharwad\n", font: { bold: true, size: 12 } },
-                { text: "ALL INDIA RADIO", font: { bold: true, size: 12 } },
+          function getHeaderData() {
+            return {
+              lines: [
+                "PRASAR BHARATI",
+                "INDIA'S PUBLIC SERVICE BROADCASTER",
+                "AIR Dharwad",
+                "ALL INDIA RADIO",
               ],
+              logo: "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+            };
+          }                                      
+           const header = getHeaderData();
+
+            // ✅ Merge
+            sheet.mergeCells("A1:N1");
+
+            const cell = sheet.getCell("A1");
+
+            cell.value = {
+              richText: header.lines.map((line, i) => ({
+                text: line + (i !== header.lines.length - 1 ? "\n" : ""),
+                font: { bold: true, size: 12 } // ✅ FIXED
+              }))
             };
 
-            sheet.getCell("A1").alignment = {
+            cell.alignment = {
               horizontal: "center",
               vertical: "middle",
               wrapText: true,
             };
 
-            // 🔥 MERGE FULL WIDTH (IMPORTANT)
-            sheet.mergeCells("A1:N1");
-
             // 🔥 ROW HEIGHT
             sheet.getRow(1).height = 65;
 
-            // 🔥 ADD IMAGE (LEFT SIDE)
+          // =========================
+          // 🔥 ADD LOGO
+          // =========================            
+            const base64 = await urlToBase64(header.logo);
+
+            const imageId = workbook.addImage({
+              base64,
+              extension: "png",
+            });
+
             sheet.addImage(imageId, {
               tl: { col: 0.2, row: 0.2 },
-              ext: { width: 75, height: 65 },
+              ext: { width: 65, height: 65 },
             });
-          }
           // 🔥 PROCESS ALL TABLES INSIDE WRAPPER
 
           const tables = [wrapper.querySelector("table")];
@@ -14998,28 +14922,58 @@
         const buffer = await workbook.xlsx.writeBuffer();
 
         const fileName =
-          mode === "single" ? `${selectedEmp}_IT.xlsx` : `${station}_IT.xlsx`;
+          mode === "single" ? `${selectedEmp}_IT Calculation.xlsx` : `${station}_IT Calculations.xlsx`;
 
         saveAs(new Blob([buffer]), fileName);
       }
 
+
+      async function urlToBase64(url) {
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result.split(",")[1]);
+          reader.readAsDataURL(blob);
+        });
+      }
+
+
       function removeNumberFormatting(root) {
-        const cells = root.querySelectorAll("td, th");
+        root.querySelectorAll("td, th").forEach(cell => {
 
-        cells.forEach((cell) => {
-          const text = cell.innerText;
+          // ✅ If cell contains <b> or <strong>, handle differently
+          const boldEl = cell.querySelector("b, strong");
 
-          // Store original
-          cell.dataset.originalValue = text;
+          if (boldEl) {
+            let text = boldEl.textContent;
 
-          // Remove ₹ and commas
+            const clean = text.replace(/[₹,]/g, "").trim();
+
+            if (!isNaN(clean) && clean !== "") {
+              boldEl.textContent = clean; // ✅ update INSIDE <b>
+            } else {
+              boldEl.textContent = text.replace(/[₹,]/g, "");
+            }
+
+            return; // ✅ skip normal processing
+          }
+
+          // ✅ Normal cells
+          let text = cell.textContent;
+
           const clean = text.replace(/[₹,]/g, "").trim();
 
           if (!isNaN(clean) && clean !== "") {
-            cell.innerText = clean;
+            cell.textContent = clean;
+          } else {
+            cell.textContent = text.replace(/[₹,]/g, "");
           }
+
         });
       }
+
 
       function restoreNumberFormatting(root) {
         const cells = root.querySelectorAll("td, th");
@@ -15031,19 +14985,40 @@
         });
       }
 
-      function stripFormattingFromClone(root) {
-        const cells = root.querySelectorAll("td, th");
+      
+      function buildPrintHeader(doc) {
 
-        cells.forEach((cell) => {
-          const text = cell.textContent;
+        const header = doc.createElement("table");
+        header.style.width = "100%";
+        header.style.borderCollapse = "collapse";
+        header.style.marginBottom = "6px";
 
-          const clean = text.replace(/[₹,]/g, "").trim();
+        header.innerHTML = `
+          <tr>
+            <!-- LOGO -->
+            <td style="width:70px; text-align:left;">
+              <img 
+                src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+                style="width:60px;height:60px;"
+              />
+            </td>
 
-          if (!isNaN(clean) && clean !== "") {
-            cell.textContent = clean;
-          }
-        });
+            <!-- TEXT -->
+            <td style="text-align:center;">
+              <div style="font-size:12px;font-weight:bold;">PRASAR BHARATI</div>
+              <div style="font-size:12px;font-weight:bold;">INDIA'S PUBLIC SERVICE BROADCASTER</div>
+              <div style="font-size:12px;font-weight:bold;">AIR Dharwad</div>
+              <div style="font-size:12px;font-weight:bold;">ALL INDIA RADIO</div>
+            </td>
+
+            <!-- EMPTY -->
+            <td style="width:70px;"></td>
+          </tr>
+        `;
+
+        return header;
       }
+
 
       function buildITHTML(mode = "single") {
         const wrapper = document.querySelector(".ITtableWrapper");
@@ -15113,11 +15088,13 @@
     body {
       margin: 0;
       background: white;
+      font-size: 9px !important;
     }
 
     .page {
       margin: 0 auto;
       page-break-after: always;
+      padding-right: 2mm;
     }
 
     .page:last-child {
@@ -15127,21 +15104,34 @@
     .page * {
       overflow: visible !important;
       max-height: none !important;
-      height: auto !important;
+      height: auto !important;      
+      font-size:9px !important;
     }
 
-    table {
-      width: 100% !important;
-      border-collapse: collapse;
+    input{
+      background:white;
+      border:none;
+      outline:none;
+      width:80px;
+      padding:0;
+      height:max-content;
     }
 
     img {
+      display:block;
       max-width: 60px !important;
       max-height: 60px !important;
+      display: inline-block !important;
     }
 
     tr {
       page-break-inside: avoid;
+    }
+
+    td, th {
+      
+      padding:3px !important;
+      height:20px;
     }
 
     * {
@@ -15157,25 +15147,32 @@
         // 🔁 LOOP EMPLOYEES
         // =========================
         employees.forEach((empName) => {
-          // 🔥 IMPORTANT → RENDER IT UI FIRST
-          renderCalculatedITTable(empName, selectedFY, "calculated");
 
-          const wrapper = document.querySelector(".ITtableWrapper");
-          if (!wrapper) return;
+        renderCalculatedITTable(empName, selectedFY, "calculated");
 
-          // 🔥 CLONE FULL WRAPPER (ALL TABLES)
-          const clone = wrapper.cloneNode(true);
-          stripFormattingFromClone(clone);
+        const wrapper = document.querySelector(".ITtableWrapper");
+        if (!wrapper) return;
 
-          const page = doc.createElement("div");
-          page.className = "page";
-          page.appendChild(clone);
+        const clone = wrapper.cloneNode(true);
+        removeNumberFormatting(clone);
 
-          doc.body.appendChild(page);
-        });
+        const page = doc.createElement("div");
+        page.className = "page";
+
+        // ✅ ADD HEADER FIRST (NEW)
+        const header = buildPrintHeader(doc);
+        page.appendChild(header);
+
+        // ✅ ADD CONTENT
+        page.appendChild(clone);
+
+        doc.body.appendChild(page);
+      });
 
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
+
+
 
       const itmenu = id("ITprintMenu");
       const itprintBtn = id("ITprintBtn");
@@ -15217,23 +15214,7 @@
         itmenu.classList.remove("show");
       });
 
-      function updateITPrintMenuState() {
-        const hasEmp = id("ITPage_Emp")?.value;
-
-        const printIT = id("itPrintOption");
-        const excelIT = id("itExcelOption"); // ✅ FIXED ID
-
-        [printIT, excelIT].forEach((opt) => {
-          if (!opt) return;
-
-          if (hasEmp) {
-            opt.classList.remove("disabled");
-          } else {
-            opt.classList.add("disabled");
-          }
-        });
-      }
-
+      
       document.querySelectorAll("input[name='salaryMode']").forEach((radio) => {
         radio.addEventListener("change", () => {
           const empName = id("ITPage_Emp")?.value;
@@ -15255,6 +15236,7 @@
           renderCalculatedITTable(empName, selectedFY, mode);
         });
       });
+
 
       document.querySelectorAll(".menu-option").forEach((opt) => {
         opt.addEventListener("click", function () {
@@ -15283,6 +15265,7 @@
           // ===== ALL SALARY SLIP EXCEL =====
           if (type === "excel-allIT") {
             exportITExcel("all");
+            
           }
         });
       });
