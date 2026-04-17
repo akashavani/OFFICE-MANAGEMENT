@@ -9220,6 +9220,7 @@
           });
 
           return total;
+          console.log("DAA Total", total)
         }
 
         const goTotal = getTotal("PB_GOViewTbl");
@@ -13720,9 +13721,9 @@
           `;
         });
 
-        oldSlabHTML += `
-          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
+        oldSlabHTML += `          
           <tr><td colspan="5"><b>Calculated Income Tax (Slab Total)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldSlabData.total)}</b></td></tr>
+          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
           <tr><td colspan="5">Rebate u/s 87A (Taxable Gross Income <= ${formatCurrency(oldRebateUpto)})</td><td style="text-align:right;" colspan="2">${formatCurrency(oldRebateApplied)}</td></tr>
           <tr><td colspan="5">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTax)}</td></tr>
           <tr><td colspan="5">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTaxCess)}</td></tr>
@@ -13802,9 +13803,9 @@
           `;
         });
 
-        newSlabHTML += `
-          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
+        newSlabHTML += `          
           <tr><td colspan="5"><b>Calculated Income Tax (Slab Total)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(newSlabData.total)}</b></td></tr>
+          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
           <tr><td colspan="5">Rebate u/s 87A (Taxable Gross Income <= ${formatCurrency(newRebateUpto)})</td><td style="text-align:right;" colspan="2">${formatCurrency(newRebateApplied)}</td></tr>
           <tr><td colspan="5">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(newFinalTax)}</td></tr>
           <tr><td colspan="5">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(newFinalTaxCess)}</td></tr>
@@ -14048,15 +14049,16 @@
             oldSlabData.rows.forEach((s) => {
               oldSlabHTML += `
                 <tr>
-                  <td>${s.range}</td>
+                  <td colspan="4">${s.range}</td>
                   <td style="text-align:center;">${s.rate}</td>
                   <td style="text-align:right;" colspan="2">${formatCurrency(s.tax)}</td>
                 </tr>
               `;
             });
 
-            oldSlabHTML += `
+            oldSlabHTML += `              
               <tr><td colspan="5"><b>Calculated Income Tax (Slab Total)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(reOldTotalTax)}</b></td></tr>
+              <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
               <tr><td colspan="5">Rebate u/s 87A</td><td style="text-align:right;" colspan="2">${formatCurrency(reOldRebateApplied)}</td></tr>
               <tr> <td colspan="5">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTax)}</td></tr>
               <tr><td colspan="5">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTaxCess)}</td></tr>
