@@ -7,17 +7,24 @@
     <!-- font style -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
+      rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&display=swap"
+      rel="stylesheet">
     <!-- Icon -->
     <script defer src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
       /* =========================
@@ -27,8 +34,8 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-size: 10px;
-        font-family: "Roboto Condensed", "Inter", sans-serif;
+        font-size: 11px;
+        font-family: "Inter", Arial, Helvetica, sans-serif;
         background: transparent;
       }
 
@@ -164,7 +171,7 @@
       option {
         color: white;
         font-weight: 100;
-        font-family: "Roboto Condensed", "Inter", sans-serif;
+        font-family: "Inter", Arial, Helvetica, sans-serif;
       }
 
       /* =============APP LAYOUT=========== */
@@ -879,17 +886,23 @@
       }
 
       #PB_GOEditTbl td,
-      #PB_NPSEditTbl td,
-      #PB_NPSITCalc td,
-      #PB_GOITCalc td {
+      #PB_NPSEditTbl td {
         height: 22px;
       }
 
+      #PB_NPSITCalc td,
+      #PB_GOITCalc td {
+        height: 23.5px;
+      }
+
       #PB_GOEditTbl td *,
-      #PB_NPSEditTbl td *,
+      #PB_NPSEditTbl td * {
+        line-height: 1 !important;
+      }
+
       #PB_NPSITCalc td *,
       #PB_GOITCalc td * {
-        line-height: 1 !important;
+        line-height: 1.3 !important;
       }
 
       /* 🔹 MAIN TABLES TAKE REMAINING SPACE */
@@ -953,7 +966,7 @@
         border-right: dotted 1px lightgray;
         background: #1f4e79;
         color: #ffffff;
-        font-size: 10px;
+        font-size: 11px;
       }
 
       /* ================= STICKY FIRST COLUMN ================= */
@@ -1182,14 +1195,12 @@
         font-family: "Arial";
       }
 
-      .header-text h3 {
+      .DAAheader-Station {
         margin: 0;
         font-size: 12px;
-        border: solid 2px black;
-        padding: 4px 8px;
         width: max-content;
-        margin: auto;
         font-family: "Arial";
+        padding: 2px;
       }
 
       .month-toggle-input {
@@ -1493,7 +1504,7 @@
       .SalarySlipTableWrapper {
         width: 60%;
         margin: auto;
-        font-size: 10px;
+        font-size: 11px;
         background-color: white;
         overflow: auto;
         height: 600px;
@@ -1691,6 +1702,7 @@
         border-radius: 8px;
         width: 280px;
         padding: 2px;
+        background: rgb(215, 255, 201);
       }
       .ITpanelDiv label {
         font-weight: bold;
@@ -1698,10 +1710,12 @@
       }
 
       .ITpanelDiv span {
+        font-family: 'Rozha One', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         text-align: center;
-        font-size: 15px;
+        font-size: 20px;
         font-weight: bold;
-        padding: 4px;
+        padding: 2px;
+        line-height: 25px;
       }
 
       /* ===============================================
@@ -1813,8 +1827,7 @@
           <button
             class="menu-btn active"
             data-tooltip="Dashboard"
-            data-page="DashBoard"
-          >
+            data-page="DashBoard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </button>
@@ -1822,8 +1835,7 @@
           <button
             class="menu-btn"
             data-tooltip="Employee Details"
-            data-page="EmpPage"
-          >
+            data-page="EmpPage">
             <i data-lucide="user"></i>
             <span>Employee Details</span>
           </button>
@@ -1831,8 +1843,7 @@
           <button
             class="menu-btn"
             data-tooltip="Pay Bill"
-            data-page="PayBillPage"
-          >
+            data-page="PayBillPage">
             <i data-lucide="file-text"></i>
             <span>Pay Bill</span>
           </button>
@@ -1840,8 +1851,7 @@
           <button
             class="menu-btn"
             data-tooltip="Salary Slip"
-            data-page="SalarySlipPage"
-          >
+            data-page="SalarySlipPage">
             <i data-lucide="receipt"></i>
             <span>Salary Slip</span>
           </button>
@@ -1854,8 +1864,7 @@
           <button
             class="menu-btn"
             data-tooltip="Pensions"
-            data-page="PensionPage"
-          >
+            data-page="PensionPage">
             <i data-lucide="landmark"></i>
             <span>Pensions</span>
           </button>
@@ -1863,8 +1872,7 @@
           <button
             class="menu-btn"
             data-tooltip="Budgets"
-            data-page="BudgetPage"
-          >
+            data-page="BudgetPage">
             <i data-lucide="pie-chart"></i>
             <span>Budgets</span>
           </button>
@@ -1872,8 +1880,7 @@
           <button
             class="menu-btn"
             data-tooltip="Database"
-            data-page="DatabasePage"
-          >
+            data-page="DatabasePage">
             <i data-lucide="database"></i>
             <span>Database</span>
           </button>
@@ -1890,8 +1897,7 @@
       <div class="right-panel">
         <img
           class="watermark"
-          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-        />
+          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" />
 
         <div class="SectionPage" id="DashBoard">
           <div class="header">
@@ -2102,15 +2108,13 @@
                     style="max-width: 40px"
                     disabled
                     id="PayBillPage_DA%"
-                    type="text"
-                  />
+                    type="text" />
                   <input
                     id="PayBillPage_OldDA%"
                     disabled
                     style="max-width: 40px"
                     type="text"
-                    hidden
-                  />
+                    hidden />
                 </td>
                 <td><label>TA Zone :</label></td>
                 <td><input disabled id="PayBillPage_TAZone" /></td>
@@ -2118,8 +2122,7 @@
                 <td>
                   <input disabled id="PayBillPage_HRAZone" /><input
                     hidden
-                    id="PayBillPage_HRA%"
-                  />
+                    id="PayBillPage_HRA%" />
                 </td>
                 <td></td>
               </tr>
@@ -2146,8 +2149,7 @@
                 <div
                   class="print-option menu-option"
                   id="daaPrintOption"
-                  data-type="pdf-daa"
-                >
+                  data-type="pdf-daa">
                   📊 DAA Bill Report PDF
                 </div>
 
@@ -2158,8 +2160,7 @@
                 <div
                   class="excel-option menu-option"
                   id="daaExcelOption"
-                  data-type="excel-daa"
-                >
+                  data-type="excel-daa">
                   ⬇️ DAA Bill Excel
                 </div>
               </div>
@@ -2191,13 +2192,13 @@
                     <th colspan="13" style="border: none">
                       <div class="header-container">
                         <img
-                          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-                        />
+                          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" />
 
                         <div class="header-text">
                           <h1>PRASAR BHARATI</h1>
                           <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
-                          <h3></h3>
+                          <h2>AIR Dharwad</h2>
+                          <h2>ALL INDIA RADIO</h2>
                         </div>
                       </div>
                     </th>
@@ -2207,11 +2208,11 @@
                       colspan="13"
                       style="
                         border: solid 1.5px black;
-                        padding: 5px;
+                        padding: 2px;
                         text-align: center;
-                      "
-                    >
-                      MANUAL BILL OF DA ARREARS IN r/o ALL GO STAFF
+                      ">
+                      MANUAL BILL OF DA ARREARS IN r/o ALL GO STAFF <h3
+                        class="DAAheader-Station"></h3>
                     </th>
                   </tr>
                   <tr>
@@ -2277,13 +2278,13 @@
                     <th colspan="20" style="border: none">
                       <div class="header-container">
                         <img
-                          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-                        />
+                          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" />
 
                         <div class="header-text">
                           <h1>PRASAR BHARATI</h1>
                           <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
-                          <h3></h3>
+                          <h2>AIR Dharwad</h2>
+                          <h2>ALL INDIA RADIO</h2>
                         </div>
                       </div>
                     </th>
@@ -2293,11 +2294,11 @@
                       colspan="20"
                       style="
                         border: solid 1.5px black;
-                        padding: 5px;
+                        padding: 2px;
                         text-align: center;
-                      "
-                    >
+                      ">
                       MANUAL BILL OF DA ARREARS IN r/o ALL PRASAR BHARATI STAFF
+                      OF <h3 class="DAAheader-Station"></h3>
                     </th>
                   </tr>
                   <tr>
@@ -2398,8 +2399,7 @@
                 <div
                   class="print-option menu-option"
                   id="ssPrintOption"
-                  data-type="pdf-singleSS"
-                >
+                  data-type="pdf-singleSS">
                   🧾 Employee Salary Slip PDF
                 </div>
                 <div class="print-option menu-option" data-type="pdf-allSS">
@@ -2410,8 +2410,7 @@
                 <div
                   class="excel-option menu-option"
                   id="ssExcelOption"
-                  data-type="excel-singleSS"
-                >
+                  data-type="excel-singleSS">
                   ⬇️ Employee Salary Slip Excel
                 </div>
                 <div class="excel-option menu-option" data-type="excel-allSS">
@@ -2432,19 +2431,16 @@
                         display: flex;
                         flex-direction: row;
                         padding: 8px 2px;
-                      "
-                    >
+                      ">
                       <img
                         id="SalarySlipLogo"
-                        src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-                      />
+                        src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l" />
                       <div
                         style="
                           display: flex;
                           flex-direction: column;
                           margin: auto;
-                        "
-                      >
+                        ">
                         <h3 style="margin: 0">PRASAR BHARATI</h3>
                         <h3 style="margin: 0">
                           INDIA'S PUBLIC SERVICE BROADCASTER
@@ -2458,8 +2454,7 @@
                 <tr>
                   <th
                     colspan="7"
-                    style="padding: 0px; border: solid 1px black; height: 30px"
-                  >
+                    style="padding: 0px; border: solid 1px black; height: 30px">
                     SALARY SLIP FOR THE MONTH OF
                     <span id="SalarySlipHeaderMonth"></span>
                   </th>
@@ -2474,8 +2469,7 @@
                         border-collapse: collapse;
                         margin: 0px;
                         border: none;
-                      "
-                    >
+                      ">
                       <colgroup>
                         <col style="width: 15%" />
                         <col style="width: 15%" />
@@ -2545,8 +2539,7 @@
                             background-color: #d3d3d3;
                             text-align: center;
                             font-weight: bold;
-                          "
-                        >
+                          ">
                           LOAN DEDUCTION DETAIL
                         </td>
                       </tr>
@@ -2587,8 +2580,7 @@
                               font-weight: bold;
                               font-size: 13px;
                               background: #edebb7;
-                            "
-                          >
+                            ">
                             <h3 style="font-size: 12px; background: #edebb7">
                               ==============🚫 No Data 🚫==============
                             </h3>
@@ -2601,8 +2593,7 @@
                 <tr>
                   <td
                     colspan="7"
-                    style="max-height: 2px; height: 2px; padding: 0"
-                  ></td>
+                    style="max-height: 2px; height: 2px; padding: 0"></td>
                 </tr>
                 <tr>
                   <td style="padding: 0px">
@@ -2643,8 +2634,7 @@
                               font-weight: bold;
                               font-size: 13px;
                               background: #edebb7;
-                            "
-                          >
+                            ">
                             <h3 style="font-size: 12px; background: #edebb7">
                               ==============🚫No Data 🚫==============
                             </h3>
@@ -2707,21 +2697,17 @@
                       name="salaryMode"
                       id="calcSalary"
                       value="Calculated Salary"
-                      checked
-                    />
-                    <label for="calcSalary" class="btn red"
-                      >Calculated Salary</label
-                    >
+                      checked />
+                    <label for="calcSalary" class="btn red">Calculated
+                      Salary</label>
 
                     <input
                       type="radio"
                       name="salaryMode"
                       id="paidSalary"
-                      value="Paid Salary"
-                    />
-                    <label for="paidSalary" class="btn green"
-                      >Paid Salary</label
-                    >
+                      value="Paid Salary" />
+                    <label for="paidSalary" class="btn green">Paid
+                      Salary</label>
 
                     <div class="slider"></div>
                   </div>
@@ -2742,8 +2728,7 @@
                 <div
                   class="print-option menu-option"
                   id="itPrintOption"
-                  data-type="pdf-singleIT"
-                >
+                  data-type="pdf-singleIT">
                   🧾 Employee IT Calculation PDF
                 </div>
                 <div class="print-option menu-option" data-type="pdf-allIT">
@@ -2754,8 +2739,7 @@
                 <div
                   class="excel-option menu-option"
                   id="itExcelOption"
-                  data-type="excel-singleIT"
-                >
+                  data-type="excel-singleIT">
                   ⬇️ Employee IT Calculation Excel
                 </div>
                 <div class="excel-option menu-option" data-type="excel-allIT">
@@ -2772,8 +2756,7 @@
               gap: 10px;
               justify-content: space-between;
               margin: 4px;
-            "
-          >
+            ">
             <div class="ITpanelDiv">
               <label>Best Regime Option</label>
               <span id="PanelRegime">0</span>
@@ -2855,48 +2838,42 @@
               border-radius: 8px;
               border: solid 1px rgb(189, 189, 189);
               font-weight: bold;
-            "
-          >
+            ">
             <tr>
               <td>Sanctioned SBG</td>
               <td>
                 <input
                   disabled
                   id="SBGsanctioned"
-                  style="font-size: 12px; font-weight: bold; width: 150px"
-                />
+                  style="font-size: 12px; font-weight: bold; width: 150px" />
               </td>
               <td>SBG Utilised</td>
               <td>
                 <input
                   disabled
                   id="SBGutilised"
-                  style="font-size: 12px; font-weight: bold; width: 150px"
-                />
+                  style="font-size: 12px; font-weight: bold; width: 150px" />
               </td>
               <td>Available SBG</td>
               <td>
                 <input
                   disabled
                   id="SBGavailable"
-                  style="font-size: 12px; font-weight: bold; width: 150px"
-                />
+                  style="font-size: 12px; font-weight: bold; width: 150px" />
               </td>
               <td>Calculated SBG</td>
               <td>
                 <input
                   disabled
                   id="SBGcalculated"
-                  style="font-size: 12px; font-weight: bold; width: 150px"
-                />
+                  style="font-size: 12px; font-weight: bold; width: 150px" />
               </td>
               <td>Revised SBG</td>
               <td>
                 <input
                   disabled
                   id="SBGrevised"
-                  style="font-size: 12px; font-weight: bold; width: 150px"
-                />
+                  style="font-size: 12px; font-weight: bold; width: 150px" />
               </td>
             </tr>
           </table>
@@ -2904,8 +2881,7 @@
             <div
               class="BudgetTablefromPBWrapper"
               id="BudgetTablefromPBWrapper"
-              style="display: none"
-            ></div>
+              style="display: none"></div>
             <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
           </div>
         </div>
@@ -3166,9 +3142,46 @@
         renderFilterMainBudgetExpTable();
       }
 
-      /* =========================
-   🔥 DATE PARSERS
-========================= */
+
+      async function loadData() {
+        let empRes = await fetch(
+          "https://office-management-f425.onrender.com/emp",
+        );
+        let pbRes = await fetch(
+          "https://office-management-f425.onrender.com/pb",
+        );
+        let cpcRes = await fetch(
+          "https://office-management-f425.onrender.com/cpc",
+        );
+        let qtrsRes = await fetch(
+          "https://office-management-f425.onrender.com/qtrs",
+        );
+        let cityRes = await fetch(
+          "https://office-management-f425.onrender.com/city",
+        );
+        let sbgRes = await fetch(
+          "https://office-management-f425.onrender.com/sbg",
+        );
+        let sbgExpRes = await fetch(
+          "https://office-management-f425.onrender.com/sbgexp",
+        );
+        let itRes = await fetch(
+          "https://office-management-f425.onrender.com/it",
+        );
+        let commRes = await fetch(
+          "https://office-management-f425.onrender.com/comm",
+        );
+
+        empData = await empRes.json();
+        sbgData = await sbgRes.json();
+        sbgExpData = await sbgExpRes.json();
+        pbData = await pbRes.json();
+        cpcData = await cpcRes.json();
+        qtrsData = await qtrsRes.json();
+        cityData = await cityRes.json();
+        itData = await itRes.json();
+        commData = await commRes.json();
+      }
 
       /* =========================
        🔥 UNIVERSAL DATE UTILITY
@@ -3901,46 +3914,7 @@
       let sbgExpData = { headers: [], rows: [] };
       let sbgData = {}; // BudgetDB (SBG)
 
-      async function loadData() {
-        let empRes = await fetch(
-          "https://office-management-f425.onrender.com/emp",
-        );
-        let pbRes = await fetch(
-          "https://office-management-f425.onrender.com/pb",
-        );
-        let cpcRes = await fetch(
-          "https://office-management-f425.onrender.com/cpc",
-        );
-        let qtrsRes = await fetch(
-          "https://office-management-f425.onrender.com/qtrs",
-        );
-        let cityRes = await fetch(
-          "https://office-management-f425.onrender.com/city",
-        );
-        let sbgRes = await fetch(
-          "https://office-management-f425.onrender.com/sbg",
-        );
-        let sbgExpRes = await fetch(
-          "https://office-management-f425.onrender.com/sbgexp",
-        );
-        let itRes = await fetch(
-          "https://office-management-f425.onrender.com/it",
-        );
-        let commRes = await fetch(
-          "https://office-management-f425.onrender.com/comm",
-        );
-
-        empData = await empRes.json();
-        sbgData = await sbgRes.json();
-        sbgExpData = await sbgExpRes.json();
-        pbData = await pbRes.json();
-        cpcData = await cpcRes.json();
-        qtrsData = await qtrsRes.json();
-        cityData = await cityRes.json();
-        itData = await itRes.json();
-        commData = await commRes.json();
-      }
-
+      
       function applyFilters() {
         //console.log("FILTER isAddMode:", isAddMode);
         if (!pbData.headers) return;
@@ -4119,7 +4093,7 @@
       }
 
       function updateStationHeaders(station) {
-        document.querySelectorAll(".header-text h3").forEach((h3) => {
+        document.querySelectorAll(".DAAheader-Station").forEach((h3) => {
           h3.textContent = station || "";
         });
       }
@@ -4675,7 +4649,7 @@
           count++;
         });
 
-        console.log("✅ Added Employees:", count);
+        //console.log("✅ Added Employees:", count);
       }
 
       function copyPreviousMonthData(nextMonth, station) {
@@ -4812,6 +4786,16 @@
             const newRow = [...row];
             newRow[monthIdx] = nextMonth;
 
+            // 🔥 RESET CALCULATED FIELDS
+            const resetCols = [
+              "DAA","DAA on TA","DAA on NPSE","DAA on NPSC","Total DAA","DAA on NPSE ded","DAA on NPS"
+            ];
+
+            resetCols.forEach(col => {
+              const idx = headers.indexOf(col);
+              if (idx !== -1) newRow[idx] = "";
+            });
+
             newRows.push(newRow);
             existingSet.add(empName);
           }
@@ -4846,7 +4830,7 @@
           return true;
         });
 
-        console.log("✅ Copied:", newRows.length);
+        //console.log("✅ Copied:", newRows.length);
       }
 
       // 🔥============== PAY BILL VIEW TABLE ===========================
@@ -6048,11 +6032,15 @@
           }));
       }
 
+
+      let isResetMode = false;
+
       function updateDAAFromPBDB(rowElements) {
         const inputDA = Math.min(num(id("PayBillPage_DA%").value), 150);
         const selectedMonth = id("PayBillPage_SalMonth")?.value;
 
         if (!selectedMonth) return;
+        if (isResetMode) return;
 
         const [mon, year] = selectedMonth.split("-");
 
@@ -6141,32 +6129,68 @@
             blockStart = 7;
             blockEnd = 12;
           }
+          
 
           // 🔥 CASE 3 → Jan to previous month
-          const useFullRange = selectedNum > 6 && !block1HasChange;
+          //const useFullRange = selectedNum > 6 && !block1HasChange;
           let calcDetails = [];
           history.forEach((r) => {
-            const [m] = r.month.split("-");
-            const mNum = monthMap[m];
+            const rVal = parseMonthYear(r.month);
+            const selVal = parseMonthYear(selectedMonth);
 
-            // 🔹 RANGE CHECK
-            if (!useFullRange) {
-              if (mNum < blockStart || mNum > blockEnd) return;
+            // 🔹 ONLY BEFORE SELECTED MONTH
+            if (rVal >= selVal) return;
+
+            // 🔹 SAME YEAR ONLY (CRITICAL)
+            const [, ry] = r.month.split("-");
+            if (parseInt(ry) !== parseInt(year)) return;
+
+            const mNum = monthMap[r.month.split("-")[0]];
+
+            // 🔥 CASE 1: Jan–Jun selection
+            if (selectedNum <= 6) {
+              if (mNum >= selectedNum) return;
             }
 
-            // 🔹 BEFORE SELECTED MONTH
-            if (parseMonthYear(r.month) >= parseMonthYear(selectedMonth))
-              return;
+            // 🔥 CASE 2: Jul–Dec selection
+            else {
 
-            // 🔹 SAME OLD DA BLOCK
-            if (r.da !== prevDA) return;
+              // 🔥 CHECK if change exists in Jan–Jun (CURRENT YEAR ONLY)
+              let block1HasChange = false;
+
+              for (let i = 1; i < history.length; i++) {
+                const [pm, py] = history[i].month.split("-");
+                const pNum = monthMap[pm];
+                const pYear = parseInt(py);
+
+                if (
+                  pYear === parseInt(year) &&
+                  pNum <= 6 &&
+                  history[i].da !== history[i - 1].da
+                ) {
+                  block1HasChange = true;
+                  break;
+                }
+              }
+
+              if (block1HasChange) {
+                // 🔹 change happened in block1 → only block2
+                if (mNum < 7 || mNum >= selectedNum) return;
+              } else {
+                // 🔥 NO change in block1 → FULL RANGE (KEY FIX)
+                if (mNum >= selectedNum) return;
+              }
+            }
+
+            // 🔥 ONLY OLD DA BLOCK (KEEP THIS — IMPORTANT)
+            if (r.da >= inputDA) return;
 
             // =========================
             // 🔹 DAA (BASIC PAY)
             // =========================
             const basic = num(r.basic);
 
-            const oldAmt = basic * (prevDA / 100);
+            const oldAmt = basic * (r.da / 100);
             const newAmt = basic * (inputDA / 100);
 
             const diff = newAmt - oldAmt;
@@ -6176,7 +6200,7 @@
             // =========================
             const ta = num(r.ta);
 
-            const oldTA = ta * (prevDA / 100);
+            const oldTA = ta * (r.da / 100);
             const newTA = ta * (inputDA / 100);
 
             const diffTA = newTA - oldTA;
@@ -6219,7 +6243,7 @@
                 basic: basic,
                 ta: ta,
 
-                oldDApercent: prevDA,
+                oldDApercent: r.da,
                 newDApercent: inputDA,
 
                 oldDA: Math.round(oldAmt),
@@ -6349,6 +6373,7 @@
           );
         }); //To Create DAA Calculation Table
       }
+      
 
       // 🔥============== TO GET DA ARREARS TABLE===========================
 
@@ -6506,14 +6531,14 @@
       }
 
       function resetDAAInEditTables() {
+        //console.log("🔥 Reset DAA Called")
+        isResetMode = true;   // 🔥 block calculation
+
         const goTable = id("daaGOTableCalculation");
         const npsTable = id("daaNPSTableCalculation");
 
-        const goBody = ensureTbody(goTable);
-        const npsBody = ensureTbody(npsTable);
-
-        goBody.innerHTML = "";
-        npsBody.innerHTML = "";
+        ensureTbody(goTable).innerHTML = "";
+        ensureTbody(npsTable).innerHTML = "";
 
         ["PB_GOEditTbl", "PB_NPSEditTbl"].forEach((tableId) => {
           const table = id(tableId);
@@ -6522,27 +6547,94 @@
           const rows = table.querySelectorAll("tbody tr");
 
           rows.forEach((tr) => {
-            // 🔥 find all numeric editable cells
-            tr.querySelectorAll("input, td").forEach((el) => {
-              const label = el.getAttribute("data-col") || el.className || "";
 
-              // 🔥 match DAA related fields
+            tr._daaDetails = []; // 🔥 clear cache
+
+            Object.values(tr._cells || {}).forEach((cell) => {
+
+              if (!cell) return;
+
+              const col = cell.getAttribute?.("data-col") || "";
+
               if (
-                label.includes("DAA") ||
-                label.includes("Arrears") ||
-                label.includes("Recovery") ||
-                label.includes("Reimburse")
+                col.includes("DAA") ||
+                col.includes("Arrears") ||
+                col.includes("Recovery") ||
+                col.includes("Reimburse")
               ) {
-                if (el.tagName === "INPUT") {
-                  el.value = 0;
+                if (cell.tagName === "INPUT") {
+                  cell.value = 0;
                 } else {
-                  el.innerText = "0";
+                  cell.innerText = "0";
                 }
               }
             });
           });
         });
+
+        // 🔥 small delay before enabling calculation
+        setTimeout(() => {
+          isResetMode = false;
+        }, 100);
       }
+
+
+      function updateAndRenderDAA() {
+        if (isResetMode) return;
+        // 🔥 1. Recalculate base rows
+        recalculateAllRows();
+
+        // 🔥 2. Recalculate DAA (your main engine)
+        ["PB_GOEditTbl", "PB_NPSEditTbl"].forEach((tableId) => {
+          const table = id(tableId);
+          if (!table) return;
+
+          const rows = [...table.querySelectorAll("tbody tr:not(.total-row)")];
+          const rowElements = rows.map((tr) => ({ tr }));
+
+          updateDAAFromPBDB(rowElements); // 🔥 YOUR CORE LOGIC :contentReference[oaicite:0]{index=0}
+        });
+        
+
+        // 🔥 3. Render DAA table
+        const allRows = getDAAallRowElements();
+        renderDAACalcTables(allRows);
+
+        //console.log("DAA render running", allRows);
+      }
+
+      function hasDAAData() {
+        function getTotal(tableId) {
+          const table = id(tableId);
+          if (!table) return 0;
+
+          const headers = table.querySelectorAll("thead th");
+
+          let colIndex = -1;
+
+          headers.forEach((th, i) => {
+            const text = th.textContent.toLowerCase().replace(/\s+/g, "");
+            if (text === "totaldaa") colIndex = i;
+          });
+
+          if (colIndex === -1) return 0;
+
+          let total = 0;
+
+          table.querySelectorAll("tbody tr").forEach((tr) => {
+            const val = tr.children[colIndex]?.textContent || "";
+            total += CurrencytoNum(val);
+          });
+
+          return total;
+        }
+
+        const goTotal = getTotal("PB_GOViewTbl");
+        const npsTotal = getTotal("PB_NPSViewTbl");
+
+        return goTotal > 0 || npsTotal > 0;
+      }
+
 
       // 🔥==============================================================
 
@@ -7139,9 +7231,9 @@
 
         const remainingMonths = 12 - paidMonthCount;
 
-        // 🔥 EDGE CASES
-        if (remainingMonths <= 0 || pendingTDS <= 0) {
+        if (pendingTDS <= 0) {
           return {
+            netTax,
             it: 0,
             cess: 0,
             total: 0,
@@ -7149,11 +7241,24 @@
         }
 
         // 🔥 STEP 3: MONTHLY CALCULATION (YOUR FORMULA)
-        const it = Math.round(pendingTDS / (1.04 * remainingMonths), 0);
-        const cess = Math.round(it * 0.04, 0);
-        const total = it + cess;
+        let it = Math.round(pendingTDS / (1.04 * remainingMonths), 0);
+        let cess = Math.round(it * 0.04, 0);
+        let total = it + cess;
 
+        // 🔥 EXTRA SAFETY
+        if (!isFinite(it)) it = 0;
+        if (!isFinite(cess)) cess = 0;
+        if (!isFinite(total)) total = 0;
+
+        //console.table({
+        //  empName: empName,
+        //  netTax: netTax,
+        //  it:it,
+        //  cess:cess,
+        //  total:total,
+        //})
         return {
+          netTax,
           it,
           cess,
           total,
@@ -7464,6 +7569,29 @@
         };
       }
 
+
+      function getEditTableEmployees() {
+        const tableIds = ["PB_GOEditTbl", "PB_NPSEditTbl"];
+        const empIndex = pbData.headers.indexOf("Employee Name");
+
+        const names = new Set();
+
+        tableIds.forEach((tblId) => {
+          const table = document.getElementById(tblId);
+          if (!table) return;
+
+          table.querySelectorAll("tbody tr").forEach((tr) => {
+            const cell = tr.children[empIndex];
+            if (!cell) return;
+
+            const name = cell.innerText.trim();
+            if (name) names.add(name);
+          });
+        });
+
+        return [...names];
+      }
+
       function renderGOITTable() {
         const table = id("PB_GOITCalc");
         if (!table) return;
@@ -7496,9 +7624,9 @@
         // 🔥 Get current month correctly
         const el = id("PayBillPage_SalMonth");
         const currentMonth = el.options[el.selectedIndex]?.text;
+        const editEmployees = getEditTableEmployees();
 
-        pbData.rows.forEach((row) => {
-          const empName = row[empIndex];
+        editEmployees.forEach((empName) => {
           if (processed.has(empName)) return;
           processed.add(empName);
 
@@ -7519,20 +7647,14 @@
           // 🔥 STEP 2: Select BEST regime
           let tax, regime;
 
-          // 🔥 Handle edge cases first
-          if (oldTax.total === 0 && newTax.total === 0) {
-            tax = oldTax;
-            regime = "Old Regime";
-          } else {
             // 🔥 NORMAL CASE → pick minimum
-            if (oldTax.total <= newTax.total) {
+            if (oldTax.netTax <= newTax.netTax) {
               tax = oldTax;
               regime = "Old Regime";
             } else {
               tax = newTax;
               regime = "New Regime";
             }
-          }
 
           // 🔥 STEP 3: Validate employee
           const result = calculateFYGrossFinal(empName, selectedFY, regime);
@@ -7605,9 +7727,9 @@
         // 🔥 Get current month correctly
         const el = id("PayBillPage_SalMonth");
         const currentMonth = el.options[el.selectedIndex]?.text;
+        const editEmployees = getEditTableEmployees();
 
-        pbData.rows.forEach((row) => {
-          const empName = row[empIndex];
+        editEmployees.forEach((empName) => {
           if (processed.has(empName)) return;
           processed.add(empName);
 
@@ -7628,19 +7750,14 @@
           // 🔥 STEP 2: Select BEST regime
           let tax, regime;
 
-          if (oldTax.total === 0 && newTax.total === 0) {
-            tax = oldTax;
-            regime = "Old Regime";
-          } else {
-            // 🔥 NORMAL CASE → pick minimum
-            if (oldTax.total <= newTax.total) {
+         // 🔥 NORMAL CASE → pick minimum
+            if (oldTax.netTax <= newTax.netTax) {
               tax = oldTax;
               regime = "Old Regime";
             } else {
               tax = newTax;
               regime = "New Regime";
             }
-          }
 
           // 🔥 STEP 3: Validate employee
           const result = calculateFYGrossFinal(empName, selectedFY, regime);
@@ -7680,6 +7797,7 @@
 
         tbody.appendChild(totalRow);
       }
+      
 
       function calculateITFields(tr) {
         const itInput = getCellInput(tr, "IT");
@@ -8081,7 +8199,7 @@
       }
 
       on("PBaddBtn", "click", () => {
-        resetDAAInEditTables();
+        
         //console.log("BTN isAddMode:", isAddMode);
         const monthEl = id("PayBillPage_SalMonth");
         const station = id("PayBillPage_Station")?.value;
@@ -8091,7 +8209,7 @@
         if (!isAddMode) {
           // 🔥 FIRST CLICK → ENTER ADD MODE
           isAddMode = true;
-
+          
           //console.log("ADD MODE ACTIVATED");
 
           const currentMonth = String(monthEl.value || "").trim();
@@ -8099,12 +8217,14 @@
 
           copyPreviousMonthData(nextMonth, station);
           addNewEmployeesFromEmpDB(nextMonth, station);
+          
 
           filters.station = String(station).trim();
           filters.month = String(nextMonth).trim();
           filters.fy = getFinancialYear(nextMonth);
 
-          applyFilters();
+          applyFilters();          
+          resetDAAInEditTables();
           refreshPBView();
 
           const el = id("PayBillPage_SalMonth");
@@ -8904,9 +9024,15 @@
         // ===== STYLE =====
         const style = doc.createElement("style");
         style.textContent = `
-    @page { size: A4 landscape; margin: 5mm; }
+      @page {
+          size: A4 landscape;
+          margin-top: 5mm;
+          margin-right: 5mm;
+          margin-left: 5mm;
+          margin-bottom: 10mm; /* 🔥 increase bottom */
+        }
 
-      * { font-family: "Roboto Condensed", "Inter", sans-serif; font-size: 10px;padding:0;margin:0}
+      * { font-family: "Inter", Arial, Helvetica, sans-serif; font-size: 11px;padding:0;margin:0}
 
       body{padding:5px 5px;}
 
@@ -8938,7 +9064,7 @@
 
       .header-right {
         width: 100px;
-        font-size: 10px;
+        font-size: 11px;
         text-align: right;
       }
 
@@ -8979,7 +9105,7 @@
         background: #f1f5f9;
         border:solid 1px black;
         padding:2px 4px;
-        font-size:10px;
+        font-size: 11px;
       }
 
       td {
@@ -8993,7 +9119,7 @@
         text-align:center;
         width:100%;
         height:20px;
-        font-size:11px;
+        font-size:12px;
         font-weight:bold;
         padding:5px 5px;
       }
@@ -9163,8 +9289,15 @@
         // ===== STYLE =====
         const style = doc.createElement("style");
         style.textContent = `
-        @page { size: A4 landscape; margin: 5mm; }
-        *{font-size:10px;font-family:"Roboto Condensed", "Inter", sans-serif;}
+        @page {
+          size: A4 landscape;
+          margin-top: 5mm;
+          margin-right: 5mm;
+          margin-left: 5mm;
+          margin-bottom: 10mm; /* 🔥 increase bottom */
+        }
+
+        *{font-size: 11px;font-family: "Inter", Arial, Helvetica, sans-serif;}
 
         .footer {
           text-align: right;
@@ -9290,60 +9423,7 @@
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
 
-      function updateAndRenderDAA() {
-        // 🔥 1. Recalculate base rows
-        recalculateAllRows();
-
-        // 🔥 2. Recalculate DAA (your main engine)
-        ["PB_GOEditTbl", "PB_NPSEditTbl"].forEach((tableId) => {
-          const table = id(tableId);
-          if (!table) return;
-
-          const rows = [...table.querySelectorAll("tbody tr:not(.total-row)")];
-          const rowElements = rows.map((tr) => ({ tr }));
-
-          updateDAAFromPBDB(rowElements); // 🔥 YOUR CORE LOGIC :contentReference[oaicite:0]{index=0}
-        });
-
-        // 🔥 3. Render DAA table
-        const allRows = getDAAallRowElements();
-        renderDAACalcTables(allRows);
-
-        //console.log("DAA render running", allRows);
-      }
-
-      function hasDAAData() {
-        function getTotal(tableId) {
-          const table = id(tableId);
-          if (!table) return 0;
-
-          const headers = table.querySelectorAll("thead th");
-
-          let colIndex = -1;
-
-          headers.forEach((th, i) => {
-            const text = th.textContent.toLowerCase().replace(/\s+/g, "");
-            if (text === "totaldaa") colIndex = i;
-          });
-
-          if (colIndex === -1) return 0;
-
-          let total = 0;
-
-          table.querySelectorAll("tbody tr").forEach((tr) => {
-            const val = tr.children[colIndex]?.textContent || "";
-            total += CurrencytoNum(val);
-          });
-
-          return total;
-        }
-
-        const goTotal = getTotal("PB_GOViewTbl");
-        const npsTotal = getTotal("PB_NPSViewTbl");
-
-        return goTotal > 0 || npsTotal > 0;
-      }
-
+      
       function openPrintWindow(html) {
         const win = window.open("", "_blank");
 
@@ -9625,10 +9705,10 @@
           });
 
           [
-            { row: 1, height: 60, size: 11 },
-            { row: 2, height: 24, size: 10 },
-            { row: 3, height: 30, size: 9.5 },
-            { row: 4, height: 30, size: 9.5 },
+            { row: 1, height: 67, size: 11 },
+            { row: 2, height: 44, size: 10 },
+            { row: 3, height: 32, size: 9.5 },
+            { row: 4, height: 32, size: 9.5 },
           ].forEach(({ row, height, size }) => {
             const r = sheet.getRow(row);
 
@@ -9707,7 +9787,7 @@
             });
 
             sheet.addImage(imageId, {
-              tl: { col: 0, row: 0 },
+              tl: { col: 0.2, row: 0.2 },
               ext: { width: 70, height: 60 },
             });
           }
@@ -9747,6 +9827,7 @@
             fitToHeight: false,
             horizontalCentered: true, // Center on page
             verticalCentered: false,
+
             margins: {
               left: 0.3,
               right: 0.3,
@@ -9756,7 +9837,7 @@
               footer: 0.2,
             },
           };
-
+          sheet.views = [{ showGridLines: false }];
           sheet.pageSetup.printArea = `A1:${lastColLetter}${lastRow + 2}`;
         }
 
@@ -13482,7 +13563,7 @@
         const pan = empRow?.[panIndex] || "";
 
         const infoTable = document.createElement("table");
-
+        
         infoTable.style.width = "100%";
         infoTable.style.borderCollapse = "collapse";
         infoTable.style.marginBottom = "8px";
@@ -13552,7 +13633,7 @@
         );
 
         thead.innerHTML = `
-        <tr><th colspan="14" style="text-align:center;font-size:11px;">Salary Breakup for the Financial Year ${ITfy} for ${Sal}</th><tr>
+        <tr><th colspan="14" style="text-align:center;font-size:12px;">Salary Breakup for the Financial Year ${ITfy} for ${Sal}</th><tr>
         <tr><th style="text-align: left;">Salary Breakup</th>
       
       ${data
@@ -13569,12 +13650,12 @@
               display:inline-block;
               margin-top:2px;
               padding:2px 10px;
-              font-size:10px;
+              font-size: 11px;
               border-radius:5px;
               color:${cl};
               background:${bg};
             ">
-              ${label}
+              (${label})
             </span>
           </th>
         `;
@@ -13601,8 +13682,8 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
       <td colspan="${colSpan}" 
-          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:12px;background:#edebb7">
-          <h3 style="font-size:12px;background:#edebb7;">==============🚫 Employee Retired 🚫==============</h3>
+          style="text-align:center; padding:15px; color:red;font-weight:bold;font-size:13px;background:#edebb7">
+          <h3 style="font-size:13px;background:#edebb7;">==============🚫 Employee Retired 🚫==============</h3>
       </td>
     `;
 
@@ -13705,6 +13786,8 @@
         const HRA_rate = isMetro ? 0.5 : 0.4;
         const oldRegime = "Old Regime";
         const newRegime = "New Regime";
+        window.houseRentMap = window.houseRentMap || {};
+        const rentValue = Number(window.houseRentMap?.[empName] || 0);
 
         data.forEach((r) => {
           const bp = Number(r["Basic Pay"]) || 0;
@@ -13734,7 +13817,8 @@
 
           const totalSalary = BP + DA;
 
-          const rent = 0;
+          const rent = rentValue;
+
           const elihra1 = HRA;
 
           const elihra2 = Math.max(0, rent - Math.round(0.1 * totalSalary));
@@ -13838,7 +13922,7 @@
 
         oldSlabHTML += `          
           <tr><td colspan="5"><b>Calculated Income Tax (Slab Total)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(oldSlabData.total)}</b></td></tr>
-          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
+          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax under Old Tax Regime</b></td></tr>
           <tr><td colspan="5">Rebate u/s 87A (Taxable Gross Income <= ${formatCurrency(oldRebateUpto)})</td><td style="text-align:right;" colspan="2">${formatCurrency(oldRebateApplied)}</td></tr>
           <tr><td colspan="5">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTax)}</td></tr>
           <tr><td colspan="5">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(oldFinalTaxCess)}</td></tr>
@@ -13920,7 +14004,7 @@
 
         newSlabHTML += `          
           <tr><td colspan="5"><b>Calculated Income Tax (Slab Total)</b></td><td style="text-align:right;" colspan="2"><b>${formatCurrency(newSlabData.total)}</b></td></tr>
-          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax</b></td></tr>
+          <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Calculation of Income Tax under New Rax Regime</b></td></tr>
           <tr><td colspan="5">Rebate u/s 87A (Taxable Gross Income <= ${formatCurrency(newRebateUpto)})</td><td style="text-align:right;" colspan="2">${formatCurrency(newRebateApplied)}</td></tr>
           <tr><td colspan="5">Tax After Rebate</td><td style="text-align:right;" colspan="2">${formatCurrency(newFinalTax)}</td></tr>
           <tr><td colspan="5">Education Cess @4%</td><td style="text-align:right;" colspan="2">${formatCurrency(newFinalTaxCess)}</td></tr>
@@ -13944,11 +14028,11 @@
       </colgroup>
       <thead>
         <tr>
-          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:11px; color:white;padding:10px;">
-            Old Tax Regime Calculation
+          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:12px; color:white;padding:10px;">
+            Old Tax Regime Calculation for FY ${ITfy}
             ${
               bestRegime === "Old Tax Regime"
-                ? "<span style='margin-left:8px; color:green; font-weight:bold;border:1px solid green;border-radius:4px;color:green;background:#baffba;box-shadow:0px 0px 2px 1px #00ff00;padding:3px;'>✅ Selected</span>"
+                ? "<span style='margin-left:8px;font-weight:bold;border-radius:4px;color:#002109;background:#33ff69;box-shadow:0px 0px 2px 1px #00ff00;padding:4px;'>( ✔ Selected )</span>"
                 : ""
             }
           </th>
@@ -13971,8 +14055,8 @@
           <td colspan="5" style="padding:
           0px 8px">
             HRA Rebate
-            <label style="margin-left:10px;color:gray;font-style:italic;">(House Rent for FY :
-            <input type="number" id="rentInput" min="0" value ="0" placeholder="Enter Rent" style="width:120px;margin-left:5px">)</label>
+            <label style="margin-left:10px;color:gray;font-style:italic;">(House Rent for FY :</label>
+            <input type="number" id="rentInput" min="0" style="width:120px;margin-left:5px">)
           </td>
           <td id="hraValue" style="text-align:right;" colspan="2"> ${formatCurrency(elihra)}</td>
         </tr>
@@ -14004,7 +14088,7 @@
           </td>
         </tr>
 
-        <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Tax Slab under Old Tax Regime for FY ${ITfy}</b></td></tr>
+        <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;"><b>Tax Slab under Old Tax Regime</b></td></tr>
         <tbody id="oldSlabBody">
           ${oldSlabHTML}
         </tbody>
@@ -14026,11 +14110,11 @@
       </colgroup>
       <thead>
         <tr>
-          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:11px; color:white;padding:10px;">
-            New Tax Regime Calculation
+          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:12px; color:white;padding:10px;">
+            New Tax Regime Calculation for FY ${ITfy}
             ${
               bestRegime === "New Tax Regime"
-                ? "<span style='margin-left:8px; color:green; font-weight:bold;border:1px solid green;border-radius:4px;color:green;background:#baffba;box-shadow:0px 0px 2px 1px #00ff00;padding:4px;'>✅ Selected</span>"
+                ? "<span style='margin-left:8px;font-weight:bold;border-radius:4px;color:#002109;background:#33ff69;box-shadow:0px 0px 2px 1px #00ff00;padding:4px;'>( ✔ Selected )</span>"
                 : ""
             }
           </th>
@@ -14042,7 +14126,7 @@
         <tr><td colspan="5">Standard Deduction</td><td style="text-align:right;" colspan="2">${formatCurrency(newStandardDeduction)}</td></tr>
         <tr><td colspan="5">Deduction Eligible under NPSE</td><td style="text-align:right;" colspan="2">${formatCurrency(elinpse)}</td></tr>
         <tr><td colspan="5"><b>Taxable Gross Income</b></td><td style="text-align:right;" id="NewTaxGross" colspan="2"><b>${formatCurrency(newTaxableIncome)}</b></td></tr>
-        <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;""><b>Tax Slab under New Tax Regime for FY ${ITfy}</b></td></tr>
+        <tr style="background:#edf1fa"><td colspan="7" style="text-align:center;""><b>Tax Slab under New Tax Regime</b></td></tr>
         ${newSlabHTML}
       </tbody>
     </table>
@@ -14093,10 +14177,18 @@
           const rentInput = document.getElementById("rentInput");
           if (!rentInput) return;
 
+          // ✅ restore value
+          window.houseRentMap = window.houseRentMap || {};
+          rentInput.value = window.houseRentMap[empName] || "";
+
           rentInput.addEventListener("input", () => {
-            let BP = 0;
-            let DA = 0;
-            let HRA = 0;
+
+            const rent = Number(rentInput.value || 0);
+
+            // ✅ store per employee
+            window.houseRentMap[empName] = rent;
+
+            let BP = 0, DA = 0, HRA = 0;
 
             data.forEach((r) => {
               BP += Number(r["Basic Pay"]) || 0;
@@ -14105,7 +14197,6 @@
             });
 
             const totalSalary = BP + DA;
-            const rent = Number(rentInput.value) || 0;
 
             const elihra1 = HRA;
             const elihra2 = Math.max(0, rent - Math.round(0.1 * totalSalary));
@@ -14113,7 +14204,6 @@
 
             const elihra = Math.min(elihra1, elihra2, elihra3);
 
-            // ✅ UPDATE HRA
             document.getElementById("hraValue").innerHTML =
               formatCurrency(elihra);
 
@@ -14215,6 +14305,7 @@
           });
         }, 100);
       }
+
 
       ["ITPage_Station", "ITPage_Emp", "ITPage_FY"].forEach((idName) => {
         id(idName)?.addEventListener("change", () => {
@@ -14385,7 +14476,7 @@
           "mumbai",
           "kolkata",
         ].some((c) => station.includes(c));
-        const HRA_rate = isMetro ? 0.5 : 0.4;
+        const HRA_rate = isMetro ? 0.5 : 0.4;        
 
         data.forEach((r) => {
           const bp = Number(r["Basic Pay"]) || 0;
@@ -14511,6 +14602,7 @@
         const nameIndex = h.indexOf("Employee Name");
         const stationIndex = h.indexOf("Pay Drawn Station");
         const monthIndex = h.indexOf("Salary Month");
+        window.houseRentMap = window.houseRentMap || {};
 
         // =========================
         // 🔥 HELPERS
@@ -14606,6 +14698,7 @@
 
           return null;
         }
+        
 
         // =========================
         // 🔥 UPDATED PROCESS FUNCTION
@@ -14673,7 +14766,21 @@
             let hasValue = false;
 
             cells.forEach((cell) => {
-              const text = cell.innerText.trim();
+              let text = cell.innerText.trim();
+
+              const input = cell.querySelector("#rentInput");
+
+              if (input) {
+                const val = input.value || "";
+
+                // 🔥 FIX: insert value BEFORE closing bracket
+                text = text.replace(/\)\s*$/, `${val})`);
+
+                // If no closing bracket found (fallback)
+                if (!text.includes(val)) {
+                  text = text + " " + val;
+                }
+              }
               if (text) hasValue = true;
 
               const cs = window.getComputedStyle(cell);
@@ -14798,8 +14905,21 @@
             let hasValue = false;
 
             cells.forEach((cell) => {
-              const text = cell.innerText.trim();
-              if (text) hasValue = true;
+              let text = cell.innerText.trim();
+
+              const input = cell.querySelector("#rentInput");
+
+              if (input) {
+                const val = input.value || "";
+
+                // 🔥 FIX: insert value BEFORE closing bracket
+                text = text.replace(/\)\s*$/, `${val})`);
+
+                // If no closing bracket found (fallback)
+                if (!text.includes(val)) {
+                  text = text + " " + val;
+                }
+              }
 
               const cs = window.getComputedStyle(cell);
               const colSpan = cell.colSpan || 1;
@@ -14917,11 +15037,19 @@
         // 🔁 LOOP
         // =========================
         for (const empName of employees) {
-          // 🔥 RENDER UI FIRST (IMPORTANT)
+          // 🔥 RENDER (needed for calculation)
           renderCalculatedITTable(empName, selectedFY, "calculated");
 
           const wrapper = document.querySelector(".ITtableWrapper");
           if (!wrapper) continue;
+
+          // 🔥 RESTORE INPUT VALUE AFTER RENDER
+          const rentValue = window.houseRentMap?.[empName] || "";
+
+          const rentInput = wrapper.querySelector("#rentInput");
+          if (rentInput) {
+            rentInput.value = rentValue;
+          }
 
           const sheet = workbook.addWorksheet(
             mode === "single"
@@ -15120,10 +15248,10 @@
 
             <!-- TEXT -->
             <td style="text-align:center;">
-              <div style="font-size:12px;font-weight:bold;">PRASAR BHARATI</div>
-              <div style="font-size:12px;font-weight:bold;">INDIA'S PUBLIC SERVICE BROADCASTER</div>
-              <div style="font-size:12px;font-weight:bold;">AIR Dharwad</div>
-              <div style="font-size:12px;font-weight:bold;">ALL INDIA RADIO</div>
+              <div style="font-size:13px;font-weight:bold;">PRASAR BHARATI</div>
+              <div style="font-size:13px;font-weight:bold;">INDIA'S PUBLIC SERVICE BROADCASTER</div>
+              <div style="font-size:13px;font-weight:bold;">AIR Dharwad</div>
+              <div style="font-size:13px;font-weight:bold;">ALL INDIA RADIO</div>
             </td>
 
             <!-- EMPTY -->
@@ -15137,7 +15265,7 @@
       function buildITHTML(mode = "single") {
         const wrapper = document.querySelector(".ITtableWrapper");
         // 🔥 REMOVE FORMATTING
-        removeNumberFormatting(wrapper);
+        //removeNumberFormatting(wrapper);
         const station = id("ITPage_Station")?.value;
         const selectedFY = id("ITPage_FY")?.value;
         const selectedEmp = id("ITPage_Emp")?.value;
@@ -15195,10 +15323,12 @@
 
         style.textContent = `
     @page {
-      size: A4 portrait;
-      margin: 5mm;
+      size: A4 potrait;
+      margin-top: 5mm;
+      margin-right: 5mm;
+      margin-left: 5mm;
+      margin-bottom: 10mm; /* 🔥 increase bottom */
     }
-
     body {
       margin: 0;
       background: white;
@@ -15257,16 +15387,43 @@
 
         doc.head.appendChild(style);
 
+        function copyInputValues(source, target) {
+          const sourceInputs = source.querySelectorAll("input, textarea, select");
+          const targetInputs = target.querySelectorAll("input, textarea, select");
+
+          sourceInputs.forEach((input, i) => {
+            const cloneInput = targetInputs[i];
+            if (!cloneInput) return;
+
+            if (input.type === "checkbox" || input.type === "radio") {
+              cloneInput.checked = input.checked;
+            } else {
+              cloneInput.value = input.value;
+            }
+          });
+        }
+
         // =========================
         // 🔁 LOOP EMPLOYEES
         // =========================
         employees.forEach((empName) => {
-          renderCalculatedITTable(empName, selectedFY, "calculated");
+          //renderCalculatedITTable(empName, selectedFY, "calculated");
 
           const wrapper = document.querySelector(".ITtableWrapper");
           if (!wrapper) return;
 
           const clone = wrapper.cloneNode(true);
+
+          // 🔥 COPY INPUT VALUES
+          copyInputValues(wrapper, clone);
+
+          // 🔥 OPTIONAL: convert inputs to text for print
+          clone.querySelectorAll("input").forEach((inp) => {
+            const span = document.createElement("span");
+            span.textContent = inp.value;
+            inp.replaceWith(span);
+          });
+
           removeNumberFormatting(clone);
 
           const page = doc.createElement("div");
