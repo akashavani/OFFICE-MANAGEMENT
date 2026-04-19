@@ -112,7 +112,7 @@ def update_pb():
         data = pb_sheet.get_all_values()
         headers = data[0]
         rows = data[1:]
-
+        print("📌 HEADERS:", headers)
         # 🔍 Column indexes
         month_idx = headers.index("Salary Month")
         station_idx = headers.index("Pay Drawn Station")
