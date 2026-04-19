@@ -885,11 +885,12 @@
       #PB_GOEditTbl td,
       #PB_NPSEditTbl td {
         height: 22px;
+        min-width: 90px;
       }
 
       #PB_NPSITCalc td,
       #PB_GOITCalc td {
-        height: 23.5px;
+        height: 23.7px;
       }
 
       #PB_GOEditTbl td *,
@@ -982,6 +983,15 @@
         width: 210px;
       }
 
+      #PB_GOEditTbl th:nth-child(2),
+      #PB_NPSEditTbl th:nth-child(2),
+      #PB_GOEditTbl td:nth-child(2),
+      #PB_NPSEditTbl td:nth-child(2) {         
+          min-width: 70px;
+          width: 70px;
+          text-align: center;
+      }
+
       #PB_GOViewTbl th:first-child,
       #PB_GOViewTbl td:first-child,
       #PB_NPSViewTbl th:first-child,
@@ -1019,6 +1029,7 @@
         background: #1f4e79;
         color: #ffffff;
       }
+      
 
       /* ================= SEPARATOR ================= */
       #PB_GOViewTbl td:first-child,
@@ -1070,6 +1081,7 @@
         /* default */
         box-sizing: border-box;
         height: 100%;
+        width: 100%;
       }
 
       .PB-Table-Wrapper input[type="text"]:hover,
@@ -4164,12 +4176,10 @@
               }
 
               if (type === "fy") {
-                updateStationHeaders(el.value);
                 SyncAllPage();
               }
 
               if (type === "month") {
-                updateStationHeaders(el.value);
                 SyncAllPage();
               }
             });
@@ -4385,6 +4395,7 @@
         const rows = pbData.rows;
 
         const nameIndex = headers.indexOf("Employee Name");
+        const hrisIndex = headers.indexOf("HRIS");
         const startIndex = headers.indexOf("Basic Pay");
         const endIndex = headers.indexOf("Net Income");
 
@@ -4408,6 +4419,7 @@
 
         filteredRows.forEach((row) => {
           const empName = String(row[nameIndex] || "").trim();
+          const hris = String(row[hrisIndex] || "").trim();
 
           const deptRaw = String(deptMap[empName] || "").toLowerCase();
 
@@ -4424,6 +4436,7 @@
           headers,
           goRows,
           nameIndex,
+          hrisIndex,
           startIndex,
           endIndex,
           station,
@@ -4435,6 +4448,7 @@
           headers,
           npsRows,
           nameIndex,
+          hrisIndex,
           startIndex,
           endIndex,
           station,
@@ -4885,6 +4899,7 @@
         headers,
         rows,
         nameIndex,
+        hrisIndex,
         start,
         end,
         station,
@@ -4903,6 +4918,7 @@
         /* ================= HEADERS ================= */
         const selectedHeaders = [
           "Employee Name",
+          "HRIS",
           ...headers.slice(start, end + 1),
         ];
 
@@ -4914,10 +4930,11 @@
           const rowData = [];
 
           rowData.push(row[nameIndex]);
+          rowData.push(row[hrisIndex]);
 
           const values = row.slice(start, end + 1).map((val, i) => {
             const n = num(val);
-            sums[i + 1] += n;
+            sums[i + 2] += n;
             return n;
           });
 
@@ -4926,7 +4943,7 @@
 
         /* ================= COLUMN FILTER ================= */
         const activeCols = selectedHeaders.map((h, i) => {
-          if (i === 0) return true;
+          if (i === 0 || i === 1) return true; 
 
           const col = String(h).toLowerCase().replace(/\s+/g, "");
 
@@ -5008,8 +5025,8 @@
             //console.log("Processing cell:", val, "at column:", selectedHeaders[i]);
             const td = createEl("td");
 
-            if (i === 0) {
-              td.textContent = val;
+            if (i === 0 || i === 1) {
+              td.textContent = val; // Name + HRIS
             } else {
               td.textContent = formatCurrency(val);
               td.classList.add("currency");
@@ -5034,6 +5051,8 @@
 
           if (i === 0) {
             td.textContent = "Total";
+          } else if (i === 1) {
+            td.textContent = ""; // HRIS column empty in total
           } else {
             td.textContent = formatCurrency(sums[i]);
           }
@@ -5601,7 +5620,7 @@
         "DAA on NPS",
         "NPS",
         "DAA on NPSE ded",
-        "NPSE Ded",
+        "NPSE Ded"
       ];
 
       const NPS_HIDDEN_COLUMNS = [
@@ -5611,6 +5630,7 @@
         "GPF",
         "CGEIS",
         "NPS",
+        "DAA on NPS"
       ];
 
       function normalize(str) {
@@ -5699,16 +5719,18 @@
         /* ================= FIXED RANGE ================= */
 
         const nameIndex = getColIndex(headers, "Employee Name");
+        const hrisIndex = getColIndex(headers, "HRIS");
         const startIndex = getColIndex(headers, "Last Increment");
         const endIndex = getColIndex(headers, "Recovery Details");
 
         const selectedHeaders = [
           "Employee Name",
+          "HRIS",
           ...headers.slice(startIndex, endIndex + 1),
         ];
 
         const processedRows = rows.map((row) => {
-          return [row[nameIndex], ...row.slice(startIndex, endIndex + 1)];
+          return [row[nameIndex],row[hrisIndex], ...row.slice(startIndex, endIndex + 1)];
         });
 
         /* ================= DROPDOWNS ================= */
@@ -5775,6 +5797,10 @@
 
         processedRows.forEach((row, rIndex) => {
           const tr = createEl("tr");
+          const empHRIS = row[hrisIndex];
+
+          // 🔥 STORE HRIS IN ROW
+          tr.dataset.hris = empHRIS || "";
 
           row.forEach((val, i) => {
             const colName = selectedHeaders[i];
@@ -5783,8 +5809,9 @@
             td.setAttribute("data-col", colName);
 
             /* Employee Name */
-            if (i === 0) {
+            if (i === 0 || colName === "HRIS") {
               td.textContent = val;
+
             } else if (checkboxCols.includes(colName)) {
               /* Checkbox */
               const input = createEl("input", { type: "checkbox" });
@@ -5895,10 +5922,15 @@
           });
 
           tr._cells = Object.fromEntries(
-            [...tr.querySelectorAll("[data-col]")].map((td) => [
-              td.dataset.col,
-              td.querySelector("input, select, textarea"),
-            ]),
+            [...tr.querySelectorAll("[data-col]")].map((td) => {
+              const input = td.querySelector("input, select, textarea");
+
+              // 🔥 If no input (HRIS / Name), store textContent
+              return [
+                td.dataset.col,
+                input || td
+              ];
+            })
           );
 
           applyColumnRules(tr, selectedHeaders, tableId);
@@ -5967,6 +5999,7 @@
         applyTableColumnRules(table, selectedHeaders, tableId);
         recalculateAllTotals();
       }
+
 
       function getBasicPay(payLevel, index) {
         if (!cpcData || !cpcData.headers || !cpcData.rows) return 0;
@@ -6668,14 +6701,23 @@
           // =========================
           if (isNPS) {
 
-            const npseInput = tr._cells["DAA on NPSE"];
-            const npscInput = tr._cells["DAA on NPSC"];
+            const daanpseInput = tr._cells["DAA on NPSE"];
+            const daanpscInput = tr._cells["DAA on NPSC"];
+            const daanpseInput2 = tr._cells["DAA on NPSE ded"];
+            const daanpsInput = tr._cells["DAA on NPS"];
 
-            setValue(npseInput, Math.round(daa * 0.14));
-            setValue(npscInput, Math.round(daa * 0.1));
+            setValue(daanpseInput, Math.round(daa * 0.14));
+            setValue(daanpseInput2, Math.round(daa * 0.14));
+            setValue(daanpscInput, Math.round(daa * 0.1));
+            setValue(daanpsInput, Math.round((daa * 0.14) + (daa * 0.1)));
 
-            const daaNPSE = num(npseInput?.value);
-            const daaNPSC = num(npscInput?.value);
+            const daaNPSE = num(daanpseInput?.value);
+            const daaNPSC = num(daanpscInput?.value);
+
+            setValue(
+              getCellInput(tr,"DAA on NPSE ded"),
+              Math.round(daaNPSE)
+            );
 
             setValue(
               getCellInput(tr,"DAA on NPS"),
@@ -6721,14 +6763,16 @@
 
             const daaInput = tr._cells["DAA"];
             const daaTAInput = tr._cells["DAA on TA"];
-            const npseInput = tr._cells["DAA on NPSE"];
-            const npscInput = tr._cells["DAA on NPSC"];
+            const daanpseInput = tr._cells["DAA on NPSE"];
+            const daanpscInput = tr._cells["DAA on NPSC"];
+            const daanpseInput2 = tr._cells["DAA on NPSE ded"];
+            const daanpsInput = tr._cells["DAA on NPS"];
 
             if (!daaInput) return;
 
             if (daaInput.dataset.bound === "true") return;
 
-            [daaInput, daaTAInput, npseInput, npscInput].forEach(el => {
+            [daaInput, daaTAInput, daanpseInput, daanpscInput, daanpseInput2, daanpsInput].forEach(el => {
               if (el) el.dataset.bound = "true";
             });
 
@@ -6737,8 +6781,10 @@
               const daa = num(daaInput?.value || daaInput?.innerText || 0);
               const daaTA = num(daaTAInput?.value || daaTAInput?.innerText || 0);
 
-              const daaNPSE = num(npseInput?.value || 0);
-              const daaNPSC = num(npscInput?.value || 0);
+              const daaNPSE = num(daanpseInput?.value || 0);
+              const daaNPSC = num(daanpscInput?.value || 0);
+
+              setValue(getCellInput(tr,"DAA on NPSE ded"), daaNPSE);
 
               setValue(getCellInput(tr,"DAA on NPS"), daaNPSE + daaNPSC);
 
@@ -6751,8 +6797,8 @@
 
             daaInput.addEventListener("input", recalc);
             daaTAInput?.addEventListener("input", recalc);
-            npseInput?.addEventListener("input", recalc);
-            npscInput?.addEventListener("input", recalc);
+            daanpseInput?.addEventListener("input", recalc);
+            daanpscInput?.addEventListener("input", recalc);
             
           });
         }
@@ -7991,7 +8037,7 @@
     <tr>
       <th>
         Next Month IT Deduction <br>
-        [Regime] ( IT + Cess = Net IT )
+        [Regime](IT + Cess = Net IT)
       </th>
     </tr>
   `;
@@ -8063,8 +8109,8 @@
         const totalRow = document.createElement("tr");
         totalRow.classList.add("total-row");
         totalRow.innerHTML = `
-    <td style="background:white;box-shadow:none;"></td>
-  `;
+          <td style="height:26px"></td>
+        `;
         //totalRow.innerHTML = `
         //  <td style="font-weight:bold;">${formatCurrency(grandTotal)}</td>
         //`;
@@ -8556,10 +8602,9 @@
           });
 
           createPayBillEditTables();
-
+          setupManualDAAHandlers();
           recalculateAllRows();
           recalculateAllTotals();
-
           renderNPSITTable();
           renderGOITTable();
         } else {
@@ -8623,6 +8668,7 @@
         if (!monthEl || !station) return;
         isAddMode = false;
         if (isEditMode) {
+          setupManualDAAHandlers();
           savePBData("EDIT");
           isEditMode = false;
           return;
@@ -8777,8 +8823,7 @@
             // 🔥 HRIS
             const empName = rowObj["Employee Name"];
             const empStation = rowObj["Pay Drawn Station"];
-            rowObj["HRIS"] = getHRIS(empName , empStation);
-
+            rowObj["HRIS"] = rowObj["HRIS"] || getHRIS(empName, empStation);
             //console.log("LOOKUP:", empName, empStation, getDesignation(empName, empStation));
 
             //console.log("SAVE MODE:", mode);
@@ -9715,7 +9760,7 @@
           margin-top: 5mm;
           margin-right: 5mm;
           margin-left: 5mm;
-          margin-bottom: 10mm; /* 🔥 increase bottom */
+          margin-bottom: 25mm; /* 🔥 increase bottom */
         }
 
         *{font-size: 11px;font-family: "Inter", Arial, Helvetica, sans-serif;}
@@ -12664,6 +12709,7 @@
           const [rm, ry] = month.split("-");
           const rowYear = Number(ry);
           const rMonth = monthOrder[rm];
+          console.log(rowYear, rMonth);
 
           let include = false;
 
@@ -12676,6 +12722,7 @@
             if (
               (rowYear === prevYear && rMonth >= 3) || // Mar–Dec prev year
               (rowYear === selectedYear && rMonth <= 2) // Jan–Feb current year
+              
             ) {
               include = true;
             }
@@ -12685,16 +12732,35 @@
           // ✅ CASE 2: AFTER MARCH → ROLLING CURRENT FY
           // =========================
           else {
-            const fyStartYear = selectedYear;
+           const fyStartYear = sMonth <= 2 ? selectedYear - 1 : selectedYear;
 
-            // Mar → previous month
-            if (rowYear === fyStartYear && rMonth >= 3 && rMonth < sMonth) {
-              include = true;
+            // =========================
+            // ✅ CASE A: Jan / Feb
+            // =========================
+            if (sMonth <= 2) {
+
+              // Mar–Dec of previous FY
+              if (rowYear === fyStartYear && rMonth >= 3) {
+                include = true;
+              }
+
+              // Jan → selected-1 of current year
+              if (rowYear === fyStartYear + 1 && rMonth < sMonth) {
+                include = true;
+              }
+
             }
 
-            // Handle Jan/Feb (cross year)
-            if (sMonth <= 2 && rowYear === fyStartYear + 1 && rMonth < sMonth) {
-              include = true;
+            // =========================
+            // ✅ CASE B: Mar–Dec
+            // =========================
+            else {
+
+              // Mar → selected-1 (same year)
+              if (rowYear === fyStartYear && rMonth >= 3 && rMonth < sMonth) {
+                include = true;
+              }
+
             }
           }
 
