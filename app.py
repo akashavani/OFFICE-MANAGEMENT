@@ -140,13 +140,14 @@ def update_pb():
 
         # 🔄 Process incoming
         for row_obj in edit_rows:
-
+            print("📦 Incoming Row:", row_obj)
             key = f"{clean(row_obj.get('Salary Month'))}|{clean(row_obj.get('Pay Drawn Station'))}|{clean(row_obj.get('Employee Name'))}"
 
             if category_idx >= 0:
                 key += f"|{clean(row_obj.get('Category'))}"
 
             new_row = [row_obj.get(h, "") for h in headers]
+            print("📊 Generated Row:", new_row)
 
             if key in row_map:
                 row_num = row_map[key]
@@ -161,6 +162,7 @@ def update_pb():
 
             else:
                 new_rows.append(new_row)
+                
 
         # ⚡ BULK UPDATE (FAST)
         if update_cells:
