@@ -117,6 +117,7 @@ def update_pb():
         month_idx = headers.index("Salary Month")
         station_idx = headers.index("Pay Drawn Station")
         emp_idx = headers.index("Employee Name")
+        hris_idx = headers.index("HRIS") if "HRIS" in headers else -1
 
         # Optional
         category_idx = headers.index("Category") if "Category" in headers else -1
@@ -128,6 +129,9 @@ def update_pb():
         row_map = {}
         for i, r in enumerate(rows):
             key = f"{clean(r[month_idx])}|{clean(r[station_idx])}|{clean(r[emp_idx])}"
+
+            if hris_idx >= 0:
+                key += f"|{clean(r[hris_idx])}"
             
             if category_idx >= 0:
                 key += f"|{clean(r[category_idx])}"
@@ -143,10 +147,25 @@ def update_pb():
             print("📦 Incoming Row:", row_obj)
             key = f"{clean(row_obj.get('Salary Month'))}|{clean(row_obj.get('Pay Drawn Station'))}|{clean(row_obj.get('Employee Name'))}"
 
+            if hris_idx >= 0:
+                key += f"|{clean(row_obj.get('HRIS'))}"
+
             if category_idx >= 0:
                 key += f"|{clean(row_obj.get('Category'))}"
 
-            new_row = [row_obj.get(h, "") for h in headers]
+            new_row = []
+
+            for i, h in enumerate(headers):
+
+                val = row_obj.get(h, "")
+
+                # 🔥 ONLY protect designation column
+                if h.strip().lower() == "designation on salary month":
+                    if not val and key in row_map:
+                        existing_row = rows[row_map[key] - 2]
+                        val = existing_row[i]
+
+                new_row.append(val)
             print("📊 Generated Row:", new_row)
 
             if key in row_map:
