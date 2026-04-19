@@ -1263,7 +1263,8 @@
       .action-group,
       .SBGaction-group,
       .SSaction-group,
-      .ITaction-group {
+      .ITaction-group,
+      .Pensionaction-group {
         display: flex;
         gap: 10px;
         padding: 1px 1px;
@@ -1280,7 +1281,8 @@
       .action-group button,
       .SBGaction-group button,
       .SSaction-group button,
-      .ITaction-group button {
+      .ITaction-group button,
+      .Pensionaction-group button {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -1300,7 +1302,8 @@
       .action-group button:disabled,
       .SBGaction-group button:disabled,
       .SSaction-group button:disabled,
-      .ITaction-group button:disabled {
+      .ITaction-group button:disabled,
+      .Pensionaction-group button:disabled {
         opacity: 0.3;
         background: #ffffff;
         cursor: not-allowed;
@@ -1311,7 +1314,8 @@
       .action-group button:not(:disabled):hover,
       .SBGaction-group button:not(:disabled):hover,
       .SSaction-group button:not(:disabled):hover,
-      .ITaction-group button:not(:disabled):hover {
+      .ITaction-group button:not(:disabled):hover,
+      .Pensionaction-group button:not(:disabled):hover {
         padding: 4px 8px;
         background: #ffffff;
         border-color: #cbd5e1;
@@ -1322,7 +1326,8 @@
       .action-group button:not(:disabled):hover span,
       .SBGaction-group button:not(:disabled):hover span,
       .SSaction-group button:not(:disabled):hover span,
-      .ITaction-group button:not(:disabled):hover span {
+      .ITaction-group button:not(:disabled):hover span,
+      .Pensionaction-group button:not(:disabled):hover span {
         max-width: 120px;
         opacity: 1;
         transition: max-width 2s ease;
@@ -1333,7 +1338,8 @@
       .action-group button:not(:disabled):hover svg,
       .SBGaction-group button:not(:disabled):hover svg,
       .SSaction-group button:not(:disabled):hover svg,
-      .ITaction-group button:not(:disabled):hover svg {
+      .ITaction-group button:not(:disabled):hover svg,
+      .Pensionaction-group button:not(:disabled):hover svg {
         width: 16px;
         height: 16px;
       }
@@ -1342,7 +1348,8 @@
       .action-group button svg,
       .SBGaction-group button svg,
       .SSaction-group button svg,
-      .ITaction-group button svg {
+      .ITaction-group button svg,
+      .Pensionaction-group button svg {
         width: 18px;
         height: 18px;
         flex-shrink: 0;
@@ -1352,7 +1359,8 @@
       .action-group button span,
       .SBGaction-group button span,
       .SSaction-group button span,
-      .ITaction-group button span {
+      .ITaction-group button span,
+      .Pensionaction-group button span {
         max-width: 0;
         overflow: hidden;
         white-space: nowrap;
@@ -1366,7 +1374,8 @@
       .action-group button:active,
       .SBGaction-group button:active,
       .SSaction-group button:active,
-      .ITaction-group button:active {
+      .ITaction-group button:active,
+      .Pensionaction-group button:active {
         transform: scale(0.96);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
       }
@@ -1397,28 +1406,32 @@
       .action-group button:nth-child(3),
       .SBGaction-group button:nth-child(3),
       .SSaction-group button:nth-child(1),
-      .ITaction-group button:nth-child(1) {
+      .ITaction-group button:nth-child(1),
+      .Pensionaction-group button:nth-child(1) {
         color: #334155;
       }
 
       .action-group button:nth-child(3):hover,
       .SBGaction-group button:nth-child(3):hover,
       .SSaction-group button:nth-child(1):hover,
-      .ITaction-group button:nth-child(1):hover {
+      .ITaction-group button:nth-child(1):hover,
+      .Pensionaction-group button:nth-child(1):hover {
         background: #f1f5f9;
       }
 
       .action-group button:nth-child(4),
       .SBGaction-group button:nth-child(4),
       .SSaction-group button:nth-child(2),
-      .ITaction-group button:nth-child(2) {
+      .ITaction-group button:nth-child(2),
+      .Pensionaction-group button:nth-child(2) {
         color: #217346;
       }
 
       .action-group button:nth-child(4):hover,
       .SBGaction-group button:nth-child(4):hover,
       .SSaction-group button:nth-child(2):hover,
-      .ITaction-group button:nth-child(2):hover {
+      .ITaction-group button:nth-child(2):hover,
+      .Pensionaction-group button:nth-child(2):hover {
         background: #f1f5f9;
       }
 
@@ -1439,7 +1452,8 @@
 
       #PBprintMenu,
       #SSprintMenu,
-      #ITprintMenu {
+      #ITprintMenu,
+      #PensionprintMenu {
         position: absolute;
         top: 120%;
         left: 0;
@@ -1462,7 +1476,8 @@
 
       #PBprintMenu.show,
       #SSprintMenu.show,
-      #ITprintMenu.show {
+      #ITprintMenu.show,
+      #PensionprintMenu.show {
         opacity: 1;
         transform: translateY(0);
         pointer-events: auto;
@@ -1654,7 +1669,7 @@
         transform: translateX(100%);
       }
 
-      .ITtableWrapper {
+      .ITtableWrapper,.PensiontableWrapper {
         margin: 4px;
         display: flex;
         flex-direction: column;
@@ -1665,7 +1680,7 @@
         overflow: auto;
       }
 
-      .ITtableWrapper table {
+      .ITtableWrapper table,.PensiontableWrapper table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
@@ -1676,7 +1691,9 @@
       }
 
       .ITtableWrapper table th,
-      .ITtableWrapper table td {
+      .ITtableWrapper table td,
+      .PensiontableWrapper table th,
+      .PensiontableWrapper table td {
         padding: 5px 8px;
         border-bottom: 1px solid #e5e7eb;
         border-right: dotted 1px #d7dae0;
@@ -1684,20 +1701,25 @@
       }
 
       .ITtableWrapper table th:first-child,
-      .ITtableWrapper table td:first-child {
+      .ITtableWrapper table td:first-child,
+      .PensiontableWrapper table th:first-child,
+      .PensiontableWrapper table td:first-child {
         border-left: solid 1px #94a3b8;
       }
 
       .ITtableWrapper table th:last-child,
-      .ITtableWrapper table td:last-child {
+      .ITtableWrapper table td:last-child,
+      .PensiontableWrapper table th:last-child,
+      .PensiontableWrapper table td:last-child {
         border-right: solid 1px #94a3b8;
       }
 
-      .ITtableWrapper table tr:last-child td {
+      .ITtableWrapper table tr:last-child td,
+      .PensiontableWrapper table tr:last-child td {
         border-bottom: solid 1px #94a3b8;
       }
 
-      .ITtableWrapper table th {
+      .ITtableWrapper table th,.PensiontableWrapper table th {
         background: #1f4e79;
         color: #ffffff;
       }
@@ -2022,6 +2044,10 @@
               <tr>
                 <td>Mobile</td>
                 <td id="Mobile"></td>
+              </tr>
+              <tr>
+                <td>Email ID</td>
+                <td id="Email"></td>
               </tr>
               <tr>
                 <td>Address</td>
@@ -2830,7 +2856,104 @@
 
         <div class="SectionPage" id="PensionPage" style="display: none">
           <div class="header">
-            <h2>Pension Benifits & Calculations</h2>
+            <h2>Pension Benifits & Calculations</h2>            
+          </div>
+          <div class="Selection-bar">
+            <table>
+              <colgroup>
+                <col style="width: 80px" />
+                <col style="width: 170px" />
+                <col style="width: 100px" />
+                <col style="width: 300px" />
+                <col style="width: 40px" />
+                <col style="width: 90px" />
+                <col style="width: 60px" />
+                <col style="width: 100px" />
+                <col style="width: 50px" />
+                <col style="width: 40px" />
+                <col style="width: 90px" />
+                <col style="width: 80px" />
+                <col style="width: 90px" />
+                <col style="width: 30px" />
+              </colgroup>
+              <tr>
+                <td><label for="PensionPage_Station">Station :</label></td>
+                <td><select id="PensionPage_Station"></select></td>
+                <td><label for="PensionPage_Emp">Employee :</label></td>
+                <td><select id="PensionPage_Emp"></select></td>
+                <td></td>
+                <td></td>
+                <td colspan="2"></td>
+                <td colspan="4"></td>
+                <td></td>
+              </tr>
+            </table>
+
+            <div class="Pensionaction-group">
+              <button id="PensionprintBtn">
+                <i data-lucide="printer"></i><span>Print</span>
+              </button>
+              <button id="PensionexcelBtn">
+                <i data-lucide="file-spreadsheet"></i><span>Excel</span>
+              </button>
+
+              <div id="PensionprintMenu">
+                <div
+                  class="print-option menu-option"
+                  id="pensionPrintOption"
+                  data-type="pdf-singlePension"
+                >
+                  🧾 Employee Pension Benifits PDF
+                </div>
+                <div class="print-option menu-option" data-type="pdf-allPension">
+                  🧾 All Employee Pension Benifits PDF
+                </div>
+
+                <!-- EXCEL OPTIONS -->
+                <div
+                  class="excel-option menu-option"
+                  id="pensionExcelOption"
+                  data-type="excel-singlePension"
+                >
+                  ⬇️ Employee Pension Benifits Excel
+                </div>
+                <div class="excel-option menu-option" data-type="excel-allPension">
+                  ⬇️ All Employee Pension Benifits Excel
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-direction: row;
+              gap: 10px;
+              justify-content: space-between;
+              margin: 4px;
+            "
+          >
+            <div class="ITpanelDiv">
+              <label>Leave Encashment</label>
+              <span id="PanelLeaveEncash">0</span>
+            </div>
+            <div class="ITpanelDiv">
+              <label>Gratuity</label>
+              <span id="PanelGratuity">0</span>
+            </div>
+            <div class="ITpanelDiv">
+              <label>Commutation</label>
+              <span id="PanelCommute">0</span>
+            </div>
+            <div class="ITpanelDiv">
+              <label>Total Pension Benifits</label>
+              <span id="PanelTotBenifits">0</span>
+            </div>
+            <div class="ITpanelDiv">
+              <label>Pension Basic</label>
+              <span id="PanelPensionBasic">0</span>
+            </div>
+          </div>
+          <div class="PensiontableWrapper">
             <table id="EmolumentTbl" border="1"></table>
           </div>
         </div>
@@ -3098,6 +3221,9 @@
           btn.disabled = true;
         });
         document.querySelectorAll(".ITaction-group button").forEach((btn) => {
+          btn.disabled = true;
+        });
+        document.querySelectorAll(".Pensionaction-group button").forEach((btn) => {
           btn.disabled = true;
         });
       });
@@ -3803,14 +3929,14 @@
           "EmpPage_Station",
           "SalSlipPage_Station",
           "ITPage_Station",
-          //"PensionPage_Station",
+          "PensionPage_Station",
           "PayBillPage_Station",
           "BudgetPage_Station",
         ],
         employee: [
           "EmpPage_Emp",
           "ITPage_Emp",
-          //"PensionPage_Emp",
+          "PensionPage_Emp",
           "SalSlipPage_Emp",
           "PayBillPage_Emp",
         ],
@@ -4165,13 +4291,13 @@
               applyFilters();
 
               if (type === "station") {
-                updateStationHeaders(el.value);
+                updateStationHeaders(el.value);                
                 SyncAllPage();
               }
 
               if (type === "employee") {
                 updateEmolumentTable();
-                fillEmpDetails(filters.employee);
+                fillEmpDetails(filters.employee);                
                 SyncAllPage();
               }
 
@@ -4182,6 +4308,7 @@
               if (type === "month") {
                 SyncAllPage();
               }
+              console.log(type, el.value);
             });
           });
         });
@@ -8630,7 +8757,7 @@
           // 🔥 FIRST CLICK → ENTER ADD MODE
           isAddMode = true;
 
-          //console.log("ADD MODE ACTIVATED");
+          console.log("ADD MODE ACTIVATED");
 
           const currentMonth = String(monthEl.value || "").trim();
           const nextMonth = getNextMonthStr(currentMonth);
@@ -8655,7 +8782,7 @@
           updateFYDropdown(nextMonth);
         } else {
           // 🔥 SECOND CLICK → SAVE
-          //console.log("SAVE MODE");
+          console.log("SAVE MODE ACTIVE");
           savePBData("ADD");
           isAddMode = false;
         }
@@ -8676,7 +8803,7 @@
 
         isEditMode = true;
 
-        //console.log("EDIT MODE ACTIVE");
+        console.log("EDIT MODE ACTIVE");
       });
 
 
@@ -12709,7 +12836,7 @@
           const [rm, ry] = month.split("-");
           const rowYear = Number(ry);
           const rMonth = monthOrder[rm];
-          console.log(rowYear, rMonth);
+          //console.log(rowYear, rMonth);
 
           let include = false;
 
@@ -14820,7 +14947,7 @@
         const mode =
           selectedModeEl?.id === "calcSalary" ? "calculated" : "paid";
 
-        console.log(`🔄 Dropdown Changed → ${mode}`);
+        console.log(`🔄 Salary Selected → ${mode}`);
 
         // =========================
         // 🔄 LOADING STATE
@@ -14846,24 +14973,7 @@
         }, 0);
       }
 
-      function updateITPrintMenuState() {
-        const hasEmp = id("ITPage_Emp")?.value;
-        const hasFY = id("ITPage_FY")?.value;
-
-        const printIT = id("itPrintOption");
-        const excelIT = id("itExcelOption");
-
-        [printIT, excelIT].forEach((opt) => {
-          if (!opt) return;
-
-          if (hasEmp && hasFY) {
-            opt.classList.remove("disabled");
-          } else {
-            opt.classList.add("disabled");
-          }
-        });
-      }
-
+      
       function calculateMonthlyTDS(newPendingTDS, paidMonthCount) {
         const remainingMonths = 12 - paidMonthCount;
 
@@ -15931,6 +16041,28 @@
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
 
+
+
+      function updateITPrintMenuState() {
+        const hasEmp = id("ITPage_Emp")?.value;
+        const hasFY = id("ITPage_FY")?.value;
+
+        const printIT = id("itPrintOption");
+        const excelIT = id("itExcelOption");
+
+        [printIT, excelIT].forEach((opt) => {
+          if (!opt) return;
+
+          if (hasEmp && hasFY) {
+            opt.classList.remove("disabled");
+          } else {
+            opt.classList.add("disabled");
+          }
+        });
+      }
+
+
+
       const itmenu = id("ITprintMenu");
       const itprintBtn = id("ITprintBtn");
       const itexcelBtn = id("ITexcelBtn");
@@ -16023,6 +16155,112 @@
           }
         });
       });
+
+      //==================================================================//
+      //                        Pension Page Script
+      // ==================================================================//
+
+      const pensionmenu = id("PensionprintMenu");
+      const pensionprintBtn = id("PensionprintBtn");
+      const pensionexcelBtn = id("PensionexcelBtn");
+
+      // 🔹 PRINT BUTTON
+      pensionprintBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        updatePensionPrintMenuState();
+
+        document
+          .querySelectorAll(".print-option")
+          .forEach((el) => (el.style.display = "block"));
+        document
+          .querySelectorAll(".excel-option")
+          .forEach((el) => (el.style.display = "none"));
+
+        pensionmenu.classList.add("show"); // ✅ ALWAYS OPEN
+      });
+
+      // 🔹 EXCEL BUTTON
+      pensionexcelBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        updatePensionPrintMenuState();
+
+        document
+          .querySelectorAll(".print-option")
+          .forEach((el) => (el.style.display = "none"));
+        document
+          .querySelectorAll(".excel-option")
+          .forEach((el) => (el.style.display = "block"));
+
+        pensionmenu.classList.add("show"); // ✅ ALWAYS OPEN
+      });
+
+      document.addEventListener("click", () => {
+        pensionmenu.classList.remove("show");
+      });
+
+      
+      function updatePensionPrintMenuState() {
+        const hasEmp = id("PensionPage_Emp")?.value;
+        const hasStation = id("PensionPage_Station")?.value;
+        console.log(hasEmp)
+
+        const printPension = id("pensionPrintOption");
+        const excelPension = id("pensionExcelOption");
+
+        [printPension, excelPension].forEach((opt) => {
+          if (!opt) return;
+
+          if (hasStation && hasEmp) {
+            opt.classList.remove("disabled");
+          } else {
+            opt.classList.add("disabled");
+          }
+        });
+      }
+
+
+
+      document.querySelectorAll(".menu-option").forEach((opt) => {
+        opt.addEventListener("click", function () {
+          const type = this.dataset.type;
+          const wrapper = document.querySelector(".PensiontableWrapper");
+
+          pensionmenu.classList.remove("show");
+
+          // =====SALARY SLIP PRINT =====
+          if (type === "pdf-singlePension") {
+            openPrintWindow(buildITHTML("single"));
+            restoreNumberFormatting(wrapper);
+          }
+
+          // ===== ALL SALARY SLIP PRINT =====
+          if (type === "pdf-allPension") {
+            openPrintWindow(buildITHTML("all"));
+            restoreNumberFormatting(wrapper);
+          }
+
+          // ===== SALARY SLIP EXCEL ✅ FIXED =====
+          if (type === "excel-singlePension") {
+            exportITExcel("single");
+          }
+
+          // ===== ALL SALARY SLIP EXCEL =====
+          if (type === "excel-allPension") {
+            exportITExcel("all");
+          }
+        });
+      });
+
+
+      ["PensionPage_Station", "PensionPage_Emp"].forEach((idName) => {
+        id(idName)?.addEventListener("change", () => {
+          console.log("updatePensionPrintMenuState called")
+          updatePensionPrintMenuState();
+        });
+      });
+
     </script>
   </body>
 </html>
