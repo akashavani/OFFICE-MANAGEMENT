@@ -1669,7 +1669,7 @@
         transform: translateX(100%);
       }
 
-      .ITtableWrapper,.PensiontableWrapper {
+      .ITtableWrapper,.PensionTableWrapper {
         margin: 4px;
         display: flex;
         flex-direction: column;
@@ -1680,7 +1680,7 @@
         overflow: auto;
       }
 
-      .ITtableWrapper table,.PensiontableWrapper table {
+      .ITtableWrapper table,.PensionTableWrapper table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
@@ -1692,8 +1692,8 @@
 
       .ITtableWrapper table th,
       .ITtableWrapper table td,
-      .PensiontableWrapper table th,
-      .PensiontableWrapper table td {
+      .PensionTableWrapper table th,
+      .PensionTableWrapper table td {
         padding: 5px 8px;
         border-bottom: 1px solid #e5e7eb;
         border-right: dotted 1px #d7dae0;
@@ -1702,24 +1702,24 @@
 
       .ITtableWrapper table th:first-child,
       .ITtableWrapper table td:first-child,
-      .PensiontableWrapper table th:first-child,
-      .PensiontableWrapper table td:first-child {
+      .PensionTableWrapper table th:first-child,
+      .PensionTableWrapper table td:first-child {
         border-left: solid 1px #94a3b8;
       }
 
       .ITtableWrapper table th:last-child,
       .ITtableWrapper table td:last-child,
-      .PensiontableWrapper table th:last-child,
-      .PensiontableWrapper table td:last-child {
+      .PensionTableWrapper table th:last-child,
+      .PensionTableWrapper table td:last-child {
         border-right: solid 1px #94a3b8;
       }
 
       .ITtableWrapper table tr:last-child td,
-      .PensiontableWrapper table tr:last-child td {
+      .PensionTableWrapper table tr:last-child td {
         border-bottom: solid 1px #94a3b8;
       }
 
-      .ITtableWrapper table th,.PensiontableWrapper table th {
+      .ITtableWrapper table th,.PensionTableWrapper table th {
         background: #1f4e79;
         color: #ffffff;
       }
@@ -1953,10 +1953,10 @@
           <div class="Selection-bar">
             <table>
               <colgroup>
-                <col style="width: 80px" />
+                <col style="width: 60px" />
                 <col style="width: 170px" />
-                <col style="width: 100px" />
-                <col style="width: 300px" />
+                <col style="width: 80px" />
+                <col style="width: 250px" />
                 <col style="width: 40px" />
                 <col style="width: 90px" />
                 <col style="width: 60px" />
@@ -2117,10 +2117,10 @@
           <div class="Selection-bar">
             <table>
               <colgroup>
-                <col style="width: 80px" />
+                <col style="width: 60px" />
                 <col style="width: 170px" />
-                <col style="width: 100px" />
-                <col style="width: 300px" />
+                <col style="width: 80px" />
+                <col style="width: 250px" />
                 <col style="width: 40px" />
                 <col style="width: 90px" />
                 <col style="width: 60px" />
@@ -2408,10 +2408,10 @@
           <div class="Selection-bar">
             <table>
               <colgroup>
-                <col style="width: 80px" />
+                <col style="width: 60px" />
                 <col style="width: 170px" />
-                <col style="width: 100px" />
-                <col style="width: 300px" />
+                <col style="width: 80px" />
+                <col style="width: 250px" />
                 <col style="width: 40px" />
                 <col style="width: 90px" />
                 <col style="width: 60px" />
@@ -2731,10 +2731,10 @@
           <div class="Selection-bar">
             <table>
               <colgroup>
-                <col style="width: 80px" />
+                <col style="width: 60px" />
                 <col style="width: 170px" />
-                <col style="width: 100px" />
-                <col style="width: 300px" />
+                <col style="width: 80px" />
+                <col style="width: 250px" />
                 <col style="width: 40px" />
                 <col style="width: 90px" />
                 <col style="width: 60px" />
@@ -2861,31 +2861,19 @@
           <div class="Selection-bar">
             <table>
               <colgroup>
-                <col style="width: 80px" />
-                <col style="width: 170px" />
-                <col style="width: 100px" />
-                <col style="width: 300px" />
-                <col style="width: 40px" />
-                <col style="width: 90px" />
                 <col style="width: 60px" />
-                <col style="width: 100px" />
-                <col style="width: 50px" />
-                <col style="width: 40px" />
-                <col style="width: 90px" />
+                <col style="width: 170px" />
                 <col style="width: 80px" />
-                <col style="width: 90px" />
-                <col style="width: 30px" />
+                <col style="width: 250px" />
+                <col style="width: 120px" />
+                <col style="width: 450px" />
+                <col style="width: 200px" />
               </colgroup>
               <tr>
                 <td><label for="PensionPage_Station">Station :</label></td>
                 <td><select id="PensionPage_Station"></select></td>
                 <td><label for="PensionPage_Emp">Employee :</label></td>
-                <td><select id="PensionPage_Emp"></select></td>
-                <td></td>
-                <td></td>
-                <td colspan="2"></td>
-                <td colspan="4"></td>
-                <td></td>
+                <td><select id="PensionPage_Emp" style="min-width: 210px;"></select></td>                
               </tr>
             </table>
 
@@ -2921,8 +2909,50 @@
                   ⬇️ All Employee Pension Benifits Excel
                 </div>
               </div>
-            </div>
+            </div>            
           </div>
+          <table style="height: 40px;">
+            <colgroup>
+                <col style="width: 100px" />
+                <col style="width: 500px" />
+                <col style="width: 250px" />
+                <col style="width: 100px" />
+                <col style="width: 90px" />
+                <col style="width: 100px" />
+                <col style="width: 90px" />
+              </colgroup>
+            <tr>
+              <td style="padding-left: 10px;font-weight: bold;">Calculation For :</td>
+              <td style="padding-left: 10px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <select id="PensionFor" style="min-width: 210px;max-width: 210px;">
+                    <option value="Superannuation">Superannuation</option>
+                    <option value="VRS">VRS</option>
+                    <option value="FamPen_inService">Family Pension (in service)</option>
+                    <option value="FamPen_afterService">Family Pension (after retirement)</option>
+                  </select>
+                  <label style="margin-left: 10px;font-weight: bold;">Last Working Date :</label>
+                  <input disabled type="date" id="VRS_Death_Date" style="width: 110px;">
+                </div>                  
+              </td>
+              <td style="text-align: right;padding-left: 10px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="CommutationOpted" checked 
+                        style="height: 18px; width: 18px; margin: 0;">
+                  
+                  <label for="CommutationOpted" style="margin: 0;margin-left: 2px;font-weight: bold;">Commutation Option :</label>
+                  
+                  <select id="CommutationOption"
+                          style="width: 60px; min-width: 60px;">
+                  </select>
+                </div>                
+              </td>
+              <td style="padding-left: 10px;font-weight: bold;">EL Available :</td>
+              <td><input type="number" id="PensionEL" value="300"></td>
+              <td style="padding-left: 10px;font-weight: bold;">HPL Available :</td>
+              <td><input type="number" id="PensionHPL" value="200"></td>
+            </tr>
+          </table>
           <div
             style="
               display: flex;
@@ -2953,7 +2983,7 @@
               <span id="PanelPensionBasic">0</span>
             </div>
           </div>
-          <div class="PensiontableWrapper">
+          <div class="PensionTableWrapper">
             <table id="EmolumentTbl" border="1"></table>
           </div>
         </div>
@@ -2965,10 +2995,10 @@
           <div class="Selection-bar">
             <table>
               <colgroup>
-                <col style="width: 80px" />
+                <col style="width: 60px" />
                 <col style="width: 170px" />
-                <col style="width: 70px" />
-                <col style="width: 100px" />
+                <col style="width: 80px" />
+                <col style="width: 250px" />
                 <col style="width: 120px" />
                 <col style="width: 400px" />
               </colgroup>
@@ -3222,10 +3252,12 @@
         });
         document.querySelectorAll(".ITaction-group button").forEach((btn) => {
           btn.disabled = true;
-        });
+        });      
         document.querySelectorAll(".Pensionaction-group button").forEach((btn) => {
           btn.disabled = true;
-        });
+        });  
+        loadCommutationOptions();
+        updatePensionUI();
       });
 
       //🔥🔥🔥🔥 GET DATA FROM SHEET🔥🔥🔥🔥//
@@ -14967,6 +14999,7 @@
         setDAPercent();
         updateEmolumentTable();
         handleITChange();
+        handlePensionChange();
         //================== Salary Slip Change ==================//
         setTimeout(() => {
           handleSalarySlipChange();
@@ -16099,9 +16132,11 @@
         itmenu.classList.add("show"); // ✅ ALWAYS OPEN
       });
 
+
       document.addEventListener("click", () => {
         itmenu.classList.remove("show");
       });
+
 
       document.querySelectorAll("input[name='salaryMode']").forEach((radio) => {
         radio.addEventListener("change", () => {
@@ -16159,6 +16194,260 @@
       //==================================================================//
       //                        Pension Page Script
       // ==================================================================//
+ 
+      const pensionSelect = document.getElementById("PensionFor");
+      const checkbox = document.getElementById("CommutationOpted");
+      const commutationSelect = document.getElementById("CommutationOption");
+      const dateInput = document.getElementById("VRS_Death_Date");
+
+       function loadCommutationOptions(){
+          
+          for (let i = 1; i <= 40; i++) {
+            const option = document.createElement("option");
+            option.value = i;          // value = 1…40
+            option.textContent = i + "%"; // text = 1%…40%
+
+            if (i === 40) {
+              option.selected = true;  // default selected
+            }
+
+            commutationSelect.appendChild(option);
+          }
+
+          //select.innerHTML = Array.from({ length: 40 }, (_, i) =>
+          //  `<option value="${i+1}" ${i+1 === 40 ? "selected" : ""}>${i+1}%</option>`
+          //).join('');
+       }
+
+      
+        // 🔹 Listen for change
+         function updatePensionUI() {
+          const val = pensionSelect.value;
+
+          // ✅ Rule 1: Commutation checkbox
+          if (val === "Superannuation" || val === "VRS") {
+            checkbox.disabled = false;
+            checkbox.checked = true;
+          } else {
+            checkbox.checked = false;
+            checkbox.disabled = true;
+          }
+
+          // ✅ Rule 2: Enable/disable dropdown based on checkbox
+          commutationSelect.disabled = !checkbox.checked;
+
+          // ✅ Rule 3: Date input disable conditions
+          if (val === "Superannuation" || val === "FamPen_afterService") {
+            dateInput.disabled = true;
+            dateInput.value = ""; // optional reset
+          } else {
+            dateInput.disabled = false;
+          }
+        }
+
+
+        // 🔹 Event listeners
+        pensionSelect.addEventListener("change", updatePensionUI);
+        checkbox.addEventListener("change", () => {
+          commutationSelect.disabled = !checkbox.checked;
+        });
+
+
+        function bindPensionEvents(empName) {
+
+          const ids = [
+            "PensionFor",
+            "VRS_Death_Date",
+            "PensionEL",
+            "PensionHPL",
+            "CommutationOpted",
+            "CommutationOption"
+          ];
+
+          ids.forEach(idName => {
+            const el = document.getElementById(idName);
+            if (!el) return;
+
+            // 🔥 Remove old listener (important to avoid duplicate triggers)
+            el.onchange = null;
+            el.oninput = null;
+
+            // 🔥 Attach fresh listeners
+            el.addEventListener("change", () => renderPensionTable(empName));
+            el.addEventListener("input", () => renderPensionTable(empName));
+          });
+        }
+
+        function renderPensionTable(empName) {
+
+          const wrapper = document.querySelector(".PensionTableWrapper");
+          if (!wrapper) return;
+
+          wrapper.innerHTML = "";
+
+          const empHead = window.empCalcHeaders;
+          const empRows = window.empCalcRows;
+
+          const nameIndex = empHead.indexOf("Employee Name");
+          const panIndex = empHead.indexOf("PAN");
+          const dobIndex = empHead.indexOf("Date of Birth");
+          const dojIndex = empHead.indexOf("Date of Joining");
+          const basicIndex = empHead.indexOf("Basic Pay");
+
+          const empRow = empRows.find(r => String(r[nameIndex]).trim() === empName);
+
+          if (!empRow) return;
+
+          const pan = empRow[panIndex] || "";
+          const dob = empRow[dobIndex] || "";
+          const doj = empRow[dojIndex] || "";
+          const lastPayDB = empRow[basicIndex] || 0;
+
+          const pensionType = id("PensionFor").value;
+          const pensionTypetext  = id("PensionFor").selectedOptions[0].text;
+          const dateInput = id("VRS_Death_Date").value;
+
+
+          const EL = Number(id("PensionEL")?.value || 0);
+          const HPL = Number(id("PensionHPL")?.value || 0);
+
+          const commutationChecked = id("CommutationOpted").checked;
+          const commutationPercent = id("CommutationOption").value;
+
+          // 🔥 Last Pay Logic
+          let lastPay = lastPayDB;
+
+          if (pensionType === "VRS" || pensionType === "FamPen_inService") {
+            lastPay = dateInput || "";
+          }
+
+          // 🔥 Employee Info Table
+          const infoTable = document.createElement("table");
+
+          infoTable.style.cssText = `
+            width:100%;
+            border-collapse:collapse;
+            font-size:11px;
+            margin-bottom:8px;
+            border:1px solid #ccc;
+          `;
+
+          infoTable.innerHTML = `
+            <colgroup>
+              <col style="width:25%">
+              <col style="width:25%">
+              <col style="width:25%">
+              <col style="width:25%">
+            </colgroup>
+            <tr style="background:#e9ecef;">
+              <th colspan="12" style="padding:6px;text-align:center;">
+                EMPLOYEE DETAILS FOR PENSION BENIFITS CALCULATION
+              </th>
+            </tr>
+
+            <tr>
+              <td><b>Employee Name</b></td>
+              <td>${empName}</td>
+              <td><b>Pension Calculation For </b></td>
+              <td>${pensionTypetext}</td>
+            </tr>
+
+            <tr>
+              <td><b>Date of Birth</b></td>
+              <td>${dob}</td>
+              <td><b>Date of Joining</b></td>
+              <td>${doj}</td>
+            </tr>
+
+            <tr>
+              <td><b>PAN</b></td>
+              <td>${pan}</td>
+              <td><b>Last Pay Drawn</b></td>
+              <td>${lastPay}</td>              
+            </tr>
+
+            <tr>
+              <td><b>EL Available</b></td>
+              <td>${EL}</td>
+              <td><b>HPL</b></td>
+              <td>${HPL}</td>              
+            </tr>
+
+            <tr>
+              <td><b>Commutation Opted</b></td>
+              <td>${commutationChecked ? "Yes" : "No"}</td>
+              <td><b>Commutation %</b></td>
+              <td>${commutationPercent}%</td>              
+            </tr>
+
+            <tr>
+              <td><b>Qualifying Service</b></td>
+              <td id="qualService"></td>
+              <td><b>Completed 6 Monthly Period</b></td>
+              <td id="sixMonth"></td>
+            </tr>
+          `;
+
+          wrapper.appendChild(infoTable);
+
+          // =========================
+          // 🔥 Pension Calculation Table
+          // =========================
+
+          const pensionTable = document.createElement("table");
+
+          pensionTable.style.cssText = `
+            width:100%;
+            border-collapse:collapse;
+            font-size:11px;
+            border:1px solid #ccc;
+          `;
+
+          pensionTable.innerHTML = `
+            <colgroup>
+              <col style="width:60%">
+              <col style="width:40%">
+            </colgroup>
+            <thead>
+              <tr>
+                <th colspan="8" style="background:#1f4e79;color:white;padding:8px;">
+                  Pension Benefits Calculation
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td colspan="4"><b>Basic Pension</b></td>
+                <td colspan="4" id="basicPension"></td>
+              </tr>
+
+              <tr>
+                <td colspan="4">Commuted Portion</td>
+                <td colspan="4" id="commutedValue"></td>
+              </tr>
+
+              <tr>
+                <td colspan="4">Residual Pension</td>
+                <td colspan="4" id="residualPension"></td>
+              </tr>
+
+              <tr>
+                <td colspan="4">Gratuity</td>
+                <td colspan="4" id="gratuity"></td>
+              </tr>
+
+              <tr>
+                <td colspan="4">Leave Encashment</td>
+                <td colspan="4" id="leaveEncash"></td>
+              </tr>
+
+            </tbody>
+          `;
+
+          wrapper.appendChild(pensionTable);
+        }
 
       const pensionmenu = id("PensionprintMenu");
       const pensionprintBtn = id("PensionprintBtn");
@@ -16204,7 +16493,6 @@
       function updatePensionPrintMenuState() {
         const hasEmp = id("PensionPage_Emp")?.value;
         const hasStation = id("PensionPage_Station")?.value;
-        console.log(hasEmp)
 
         const printPension = id("pensionPrintOption");
         const excelPension = id("pensionExcelOption");
@@ -16225,7 +16513,7 @@
       document.querySelectorAll(".menu-option").forEach((opt) => {
         opt.addEventListener("click", function () {
           const type = this.dataset.type;
-          const wrapper = document.querySelector(".PensiontableWrapper");
+          const wrapper = document.querySelector(".PensionTableWrapper");
 
           pensionmenu.classList.remove("show");
 
@@ -16256,9 +16544,27 @@
 
       ["PensionPage_Station", "PensionPage_Emp"].forEach((idName) => {
         id(idName)?.addEventListener("change", () => {
-          console.log("updatePensionPrintMenuState called")
-          updatePensionPrintMenuState();
+          handlePensionChange();
         });
+      });
+
+      function handlePensionChange(){
+        document.querySelectorAll(".Pensionaction-group button").forEach((btn) => {
+          btn.disabled = false;
+        });
+
+        const empName = id("PensionPage_Emp").value
+        updatePensionPrintMenuState();
+        renderPensionTable(empName);
+      }
+
+      document.addEventListener("input", (e) => {
+        if (
+          e.target.matches("#PensionFor, #VRS_Death_Date, #PensionEL, #PensionHPL, #CommutationOpted, #CommutationOption")
+        ) {
+          const empName = id("PensionPage_Emp")?.value; // adjust if needed
+          renderPensionTable(empName);
+        }
       });
 
     </script>
