@@ -20,8 +20,13 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- Formula Display JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body);"></script>
 
     <style>
       /* =========================
@@ -986,10 +991,10 @@
       #PB_GOEditTbl th:nth-child(2),
       #PB_NPSEditTbl th:nth-child(2),
       #PB_GOEditTbl td:nth-child(2),
-      #PB_NPSEditTbl td:nth-child(2) {         
-          min-width: 70px;
-          width: 70px;
-          text-align: center;
+      #PB_NPSEditTbl td:nth-child(2) {
+        min-width: 70px;
+        width: 70px;
+        text-align: center;
       }
 
       #PB_GOViewTbl th:first-child,
@@ -1029,7 +1034,6 @@
         background: #1f4e79;
         color: #ffffff;
       }
-      
 
       /* ================= SEPARATOR ================= */
       #PB_GOViewTbl td:first-child,
@@ -1669,7 +1673,8 @@
         transform: translateX(100%);
       }
 
-      .ITtableWrapper,.PensionTableWrapper {
+      .ITtableWrapper,
+      .PensionTableWrapper {
         margin: 4px;
         display: flex;
         flex-direction: column;
@@ -1680,7 +1685,8 @@
         overflow: auto;
       }
 
-      .ITtableWrapper table,.PensionTableWrapper table {
+      .ITtableWrapper table,
+      .PensionTableWrapper table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
@@ -1719,7 +1725,8 @@
         border-bottom: solid 1px #94a3b8;
       }
 
-      .ITtableWrapper table th,.PensionTableWrapper table th {
+      .ITtableWrapper table th,
+      .PensionTableWrapper table th {
         background: #1f4e79;
         color: #ffffff;
       }
@@ -1751,6 +1758,18 @@
         line-height: 25px;
       }
 
+      .katex {
+        font-size: 16px !important;
+        line-height: 1.4 !important;
+      }
+
+      .katex-display {
+        margin: 0 !important;
+      }
+
+      .katex .frac-line {
+        border-bottom-width: 1px !important;
+      }
       /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
   =================================================== */
@@ -2856,7 +2875,7 @@
 
         <div class="SectionPage" id="PensionPage" style="display: none">
           <div class="header">
-            <h2>Pension Benifits & Calculations</h2>            
+            <h2>Pension Benifits & Calculations</h2>
           </div>
           <div class="Selection-bar">
             <table>
@@ -2873,7 +2892,12 @@
                 <td><label for="PensionPage_Station">Station :</label></td>
                 <td><select id="PensionPage_Station"></select></td>
                 <td><label for="PensionPage_Emp">Employee :</label></td>
-                <td><select id="PensionPage_Emp" style="min-width: 210px;"></select></td>                
+                <td>
+                  <select
+                    id="PensionPage_Emp"
+                    style="min-width: 210px"
+                  ></select>
+                </td>
               </tr>
             </table>
 
@@ -2893,7 +2917,10 @@
                 >
                   🧾 Employee Pension Benifits PDF
                 </div>
-                <div class="print-option menu-option" data-type="pdf-allPension">
+                <div
+                  class="print-option menu-option"
+                  data-type="pdf-allPension"
+                >
                   🧾 All Employee Pension Benifits PDF
                 </div>
 
@@ -2905,52 +2932,84 @@
                 >
                   ⬇️ Employee Pension Benifits Excel
                 </div>
-                <div class="excel-option menu-option" data-type="excel-allPension">
+                <div
+                  class="excel-option menu-option"
+                  data-type="excel-allPension"
+                >
                   ⬇️ All Employee Pension Benifits Excel
                 </div>
               </div>
-            </div>            
+            </div>
           </div>
-          <table style="height: 40px;">
+          <table style="height: 40px">
             <colgroup>
-                <col style="width: 100px" />
-                <col style="width: 500px" />
-                <col style="width: 250px" />
-                <col style="width: 100px" />
-                <col style="width: 90px" />
-                <col style="width: 100px" />
-                <col style="width: 90px" />
-              </colgroup>
+              <col style="width: 100px" />
+              <col style="width: 500px" />
+              <col style="width: 250px" />
+              <col style="width: 100px" />
+              <col style="width: 90px" />
+              <col style="width: 100px" />
+              <col style="width: 90px" />
+            </colgroup>
             <tr>
-              <td style="padding-left: 10px;font-weight: bold;">Calculation For :</td>
-              <td style="padding-left: 10px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <select id="PensionFor" style="min-width: 210px;max-width: 210px;">
+              <td style="padding-left: 10px; font-weight: bold">
+                Calculation For :
+              </td>
+              <td style="padding-left: 10px">
+                <div style="display: flex; align-items: center; gap: 6px">
+                  <select
+                    id="PensionFor"
+                    style="min-width: 210px; max-width: 210px"
+                  >
                     <option value="Superannuation">Superannuation</option>
                     <option value="VRS">VRS</option>
-                    <option value="FamPen_inService">Family Pension (in service)</option>
-                    <option value="FamPen_afterService">Family Pension (after retirement)</option>
+                    <option value="FamPen_inService">
+                      Family Pension (in service)
+                    </option>
+                    <option value="FamPen_afterService">
+                      Family Pension (after retirement)
+                    </option>
                   </select>
-                  <label style="margin-left: 10px;font-weight: bold;">Last Working Date :</label>
-                  <input disabled type="date" id="VRS_Death_Date" style="width: 110px;">
-                </div>                  
+                  <label style="margin-left: 10px; font-weight: bold"
+                    >Last Working Date :</label
+                  >
+                  <input
+                    disabled
+                    type="date"
+                    id="VRS_Death_Date"
+                    style="width: 110px"
+                  />
+                </div>
               </td>
-              <td style="text-align: right;padding-left: 10px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <input type="checkbox" id="CommutationOpted" checked 
-                        style="height: 18px; width: 18px; margin: 0;">
-                  
-                  <label for="CommutationOpted" style="margin: 0;margin-left: 2px;font-weight: bold;">Commutation Option :</label>
-                  
-                  <select id="CommutationOption"
-                          style="width: 60px; min-width: 60px;">
-                  </select>
-                </div>                
+              <td style="text-align: right; padding-left: 10px">
+                <div style="display: flex; align-items: center; gap: 6px">
+                  <input
+                    type="checkbox"
+                    id="CommutationOpted"
+                    checked
+                    style="height: 18px; width: 18px; margin: 0"
+                  />
+
+                  <label
+                    for="CommutationOpted"
+                    style="margin: 0; margin-left: 2px; font-weight: bold"
+                    >Commutation Option :</label
+                  >
+
+                  <select
+                    id="CommutationOption"
+                    style="width: 60px; min-width: 60px"
+                  ></select>
+                </div>
               </td>
-              <td style="padding-left: 10px;font-weight: bold;">EL Available :</td>
-              <td><input type="number" id="PensionEL" value="300"></td>
-              <td style="padding-left: 10px;font-weight: bold;">HPL Available :</td>
-              <td><input type="number" id="PensionHPL" value="200"></td>
+              <td style="padding-left: 10px; font-weight: bold">
+                EL Available :
+              </td>
+              <td><input type="number" id="PensionEL" value="300" /></td>
+              <td style="padding-left: 10px; font-weight: bold">
+                HPL Available :
+              </td>
+              <td><input type="number" id="PensionHPL" value="200" /></td>
             </tr>
           </table>
           <div
@@ -3252,10 +3311,12 @@
         });
         document.querySelectorAll(".ITaction-group button").forEach((btn) => {
           btn.disabled = true;
-        });      
-        document.querySelectorAll(".Pensionaction-group button").forEach((btn) => {
-          btn.disabled = true;
-        });  
+        });
+        document
+          .querySelectorAll(".Pensionaction-group button")
+          .forEach((btn) => {
+            btn.disabled = true;
+          });
         loadCommutationOptions();
         updatePensionUI();
       });
@@ -3486,15 +3547,16 @@
       }
 
       // Service (Y M D)
-      function calcService(dojStr) {
+
+      function calcService(dojStr, endDateStr) {
         let start = DateUtil.parseDate(dojStr);
-        if (!start) return "";
+        let end = endDateStr ? new Date(endDateStr) : new Date();
 
-        let now = new Date();
+        if (!start || !end) return "";
 
-        let y = now.getFullYear() - start.getFullYear();
-        let m = now.getMonth() - start.getMonth();
-        let d = now.getDate() - start.getDate();
+        let y = end.getFullYear() - start.getFullYear();
+        let m = end.getMonth() - start.getMonth();
+        let d = end.getDate() - start.getDate();
 
         if (d < 0) {
           m--;
@@ -3510,15 +3572,16 @@
       }
 
       // 6 Month Period
-      function calcSixMonth(dojStr) {
+
+      function calcSixMonth(dojStr, endDateStr) {
         let start = DateUtil.parseDate(dojStr);
-        if (!start) return "";
+        let end = endDateStr ? new Date(endDateStr) : new Date();
 
-        let now = new Date();
+        if (!start || !end) return "";
 
-        let y = now.getFullYear() - start.getFullYear();
-        let m = now.getMonth() - start.getMonth();
-        let d = now.getDate() - start.getDate();
+        let y = end.getFullYear() - start.getFullYear();
+        let m = end.getMonth() - start.getMonth();
+        let d = end.getDate() - start.getDate();
 
         if (d > 0) m++;
 
@@ -3551,6 +3614,36 @@
         });
 
         return latest;
+      }
+
+      function formatToInputDate(dor) {
+        if (!dor || !dor.includes(",")) return "";
+
+        try {
+          const months = {
+            Jan: "01",
+            Feb: "02",
+            Mar: "03",
+            Apr: "04",
+            May: "05",
+            Jun: "06",
+            Jul: "07",
+            Aug: "08",
+            Sep: "09",
+            Oct: "10",
+            Nov: "11",
+            Dec: "12",
+          };
+
+          const [monDay, year] = dor.split(",");
+          const [mon, day] = monDay.split("-");
+
+          if (!months[mon]) return "";
+
+          return `${year}-${months[mon]}-${day.padStart(2, "0")}`;
+        } catch {
+          return "";
+        }
       }
 
       function getPayBandAndGradePay(level) {
@@ -3640,8 +3733,12 @@
 
           // existing calculations
           let superDate = calcSuperannuation(dob);
-          let service = calcService(doj);
-          let sixMonth = calcSixMonth(doj);
+
+          // 🔥 convert DOR to input format if needed
+          let endDate = formatToInputDate(superDate);
+
+          let service = calcService(doj, endDate); // ✅ till superannuation
+          let sixMonth = calcSixMonth(doj, endDate); // ✅ till superannuation
 
           let emoluments = calcLast10MonthsEmoluments(pb);
 
@@ -3758,6 +3855,10 @@
       }
 
       function calcLast10MonthsEmoluments(pb, targetDate = null, mode = "sum") {
+        if (targetDate && !(targetDate instanceof Date)) {
+          targetDate = new Date(targetDate);
+        }
+
         let pHeaders = pbData.headers;
 
         let empName = pb[pHeaders.indexOf("Employee Name")];
@@ -4323,13 +4424,13 @@
               applyFilters();
 
               if (type === "station") {
-                updateStationHeaders(el.value);                
+                updateStationHeaders(el.value);
                 SyncAllPage();
               }
 
               if (type === "employee") {
                 updateEmolumentTable();
-                fillEmpDetails(filters.employee);                
+                fillEmpDetails(filters.employee);
                 SyncAllPage();
               }
 
@@ -4520,7 +4621,8 @@
 
       /* ============DEPARTMENT MAP (EmpDB)============= */
       function getDeptMap() {
-        if (!empData || !window.empCalcHeaders || !window.empCalcRows) return {};
+        if (!empData || !window.empCalcHeaders || !window.empCalcRows)
+          return {};
 
         const headers = window.empCalcHeaders;
 
@@ -5102,7 +5204,7 @@
 
         /* ================= COLUMN FILTER ================= */
         const activeCols = selectedHeaders.map((h, i) => {
-          if (i === 0 || i === 1) return true; 
+          if (i === 0 || i === 1) return true;
 
           const col = String(h).toLowerCase().replace(/\s+/g, "");
 
@@ -5779,7 +5881,7 @@
         "DAA on NPS",
         "NPS",
         "DAA on NPSE ded",
-        "NPSE Ded"
+        "NPSE Ded",
       ];
 
       const NPS_HIDDEN_COLUMNS = [
@@ -5789,7 +5891,7 @@
         "GPF",
         "CGEIS",
         "NPS",
-        "DAA on NPS"
+        "DAA on NPS",
       ];
 
       function normalize(str) {
@@ -5889,7 +5991,11 @@
         ];
 
         const processedRows = rows.map((row) => {
-          return [row[nameIndex],row[hrisIndex], ...row.slice(startIndex, endIndex + 1)];
+          return [
+            row[nameIndex],
+            row[hrisIndex],
+            ...row.slice(startIndex, endIndex + 1),
+          ];
         });
 
         /* ================= DROPDOWNS ================= */
@@ -5970,7 +6076,6 @@
             /* Employee Name */
             if (i === 0 || colName === "HRIS") {
               td.textContent = val;
-
             } else if (checkboxCols.includes(colName)) {
               /* Checkbox */
               const input = createEl("input", { type: "checkbox" });
@@ -6085,11 +6190,8 @@
               const input = td.querySelector("input, select, textarea");
 
               // 🔥 If no input (HRIS / Name), store textContent
-              return [
-                td.dataset.col,
-                input || td
-              ];
-            })
+              return [td.dataset.col, input || td];
+            }),
           );
 
           applyColumnRules(tr, selectedHeaders, tableId);
@@ -6158,7 +6260,6 @@
         applyTableColumnRules(table, selectedHeaders, tableId);
         recalculateAllTotals();
       }
-
 
       function getBasicPay(payLevel, index) {
         if (!cpcData || !cpcData.headers || !cpcData.rows) return 0;
@@ -6848,10 +6949,7 @@
           // 🔹 GO TABLE
           // =========================
           if (isGO) {
-            setValue(
-              getCellInput(tr,"Total DAA"),
-              Math.round(daa + daaTA)
-            );
+            setValue(getCellInput(tr, "Total DAA"), Math.round(daa + daaTA));
             return; // ✅ correct exit
           }
 
@@ -6859,7 +6957,6 @@
           // 🔹 NPS TABLE
           // =========================
           if (isNPS) {
-
             const daanpseInput = tr._cells["DAA on NPSE"];
             const daanpscInput = tr._cells["DAA on NPSC"];
             const daanpseInput2 = tr._cells["DAA on NPSE ded"];
@@ -6868,29 +6965,25 @@
             setValue(daanpseInput, Math.round(daa * 0.14));
             setValue(daanpseInput2, Math.round(daa * 0.14));
             setValue(daanpscInput, Math.round(daa * 0.1));
-            setValue(daanpsInput, Math.round((daa * 0.14) + (daa * 0.1)));
+            setValue(daanpsInput, Math.round(daa * 0.14 + daa * 0.1));
 
             const daaNPSE = num(daanpseInput?.value);
             const daaNPSC = num(daanpscInput?.value);
 
+            setValue(getCellInput(tr, "DAA on NPSE ded"), Math.round(daaNPSE));
+
             setValue(
-              getCellInput(tr,"DAA on NPSE ded"),
-              Math.round(daaNPSE)
+              getCellInput(tr, "DAA on NPS"),
+              Math.round(daaNPSE + daaNPSC),
             );
 
             setValue(
-              getCellInput(tr,"DAA on NPS"),
-              Math.round(daaNPSE + daaNPSC)
+              getCellInput(tr, "Total DAA"),
+              Math.round(daa + daaTA + daaNPSE),
             );
-
-            setValue(
-              getCellInput(tr,"Total DAA"),
-              Math.round(daa + daaTA + daaNPSE)
-            );
-
           }
           //recalculateAllRows();
-        })
+        });
       }
 
       // =========================
@@ -6911,57 +7004,58 @@
         if (daanpse2) setValue(daanpse2, 0);
         //recalculateAllRows();
       }
-      
 
       function setupManualDAAHandlers() {
+        document.querySelectorAll("#PB_NPSEditTbl tbody tr").forEach((tr) => {
+          if (!tr._cells) return;
+          if (tr.classList.contains("total-row")) return;
 
-          document.querySelectorAll("#PB_NPSEditTbl tbody tr").forEach(tr => {
+          const daaInput = tr._cells["DAA"];
+          const daaTAInput = tr._cells["DAA on TA"];
+          const daanpseInput = tr._cells["DAA on NPSE"];
+          const daanpscInput = tr._cells["DAA on NPSC"];
+          const daanpseInput2 = tr._cells["DAA on NPSE ded"];
+          const daanpsInput = tr._cells["DAA on NPS"];
 
-            if (!tr._cells) return;
-            if (tr.classList.contains("total-row")) return;
+          if (!daaInput) return;
 
-            const daaInput = tr._cells["DAA"];
-            const daaTAInput = tr._cells["DAA on TA"];
-            const daanpseInput = tr._cells["DAA on NPSE"];
-            const daanpscInput = tr._cells["DAA on NPSC"];
-            const daanpseInput2 = tr._cells["DAA on NPSE ded"];
-            const daanpsInput = tr._cells["DAA on NPS"];
+          if (daaInput.dataset.bound === "true") return;
 
-            if (!daaInput) return;
-
-            if (daaInput.dataset.bound === "true") return;
-
-            [daaInput, daaTAInput, daanpseInput, daanpscInput, daanpseInput2, daanpsInput].forEach(el => {
-              if (el) el.dataset.bound = "true";
-            });
-
-            function recalc() {
-
-              const daa = num(daaInput?.value || daaInput?.innerText || 0);
-              const daaTA = num(daaTAInput?.value || daaTAInput?.innerText || 0);
-
-              const daaNPSE = num(daanpseInput?.value || 0);
-              const daaNPSC = num(daanpscInput?.value || 0);
-
-              setValue(getCellInput(tr,"DAA on NPSE ded"), daaNPSE);
-
-              setValue(getCellInput(tr,"DAA on NPS"), daaNPSE + daaNPSC);
-
-              setValue(
-                getCellInput(tr,"Total DAA"),
-                Math.round(daa + daaTA + daaNPSE)
-              );
-              recalculateAllRows();
-            }
-
-            daaInput.addEventListener("input", recalc);
-            daaTAInput?.addEventListener("input", recalc);
-            daanpseInput?.addEventListener("input", recalc);
-            daanpscInput?.addEventListener("input", recalc);
-            
+          [
+            daaInput,
+            daaTAInput,
+            daanpseInput,
+            daanpscInput,
+            daanpseInput2,
+            daanpsInput,
+          ].forEach((el) => {
+            if (el) el.dataset.bound = "true";
           });
-        }
 
+          function recalc() {
+            const daa = num(daaInput?.value || daaInput?.innerText || 0);
+            const daaTA = num(daaTAInput?.value || daaTAInput?.innerText || 0);
+
+            const daaNPSE = num(daanpseInput?.value || 0);
+            const daaNPSC = num(daanpscInput?.value || 0);
+
+            setValue(getCellInput(tr, "DAA on NPSE ded"), daaNPSE);
+
+            setValue(getCellInput(tr, "DAA on NPS"), daaNPSE + daaNPSC);
+
+            setValue(
+              getCellInput(tr, "Total DAA"),
+              Math.round(daa + daaTA + daaNPSE),
+            );
+            recalculateAllRows();
+          }
+
+          daaInput.addEventListener("input", recalc);
+          daaTAInput?.addEventListener("input", recalc);
+          daanpseInput?.addEventListener("input", recalc);
+          daanpscInput?.addEventListener("input", recalc);
+        });
+      }
 
       // 🔥============== TO GET DA ARREARS TABLE===========================
 
@@ -7053,7 +7147,7 @@
             let totalNPSC = 0;
 
             const designation = getDesignation(emp);
-            
+
             // 🔥 FIRST LOOP → CALCULATE TOTALS
             rows.forEach((d) => {
               totalDA += d.diffDA || 0;
@@ -7177,7 +7271,7 @@
           const rows = [...table.querySelectorAll("tbody tr:not(.total-row)")];
           const rowElements = rows.map((tr) => ({ tr }));
 
-          updateDAAFromPBDB(rowElements); // 🔥 YOUR CORE LOGIC           
+          updateDAAFromPBDB(rowElements); // 🔥 YOUR CORE LOGIC
         });
 
         // 🔥 3. Render DAA table
@@ -8838,7 +8932,6 @@
         console.log("EDIT MODE ACTIVE");
       });
 
-
       async function savePBData(mode = "ADD") {
         //console.trace("SAVE CALLED");
         const salaryMonth = id("PayBillPage_SalMonth").value;
@@ -8863,7 +8956,10 @@
 
         function getHRIS(empName, station) {
           for (let r of empRows) {
-            if (String(r[empNameIdx]).trim() === String(empName).trim() && String(r[stationIdx]).trim() === String(station).trim()) {
+            if (
+              String(r[empNameIdx]).trim() === String(empName).trim() &&
+              String(r[stationIdx]).trim() === String(station).trim()
+            ) {
               return r[hrisIdx] || "";
             }
           }
@@ -8871,16 +8967,16 @@
         }
 
         function getEmpDesignation(empName, station, hris) {
-
           const clean = (v) =>
-            String(v || "").replace(/\s+/g, "").toLowerCase();
+            String(v || "")
+              .replace(/\s+/g, "")
+              .toLowerCase();
 
           const cleanName = clean(empName);
           const cleanStation = clean(station);
           const cleanHRIS = clean(hris);
 
           for (let r of empRows) {
-
             const rowName = clean(r[empNameIdx]);
             const rowStation = clean(r[stationIdx]);
             const rowHRIS = clean(r[hrisIdx]);
@@ -8898,7 +8994,6 @@
 
           return "";
         }
-
 
         /* =========================
         🔹 CLEAN NUMBER
@@ -8988,7 +9083,7 @@
             //console.log("SAVE MODE:", mode);
 
             // 🔥 DESIGNATION (ADD MODE ONLY)
-           if (mode === "ADD") {
+            if (mode === "ADD") {
               const empHRIS = rowObj["HRIS"];
               rowObj["Designation on Salary Month"] =
                 getEmpDesignation(empName, empStation, empHRIS) || "";
@@ -9020,7 +9115,7 @@
           alert("No data to save");
           return;
         }
-        
+
         //console.log("Saving Mode:", mode, data);
 
         /* =========================
@@ -9074,7 +9169,6 @@
           alert("❌ Server error");
         }
       }
-
 
       const daInput = id("PayBillPage_DA%");
       const errorEl = id("DA_Error");
@@ -9871,7 +9965,8 @@
       }
 
       function getDesignation(empName) {
-        if (!empData || !window.empCalcHeaders || !window.empCalcRows) return "";
+        if (!empData || !window.empCalcHeaders || !window.empCalcRows)
+          return "";
 
         const headers = window.empCalcHeaders;
         const rows = window.empCalcRows;
@@ -12881,7 +12976,6 @@
             if (
               (rowYear === prevYear && rMonth >= 3) || // Mar–Dec prev year
               (rowYear === selectedYear && rMonth <= 2) // Jan–Feb current year
-              
             ) {
               include = true;
             }
@@ -12891,13 +12985,12 @@
           // ✅ CASE 2: AFTER MARCH → ROLLING CURRENT FY
           // =========================
           else {
-           const fyStartYear = sMonth <= 2 ? selectedYear - 1 : selectedYear;
+            const fyStartYear = sMonth <= 2 ? selectedYear - 1 : selectedYear;
 
             // =========================
             // ✅ CASE A: Jan / Feb
             // =========================
             if (sMonth <= 2) {
-
               // Mar–Dec of previous FY
               if (rowYear === fyStartYear && rMonth >= 3) {
                 include = true;
@@ -12907,19 +13000,16 @@
               if (rowYear === fyStartYear + 1 && rMonth < sMonth) {
                 include = true;
               }
-
             }
 
             // =========================
             // ✅ CASE B: Mar–Dec
             // =========================
             else {
-
               // Mar → selected-1 (same year)
               if (rowYear === fyStartYear && rMonth >= 3 && rMonth < sMonth) {
                 include = true;
               }
-
             }
           }
 
@@ -15006,7 +15096,6 @@
         }, 0);
       }
 
-      
       function calculateMonthlyTDS(newPendingTDS, paidMonthCount) {
         const remainingMonths = 12 - paidMonthCount;
 
@@ -16074,8 +16163,6 @@
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
 
-
-
       function updateITPrintMenuState() {
         const hasEmp = id("ITPage_Emp")?.value;
         const hasFY = id("ITPage_FY")?.value;
@@ -16093,8 +16180,6 @@
           }
         });
       }
-
-
 
       const itmenu = id("ITprintMenu");
       const itprintBtn = id("ITprintBtn");
@@ -16132,11 +16217,9 @@
         itmenu.classList.add("show"); // ✅ ALWAYS OPEN
       });
 
-
       document.addEventListener("click", () => {
         itmenu.classList.remove("show");
       });
-
 
       document.querySelectorAll("input[name='salaryMode']").forEach((radio) => {
         radio.addEventListener("change", () => {
@@ -16194,137 +16277,465 @@
       //==================================================================//
       //                        Pension Page Script
       // ==================================================================//
- 
+
       const pensionSelect = document.getElementById("PensionFor");
       const checkbox = document.getElementById("CommutationOpted");
       const commutationSelect = document.getElementById("CommutationOption");
       const dateInput = document.getElementById("VRS_Death_Date");
 
-       function loadCommutationOptions(){
-          
-          for (let i = 1; i <= 40; i++) {
-            const option = document.createElement("option");
-            option.value = i;          // value = 1…40
-            option.textContent = i + "%"; // text = 1%…40%
+      function loadCommutationOptions() {
+        for (let i = 1; i <= 40; i++) {
+          const option = document.createElement("option");
+          option.value = i; // value = 1…40
+          option.textContent = i + "%"; // text = 1%…40%
 
-            if (i === 40) {
-              option.selected = true;  // default selected
+          if (i === 40) {
+            option.selected = true; // default selected
+          }
+
+          commutationSelect.appendChild(option);
+        }
+
+        //select.innerHTML = Array.from({ length: 40 }, (_, i) =>
+        //  `<option value="${i+1}" ${i+1 === 40 ? "selected" : ""}>${i+1}%</option>`
+        //).join('');
+      }
+
+      // 🔹 Listen for change
+      function updatePensionUI() {
+        const selName = id("PensionPage_Emp").value;
+        const val = pensionSelect.value;
+
+        const empHead = window.empCalcHeaders;
+        const empRows = window.empCalcRows;
+
+        const nameIndex = empHead.indexOf("Employee Name");
+        const dorIndex = empHead.indexOf("Superannuation");
+        const serviceIndex = empHead.indexOf("Status");
+        const vrsIndex = empHead.indexOf("VRS / Deceased Date");
+
+        const empRow = empRows.find(
+          (r) => String(r[nameIndex]).trim() === selName,
+        );
+        if (!empRow) return;
+
+        const dor = empRow[dorIndex] || "";
+        const vrs = empRow[vrsIndex] || "";
+        const serviceType = empRow[serviceIndex];
+
+        // =========================
+        // 🔥 RESET ON EMPLOYEE CHANGE
+        // =========================
+        const prevEmp = dateInput.dataset.prevEmp;
+
+        if (prevEmp !== selName) {
+          dateInput.value = "";
+          dateInput.dataset.prevEmp = selName;
+        }
+
+        // =========================
+        // 🔥 RESET ON TYPE CHANGE
+        // =========================
+        if (dateInput.dataset.prevType !== val) {
+          dateInput.value = "";
+          dateInput.dataset.prevType = val;
+        }
+
+        // =========================
+        // ✅ Rule 1: Commutation
+        // =========================
+        if (val === "Superannuation" || val === "VRS") {
+          checkbox.disabled = false;
+          checkbox.checked = true;
+        } else {
+          checkbox.checked = false;
+          checkbox.disabled = true;
+        }
+
+        commutationSelect.disabled = !checkbox.checked;
+
+        // =========================
+        // ✅ Rule 2: Date behavior
+        // =========================
+
+        const isLocked =
+          val === "Superannuation" || val === "FamPen_afterService";
+
+        dateInput.disabled = isLocked;
+
+        // 🔥 CASE 1: Locked → always DOR
+        if (isLocked) {
+          dateInput.value = formatToInputDate(dor);
+        }
+
+        // 🔥 CASE 2: Editable → smart fill
+        else {
+          if (!dateInput.value) {
+            // ✅ Priority 1: DB value (VRS / Deceased)
+            if ((serviceType === "VRS" || serviceType === "Deceased") && vrs) {
+              dateInput.value = formatToInputDate(vrs);
             }
 
-            commutationSelect.appendChild(option);
-          }
-
-          //select.innerHTML = Array.from({ length: 40 }, (_, i) =>
-          //  `<option value="${i+1}" ${i+1 === 40 ? "selected" : ""}>${i+1}%</option>`
-          //).join('');
-       }
-
-      
-        // 🔹 Listen for change
-         function updatePensionUI() {
-          const val = pensionSelect.value;
-
-          // ✅ Rule 1: Commutation checkbox
-          if (val === "Superannuation" || val === "VRS") {
-            checkbox.disabled = false;
-            checkbox.checked = true;
-          } else {
-            checkbox.checked = false;
-            checkbox.disabled = true;
-          }
-
-          // ✅ Rule 2: Enable/disable dropdown based on checkbox
-          commutationSelect.disabled = !checkbox.checked;
-
-          // ✅ Rule 3: Date input disable conditions
-          if (val === "Superannuation" || val === "FamPen_afterService") {
-            dateInput.disabled = true;
-            dateInput.value = ""; // optional reset
-          } else {
-            dateInput.disabled = false;
+            // ✅ Priority 2: VRS / In-service → today
+            else if (val === "VRS" || val === "FamPen_inService") {
+              dateInput.value = new Date().toISOString().split("T")[0];
+            }
           }
         }
 
+        // =========================
+        // 💡 Optional: prevent future dates beyond DOR
+        // =========================
+        if (dor) {
+          dateInput.max = formatToInputDate(dor);
+        }
+      }
 
-        // 🔹 Event listeners
-        pensionSelect.addEventListener("change", updatePensionUI);
-        checkbox.addEventListener("change", () => {
-          commutationSelect.disabled = !checkbox.checked;
+      // 🔹 Event listeners
+      //pensionSelect.addEventListener("change", updatePensionUI);
+      checkbox.addEventListener("change", () => {
+        commutationSelect.disabled = !checkbox.checked;
+      });
+
+      function bindPensionEvents(empName) {
+        const ids = [
+          "PensionFor",
+          "VRS_Death_Date",
+          "PensionEL",
+          "PensionHPL",
+          "CommutationOpted",
+          "CommutationOption",
+        ];
+
+        ids.forEach((idName) => {
+          const el = document.getElementById(idName);
+          if (!el) return;
+
+          // 🔥 Remove old listener (important to avoid duplicate triggers)
+          el.onchange = null;
+          el.oninput = null;
+
+          // 🔥 Attach fresh listeners
+          el.addEventListener("change", () => renderPensionTable(empName));
+          el.addEventListener("input", () => renderPensionTable(empName));
+        });
+      }
+
+      function buildEmolumentHTMLVertical(data) {
+        let total = 0;
+
+        let html = `
+          <table style="width:100%; border-collapse:collapse; font-size:11px;">
+            <thead>
+              <tr>
+                <th colspan="3" style="text-align:center;background:#e5e7eb;">
+                  Last 10 Month Emolument
+                </th>
+              </tr>
+              <tr>
+                <th>Month</th>
+                <th>Basic Pay</th>
+                <th>Index</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.forEach((r) => {
+          total += Number(r.basic) || 0;
+
+          html += `
+            <tr>
+              <td>${r.month}</td>
+              <td>${r.basic}</td>
+              <td>${r.index}</td>
+            </tr>
+          `;
         });
 
+        html += `
+            <tr style="font-weight:bold;background:#fef3c7;">
+              <td>Total</td>
+              <td>${total.toLocaleString("en-IN")}</td>
+              <td></td>
+            </tr>
+          </tbody>
+          </table>
+        `;
 
-        function bindPensionEvents(empName) {
+        return html;
+      }
 
-          const ids = [
-            "PensionFor",
-            "VRS_Death_Date",
-            "PensionEL",
-            "PensionHPL",
-            "CommutationOpted",
-            "CommutationOption"
-          ];
+      function buildEmolumentHTML(data) {
+        let total = 0;
 
-          ids.forEach(idName => {
-            const el = document.getElementById(idName);
-            if (!el) return;
+        // 🔹 Rows
+        let monthRow = "<tr><th>Month</th>";
+        let basicRow = "<tr><th>Basic Pay</th>";
+        //let indexRow = "<tr><th>Index</th>";
 
-            // 🔥 Remove old listener (important to avoid duplicate triggers)
-            el.onchange = null;
-            el.oninput = null;
+        data.forEach((r) => {
+          const val = Number(r.basic) || 0;
+          total += val;
 
-            // 🔥 Attach fresh listeners
-            el.addEventListener("change", () => renderPensionTable(empName));
-            el.addEventListener("input", () => renderPensionTable(empName));
-          });
+          monthRow += `<td>${r.month}</td>`;
+          basicRow += `<td>${formatCurrency(val)}</td>`;
+          //indexRow += `<td>${r.index}</td>`;
+        });
+
+        // 🔹 Add TOTAL as last column
+        monthRow += `<th>Total</th></tr>`;
+        basicRow += `<td style="font-weight:bold;background:#fef3c7;">${formatCurrency(total)}</td></tr>`;
+        //indexRow += `<td></td></tr>`; // empty cell under Total
+
+        let html = `
+    <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;border:solid 1px lightgray">
+      <colgroup>
+        <col style="width:10%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:8%">
+        <col style="width:10%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th colspan="${data.length + 2}" style="text-align:center">
+            Last 10 Month Emolument
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        ${monthRow}
+        ${basicRow}
+      </tbody>
+    </table>
+  `;
+
+        return html;
+      }
+
+      function getPBAsOnDate(empName, targetDate) {
+        const headers = pbData.headers;
+        const rows = pbData.rows;
+
+        const empIdx = headers.indexOf("Employee Name");
+        const monthIdx = headers.indexOf("Salary Month");
+
+        // ✅ FIX: normalize targetDate
+        if (targetDate && !(targetDate instanceof Date)) {
+          targetDate = new Date(targetDate);
         }
 
-        function renderPensionTable(empName) {
+        const targetTime = targetDate ? targetDate.getTime() : null;
 
-          const wrapper = document.querySelector(".PensionTableWrapper");
-          if (!wrapper) return;
+        let bestRow = null;
 
-          wrapper.innerHTML = "";
+        rows.forEach((r) => {
+          if (r[empIdx] !== empName) return;
 
-          const empHead = window.empCalcHeaders;
-          const empRows = window.empCalcRows;
+          const monthTime = DateUtil.toTime(r[monthIdx]);
 
-          const nameIndex = empHead.indexOf("Employee Name");
-          const panIndex = empHead.indexOf("PAN");
-          const dobIndex = empHead.indexOf("Date of Birth");
-          const dojIndex = empHead.indexOf("Date of Joining");
-          const basicIndex = empHead.indexOf("Basic Pay");
-
-          const empRow = empRows.find(r => String(r[nameIndex]).trim() === empName);
-
-          if (!empRow) return;
-
-          const pan = empRow[panIndex] || "";
-          const dob = empRow[dobIndex] || "";
-          const doj = empRow[dojIndex] || "";
-          const lastPayDB = empRow[basicIndex] || 0;
-
-          const pensionType = id("PensionFor").value;
-          const pensionTypetext  = id("PensionFor").selectedOptions[0].text;
-          const dateInput = id("VRS_Death_Date").value;
-
-
-          const EL = Number(id("PensionEL")?.value || 0);
-          const HPL = Number(id("PensionHPL")?.value || 0);
-
-          const commutationChecked = id("CommutationOpted").checked;
-          const commutationPercent = id("CommutationOption").value;
-
-          // 🔥 Last Pay Logic
-          let lastPay = lastPayDB;
-
-          if (pensionType === "VRS" || pensionType === "FamPen_inService") {
-            lastPay = dateInput || "";
+          if (!targetTime || monthTime <= targetTime) {
+            if (!bestRow || monthTime > DateUtil.toTime(bestRow[monthIdx])) {
+              bestRow = r;
+            }
           }
+        });
 
-          // 🔥 Employee Info Table
-          const infoTable = document.createElement("table");
+        return bestRow;
+      }
 
-          infoTable.style.cssText = `
+      function getEffectiveEndDate(empRow, inputDate) {
+        const empHead = window.empCalcHeaders;
+
+        const dorIndex = empHead.indexOf("Superannuation");
+        const dorStr = empRow[dorIndex];
+
+        // convert both to Date
+        const dorDate = new Date(formatToInputDate(dorStr));
+        const input = inputDate ? new Date(inputDate) : null;
+
+        // 🔥 if no input → use DOR
+        if (!input) return dorDate;
+
+        // 🔥 return MIN(input, DOR)
+        return input > dorDate ? dorDate : input;
+      }
+
+
+
+      function renderPensionTable(empName) {
+        const wrapper = document.querySelector(".PensionTableWrapper");
+        if (!wrapper) return;
+
+        wrapper.innerHTML = "";
+
+        const empHead = window.empCalcHeaders;
+        const empRows = window.empCalcRows;
+
+        const nameIndex = empHead.indexOf("Employee Name");
+        const panIndex = empHead.indexOf("PAN");
+        const dobIndex = empHead.indexOf("DOB");
+        const dojIndex = empHead.indexOf("DOJ");
+        const dorIndex = empHead.indexOf("Superannuation");
+        const basicIndex = empHead.indexOf("Last Drawn Basic Pay");
+
+        const empRow = empRows.find(
+          (r) => String(r[nameIndex]).trim() === empName,
+        );
+        if (!empRow) return;
+
+        const pan = empRow[panIndex] || "";
+        const dob = empRow[dobIndex] || "";
+        const doj = empRow[dojIndex] || "";
+        const dor = empRow[dorIndex] || "";
+
+        const rawDate = dateInput.value || null;
+        const effectiveLastDate = getEffectiveEndDate(empRow, rawDate);
+
+        const totService = calcService(doj, effectiveLastDate);
+        const calcSixMonthly = calcSixMonth(doj, effectiveLastDate);
+        const sixMonthly = Math.min(66, calcSixMonthly);
+
+        let cappedsixMonthly =
+          calcSixMonthly > 66 ? " ≈ Capped to 66 from " + calcSixMonthly : "";
+
+        const lastPayDB = empRow[basicIndex] || 0;
+
+        const pensionType = id("PensionFor").value;
+        const pensionTypetext = id("PensionFor").selectedOptions[0].text;
+
+        const EL = Number(id("PensionEL")?.value || 0);
+        const HPL = Number(id("PensionHPL")?.value || 0);
+
+        const commutationChecked = id("CommutationOpted").checked;
+        const commutationPercent = id("CommutationOption").value;
+
+        // =========================
+        // 🔥 PB Selection
+        // =========================
+        let pb;
+
+        if (pensionType === "VRS" || pensionType === "FamPen_inService") {
+          pb = getPBAsOnDate(empName, effectiveLastDate);
+        } else {
+          const latest = getLatestPBMap();
+          pb = latest[empName];
+        }
+
+        // =========================
+        // 🔥 Emolument
+        // =========================
+        let emolData = pb
+          ? calcLast10MonthsEmoluments(pb, effectiveLastDate, "table")
+          : [];
+
+        const totalEmol = emolData.reduce((sum, r) => sum + (Number(r.basic) || 0), 0);
+
+        const avgEmol = totalEmol / 10;
+
+        // =========================
+        // 🔥 Basic Pay Logic
+        // =========================
+        let lastPay = lastPayDB;
+
+        if (
+          pensionType === "Superannuation" ||
+          pensionType === "FamPen_afterService"
+        ) {
+          if (emolData.length > 0) {
+            lastPay = emolData[0].basic;
+          }
+        } else {
+          const headers = pbData.headers;
+          const basicIdx = headers.indexOf("Basic Pay");
+
+          let pbRow = getPBAsOnDate(empName, effectiveLastDate);
+
+          if (pbRow) {
+            lastPay = pbRow[basicIdx];
+          } else if (emolData.length > 0) {
+            lastPay = emolData[0].basic;
+          }
+        }
+
+        // =========================
+        // 🔥 DA (FIXED)
+        // =========================
+        const headers = pbData.headers;
+        const daIdx = headers.indexOf("DA%");
+
+        const latestMap = getLatestPBMap();
+        const latestPB = latestMap[empName];
+
+        const lastDA = latestPB ? Number(latestPB[daIdx]) : 0;
+
+        const daValue = Math.round((lastPay * lastDA) / 100);
+
+        // =========================
+        // 🔥 CALCULATIONS
+        // =========================
+        let ELencash = 0;
+        let HPLencash = 0;
+
+        // 🔹 EL Encashment (max 300)
+        const ELused = Math.min(300, EL);
+        let ELspan="";
+        if (EL >300){
+          ELspan = '≈ Capped to max limit 300'
+        }else{
+          ELspan = ""
+        }
+
+        ELencash = Math.round((lastPay + daValue) * ELused / 30);
+
+        // 🔹 HPL allowed calculation
+        const maxHPLAllowed = Math.min(240, Math.max(0, 300 - ELused));
+        let HPLspan="";
+        if (300 - ELused >240){
+          HPLspan = '≈ Capped to max limit 240'
+        }else{
+          HPLspan = ""
+        }
+
+        // 🔹 Actual HPL to use
+        const HPLused = Math.min(HPL, maxHPLAllowed);
+
+        // 🔹 HPL Encashment (half pay)
+        const hplLastPay = lastPay / 2
+        const hpldaValue = daValue / 2
+        HPLencash = Math.round((hplLastPay + hpldaValue) * HPLused / 30);
+        const totLeaveEncash = ELencash + HPLencash;
+
+        let GratuityLimit = 0;
+        if (lastDA >= 50){
+          GratuityLimit = 2500000
+        }else if (lastDA < 50){
+          GratuityLimit = 2000000
+        }
+
+        const Gratuity = Math.min(GratuityLimit , Math.round((lastPay + daValue) * sixMonthly / 4));
+
+        const benificialPay1 = Math.round (0.5 * avgEmol);
+        const benificialPay2 = Math.round (0.5 * lastPay);
+        const moreBenificialPay = Math.max(benificialPay1, benificialPay2)
+
+        const commutationBasicPay = Math.round (commutationPercent * moreBenificialPay / 100)
+
+        // =========================
+        // 🔥 Employee Table
+        // =========================
+        const infoTable = document.createElement("table");
+
+
+        infoTable.style.cssText = `
             width:100%;
             border-collapse:collapse;
             font-size:11px;
@@ -16332,122 +16743,338 @@
             border:1px solid #ccc;
           `;
 
-          infoTable.innerHTML = `
+        infoTable.innerHTML = `
             <colgroup>
-              <col style="width:25%">
-              <col style="width:25%">
-              <col style="width:25%">
-              <col style="width:25%">
+              <col style="width:10%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:10%">
             </colgroup>
+
             <tr style="background:#e9ecef;">
               <th colspan="12" style="padding:6px;text-align:center;">
-                EMPLOYEE DETAILS FOR PENSION BENIFITS CALCULATION
+                EMPLOYEE DETAILS FOR PENSION BENEFITS CALCULATION
               </th>
             </tr>
 
             <tr>
-              <td><b>Employee Name</b></td>
-              <td>${empName}</td>
-              <td><b>Pension Calculation For </b></td>
-              <td>${pensionTypetext}</td>
+              <td colspan="3"><b>Employee Name</b></td>
+              <td colspan="3">${empName}</td>
+              <td colspan="3"<b>Pension Calculation For</b></td>
+              <td colspan="3">${pensionTypetext}</td>
             </tr>
 
             <tr>
-              <td><b>Date of Birth</b></td>
-              <td>${dob}</td>
-              <td><b>Date of Joining</b></td>
-              <td>${doj}</td>
+              <td colspan="3"><b>Date of Birth</b></td>
+              <td colspan="3">${dob}</td>
+              <td colspan="3"><b>Date of Joining</b></td>
+              <td colspan="3">${doj}</td>
             </tr>
 
             <tr>
-              <td><b>PAN</b></td>
-              <td>${pan}</td>
-              <td><b>Last Pay Drawn</b></td>
-              <td>${lastPay}</td>              
+              <td colspan="3"><b>PAN</b></td>
+              <td colspan="3">${pan}</td>
+              <td colspan="3"><b>Last Pay Drawn</b></td>
+              <td colspan="3">${dor}</td>
             </tr>
 
             <tr>
-              <td><b>EL Available</b></td>
-              <td>${EL}</td>
-              <td><b>HPL</b></td>
-              <td>${HPL}</td>              
+              <td colspan="3"><b>EL Available</b></td>
+              <td colspan="3">${EL}</td>
+              <td colspan="3"><b>HPL</b></td>
+              <td colspan="3">${HPL}</td>
             </tr>
 
             <tr>
-              <td><b>Commutation Opted</b></td>
-              <td>${commutationChecked ? "Yes" : "No"}</td>
-              <td><b>Commutation %</b></td>
-              <td>${commutationPercent}%</td>              
+              <td colspan="3"><b>Commutation Opted</b></td>
+              <td colspan="3">${commutationChecked ? "Yes" : "No"}</td>
+              <td colspan="3"><b>Commutation %</b></td>
+              <td colspan="3">${commutationPercent}%</td>
             </tr>
 
             <tr>
-              <td><b>Qualifying Service</b></td>
-              <td id="qualService"></td>
-              <td><b>Completed 6 Monthly Period</b></td>
-              <td id="sixMonth"></td>
+              <td colspan="3"><b>Last Drawn Basic Pay</b></td>
+              <td colspan="3">${formatCurrency(lastPay)}</td>
+              <td colspan="3"><b>Last Drawn DA</b></td>
+              <td colspan="3">${formatCurrency(daValue)} (${lastDA}%)</td>
+            </tr>
+
+            <tr>
+              <td colspan="3"><b>Qualifying Service</b></td>
+              <td colspan="3">${totService}</td>
+              <td colspan="3"><b>Completed 6 Monthly Period</b></td>
+              <td colspan="3">${sixMonthly}<span style="color:red;font-weight:bold;">${cappedsixMonthly}</span></td>
+            </tr>
+
+            <tr>
+              <td colspan="12" id="emolumentContainer"></td>
             </tr>
           `;
 
-          wrapper.appendChild(infoTable);
+        wrapper.appendChild(infoTable);
 
-          // =========================
-          // 🔥 Pension Calculation Table
-          // =========================
+        // =========================
+        // 🔥 Emolument Table Render
+        // =========================
+        if (emolData.length > 0) {
+          const emolHTML = buildEmolumentHTML(emolData);
+          const container = infoTable.querySelector("#emolumentContainer");
+          if (container) container.innerHTML = emolHTML;
+        }
 
-          const pensionTable = document.createElement("table");
 
-          pensionTable.style.cssText = `
+        const calculationTable = document.createElement("table");
+        calculationTable.id = "pensionCalculationTable";
+        calculationTable.style.cssText = `
             width:100%;
             border-collapse:collapse;
             font-size:11px;
             border:1px solid #ccc;
           `;
 
-          pensionTable.innerHTML = `
+           calculationTable.innerHTML = `
             <colgroup>
-              <col style="width:60%">
-              <col style="width:40%">
+              <col style="width:10%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:10%">
             </colgroup>
+
             <thead>
               <tr>
-                <th colspan="8" style="background:#1f4e79;color:white;padding:8px;">
+                <th colspan="12" style="background:#1f4e79;color:white;padding:8px;">
                   Pension Benefits Calculation
                 </th>
               </tr>
             </thead>
 
             <tbody>
-
               <tr>
-                <td colspan="4"><b>Basic Pension</b></td>
-                <td colspan="4" id="basicPension"></td>
+                <th colspan="12"><b>1. Leave Encashment Calculation </b></th>
+              </tr>
+              <tr>
+                <th colspan="6" style="text-align:center">1A. EL Encashment Calculation</th>
+                <th colspan="6" style="text-align:center">1B. HPL Encashment Calculation</th>                
+              </tr>
+              <tr>
+                <td>EL Encashment</td>
+                <td colspan="5" style="text-align:left; vertical-align:middle;">
+                   \\(
+                  \\text{=} 
+                  \\displaystyle \\frac{\\text{Basic Pay} + \\text{Dearness Allowance}}{30}
+                  \\times \\text{EL (Max Limit upto 300)}
+                  \\)
+                </td>
+                <td>HPL Encashment</td>
+                <td colspan="5" style="text-align:left; vertical-align:middle;">
+                  \\(
+                  \\text{=}
+                  \\displaystyle \\frac{\\text{Basic Pay} + \\text{Dearness Allowance}}{2 \\times 30}
+                  \\times \\text{HPL (Max Limit upto 240)}
+                  \\)
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="5" style="text-align:left; vertical-align:middle; white-space:nowrap;">
+                  
+                  \\(
+                  \\text{=}
+                  \\displaystyle \\frac{\\text{${formatCurrency(lastPay)}} + \\text{${formatCurrency(daValue)}}}{30}
+                  \\times \\text{${ELused}}
+                  \\quad \\color{red}{${ELspan}}
+                  \\)
+
+                </td>
+                <td></td>
+                <td colspan="5" style="text-align:left; vertical-align:middle; white-space:nowrap;">
+                  \\(
+                  \\text{=}
+                  \\displaystyle \\frac{\\text{${formatCurrency(hplLastPay)}} + \\text{${formatCurrency(hpldaValue)}}}{30}
+                  \\times \\text{${maxHPLAllowed}}
+                  \\quad \\color{red}{${HPLspan}}
+                  \\)
+
+                </td>
+              </tr>
+              <tr>
+                <td>EL Encashment</td>
+                <td colspan="5">
+                  <b>= ${formatCurrency(ELencash)}</b>
+                </td>
+                <td>HPL Encashment </td>
+                <td colspan="5">
+                  <b>= ${formatCurrency(HPLencash)}</b>
+                </td>
+              </tr>
+
+              <tr> 
+                <td>Total Leave Encashment</td>
+                <td colspan="11">= EL Encashment + HPL Encashment</td>
               </tr>
 
               <tr>
-                <td colspan="4">Commuted Portion</td>
-                <td colspan="4" id="commutedValue"></td>
+                <td></td>
+                <td colspan="11">
+                  <b>= ${formatCurrency(totLeaveEncash)}</b>
+                </td>
               </tr>
 
               <tr>
-                <td colspan="4">Residual Pension</td>
-                <td colspan="4" id="residualPension"></td>
+                <th colspan="12"><b>2. Gratuity Calculation</b></th>
               </tr>
 
               <tr>
-                <td colspan="4">Gratuity</td>
-                <td colspan="4" id="gratuity"></td>
+                <td>Gratuity</td>
+                <td colspan="11">
+                  \\(
+                  \\text{=}
+                  \\displaystyle \\frac{\\text{Basic Pay} + \\text{Dearness Allowance}}{4}
+                  \\times \\text{Completed 6-Month Period (Max 66)}
+                  \\)
+                </td>
               </tr>
 
               <tr>
-                <td colspan="4">Leave Encashment</td>
-                <td colspan="4" id="leaveEncash"></td>
+                <td></td>
+                <td colspan="11">
+                  \\(
+                  \\text{=}
+                  \\displaystyle \\frac{\\text{${formatCurrency(lastPay)}} + \\text{${formatCurrency(daValue)}}}{4}
+                  \\times \\text{${sixMonthly}}
+                  \\quad \\color{red}{\\text{${cappedsixMonthly}}}
+                  \\)
+                </td>
+              </tr>
+              <tr>
+                <td>Gratuity</td>
+                <td colspan="11">
+                  <b>= ${formatCurrency(Gratuity)}</b>
+                </td>
+              </tr>
+              <tr>
+                <th colspan="12"><b>3. Most Benificial Pay Calculation</b></th>
+              </tr>
+              <tr>
+                <td> a). Average Emolument </td>
+                <td colspan="5"> = 50% of Average Basic pay of Last 10 Months</td>
+                <td> b). Last Drawn</td>
+                <td colspan="5"> = 50% of Last Drawn Basic pay</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="5"> = 50% x ${formatCurrency(avgEmol)}</td>
+                <td></td>
+                <td colspan="5"> = 50% x ${formatCurrency(lastPay)}</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="5"> = ${formatCurrency(benificialPay1)}</td>
+                <td></td>
+                <td colspan="5"> = ${formatCurrency(benificialPay2)}</td>
+              </tr>
+              <tr>
+                <td>More Benificial Pay</td>
+                <td colspan="11">= ${formatCurrency(moreBenificialPay)}</td>
+              </tr>
+              <tr>
+                <th colspan="12"><b>4. Commutation Callculation</b></th>
+              </tr>
+              <tr>
+                <td>Basic Pay for Commutation</td>
+                <td colspan="11">Benificial Pay x Commutation (%)</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="11">${formatCurrency(moreBenificialPay)} x ${commutationPercent}%</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="11">${formatCurrency(commutationBasicPay)}</td>
               </tr>
 
             </tbody>
           `;
 
-          wrapper.appendChild(pensionTable);
-        }
+        wrapper.appendChild(calculationTable);
+        setTimeout(() => {
+          renderMathInElement(calculationTable, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "\\(", right: "\\)", display: false }
+            ]
+          });
+        }, 0);
+       
+
+        // =========================
+        // 🔥 Pension Table
+        // =========================
+        const pensionTable = document.createElement("table");
+
+        pensionTable.style.cssText = `
+            width:100%;
+            border-collapse:collapse;
+            font-size:11px;
+            border:1px solid #ccc;
+          `;
+
+        pensionTable.innerHTML = `
+            <colgroup>
+              <col style="width:60%">
+              <col style="width:40%">
+            </colgroup>
+
+            <thead>
+              <tr>
+                <th colspan="2" style="background:#1f4e79;color:white;padding:8px;">
+                  Pension Benefits Calculation
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td><b>Basic Pension</b></td>
+                <td id="basicPension"></td>
+              </tr>
+              <tr>
+                <td>Commuted Portion</td>
+                <td id="commutedValue"></td>
+              </tr>
+              <tr>
+                <td>Residual Pension</td>
+                <td id="residualPension"></td>
+              </tr>
+              <tr>
+                <td>Gratuity</td>
+                <td id="gratuity"></td>
+              </tr>
+              <tr>
+                <td>Leave Encashment</td>
+                <td id="leaveEncash"></td>
+              </tr>
+            </tbody>
+          `;
+
+        wrapper.appendChild(pensionTable);
+      }
 
       const pensionmenu = id("PensionprintMenu");
       const pensionprintBtn = id("PensionprintBtn");
@@ -16489,7 +17116,6 @@
         pensionmenu.classList.remove("show");
       });
 
-      
       function updatePensionPrintMenuState() {
         const hasEmp = id("PensionPage_Emp")?.value;
         const hasStation = id("PensionPage_Station")?.value;
@@ -16507,8 +17133,6 @@
           }
         });
       }
-
-
 
       document.querySelectorAll(".menu-option").forEach((opt) => {
         opt.addEventListener("click", function () {
@@ -16541,32 +17165,30 @@
         });
       });
 
+      function handlePensionChange() {
+        document
+          .querySelectorAll(".Pensionaction-group button")
+          .forEach((btn) => {
+            btn.disabled = false;
+          });
 
-      ["PensionPage_Station", "PensionPage_Emp"].forEach((idName) => {
-        id(idName)?.addEventListener("change", () => {
-          handlePensionChange();
-        });
-      });
-
-      function handlePensionChange(){
-        document.querySelectorAll(".Pensionaction-group button").forEach((btn) => {
-          btn.disabled = false;
-        });
-
-        const empName = id("PensionPage_Emp").value
+        const empName = id("PensionPage_Emp").value;
         updatePensionPrintMenuState();
+        updatePensionUI();
         renderPensionTable(empName);
       }
 
       document.addEventListener("input", (e) => {
         if (
-          e.target.matches("#PensionFor, #VRS_Death_Date, #PensionEL, #PensionHPL, #CommutationOpted, #CommutationOption")
+          e.target.matches(
+            "#PensionPage_Station, #PensionPage_Emp,#PensionFor, #VRS_Death_Date, #PensionEL, #PensionHPL, #CommutationOpted, #CommutationOption",
+          )
         ) {
           const empName = id("PensionPage_Emp")?.value; // adjust if needed
+          handlePensionChange();
           renderPensionTable(empName);
         }
       });
-
     </script>
   </body>
 </html>
