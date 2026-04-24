@@ -255,9 +255,22 @@ def update_sbgexp():
         # 🔥 REMOVE HEADER ROW FROM INPUT
         # =========================
         cleaned_rows = []
+
         for row in edit_rows:
-            if str(row.get("Date", "")).strip().lower() == "date":
+            date_val = str(row.get("Date", "")).strip().lower()
+
+            # ❌ skip header
+            if date_val == "date":
                 continue
+
+            # ❌ skip blank rows
+            if not date_val or date_val == "none":
+                continue
+
+            # ❌ skip invalid rows
+            if not row.get("Station") or not row.get("SBG Expenditure Under"):
+                continue
+
             cleaned_rows.append(row)
 
         edit_rows = cleaned_rows
