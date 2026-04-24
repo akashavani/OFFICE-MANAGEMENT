@@ -1770,19 +1770,28 @@
       .katex {
         font-size: 16px !important;
         line-height: 1.4 !important;
+        display: inline-block;
+        text-align: left !important;
       }
 
       .katex-display {
-        margin: 0 !important;
+        text-align: left !important; /* 🔥 overrides center */
+        margin: 4px 0 !important;
       }
 
       .katex .frac-line {
         border-bottom-width: 1px !important;
       }
 
+      .print-red {
+        color: red !important;
+        font-weight: bold !important;
+      }
+
       /* ===============================================
      RESPONSIVE (STACK ON ZOOM / SMALL WIDTH)
   =================================================== */
+
       @media (max-width: 1200px) {
         .SalarySlipTableWrapper {
           width: 70%;
@@ -2576,9 +2585,9 @@
                       </tr>
                       <tr>
                         <td style="font-weight: bold">IRLA/LOCAL CODE:</td>
-                        <td colspan="4"></td>
+                        <td colspan="3"></td>
                         <td style="font-weight: bold">HRIS CODE:</td>
-                        <td id="SShris"></td>
+                        <td colspan="2" id="SShris"></td>
                       </tr>
                       <tr>
                         <td style="font-weight: bold">SALARY OFFICE:</td>
@@ -6319,343 +6328,6 @@
       }
 
       let isResetMode = false;
-
-      function updateDAAFromPBDB2(rowElements) {
-        const inputDA = Math.min(num(id("PayBillPage_DA%").value), 150);
-        const selectedMonth = id("PayBillPage_SalMonth")?.value;
-
-        if (!selectedMonth) return;
-        if (isResetMode) return;
-
-        const [mon, year] = selectedMonth.split("-");
-
-        const monthMap = {
-          Jan: 1,
-          Feb: 2,
-          Mar: 3,
-          Apr: 4,
-          May: 5,
-          Jun: 6,
-          Jul: 7,
-          Aug: 8,
-          Sep: 9,
-          Oct: 10,
-          Nov: 11,
-          Dec: 12,
-        };
-
-        const selectedNum = monthMap[mon];
-
-        rowElements.forEach(({ tr }) => {
-          const table = tr.closest("table");
-          const isGO = table?.id === "PB_GOEditTbl";
-          const isNPS = table?.id === "PB_NPSEditTbl";
-
-          const empName = tr.children[0]?.innerText?.trim();
-          if (!empName) return;
-
-          const history = getPBDBHistory(empName);
-          if (!history.length) {
-            setValue(tr._cells["DAA"], 0);
-            setValue(tr._cells["DAA on TA"], 0);
-            return;
-          }
-
-          // 🔥 SORT
-          history.sort(
-            (a, b) => parseMonthYear(a.month) - parseMonthYear(b.month),
-          );
-
-          const selectedIndex = history.findIndex(
-            (r) => r.month === selectedMonth,
-          );
-
-          if (selectedIndex <= 0) {
-            setValue(tr._cells["DAA"], 0);
-            setValue(tr._cells["DAA on TA"], 0);
-            return;
-          }
-
-          const prevDA = history[selectedIndex - 1].da;
-
-          // ❌ NO CHANGE
-          if (inputDA === prevDA) {
-            setValue(tr._cells["DAA"], 0);
-            setValue(tr._cells["DAA on TA"], 0);
-            return;
-          }
-
-          let totalDAA = 0;
-          let totalDAA_TA = 0;
-
-          let startMonth = null;
-          let endMonth = null;
-
-          // 🔥 CHECK BLOCK 1 CHANGE
-          let block1HasChange = false;
-
-          for (let i = 1; i < history.length; i++) {
-            const [m] = history[i].month.split("-");
-            const mNum = monthMap[m];
-
-            if (mNum <= 6 && history[i].da !== history[i - 1].da) {
-              block1HasChange = true;
-              break;
-            }
-          }
-
-          // 🔥 DETERMINE BLOCK
-          let blockStart, blockEnd;
-
-          if (selectedNum <= 6) {
-            blockStart = 1;
-            blockEnd = 6;
-          } else {
-            blockStart = 7;
-            blockEnd = 12;
-          }
-
-          // 🔥 CASE 3 → Jan to previous month
-          //const useFullRange = selectedNum > 6 && !block1HasChange;
-          let calcDetails = [];
-          history.forEach((r) => {
-            const rVal = parseMonthYear(r.month);
-            const selVal = parseMonthYear(selectedMonth);
-
-            // 🔹 ONLY BEFORE SELECTED MONTH
-            if (rVal >= selVal) return;
-
-            // 🔹 SAME YEAR ONLY (CRITICAL)
-            const [, ry] = r.month.split("-");
-            if (parseInt(ry) !== parseInt(year)) return;
-
-            const mNum = monthMap[r.month.split("-")[0]];
-
-            // 🔥 CASE 1: Jan–Jun selection
-            if (selectedNum <= 6) {
-              if (mNum >= selectedNum) return;
-            }
-
-            // 🔥 CASE 2: Jul–Dec selection
-            else {
-              // 🔥 CHECK if change exists in Jan–Jun (CURRENT YEAR ONLY)
-              let block1HasChange = false;
-
-              for (let i = 1; i < history.length; i++) {
-                const [pm, py] = history[i].month.split("-");
-                const pNum = monthMap[pm];
-                const pYear = parseInt(py);
-
-                if (
-                  pYear === parseInt(year) &&
-                  pNum <= 6 &&
-                  history[i].da !== history[i - 1].da
-                ) {
-                  block1HasChange = true;
-                  break;
-                }
-              }
-
-              if (block1HasChange) {
-                // 🔹 change happened in block1 → only block2
-                if (mNum < 7 || mNum >= selectedNum) return;
-              } else {
-                // 🔥 NO change in block1 → FULL RANGE (KEY FIX)
-                if (mNum >= selectedNum) return;
-              }
-            }
-
-            // 🔥 ONLY OLD DA BLOCK (KEEP THIS — IMPORTANT)
-            if (r.da >= inputDA) return;
-
-            // =========================
-            // 🔹 DAA (BASIC PAY)
-            // =========================
-            const basic = num(r.basic);
-
-            const oldAmt = basic * (r.da / 100);
-            const newAmt = basic * (inputDA / 100);
-
-            const diff = newAmt - oldAmt;
-
-            // =========================
-            // 🔹 DAA on TA
-            // =========================
-            const ta = num(r.ta);
-
-            const oldTA = ta * (r.da / 100);
-            const newTA = ta * (inputDA / 100);
-
-            const diffTA = newTA - oldTA;
-
-            if (diff > 0) {
-              totalDAA += diff;
-              totalDAA_TA += diffTA;
-
-              const daaRounded = Math.round(diff);
-              const daaTArounded = Math.round(diffTA);
-
-              // 🔥 DEFAULT
-              let oldnpse = 0;
-              let newnpse = 0;
-              let oldnpsc = 0;
-              let newnpsc = 0;
-              let totalDAAnpse = 0;
-              let totalDAAnpsc = 0;
-              let diffDAAnpse = 0;
-              let diffDAAnpsc = 0;
-              let diffDAAnps = 0;
-
-              // 🔥 ONLY FOR NPS TABLE
-              if (isNPS) {
-                const daaTotal = daaRounded + daaTArounded;
-
-                oldnpse = Math.round((oldAmt + basic) * 0.14);
-                newnpse = Math.round((newAmt + basic) * 0.14);
-                oldnpsc = Math.round((oldAmt + basic) * 0.1);
-                newnpsc = Math.round((newAmt + basic) * 0.1);
-                diffDAAnpse = newnpse - oldnpse;
-                diffDAAnpsc = newnpsc - oldnpsc;
-                diffDAAnps = diffDAAnpse + diffDAAnpsc;
-              }
-
-              calcDetails.push({
-                emp: empName,
-                month: r.month,
-
-                basic: basic,
-                ta: ta,
-
-                oldDApercent: r.da,
-                newDApercent: inputDA,
-
-                oldDA: Math.round(oldAmt),
-                newDA: Math.round(newAmt),
-
-                oldTA: Math.round(ta + oldTA),
-                newTA: Math.round(ta + newTA),
-
-                diffDA: Math.round(daaRounded),
-                diffTA: Math.round(daaTArounded),
-
-                totalDA: Math.round(totalDAA),
-                totalTA: Math.round(totalDAA_TA),
-
-                totalDAArrears: Math.round(totalDAA + totalDAA_TA),
-
-                // 🔥 CONDITIONAL
-                oldNPSE: oldnpse,
-                newNPSE: newnpse,
-                oldNPSC: oldnpsc,
-                newNPSC: newnpsc,
-                diffDAANPSE: diffDAAnpse,
-                diffDAANPSC: diffDAAnpsc,
-                diffDAANPS: diffDAAnps,
-                type: isGO ? "GO" : "NPS", // 🔥 useful for render
-              });
-
-              const [m] = r.month.split("-");
-              if (!startMonth) startMonth = m;
-              endMonth = m;
-            }
-          });
-
-          // ✅ SET VALUES
-          setValue(tr._cells["DAA"], Math.round(totalDAA) || 0);
-          setValue(tr._cells["DAA on TA"], Math.round(totalDAA_TA) || 0);
-          tr._daaDetails = calcDetails;
-          // =========================
-          // 🔹 ARREAR DETAILS (TEXTAREA SAFE)
-          // =========================
-          const arrearInput = tr._cells["Arrears Details"];
-
-          if (arrearInput) {
-            if (totalDAA > 0 && startMonth && endMonth) {
-              const year = selectedMonth.split("-")[1];
-
-              const text = `DAA (${prevDA}% to ${inputDA}%) ${startMonth} to ${endMonth} ${year}`;
-
-              // 🔥 update ONLY if:
-              // 1. empty OR
-              // 2. previously auto-generated
-              if (!arrearInput.value || arrearInput.dataset.auto === "true") {
-                arrearInput.value = text;
-                arrearInput.dataset.auto = "true"; // mark as auto
-              }
-            } else {
-              // ❌ no arrear → clear only if auto
-              if (arrearInput.dataset.auto === "true") {
-                arrearInput.value = "";
-              }
-            }
-          }
-
-          // =========================
-          // 🔹 GO TABLE → FORCE ZERO
-          // =========================
-          if (table && table.id === "PB_GOEditTbl") {
-            const npseDAAInput = tr._cells["DAA on NPSE"];
-            const npscDAAInput = tr._cells["DAA on NPSC"];
-            const npseDedDAAInput = tr._cells["DAA on NPSE ded"];
-
-            setValue(npseDAAInput, 0);
-            setValue(npscDAAInput, 0);
-            setValue(npseDedDAAInput, 0);
-
-            // mark as auto
-            npseDAAInput.dataset.auto = "true";
-            npscDAAInput.dataset.auto = "true";
-
-            setValue(getCellInput(tr, "DAA on NPS"), 0);
-
-            // Total DAA without NPS
-            setValue(
-              getCellInput(tr, "Total DAA"),
-              Math.round(totalDAA + totalDAA_TA),
-            );
-
-            return; // 🔥 stop here
-          }
-
-          // =========================
-          // 🔹 NPS TABLE → NORMAL CALC
-          // =========================
-          if (!table || table.id !== "PB_NPSEditTbl") return;
-
-          const daaValue = Math.round(totalDAA) || 0;
-
-          const npseInput = tr._cells["DAA on NPSE"];
-          const npscInput = tr._cells["DAA on NPSC"];
-          const npseDedInput = tr._cells["DAA on NPSE ded"];
-
-          // 🔥 ALWAYS RECALCULATE IF AUTO (fixes stale issue)
-          if (npseInput.dataset.auto !== "false") {
-            setValue(npseInput, Math.round(daaValue * 0.14));
-            setValue(npseDedInput, Math.round(daaValue * 0.14));
-            npseInput.dataset.auto = "true";
-          }
-
-          if (npscInput.dataset.auto !== "false") {
-            setValue(npscInput, Math.round(daaValue * 0.1));
-            npscInput.dataset.auto = "true";
-          }
-
-          // 🔹 FINAL VALUES (manual or auto)
-          const daaNPSE = num(npseInput.value);
-          const daaNPSC = num(npscInput.value);
-
-          // 🔹 TOTALS
-          setValue(
-            getCellInput(tr, "DAA on NPS"),
-            Math.round(daaNPSE + daaNPSC),
-          );
-
-          setValue(
-            getCellInput(tr, "Total DAA"),
-            Math.round(totalDAA + totalDAA_TA + daaNPSE),
-          );
-        }); //To Create DAA Calculation Table
-      }
 
       function updateDAAFromPBDB(rowElements) {
         const inputDA = Math.min(num(id("PayBillPage_DA%").value), 150);
@@ -10454,7 +10126,7 @@
 
             sheet.addImage(imageId, {
               tl: { col: 0.2, row: 0.2 },
-              ext: { width: 70, height: 60 },
+              ext: { width: 65, height: 65 },
             });
           }
 
@@ -10575,7 +10247,7 @@
 
           sheet.addImage(imageId, {
             tl: { col: 1, row: 0 },
-            ext: { width: 75, height: 75 },
+            ext: { width: 65, height: 65 },
           });
 
           /* ===== EXTRACT TABLE ===== */
@@ -10825,7 +10497,7 @@
         await createSheet(npsHTML, "NPS");
 
         const buffer = await workbook.xlsx.writeBuffer();
-        saveAs(new Blob([buffer]), `${station}_PayBill_${month}.xlsx`);
+        saveAs(new Blob([buffer]), `${station} PayBill ${month}.xlsx`);
       }
 
       //===========================Budget Page Script =================== //
@@ -13354,8 +13026,8 @@
             });
 
             sheet.addImage(imageId, {
-              tl: { col: 0, row: 0 },
-              ext: { width: 80, height: 80 },
+              tl: { col: 0.2, row: 0.2 },
+              ext: { width: 65, height: 65 },
             });
           }
 
@@ -13401,8 +13073,8 @@
 
         const fileName =
           mode === "single"
-            ? `${selectedEmp}_${selectedMonth}_SalarySlip.xlsx`
-            : `${station}_${selectedMonth}_SalarySlips.xlsx`;
+            ? `${selectedEmp}-${selectedMonth} SalarySlip.xlsx`
+            : `${station}-${selectedMonth} SalarySlips.xlsx`;
 
         saveAs(new Blob([buffer]), fileName);
 
@@ -14710,7 +14382,7 @@
       </colgroup>
       <thead>
         <tr>
-          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:12px; color:white;padding:10px;">
+          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:12px; color:white;padding:10px;" class="rowITregimeHeader">
             Old Tax Regime Calculation for FY ${ITfy}
             ${
               bestRegime === "Old Tax Regime"
@@ -14792,7 +14464,7 @@
       </colgroup>
       <thead>
         <tr>
-          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:12px; color:white;padding:10px;">
+          <th colspan="7" style="background: #1f4e79; text-align:center; font-size:12px; color:white;padding:10px;" class="rowITregimeHeader">
             New Tax Regime Calculation for FY ${ITfy}
             ${
               bestRegime === "New Tax Regime"
@@ -15834,8 +15506,8 @@
 
         const fileName =
           mode === "single"
-            ? `${selectedEmp}_IT Calculation.xlsx`
-            : `${station}_IT Calculations.xlsx`;
+            ? `${selectedEmp}-IT Calculation.xlsx`
+            : `${station}-IT Calculations.xlsx`;
 
         saveAs(new Blob([buffer]), fileName);
       }
@@ -15853,7 +15525,10 @@
 
       function removeNumberFormatting(root) {
         root.querySelectorAll("td, th").forEach((cell) => {
-          // ✅ If cell contains <b> or <strong>, handle differently
+          // 🔥 1. SKIP KATEX CELLS COMPLETELY
+          if (cell.querySelector(".katex")) return;
+
+          // 🔥 2. HANDLE BOLD ELEMENTS SAFELY
           const boldEl = cell.querySelector("b, strong");
 
           if (boldEl) {
@@ -15862,24 +15537,28 @@
             const clean = text.replace(/[₹,]/g, "").trim();
 
             if (!isNaN(clean) && clean !== "") {
-              boldEl.textContent = clean; // ✅ update INSIDE <b>
+              boldEl.textContent = clean;
             } else {
               boldEl.textContent = text.replace(/[₹,]/g, "");
             }
 
-            return; // ✅ skip normal processing
+            return;
           }
 
-          // ✅ Normal cells
-          let text = cell.textContent;
+          // 🔥 3. CLEAN ONLY TEXT NODES (NOT HTML)
+          cell.childNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              let text = node.textContent;
 
-          const clean = text.replace(/[₹,]/g, "").trim();
+              const clean = text.replace(/[₹,]/g, "").trim();
 
-          if (!isNaN(clean) && clean !== "") {
-            cell.textContent = clean;
-          } else {
-            cell.textContent = text.replace(/[₹,]/g, "");
-          }
+              if (!isNaN(clean) && clean !== "") {
+                node.textContent = clean;
+              } else {
+                node.textContent = text.replace(/[₹,]/g, "");
+              }
+            }
+          });
         });
       }
 
@@ -15985,68 +15664,74 @@
         const style = doc.createElement("style");
 
         style.textContent = `
-    @page {
-      size: A4 potrait;
-      margin-top: 5mm;
-      margin-right: 5mm;
-      margin-left: 5mm;
-      margin-bottom: 10mm; /* 🔥 increase bottom */
-    }
-    body {
-      margin: 0;
-      background: white;
-      font-size: 9px !important;
-    }
+          @page {
+            size: A4 potrait;
+            margin-top: 5mm;
+            margin-right: 5mm;
+            margin-left: 5mm;
+            margin-bottom: 10mm; /* 🔥 increase bottom */
+          }
+          body {
+            margin: 0;
+            background: white;
+            font-size: 9px !important;
+          }
 
-    .page {
-      margin: 0 auto;
-      page-break-after: always;
-      padding-right: 2mm;
-    }
+          .page {
+            margin: 0 auto;
+            page-break-after: always;
+            padding-right: 2mm;
+          }
 
-    .page:last-child {
-      page-break-after: auto;
-    }
+          .page:last-child {
+            page-break-after: auto;
+          }
 
-    .page * {
-      overflow: visible !important;
-      max-height: none !important;
-      height: auto !important;      
-      font-size:9px !important;
-    }
+          .page * {
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;      
+            font-size:9px !important;
+          }
 
-    input{
-      background:white;
-      border:none;
-      outline:none;
-      width:80px;
-      padding:0;
-      height:max-content;
-    }
+          input{
+            background:white;
+            border:none;
+            outline:none;
+            width:80px;
+            padding:0;
+            height:max-content;
+          }
 
-    img {
-      display:block;
-      max-width: 60px !important;
-      max-height: 60px !important;
-      display: inline-block !important;
-    }
+          img {
+            display:block;
+            max-width: 60px !important;
+            max-height: 60px !important;
+            display: inline-block !important;
+          }
 
-    tr {
-      page-break-inside: avoid;
-    }
+          tr {
+            page-break-inside: avoid;
+          }
 
-    td, th {
-      
-      padding:3px !important;
-      height:20px;
-    }
+          td, th {
+            
+            padding:3px !important;
+            height:20px;
+          }
 
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-    }
-  `;
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+
+          .rowITregimeHeader {
+            height:30px !important;
+            min-height:30px !important;
+            padding:10px !important;
+          }
+        `;
 
         doc.head.appendChild(style);
 
@@ -16349,57 +16034,12 @@
         }
       }
 
-      function buildEmolumentHTMLVertical(data) {
-        let total = 0;
-
-        let html = `
-          <table style="width:100%; border-collapse:collapse; font-size:11px;">
-            <thead>
-              <tr>
-                <th colspan="3" style="text-align:center;background:#e5e7eb;">
-                  Last 10 Month Emolument
-                </th>
-              </tr>
-              <tr>
-                <th>Month</th>
-                <th>Basic Pay</th>
-                <th>Index</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        data.forEach((r) => {
-          total += Number(r.basic) || 0;
-
-          html += `
-            <tr>
-              <td>${r.month}</td>
-              <td>${r.basic}</td>
-              <td>${r.index}</td>
-            </tr>
-          `;
-        });
-
-        html += `
-            <tr style="font-weight:bold;background:#fef3c7;">
-              <td>Total</td>
-              <td>${total.toLocaleString("en-IN")}</td>
-              <td></td>
-            </tr>
-          </tbody>
-          </table>
-        `;
-
-        return html;
-      }
-
       function buildEmolumentHTML(data) {
         let total = 0;
 
         // 🔹 Rows
-        let monthRow = "<tr><th>Month</th>";
-        let basicRow = "<tr><th>Basic Pay</th>";
+        let monthRow = "<tr><td>Month</td>";
+        let basicRow = "<tr><td>Basic Pay</td>";
         //let indexRow = "<tr><th>Index</th>";
 
         data.forEach((r) => {
@@ -16412,7 +16052,7 @@
         });
 
         // 🔹 Add TOTAL as last column
-        monthRow += `<th>Total</th></tr>`;
+        monthRow += `<td style="font-weight:bold;background:#fef3c7;">Total</td></tr>`;
         basicRow += `<td style="font-weight:bold;background:#fef3c7;">${formatCurrency(total)}</td></tr>`;
         //indexRow += `<td></td></tr>`; // empty cell under Total
 
@@ -16654,17 +16294,27 @@
 
         let r = empty();
 
+        // 🔥 ADD THIS
+        const dates = calculatePensionDates(); // your existing function
+
         // =========================
-        // 🔴 RULE 0: Non-GO → Not Applicable for all except gratuity
+        // 🔴 RULE 0: Non-GO → EMPTY
         // =========================
+        const npsMsg = "(Not Applicable under NPS Rule)";
+
         if (dept !== "GO") {
-          r.sup = "(Not Applicable due to NPS Rule)";
-          r.enh = "(Not Applicable due to NPS Rule)";
-          r.red = "(Not Applicable due to NPS Rule)";
-          r.commute = "(Not Applicable due to NPS Rule)";
-          r.ben = "(Not Applicable due to NPS Rule)";
-          // 🔥 gratuity still allowed → no override
-          return r;
+          ["sup", "enh", "red", "commute", "ben"].forEach((k) => {
+            r[k] = npsMsg;
+          });
+
+          // 🔥 IMPORTANT → return EMPTY dates
+          return {
+            remarks: r,
+            dates: {
+              enhancedTo: "",
+              reducedFrom: "",
+            },
+          };
         }
 
         // =========================
@@ -16691,7 +16341,7 @@
           r.red = r.red || "(Not Eligible since Service < 10 Years)";
           r.commute = "(Not Eligible since Service < 10 Years)";
           r.ben = "(Not Eligible since Service < 10 Years)";
-          return r;
+          return { remarks: r, dates }; // 🔥 return both
         }
 
         // =========================
@@ -16717,7 +16367,7 @@
           r.ben = "(Not Applicable)";
         }
 
-        return r;
+        return { remarks: r, dates }; // 🔥 return both
 
         function empty() {
           return {
@@ -16943,54 +16593,43 @@
         // -------------------------
         // TEXT FORMULA
         // -------------------------
-        if (
-          pensionType === "FamPen_inService" &&
-          gratuityFactor > 0 &&
-          sixMonthly < 40
-        ) {
-          // ✅ ALWAYS slab for <40
-          formulaText = `
-          \\text{(Basic Pay + DA)} \\times ${gratuityFactor}
-          `;
-        } else if (gratuityFactor > 0) {
-          // ✅ fraction for others
-          formulaText = `
-          \\displaystyle \\frac{\\text{Basic Pay + DA}}{4}
-          \\times \\text{Completed 6 month Period}
-          `;
+        if (gratuityFactor > 0) {
+          if (Number.isInteger(gratuityFactor)) {
+            // 🔹 slab case (2, 6, 12, 20)
+            formulaText = `
+              \\text{(BP + DA)} \\times ${gratuityFactor}
+            `;
+          } else {
+            // 🔹 fraction case (sixMonthly / 4)
+            formulaText = `
+              \\text{(BP + DA)} 
+              \\times \\frac{${sixMonthly}}{4}
+            `;
+          }
         } else {
           formulaText = `
-          \\text{ Not Eligible since Completed Service is Less than 5 Years}
+            \\text{ Not Eligible since Completed Service is Less than 5 Years}
           `;
         }
-
         // -------------------------
         // VALUE FORMULA
         // -------------------------
-        if (
-          pensionType === "FamPen_inService" &&
-          gratuityFactor > 0 &&
-          sixMonthly < 40
-        ) {
-          // ✅ slab value display
-          formulaValueText = `
-          \\text{=}
-          \\text{(${formatCurrency(lastPay)} + ${formatCurrency(daValue)})}
-          \\times ${gratuityFactor}
-          `;
-        } else if (gratuityFactor > 0) {
-          // ✅ fraction value display
-          formulaValueText = `
-          \\text{=}
-          \\displaystyle \\frac{
-            \\text{${formatCurrency(lastPay)} + ${formatCurrency(daValue)}}
-          }{4}
-          \\times ${sixMonthly}
-          `;
+        if (gratuityFactor > 0) {
+          if (Number.isInteger(gratuityFactor)) {
+            formulaValueText = `
+              \\text{=}
+              \\text{(${formatCurrency(lastPay)} + ${formatCurrency(daValue)})}
+              \\times ${gratuityFactor}
+            `;
+          } else {
+            formulaValueText = `
+              \\text{=}
+              \\text{(${formatCurrency(lastPay)} + ${formatCurrency(daValue)})}
+              \\times \\frac{${sixMonthly}}{4}
+            `;
+          }
         } else {
-          formulaValueText = `
-          \\text{= ₹ 0}
-          `;
+          formulaValueText = `\\text{= ₹ 0}`;
         }
 
         const benificialPay1 = Math.round(0.5 * avgEmol);
@@ -17026,7 +16665,7 @@
         const supDA = Math.round((Number(supBasicPay) * Number(lastDA)) / 100);
         enhBasicPay = moreBenificialPay;
         const enhDA = Math.round((Number(enhBasicPay) * Number(lastDA)) / 100);
-        redBasicPay = Math.round(Number(moreBenificialPay) * 0.3);
+        redBasicPay = Math.round((Number(moreBenificialPay) * 0.3) / 0.5);
         const redDA = Math.round((Number(redBasicPay) * Number(lastDA)) / 100);
 
         if (sixMonthly >= 20) {
@@ -17098,14 +16737,14 @@
 
             <tr style="background:#e9ecef;">
               <th colspan="12" style="padding:6px;text-align:center;">
-                EMPLOYEE DETAILS FOR PENSION BENEFITS CALCULATION
+                SERVICE DETAILS IN r/o ${empName.toUpperCase()}
               </th>
             </tr>
 
             <tr>
               <td colspan="3"><b>Employee Name</b></td>
               <td colspan="3">${empName}</td>
-              <td colspan="3"<b>Pension Calculation For</b></td>
+              <td colspan="3"><b>Pension Calculation For</b></td>
               <td colspan="3">${pensionTypetext}</td>
             </tr>
 
@@ -17119,7 +16758,7 @@
             <tr>
               <td colspan="3"><b>PAN</b></td>
               <td colspan="3">${pan}</td>
-              <td colspan="3"><b>Last Pay Drawn</b></td>
+              <td colspan="3"><b>Last Salary Drawn on</b></td>
               <td colspan="3">${dor}</td>
             </tr>
 
@@ -17138,9 +16777,9 @@
             </tr>
 
             <tr>
-              <td colspan="3"><b>Last Drawn Basic Pay</b></td>
+              <td colspan="3"><b>Last Drawn Basic Pay <span style="padding:4px;border-radius:3px;background:#fabe5c;width:20px">(BP)</span></b></td>
               <td colspan="3">${formatCurrency(lastPay)}</td>
-              <td colspan="3"><b>Last Drawn DA</b></td>
+              <td colspan="3"><b>Last Drawn DA <span style="padding:4px;border-radius:3px;background:#fabe5c;width:20px">(DA)</span></b></td>
               <td colspan="3">${formatCurrency(daValue)} (${lastDA}%)</td>
             </tr>
 
@@ -17207,36 +16846,36 @@
             <thead>
               <tr>
                 <th colspan="12" style="background:#1f4e79;color:white;padding:8px;text-align:center">
-                  Pension Benefits Calculation
+                  PENSION BENIFITS CALCULATION IN r/o ${empName.toUpperCase()}
                 </th>
               </tr>
             </thead>
 
             <tbody>
               <tr >
-                <th colspan="12" style="background:#edf1fa;color:black;"><b>1. Leave Encashment Calculation </b></th>
+                <th colspan="12" style="background:#edf1fa;color:black;"><b>1. LEAVE ENCASHMENT CALCULATION </b></th>
               </tr>
               <tr>
                 <td colspan="2">EL Encashment</td>
                 <td colspan="4" style="text-align:left; vertical-align:middle;">
                    \\(
                   \\text{=} 
-                  \\displaystyle \\frac{\\text{Basic Pay} + \\text{Dearness Allowance}}{30}
-                  \\times \\text{EL (Max Limit upto 300)}
+                  \\displaystyle \\frac{\\text{BP} + \\text{DA}}{30}
+                  \\times \\text{EL (capped to 300)}
                   \\)
                 </td>
                 <td colspan="2">HPL Encashment</td>
                 <td colspan="4" style="text-align:left; vertical-align:middle;">
                   \\(
                   \\text{=}
-                  \\displaystyle \\frac{\\text{Basic Pay} + \\text{Dearness Allowance}}{2 \\times 30}
-                  \\times \\text{HPL (Max Limit upto 240)}
+                  \\displaystyle \\frac{\\text{BP} + \\text{DA}}{2 \\times 30}
+                  \\times \\text{HPL (capped to 240)}
                   \\)
                 </td>
               </tr>
               <tr>
                 <td colspan="2"></td>
-                <td colspan="4" style="text-align:left; vertical-align:middle; white-space:nowrap;">
+                <td colspan="4" style="text-align:left; vertical-align:middle;">
                   
                   \\(
                   \\text{=}
@@ -17247,7 +16886,7 @@
 
                 </td>
                 <td colspan="2"></td>
-                <td colspan="4" style="text-align:left; vertical-align:middle; white-space:nowrap;">
+                <td colspan="4" style="text-align:left; vertical-align:middle;">
                   \\(
                   \\text{=}
                   \\displaystyle \\frac{\\text{${formatCurrency(hplLastPay)}} + \\text{${formatCurrency(hpldaValue)}}}{30}
@@ -17281,7 +16920,7 @@
               </tr>
 
               <tr>
-                <th colspan="12" style="background:#edf1fa;color:black;"><b>2. Gratuity Calculation <span style="color:red" id="gratuitySpan"></span></b></th>
+                <th colspan="12" style="background:#edf1fa;color:black;"><b>2. GRATUITY CALCULATION <span class="print-red" id="gratuitySpan"></span></b></th>
               </tr>
               <tr>
                 <td colspan="2">Gratuity</td>
@@ -17307,13 +16946,13 @@
                 </td>
               </tr>
               <tr>
-                <th colspan="12" style="background:#edf1fa;color:black;"><b>3. Most Benificial Pay Calculation for Pension Benifits <span style="color:red" id="BenificialSpan"></b></th>
+                <th colspan="12" style="background:#edf1fa;color:black;"><b>3. MOST BENIFICIAL PAY FOR PENSION CALCULATION <span class="print-red" id="BenificialSpan"></b></th>
               </tr>
               <tr class="BenificialRows">
                 <td colspan="2"> a). Average Emolument </td>
                 <td colspan="4"> = 50% of Average Basic pay of Last 10 Months</td>
                 <td colspan="2"> b). Last Drawn</td>
-                <td colspan="4"> = 50% of Last Drawn Basic pay</td>
+                <td colspan="4"> = 50% of BP</td>
               </tr>
               <tr class="BenificialRows">
                 <td colspan="2"></td>
@@ -17332,7 +16971,7 @@
                 <td colspan="10"><b>= ${formatCurrency(moreBenificialPay)}</b></td>
               </tr>
               <tr>
-                <th colspan="12"  style="background:#edf1fa;color:black;"><b>4. Commutation Calculation <span style="color:red" id="CommuteSpan"></span></b></th>
+                <th colspan="12"  style="background:#edf1fa;color:black;"><b>4. COMMUTATION CALCULATION <span class="print-red" id="CommuteSpan"></span></b></th>
               </tr>
               <tr class="CommuteRows">
                 <td colspan="2">Basic Pay for Commutation</td>
@@ -17364,11 +17003,11 @@
                 <td colspan="10"><b>= ${formatCurrency(commutation)}</b></td>
               </tr>
               <tr>
-                <td colspan="2" style="background:#edf1fa;color:black;"><b>5. Residual Pension</b></td>
+                <td colspan="2" style="background:#edf1fa;color:black;"><b>5. RESIDUAL PENSION</b></td>
                 <td colspan="10" style="background:#edf1fa;color:black;"><b>${formatCurrency(residualPension)}</b></td>
               </tr>
               <tr>
-                <th colspan="12"  style="background:#edf1fa;color:black;"><b>6. Superannuation Pension Calculation <span style="color:red" id="supPensionSpan"></span></b></th>
+                <th colspan="12"  style="background:#edf1fa;color:black;"><b>6. SUPERANNUATION PENSION CALCULATION <span class="print-red" id="supPensionSpan"></span></b></th>
               </tr>
               <tr class="supPensionRows">
                 <td colspan="3">Basic Pay</td>
@@ -17383,9 +17022,9 @@
                 <td colspan="3"><b>${formatCurrency(supPension)}</b></td>
               </tr>
                <tr>
-                <th colspan="12"  style="background:#edf1fa;color:black;"><b>7. Enhanced Pension Calculation 
-                  <span id="enhancedToDate" style="color:red"></span>
-                  <span style="color:red" id="enhPensionSpan"></span></b>
+                <th colspan="12"  style="background:#edf1fa;color:black;"><b>7. ENHANCED PENSION CALCULATION 
+                  <span id="enhancedToDate" class="print-red"></span>
+                  <span class="print-red" id="enhPensionSpan"></span></b>
                 </th>
               </tr>
               <tr class="enhPensionRows">
@@ -17402,9 +17041,9 @@
               </tr>
               </tr>
                <tr>
-                <th colspan="12"  style="background:#edf1fa;color:black;"><b>8. Reduced Pension Calculation 
-                  <span id="reducedFromDate" style="color:red"></span>
-                  <span style="color:red" id="redPensionSpan"></span></b>
+                <th colspan="12"  style="background:#edf1fa;color:black;"><b>8. REDUCED PENSION CALCULATION 
+                  <span id="reducedFromDate" class="print-red"></span>
+                  <span class="print-red" id="redPensionSpan"></span></b>
                 </th>
               </tr>
               <tr class="redPensionRows">
@@ -17431,7 +17070,8 @@
         }
 
         togglePensionSections(sixMonthly, pensionType);
-        const dates = calculatePensionDates(
+
+        const pensionDates = calculatePensionDates(
           dob,
           effectiveLastDate,
           pensionType,
@@ -17439,10 +17079,10 @@
 
         const isCommChecked = id("CommutationOpted")?.checked;
 
-        const remarks = getPensionRemarks(
+        const { remarks } = getPensionRemarks(
           sixMonthly,
           pensionType,
-          isCommChecked, // ✅ ADD THIS
+          isCommChecked,
         );
 
         ["sup", "enh", "red", "commute", "ben", "grat"].forEach((key) => {
@@ -17463,19 +17103,21 @@
             : "";
         });
 
-        id("enhancedToDate").textContent = dates.enhancedTo
-          ? ` (upto ${formatDate(dates.enhancedTo)})`
-          : "";
+        id("enhancedToDate").textContent =
+          !isNonGO && pensionDates.enhancedTo
+            ? ` (upto ${formatDate(pensionDates.enhancedTo)})`
+            : "";
 
-        id("reducedFromDate").textContent = dates.reducedFrom
-          ? ` (from ${formatDate(dates.reducedFrom)})`
-          : "";
+        id("reducedFromDate").textContent =
+          !isNonGO && pensionDates.reducedFrom
+            ? ` (from ${formatDate(pensionDates.reducedFrom)})`
+            : "";
 
         //setTimeout(() => {
         renderMathInElement(calculationTable, {
           delimiters: [
             { left: "$$", right: "$$", display: true },
-            { left: "\\(", right: "\\)", display: false },
+            { left: "\\(", right: "\\)", display: true }, // 🔥 change to true
           ],
         });
         //}, 0);
@@ -17727,75 +17369,82 @@
         const style = doc.createElement("style");
 
         style.textContent = `
-          @page {
-            size: A4 potrait;
-            margin-top: 5mm;
-            margin-right: 5mm;
-            margin-left: 5mm;
-            margin-bottom: 10mm; /* 🔥 increase bottom */
-          }
+            @page {
+              size: A4 portrait;
+              margin: 5mm;
+            }
 
-          body {
-            margin: 0;
-            background: white;
-            font-size: 10px !important;
-          }
+            body {
+              margin: 0;
+              font-size: 10px;
+            }
 
-          .page {
-            margin: 0 auto;
-            page-break-after: always;
-            padding-right: 2mm;
-          }
+            /* allow natural flow */
+            .page {
+              margin: 0 auto;
+              padding-right: 2mm;
+            }
 
-          .page:last-child {
-            page-break-after: auto;
-          }
+            /* tables */
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
 
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
+            /* allow row splitting if needed */
+            tr {
+              break-inside: auto;
+            }
 
-          td, th {
-            padding: 4px !important;
-            font-size: 10px !important;
-          }
+            /* cells */
+            td, th {
+              padding: 4px;
+              font-size: 10px;
+            }
 
-          tr {
-            page-break-inside: avoid;
-          }
+            /* ✅ REMOVE ONLY SCROLL (NO PAGE CONTROL HERE) */
+            .PensionTableWrapper,
+            .SectionPage,
+            .right-panel {
+              overflow: visible !important;
+              height: auto !important;
+              max-height: none !important;
+            }
 
-          /* 🔥 ONLY REMOVE SCROLLBARS (SAFE) */
-          .PensionTableWrapper,
-          .SectionPage,
-          .right-panel {
-            overflow: visible !important;
-            height: auto !important;
-            max-height: none !important;
-          }
+            /* ✅ KaTeX FIX */
+            .katex {
+              display: inline-block !important;
+              white-space: normal !important;
+              line-height: 1.4;
+            }
 
-          /* 🔥 HANDLE INTERNAL SCROLL AREAS ONLY */
-          [style*="overflow"],
-          .table-container {
-            overflow: visible !important;
-            max-height: none !important;
-          }
+            /* print colors */
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
 
-          /* 🔥 KEEP KATEX SAME (NO CHANGE) */
-          .katex {
-            display: inline-block !important;
-            white-space: nowrap !important;
-          }
+            #emolumentContainer, #calculationContainer, #pensionContainer{
+              border:none;
+              padding:0;
+            }
 
-          /* 🔥 HIDE SCROLLBAR UI */
-          ::-webkit-scrollbar {
-            display: none !important;
-          }
+            span {
+              color: inherit;
+            }
 
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
+            span[style*="color:red"] {
+              color: #d00000 !important;
+              -webkit-text-fill-color: #d00000 !important;
+              font-weight: bold !important;
+            }
+
+            @media print {
+              .print-red {
+                color: red !important;
+                font-weight: bold !important;
+              }
+            }
         `;
 
         doc.head.appendChild(style);
@@ -17845,12 +17494,19 @@
             if (inp.type === "checkbox") {
               span.textContent = inp.checked ? "✔" : "";
             } else {
-              span.textContent = inp.value || "";
+              let val = inp.value || "";
+
+              if (!isNaN(val.replace(/[,₹\s]/g, ""))) {
+                val = val.replace(/[,₹\s]/g, "");
+              }
+
+              span.textContent = val;
             }
 
             inp.replaceWith(span);
           });
 
+          removeNumberFormatting(clone);
           // =========================
           // 🔥 FIX 3: PRESERVE NESTED TABLES
           // =========================
@@ -17880,6 +17536,7 @@
 
           // 🔥 HEADER
           const header = buildPrintHeader(doc);
+          header.classList.add("print-header");
           page.appendChild(header);
 
           // 🔥 CONTENT
@@ -17904,11 +17561,10 @@
         const rows = window.empCalcRows;
 
         const nameIndex = headers.indexOf("Employee Name");
-
         const TOTAL_COLS = 12;
 
         // =========================
-        // 🔧 HELPERS (UNCHANGED)
+        // 🔧 HELPERS
         // =========================
         function parseValue(text) {
           if (!text) return "";
@@ -17916,22 +17572,31 @@
           return !isNaN(clean) && clean !== "" ? Number(clean) : text;
         }
 
+        function isVisible(el) {
+          const style = getComputedStyle(el);
+          return (
+            style.display !== "none" &&
+            style.visibility !== "hidden" &&
+            el.offsetParent !== null
+          );
+        }
+
+        function getFormulaText(cell) {
+          const katex = cell.querySelector(".katex-html");
+          if (katex) {
+            return katex.innerText.replace(/\s+/g, " ").trim();
+          }
+          return cell.innerText.trim();
+        }
+
         function getFontColor(color) {
           const m = color?.match(/\d+/g);
           if (!m || m.length < 3) return undefined;
-
-          const [r, g, b] = m.map(Number);
           return {
             argb:
               "FF" +
-              [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join(""),
+              m.map((x) => Number(x).toString(16).padStart(2, "0")).join(""),
           };
-        }
-
-        function isValidFill(bg) {
-          if (!bg || bg === "transparent") return false;
-          if (bg.includes("rgba") && bg.endsWith(", 0)")) return false;
-          return true;
         }
 
         function rgbToARGB(rgb) {
@@ -17955,37 +17620,46 @@
         }
 
         // =========================
-        // 🔥 FIXED PROCESS FUNCTION
+        // 🔥 MAIN TABLE PROCESSOR
         // =========================
         function processTable(sheet, table, startRow = 1) {
           let currentRow = startRow;
 
-          const trs = table.querySelectorAll("tr");
+          // 🔥 track first header row
+          let isFirstTHHandled = false;
 
-          trs.forEach((tr) => {
-            const nestedTables = tr.querySelectorAll(":scope > td > table");
+          const trs = Array.from(table.rows).filter(isVisible);
 
-            // 🔥 HANDLE NESTED TABLE
-            if (nestedTables.length === 1) {
-              currentRow = processTable(sheet, nestedTables[0], currentRow);
-              return;
+          for (const tr of trs) {
+            // 🔥 HANDLE NESTED TABLE (ONLY DIRECT CHILD)
+            const nestedTable = Array.from(tr.children)
+              .map((td) => td.querySelector(":scope > table"))
+              .find(Boolean);
+
+            if (nestedTable) {
+              currentRow = processTable(sheet, nestedTable, currentRow);
+              continue;
             }
 
-            const cells = tr.querySelectorAll("th, td");
-            if (!cells.length) return;
+            const cells = Array.from(tr.cells).filter(isVisible);
+            if (!cells.length) continue;
 
-            let colIndex = 1;
             const excelRow = sheet.getRow(currentRow);
 
+            // 🔥 HEADER DETECTION
+            const hasTH = cells.some((c) => c.tagName === "TH");
+
+            // 🔥 ROW HEIGHT
+            excelRow.height = hasTH ? 25 : 18;
+
+            let colIndex = 1;
             let hasValue = false;
 
-            cells.forEach((cell) => {
-              if (colIndex > TOTAL_COLS) return;
+            for (const cell of cells) {
+              if (colIndex > TOTAL_COLS) break;
 
-              let text = cell.innerText.trim();
+              const text = getFormulaText(cell);
               if (text) hasValue = true;
-
-              const cs = getComputedStyle(cell);
 
               const colSpan = Math.min(
                 cell.colSpan || 1,
@@ -17994,8 +17668,27 @@
 
               const excelCell = excelRow.getCell(colIndex);
 
+              const cs = getComputedStyle(cell);
+              const isTH = cell.tagName === "TH";
+
+              // =========================
+              // 🔥 ALIGNMENT LOGIC
+              // =========================
+              let horizontalAlign = "left";
+
+              // 👉 ONLY FIRST HEADER ROW CENTER
+              if (isTH && !isFirstTHHandled) {
+                horizontalAlign = "center";
+              }
+
+              // =========================
+              // 🔥 VALUE
+              // =========================
               excelCell.value = parseValue(text);
 
+              // =========================
+              // 🔥 FONT
+              // =========================
               excelCell.font = {
                 name: "Calibri",
                 size: 11,
@@ -18006,17 +17699,25 @@
                 color: getFontColor(cs.color),
               };
 
-              // 🔥 ALIGNMENT FIX
+              // =========================
+              // 🔥 ALIGNMENT APPLY
+              // =========================
               excelCell.alignment = {
-                horizontal:
-                  colSpan >= 6 ? "center" : colIndex === 1 ? "left" : "right",
+                horizontal: horizontalAlign,
                 vertical: "middle",
                 wrapText: true,
               };
 
+              // =========================
               // 🔥 BACKGROUND
+              // =========================
               const bg = getEffectiveBackground(cell);
-              if (isValidFill(bg)) {
+              if (
+                bg &&
+                bg !== "transparent" &&
+                !bg.includes("rgba(0, 0, 0, 0)") &&
+                !bg.includes("rgb(0, 0, 0)")
+              ) {
                 const argb = rgbToARGB(bg);
                 if (argb) {
                   excelCell.fill = {
@@ -18027,7 +17728,9 @@
                 }
               }
 
+              // =========================
               // 🔥 BORDER
+              // =========================
               excelCell.border = {
                 top: { style: "thin" },
                 bottom: { style: "thin" },
@@ -18035,7 +17738,9 @@
                 right: { style: "thin" },
               };
 
-              // 🔥 MERGE FIX
+              // =========================
+              // 🔥 MERGE
+              // =========================
               if (colSpan > 1) {
                 try {
                   sheet.mergeCells(
@@ -18048,19 +17753,18 @@
               }
 
               colIndex += colSpan;
-            });
+            }
 
-            // 🔥 FILL REMAINING CELLS
-            while (colIndex <= TOTAL_COLS) {
-              excelRow.getCell(colIndex).value = "";
-              colIndex++;
+            // 🔥 MARK FIRST HEADER ROW DONE
+            if (!isFirstTHHandled && hasTH) {
+              isFirstTHHandled = true;
             }
 
             if (hasValue) {
               excelRow.commit();
               currentRow++;
             }
-          });
+          }
 
           return currentRow;
         }
@@ -18082,11 +17786,13 @@
           const sheet = workbook.addWorksheet(empName.substring(0, 25));
 
           // =========================
-          // 🔥 HEADER (UNCHANGED STYLE)
+          // 🔥 HEADER
           // =========================
-          sheet.mergeCells("A1:L1");
+          sheet.mergeCells(1, 1, 1, TOTAL_COLS);
 
-          sheet.getCell("A1").value = {
+          const headerCell = sheet.getCell(1, 1);
+
+          headerCell.value = {
             richText: [
               { text: "PRASAR BHARATI\n", font: { bold: true, size: 12 } },
               {
@@ -18098,17 +17804,19 @@
             ],
           };
 
-          sheet.getCell("A1").alignment = {
+          headerCell.alignment = {
             horizontal: "center",
             vertical: "middle",
             wrapText: true,
           };
 
-          sheet.getRow(1).height = 65;
+          sheet.getRow(1).height = 75;
 
-          // 🔥 LOGO SAME AS IT
+          // =========================
+          // 🔥 LOGO (FIXED POSITION)
+          // =========================
           const base64 = await urlToBase64(
-            "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
+            "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
           );
 
           const imageId = workbook.addImage({
@@ -18116,55 +17824,52 @@
             extension: "png",
           });
 
+          // 🔥 Position inside first row (header row)
           sheet.addImage(imageId, {
-            tl: { col: 0.2, row: 0.2 },
-            ext: { width: 65, height: 65 },
+            tl: { col: 0.2, row: 0 },   // left top
+            ext: { width: 65, height: 65 }
           });
 
           // =========================
-          // 🔥 TABLE
+          // 🔥 MAIN TABLE ONLY
           // =========================
-          let currentRow = 2;
-          const table = wrapper.querySelector("table");
+          const mainTable = wrapper.querySelector("table");
 
-          if (table) {
-            currentRow = processTable(sheet, table, currentRow);
+          let currentRow = 2;
+
+          if (mainTable) {
+            currentRow = processTable(sheet, mainTable, currentRow);
           }
 
           const lastRow = currentRow - 1;
 
           // =========================
-          // 🔥 COLUMN WIDTH (FIXED)
+          // 🔥 COLUMN WIDTH
           // =========================
-          sheet.columns = [
-            { width: 18 },
-            { width: 12 },
-            { width: 12 },
-            { width: 12 },
-            { width: 12 },
-            { width: 12 },
-            { width: 12 },
-            { width: 12 },
-            { width: 12 },
-            { width: 12 },
-            { width: 12 },
-            { width: 18 },
-          ];
+          sheet.columns = Array.from({ length: TOTAL_COLS }, (_, i) => ({
+            width: i === 0 || i === TOTAL_COLS - 1 ? 18 : 12,
+          }));
 
           // =========================
-          // 🔥 PRINT
+          // 🔥 PRINT SETUP
           // =========================
           sheet.pageSetup = {
-            paperSize: 9,
+            paperSize: 9, // 🔥 A4
             orientation: "landscape",
+            //scale: 100,
+            horizontalCentered: true,
+            verticalCentered: false,
             fitToPage: true,
             fitToWidth: 1,
+            //fitToHeight: false,
             fitToHeight: 999,
             margins: {
               left: 0.3,
               right: 0.3,
               top: 0.5,
               bottom: 0.5,
+              header: 0.3,
+              footer: 0.3,
             },
             printArea: `A1:L${lastRow}`,
           };
@@ -18172,7 +17877,12 @@
 
         const buffer = await workbook.xlsx.writeBuffer();
 
-        saveAs(new Blob([buffer]), `${selectedEmp || station}_Pension.xlsx`);
+        const fileName =
+          mode === "single"
+            ? `${selectedEmp}-Pension Calculation.xlsx`
+            : `${station}-Pension Calculations.xlsx`;
+
+        saveAs(new Blob([buffer]), fileName);
       }
     </script>
   </body>
