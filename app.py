@@ -228,7 +228,8 @@ def update_sbgexp():
         # ⚡ Existing key map (KEEP THIS)
         row_map = {}
         for i, r in enumerate(rows):
-            key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
+            # key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
+            key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}"
             row_map[key] = i + 2  # sheet row
 
         updates = []
@@ -240,7 +241,8 @@ def update_sbgexp():
 
             row_index = row_obj.get("rowIndex")  # 🔥 NEW (from frontend)
 
-            key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
+            # key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
+            key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}"
 
             new_row = [row_obj.get(h, "") for h in headers]
 
