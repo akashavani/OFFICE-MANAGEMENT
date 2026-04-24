@@ -227,10 +227,14 @@ def update_sbgexp():
         # 🔥 REPLACE MODE (FINAL FIX)
         # =========================
         if mode == "replace":
-            # Keep only header row
-            sbgexp_sheet.resize(rows=1)
 
-            # Build fresh rows
+            # 🔥 FULL CLEAR (THIS IS THE REAL FIX)
+            sbgexp_sheet.clear()
+
+            # 🔥 REWRITE HEADER
+            sbgexp_sheet.append_row(headers)
+
+            # 🔥 ADD NEW DATA
             new_rows = [
                 [row_obj.get(h, "") for h in headers]
                 for row_obj in edit_rows
