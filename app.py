@@ -211,7 +211,7 @@ def update_sbgexp():
         if not edit_rows:
             return jsonify({"status": "error", "message": "No data received"}), 400
 
-        # 📥 Existing data
+        # 📥 Existing sheet data
         data = sbgexp_sheet.get_all_values()
         headers = data[0]
         rows = data[1:]
@@ -220,58 +220,50 @@ def update_sbgexp():
         date_idx = headers.index("Date")
         station_idx = headers.index("Station")
         budget_idx = headers.index("SBG Expenditure Under")
-        details_idx = headers.index("Expenditure Details")
+
+        import re
+        from datetime import datetime
 
         def clean(val):
-            return str(val).lower()
+            return re.sub(r"\s+", " ", str(val).strip().lower())
 
-        # ⚡ Existing key map (KEEP THIS)
+        def normalize_date(val):
+            try:
+                return datetime.strptime(val.strip(), "%d-%m-%Y").strftime("%Y-%m-%d")
+            except:
+                return clean(val)
+
+        # =========================
+        # 🔥 BUILD EXISTING MAP
+        # =========================
         row_map = {}
-        for i, r in enumerate(rows):
-            # key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean(r[details_idx])}"
-            key = f"{clean(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}"
-            row_map[key] = i + 2  # sheet row
 
-        updates = []
+        for i, r in enumerate(rows):
+            key = f"{normalize_date(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}"
+            row_map[key] = i + 2  # actual sheet row
+
         update_cells = []
         new_rows = []
+        seen_keys = set()
 
-        # 🔄 Process incoming
+        # =========================
+        # 🔄 PROCESS INCOMING DATA
+        # =========================
         for row_obj in edit_rows:
 
-            row_index = row_obj.get("rowIndex")  # 🔥 NEW (from frontend)
+            key = f"{normalize_date(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}"
 
-            # key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean(row_obj.get('Expenditure Details'))}"
-            key = f"{clean(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}"
+            # 🔥 prevent duplicates in same request
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
 
             new_row = [row_obj.get(h, "") for h in headers]
 
-            # =====================================
-            # 🔥 PRIORITY 1: UPDATE BY rowIndex
-            # =====================================
-            if row_index:
-
-                try:
-                    row_num = int(row_index)
-
-                    for col_idx, val in enumerate(new_row):
-                        update_cells.append({
-                            "range": gspread.utils.rowcol_to_a1(row_num, col_idx + 1),
-                            "values": [[val]]
-                        })
-
-                    updates.append(row_num)
-
-                    continue  # ✅ skip key logic
-
-                except Exception as e:
-                    print("⚠ rowIndex error:", e)
-
-            # =====================================
-            # 🔥 PRIORITY 2: FALLBACK KEY MATCH
-            # =====================================
+            # =========================
+            # 🔁 UPDATE EXISTING
+            # =========================
             if key in row_map:
-
                 row_num = row_map[key]
 
                 for col_idx, val in enumerate(new_row):
@@ -280,25 +272,27 @@ def update_sbgexp():
                         "values": [[val]]
                     })
 
-                updates.append(row_num)
-
-            # =====================================
-            # ➕ NEW ROW
-            # =====================================
+            # =========================
+            # ➕ ADD NEW ROW
+            # =========================
             else:
                 new_rows.append(new_row)
 
+        # =========================
         # ⚡ BULK UPDATE
+        # =========================
         if update_cells:
             sbgexp_sheet.batch_update(update_cells)
 
-        # ➕ APPEND ONLY TRUE NEW ROWS
+        # =========================
+        # ➕ APPEND ONLY NEW
+        # =========================
         if new_rows:
             sbgexp_sheet.append_rows(new_rows)
 
         return jsonify({
             "status": "success",
-            "updated": len(updates),
+            "updated": len(update_cells),
             "added": len(new_rows)
         })
 
