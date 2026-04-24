@@ -13,6 +13,7 @@
       href="https://fonts.googleapis.com/css2?family=Rozha+One&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" href="data:," />
     <!-- Icon -->
     <script defer src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1769,7 +1770,7 @@
 
       .katex {
         font-size: 16px !important;
-        line-height: 1.4 !important;
+        line-height: 2.3 !important;
         display: inline-block;
         text-align: left !important;
       }
@@ -1777,6 +1778,8 @@
       .katex-display {
         text-align: left !important; /* 🔥 overrides center */
         margin: 4px 0 !important;
+        overflow-x: auto;
+        overflow-y: hidden;
       }
 
       .katex .frac-line {
@@ -3172,7 +3175,11 @@
               id="BudgetTablefromPBWrapper"
               style="display: none"
             ></div>
-            <div class="BudgetTableWrapper" id="BudgetTableWrapper"></div>
+            <div
+              class="BudgetTableWrapper"
+              id="BudgetTableWrapper"
+              style="max-height: calc(100vh - 140px)"
+            ></div>
           </div>
         </div>
 
@@ -3234,6 +3241,24 @@
       let isAddMode = false;
       let isEditMode = false;
       let isPBProcessing = false;
+
+      // Prevent infinite reload loop
+      if (!sessionStorage.getItem("reloaded")) {
+        window.addEventListener(
+          "error",
+          function (e) {
+            if (
+              e.target &&
+              e.target.tagName === "LINK" &&
+              e.target.href.includes("favicon.ico")
+            ) {
+              sessionStorage.setItem("reloaded", "true");
+              location.reload();
+            }
+          },
+          true,
+        );
+      }
 
       /* ============================================================
     🔥🔥🔥🔥ON LOAD INITIALISE TABLES & DEFAULTS🔥🔥🔥🔥
@@ -3330,10 +3355,10 @@
           updateAndRenderDAA();
         });
         on("PayBillPage_Station", "change", setDAPercent);
-        document.querySelectorAll(".SSaction-group button").forEach((btn) => {
+        qsa(".SSaction-group button").forEach((btn) => {
           btn.disabled = true;
         });
-        document.querySelectorAll(".ITaction-group button").forEach((btn) => {
+        qsa(".ITaction-group button").forEach((btn) => {
           btn.disabled = true;
         });
         document
@@ -3380,7 +3405,7 @@
             return;
           }
 
-          let table = document.getElementById(tableId);
+          let table = id(tableId);
           if (!table) {
             console.error("Table not found:", tableId);
             return;
@@ -4361,7 +4386,7 @@
       }
 
       function updateStationHeaders(station) {
-        document.querySelectorAll(".DAAheader-Station").forEach((h3) => {
+        qsa(".DAAheader-Station").forEach((h3) => {
           h3.textContent = station || "";
         });
       }
@@ -4404,7 +4429,7 @@
       }
 
       function fillSelectSmart(id, dataSet, oldValue) {
-        let select = document.getElementById(id);
+        let select = id(id);
 
         let values = [...dataSet].sort();
 
@@ -4563,7 +4588,7 @@
         }
 
         headers.forEach((col, i) => {
-          let el = document.getElementById(col);
+          let el = id(col);
 
           if (el) {
             el.textContent = row[i] ?? "";
@@ -5396,7 +5421,7 @@
 
           const printBtn = id("PBprintBtn");
           const excelBtn = id("PBexcelBtn");
-          const wrapper = document.querySelector(".PB-Table-Wrapper");
+          const wrapper = qs(".PB-Table-Wrapper");
 
           try {
             if (!isFullEdit) {
@@ -5452,7 +5477,7 @@
       }
 
       function deactivateOthers(currentBtn) {
-        document.querySelectorAll(".action-group button").forEach((btn) => {
+        qsa(".action-group button").forEach((btn) => {
           if (btn === currentBtn) return;
 
           btn.disabled = true;
@@ -5470,7 +5495,7 @@
           updateIcon(btn, btn.id === "PBeditBtn" ? "edit" : "plus");
         });
 
-        document.querySelectorAll(".SBGaction-group button").forEach((btn) => {
+        qsa(".SBGaction-group button").forEach((btn) => {
           if (btn === currentBtn) return;
 
           btn.disabled = true;
@@ -5504,13 +5529,13 @@
       }
 
       function enableAllButtons() {
-        document.querySelectorAll(".action-group button").forEach((btn) => {
+        qsa(".action-group button").forEach((btn) => {
           btn.disabled = false;
         });
       }
 
       function disableAllButtons() {
-        document.querySelectorAll(".action-group button").forEach((btn) => {
+        qsa(".action-group button").forEach((btn) => {
           btn.disabled = true;
         });
       }
@@ -6625,7 +6650,7 @@
       }
 
       function setupManualDAAHandlers() {
-        document.querySelectorAll("#PB_NPSEditTbl tbody tr").forEach((tr) => {
+        qsa("#PB_NPSEditTbl tbody tr").forEach((tr) => {
           if (!tr._cells) return;
           if (tr.classList.contains("total-row")) return;
 
@@ -6742,11 +6767,11 @@
           const rows = grouped[emp];
 
           rows.forEach((d, index) => {
-            document.querySelectorAll(".OldDASpan").forEach((span) => {
+            qsa(".OldDASpan").forEach((span) => {
               span.textContent = `[DA = ${d.oldDApercent}% ]`;
             });
 
-            document.querySelectorAll(".NewDASpan").forEach((span) => {
+            qsa(".NewDASpan").forEach((span) => {
               span.textContent = `[ DA = ${d.newDApercent}% ]`;
             });
 
@@ -7872,7 +7897,7 @@
         const names = new Set();
 
         tableIds.forEach((tblId) => {
-          const table = document.getElementById(tblId);
+          const table = id(tblId);
           if (!table) return;
 
           table.querySelectorAll("tbody tr").forEach((tr) => {
@@ -8448,7 +8473,7 @@
           if (el) el.style.display = "none";
         });
 
-        const wrapper = document.querySelector(".PB-Table-Wrapper");
+        const wrapper = qs(".PB-Table-Wrapper");
 
         // 🔥 FORCE MODE IF PROVIDED
         let isEditMode;
@@ -8654,7 +8679,7 @@
         🔹 TABLE DATA EXTRACTOR
       ========================= */
         function getTableData(tableId, type) {
-          const table = document.getElementById(tableId);
+          const table = id(tableId);
           if (!table) return [];
 
           const headers = Array.from(table.querySelectorAll("thead th")).map(
@@ -8813,7 +8838,7 @@
           // =========================
           // 🔥 RESET AUTO FLAGS
           // =========================
-          document.querySelectorAll("#PB_NPSEditTbl tbody tr").forEach((tr) => {
+          qsa("#PB_NPSEditTbl tbody tr").forEach((tr) => {
             const npse = tr._cells?.["DAA on NPSE"];
             const npsc = tr._cells?.["DAA on NPSC"];
 
@@ -9848,7 +9873,7 @@
         });
       }
 
-      document.querySelectorAll(".menu-option").forEach((opt) => {
+      qsa(".menu-option").forEach((opt) => {
         opt.addEventListener("click", function () {
           const type = this.dataset.type;
 
@@ -10503,8 +10528,8 @@
       //===========================Budget Page Script =================== //
 
       function toggleButton() {
-        const sbgselect = document.getElementById("BudgetUnderSelect");
-        const buttons = document.querySelectorAll(".SBGaction-group button");
+        const sbgselect = id("BudgetUnderSelect");
+        const buttons = qsa(".SBGaction-group button");
         const sbgindex = sbgselect.selectedIndex;
 
         const disable = sbgindex >= 0 && sbgindex <= 8;
@@ -10523,21 +10548,22 @@
         }
 
         const rows = sbgData.rows;
-
         const select = id("BudgetUnderSelect");
         if (!select) return;
 
-        // 🔥 RESET
         select.innerHTML = `<option value="" hidden>Select Budget</option>`;
 
-        // 🔥 FILTER VALID BUDGET ROWS
-        const budgetList = rows
-          .map((r) => String(r[0] || "").trim())
-          .filter(
-            (val) => val && val.toLowerCase() !== "station", // ❌ skip station row
-          );
+        // ✅ FIXED COLUMN + UNIQUE VALUES
+        const budgetList = [
+          ...new Set(
+            rows
+              .map((r) => String(r[0] || "").trim()) // 🔥 FIXED
+              .filter(
+                (val) => val && val.toLowerCase() !== "sbg expenditure under",
+              ),
+          ),
+        ];
 
-        // 🔥 OPTIONAL GROUPING (AUTO)
         const groupMap = {
           "Salaries - GO": [],
           "Salaries - PB": [],
@@ -10563,7 +10589,6 @@
           }
         });
 
-        // 🔥 CREATE DROPDOWN
         Object.keys(groupMap).forEach((group) => {
           if (!groupMap[group].length) return;
 
@@ -10574,14 +10599,11 @@
             const opt = document.createElement("option");
             opt.value = val;
             opt.textContent = val;
-
             optgroup.appendChild(opt);
           });
 
           select.appendChild(optgroup);
         });
-
-        //console.log("✅ Dropdown Loaded:", budgetList.length);
       }
 
       function getBudgetFY(dateStr) {
@@ -10608,55 +10630,67 @@
       }
 
       function convertMonthToDate(monthStr) {
-        if (!monthStr) return "";
+        if (!monthStr || typeof monthStr !== "string") return "";
 
-        const [monStr, year] = monthStr.split("-");
+        const parts = monthStr.trim().split("-");
+        if (parts.length !== 2) return "";
+
+        const monStr = parts[0].trim().toLowerCase();
+        const year = parseInt(parts[1], 10);
 
         const months = {
-          Jan: 0,
-          Feb: 1,
-          Mar: 2,
-          Apr: 3,
-          May: 4,
-          Jun: 5,
-          Jul: 6,
-          Aug: 7,
-          Sep: 8,
-          Oct: 9,
-          Nov: 10,
-          Dec: 11,
+          jan: 1,
+          feb: 2,
+          mar: 3,
+          apr: 4,
+          may: 5,
+          jun: 6,
+          jul: 7,
+          aug: 8,
+          sep: 9,
+          oct: 10,
+          nov: 11,
+          dec: 12,
         };
 
-        const m = months[monStr];
-        const y = parseInt(year, 10);
+        let month = months[monStr];
 
-        if (m === undefined || !y) return "";
+        if (!month || !year) {
+          console.error("❌ Invalid:", monthStr);
+          return "";
+        }
 
-        // 🔥 CREATE DATE (1st day)
-        const date = new Date(y, m, 1);
+        // ✅ ADD +1 MONTH
+        month += 1;
 
-        // 🔥 ADD +1 MONTH
-        date.setMonth(date.getMonth() + 1);
+        let finalYear = year;
 
-        // 🔥 FORMAT DD-MM-YYYY
-        const dd = "01";
-        const mm = String(date.getMonth() + 1).padStart(2, "0");
-        const yyyy = date.getFullYear();
+        if (month > 12) {
+          month = 1;
+          finalYear += 1;
+        }
 
-        return `${dd}-${mm}-${yyyy}`;
+        const mm = String(month).padStart(2, "0");
+
+        return `01-${mm}-${finalYear}`;
       }
 
       function getFYFromDateStr(dateStr) {
         if (!dateStr) return "";
 
-        // dateStr = DD-MM-YYYY
-        const [dd, mm, yyyy] = dateStr.split("-");
+        const parts = dateStr.split("-");
+        if (parts.length !== 3) return "";
+
+        const dd = parts[0];
+        const mm = parts[1];
+        const yyyy = parts[2];
 
         const month = parseInt(mm, 10);
         const year = parseInt(yyyy, 10);
 
         if (!month || !year) return "";
 
+        // ✅ CORRECT CONDITION
         if (month >= 4) {
           return `${year}-${String(year + 1).slice(-2)}`;
         } else {
@@ -10705,12 +10739,58 @@
       // ======================================
 
       function buildBudgetSummaryWithStation() {
+        const summary = {};
         if (!pbData || !pbData.headers || !pbData.rows) return [];
 
         const headers = pbData.headers;
         const rows = pbData.rows;
 
-        const deptMap = getDeptMap();
+        // =========================
+        // 🔥 BUILD LOCAL DEPT MAP FROM empData
+        // =========================
+        function buildDeptMapLocal() {
+          if (!empData || !empData.headers || !empData.rows) {
+            console.warn("❌ empData not ready");
+            return {};
+          }
+
+          const headers = empData.headers;
+
+          const nameIdx = headers.findIndex((h) =>
+            h.toLowerCase().includes("employee name"),
+          );
+
+          const deptIdx = headers.findIndex((h) =>
+            h.toLowerCase().includes("department"),
+          );
+
+          if (nameIdx === -1 || deptIdx === -1) {
+            console.error("❌ Employee/Department column not found in empData");
+            return {};
+          }
+
+          const map = {};
+
+          empData.rows.forEach((row) => {
+            const name = String(row[nameIdx] || "").trim();
+            const dept = String(row[deptIdx] || "")
+              .trim()
+              .toUpperCase();
+
+            if (!name) return;
+
+            const norm = name
+              .replace(/\./g, "")
+              .replace(/\s+/g, " ")
+              .trim()
+              .toLowerCase();
+
+            map[norm] = dept;
+          });
+
+          return map;
+        }
+        const deptMap = buildDeptMapLocal();
 
         const empIdx = headers.indexOf("Employee Name");
         const monthIdx = headers.indexOf("Salary Month");
@@ -10727,10 +10807,16 @@
           h.toLowerCase().includes("el encash"),
         );
 
-        const summary = {};
-
         rows.forEach((r) => {
-          const emp = String(r[empIdx] || "").trim();
+          //const emp = String(r[empIdx] || "").trim();
+          const empRaw = String(r[empIdx] || "");
+
+          const emp = empRaw
+            .replace(/\./g, "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+
           const monthStr = String(r[monthIdx] || "").trim();
           const station = String(r[stationIdx] || "").trim();
 
@@ -10744,17 +10830,23 @@
           if (!summary[key]) {
             summary[key] = {
               station,
-              date,
+              date: date,
               monthStr,
               go: 0,
               nps: 0,
-              npsIncome: 0,
               goMed: 0,
               npsMed: 0,
+              npsIncome: 0,
               el: 0,
+
+              // 🔥 NEW BREAKUPS
+              elDetails: [],
+              goMedDetails: [],
+              npsMedDetails: [],
             };
           }
 
+          // 🔥 find matching key from deptMap
           const dept = deptMap[emp] || "";
 
           const net = +r[netIdx] || 0;
@@ -10763,26 +10855,65 @@
           const med = +r[medIdx] || 0;
           const el = +r[elIdx] || 0;
 
+          //console.log("MATCH:", empRaw, "→", dept);
+
           if (dept === "GO") {
-            // ✅ GO SALARY = NET - MEDICAL
-            //const goSalary = net - med;
             const goSalary = net;
-
             summary[key].go += goSalary;
-            summary[key].goMed += med;
+
+            // ✅ GO MED
+            if (med > 0) {
+              const exists = summary[key].goMedDetails.some(
+                (e) => e.name === empRaw && Number(e.value) === Number(med),
+              );
+
+              if (!exists) {
+                summary[key].goMedDetails.push({
+                  name: empRaw,
+                  value: med,
+                });
+
+                summary[key].goMed += med;
+              }
+            }
           } else {
-            // ✅ NON-GO SALARY = NET - MEDICAL - EL
-            //const pbSalary = net - med - el;
             const pbSalary = net - el;
-
             summary[key].nps += pbSalary;
-            summary[key].npsMed += med;
 
-            // 🔥 EL separate
-            summary[key].el += el;
+            // ✅ PB MED
+            if (med > 0) {
+              const exists = summary[key].npsMedDetails.some(
+                (e) => e.name === empRaw && Number(e.value) === Number(med),
+              );
+
+              if (!exists) {
+                summary[key].npsMedDetails.push({
+                  name: empRaw,
+                  value: med,
+                });
+
+                summary[key].npsMed += med;
+              }
+            }
+
+            // ✅ EL
+            if (el > 0) {
+              const exists = summary[key].elDetails.some(
+                (e) => e.name === empRaw && Number(e.value) === Number(el),
+              );
+
+              if (!exists) {
+                summary[key].elDetails.push({
+                  name: empRaw,
+                  value: el,
+                });
+
+                summary[key].el += el;
+              }
+            }
           }
 
-          // 🔥 NPS Contribution
+          // ✅ NPS Contribution
           summary[key].npsIncome += nps + daa;
         });
         //console.log("Summary Output:", summary);
@@ -10792,6 +10923,28 @@
       // ======================================
       // 🔥 BUILD FINAL ROWS WITH CUMULATIVE
       // ======================================
+
+      function buildBillDetails(station, fy, type, mon) {
+        let st = station.replace(/\s+/g, " ").trim().toUpperCase();
+
+        let parts = st.split(" ");
+        let firstPart = parts[0] || "";
+        let secondPart = parts[1] || "";
+
+        let stationCode =
+          (firstPart.slice(0, 3) || "") + "-" + (secondPart.slice(0, 3) || "");
+
+        // ✅ FIXED FY
+        let fyText = "";
+        if (fy && fy.includes("-")) {
+          const [start, end] = fy.split("-");
+          fyText = `FY-${start}-${end}`; // ✅ FIX
+        } else {
+          fyText = `FY-${fy}`;
+        }
+
+        return `${stationCode}/${fyText}/${type}/${mon}`;
+      }
 
       function buildPBBudgetRows() {
         const data = buildBudgetSummaryWithStation();
@@ -10818,9 +10971,20 @@
 
           const cumulativeMap = {};
 
+          function formatEmpBreakup(arr) {
+            if (!arr || !arr.length) return "";
+            return arr
+              .map((e) => `${e.name}: ${formatCurrency(e.value)}`)
+              .join(", ");
+          }
+
           records.forEach((d) => {
             const [mon, yr] = d.monthStr.split("-");
-            const fy = getFYFromDateStr(d.date);
+            const fy = getFYFromDateStr(convertMonthToDate(d.monthStr));
+
+            // =========================
+            // 🔥 BUILD ROW OBJECTS
+            // =========================
 
             const rows = [
               {
@@ -10840,24 +11004,81 @@
               },
               {
                 label: `Medical Reimbursement for GO Employee-${mon}-${yr}`,
+                details: formatEmpBreakup(d.goMedDetails),
                 value: d.goMed,
                 budget: "Medical Treatment - For Govt Employees",
               },
               {
                 label: `Medical Reimbursement for PB Employee-${mon}-${yr}`,
+                details: formatEmpBreakup(d.npsMedDetails),
                 value: d.npsMed,
                 budget: "Medical Treatment - For PB Employees",
               },
               {
                 label: `EL (Leave) Encashment-${mon}-${yr}`,
+                details: formatEmpBreakup(d.elDetails),
                 value: d.el,
                 budget: "Leave Encashment - For PB Employees",
               },
             ];
 
+            // =========================
+            // 🔥 REMOVE DUPLICATES (IMPORTANT)
+            // =========================
+            const uniqueMap = new Map();
+
             rows.forEach((r) => {
-              // 🔥 🚀 SKIP ZERO VALUE ROWS (MAIN FIX)
-              if (!r.value || Number(r.value) === 0) return; //skip addition of row if sum is 0, remove this if you want month wise
+              const key = `${station}_${r.label}_${r.budget}_${mon}_${yr}`;
+
+              if (!uniqueMap.has(key)) {
+                uniqueMap.set(key, r);
+              }
+            });
+
+            const finalRows = Array.from(uniqueMap.values());
+
+            // =========================
+            // 🔥 BUILD RESULT (USE finalRows)
+            // =========================
+            finalRows.forEach((r) => {
+              // 🔥 skip zero rows
+              if (!r.value || Number(r.value) === 0) return;
+
+              let type = "";
+
+              if (
+                r.budget.includes(
+                  "SALARY ( Non-IRLA )( Regular ) - For Govt Employees",
+                )
+              ) {
+                type = "SAL-GO";
+              } else if (
+                r.budget.includes(
+                  "SALARY - For PB Employees Recruited After 05.10.2007",
+                )
+              ) {
+                type = "SAL-NPS";
+              } else if (
+                r.budget.includes("CPF Contribution / NPS - For Govt Employees")
+              ) {
+                type = "CPF";
+              } else if (
+                r.budget.includes("CPF Contribution / NPS - For PB Employees")
+              ) {
+                type = "NPS";
+              } else if (
+                r.budget.includes("Medical Treatment - For Govt Employees")
+              ) {
+                type = "MED-GO";
+              } else if (
+                r.budget.includes("Medical Treatment - For PB Employees")
+              ) {
+                type = "MED-NPS";
+              } else if (
+                r.budget.includes("Leave Encashment - For PB Employees")
+              ) {
+                type = "NPS/LEAVE_ENCASH";
+              }
 
               const key = fy + "|" + r.budget + "|" + station;
 
@@ -10867,9 +11088,9 @@
               result.push([
                 d.date,
                 station,
-                "",
+                buildBillDetails(station, fy, type, mon), // ✅ FIXED
                 r.budget,
-                r.label,
+                r.label + (r.details ? `\n(${r.details})` : ""),
                 formatCurrency(r.value),
                 formatCurrency(cumulativeMap[key]),
               ]);
@@ -10920,7 +11141,10 @@
       <td>${r[1]}</td>
       <td>${r[2]}</td>
       <td>${r[3]}</td>
-      <td>${r[4]}</td>
+      <td>
+        ${r.label}
+        ${r.details ? `<br><small>${r.details}</small>` : ""}
+      </td>
       <td>${r[5]}</td>
       <td>${r[6]}</td>
     `;
@@ -10932,43 +11156,100 @@
         container.appendChild(table);
       }
 
-      function convertRowsToObjects(rows) {
-        return rows.map((r) => ({
-          Date: r[0],
-          Station: r[1],
-          "Bill / Invoice Details": r[2],
-          "SBG Expenditure Under": r[3],
-          "Expenditure Details": r[4],
-          "Expenditure Amount (₹ in 000)": +(
-            CurrencytoNum(r[5]) / 1000
-          ).toFixed(3),
-          "Cumulative Sum of Expenditure (₹ in 000)": +(
-            CurrencytoNum(r[6]) / 1000
-          ).toFixed(3),
-        }));
+      function generateKey(r) {
+        return [
+          r[0], // Date
+          r[1], // Station
+          r[3], // Budget
+          r[4].split("(")[0].trim(), // 🔥 REMOVE dynamic breakup
+        ]
+          .join("|")
+          .toLowerCase();
       }
 
       function normalizeRow(r) {
         return [
           String(r[0]).trim(), // Date
           String(r[1]).trim(), // Station
+          String(r[2]).trim(), // Bill Details
           String(r[3]).trim(), // Budget
           String(r[4]).trim(), // Details
         ].join("|");
       }
 
-      async function updateSBGSheet(rows) {
-        if (!rows.length) {
-          console.log("⚠ No new rows to send");
+      function formatMonthToDate(monthStr) {
+        const [mon, year] = monthStr.split("-");
+        const months = {
+          Jan: "01",
+          Feb: "02",
+          Mar: "03",
+          Apr: "04",
+          May: "05",
+          Jun: "06",
+          Jul: "07",
+          Aug: "08",
+          Sep: "09",
+          Oct: "10",
+          Nov: "11",
+          Dec: "12",
+        };
+
+        return `01-${months[mon]}-${year}`;
+      }
+
+      function mapRowArrayToObject(r) {
+        return {
+          Date: r[0], // 🔥 FIXED
+          Station: r[1],
+          "Bill / Invoice Details": r[2],
+          "SBG Expenditure Under": r[3],
+          "Expenditure Details": r[4],
+          "Expenditure Amount (₹ in 000)": Number(CurrencytoNum(r[5]) / 1000),
+          "Cumulative Sum of Expenditure (₹ in 000)": Number(
+            CurrencytoNum(r[6]) / 1000,
+          ),
+        };
+      }
+
+      async function updateSBGSheet(rows, mode = "replace") {
+        if (!rows || !rows.length) {
+          console.warn("⚠ No rows to send");
           return;
         }
 
-        const formattedRows = convertRowsToObjects(rows);
+        // =========================
+        // 🔥 STRICT CLEANING (CRITICAL)
+        // =========================
+        const formattedRows = rows
+          .filter(
+            (r) =>
+              Array.isArray(r) &&
+              r.length === 7 &&
+              r[0] &&
+              r[1] &&
+              r[3] &&
+              r[4],
+          )
+          .map((r) => ({
+            Date: r[0], // ✅ proper date
+            Station: String(r[1]).trim(),
+            "Bill / Invoice Details": String(r[2] || "").trim(),
+            "SBG Expenditure Under": String(r[3]).trim(),
+            "Expenditure Details": String(r[4]).trim(),
+            "Expenditure Amount (₹ in 000)": Number(CurrencytoNum(r[5]) / 1000),
+            "Cumulative Sum of Expenditure (₹ in 000)": Number(
+              CurrencytoNum(r[6]) / 1000,
+            ),
+          }));
 
-        //console.log("📤 Sending rows:", formattedRows.length);
-        //console.log("🧪 Sample row:", formattedRows[0]);
+        //console.log("✅ FINAL CLEAN DATA:", formattedRows);
 
-        const res = await fetch(
+        if (!formattedRows.length) {
+          console.warn("⚠ All rows filtered out (invalid)");
+          return;
+        }
+
+        await fetch(
           "https://office-management-f425.onrender.com/sbgexp/update",
           {
             method: "POST",
@@ -10976,37 +11257,11 @@
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              data: formattedRows, // ✅ MUST BE 'data'
+              data: formattedRows,
+              mode: "replace", // 🔥 ALWAYS REPLACE
             }),
           },
         );
-
-        const result = await res.json();
-
-        //console.log("🔥 API RESPONSE:", result);
-      }
-
-      async function reloadSBGData() {
-        //console.log("🔄 Reloading SBG from server...");
-
-        const res = await fetch(
-          "https://office-management-f425.onrender.com/sbgexp",
-          {
-            method: "GET",
-            cache: "no-store", // 🔥 IMPORTANT (no caching)
-          },
-        );
-
-        const data = await res.json();
-
-        // 🔥 FORCE UPDATE GLOBAL
-        sbgExpData = {
-          headers: data.headers,
-          rows: data.rows,
-        };
-
-        //console.log("✅ Updated sbgExpData:", sbgExpData.rows.length);
-        //console.log("After reload:", sbgExpData.rows.slice(0, 3));
       }
 
       async function loadSBGData() {
@@ -11019,8 +11274,96 @@
           headers: data.headers,
           rows: data.rows,
         };
-
+        loadBudgetDropdown();
         //console.log("✅ SBG Loaded:", sbgData.rows.length);
+      }
+
+      async function onLoadCalculateAndUpdateSBGFromExp() {
+        if (!sbgData?.rows?.length || !sbgExpData?.rows?.length) {
+          console.warn("❌ Data not ready");
+          return;
+        }
+
+        const headers = sbgData.headers;
+        const rows = sbgData.rows;
+
+        const stationRow = rows[0]; // station names
+        const dataRows = rows.slice(1); // actual budgets
+
+        // =========================
+        // 🔥 STEP 1: BUILD TOTAL MAP
+        // =========================
+        const totalMap = {};
+
+        sbgExpData.rows.forEach((r) => {
+          const date = r[0];
+          const station = String(r[1]).trim().toLowerCase();
+          const budget = String(r[3]).trim().toLowerCase();
+          const amount = Number(r[5] || 0);
+
+          if (!date || !station || !budget) return;
+
+          const fy = getFYFromDateStr(date);
+          const key = fy + "|" + budget + "|" + station;
+
+          if (!totalMap[key]) totalMap[key] = 0;
+
+          totalMap[key] += amount; // 🔥 SUM
+        });
+
+        // =========================
+        // 🔥 STEP 2: UPDATE SBG DATA
+        // =========================
+        dataRows.forEach((row) => {
+          const budgetName = String(row[0]).trim().toLowerCase();
+
+          headers.forEach((h) => {
+            const clean = String(h).toLowerCase();
+
+            if (!clean.includes("(sbg)")) return;
+
+            const fy = clean.match(/\d{4}-\d{2}/)?.[0];
+            if (!fy) return;
+
+            const { sbgCol, usedCol, availCol } = getFYColumnIndexes(
+              headers,
+              fy,
+            );
+
+            if (sbgCol === -1) return;
+
+            const stationName = String(stationRow[sbgCol]).trim().toLowerCase();
+
+            const key = fy + "|" + budgetName + "|" + stationName;
+
+            const usedVal = Number(totalMap[key] || 0);
+            const sbgVal = Number(row[sbgCol] || 0);
+
+            // 🔥 UPDATE VALUES
+            //row[usedCol] = usedVal.toFixed(3);
+            //row[availCol] = (sbgVal - usedVal).toFixed(3);
+            row[usedCol] = Number(usedVal.toFixed(3));
+            row[availCol] = Number((sbgVal - usedVal).toFixed(3));
+          });
+        });
+
+        // =========================
+        // 🔥 STEP 3: PUSH TO BACKEND
+        // =========================
+        await fetch(
+          "https://office-management-f425.onrender.com/sbg/bulk-update",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              rows: dataRows,
+            }),
+          },
+        );
+
+        console.log("✅ SBG totals updated from SBGExp");
       }
 
       async function reloadSBGExpData() {
@@ -11038,29 +11381,25 @@
         //console.log("✅ SBGExp Loaded:", sbgExpData.rows.length);
       }
 
+      let isSyncRunning = false;
+
       async function syncPBtoSBG() {
-        //console.log("🚀 SYNC STARTED");
+        if (isSyncRunning) return;
+        isSyncRunning = true;
 
-        // 1️⃣ Build PB rows
-        const pbRows = buildPBBudgetRows();
+        try {
+          const pbRows = buildPBBudgetRows();
 
-        // 2️⃣ Update SBGExpenditure
-        await updateSBGSheet(pbRows, "replace");
+          await updateSBGSheet(pbRows, "replace");
 
-        // 3️⃣ Reload SBGExp
-        await reloadSBGExpData();
-
-        // 4️⃣ 🔥 LOAD SBG DATA (THIS WAS MISSING)
-        await loadSBGData();
-        loadBudgetDropdown();
-
-        // 5️⃣ Update BudgetDB
-        await updateBudgetDBFromSBGExp();
-
-        // 6️⃣ Refresh UI
-        await loadTable("sbg", "BudgetDB");
-
-        //console.log("✅ SYNC COMPLETED");
+          await reloadSBGExpData();
+          await loadSBGData();
+          await updateBudgetDBFromSBGExp();
+          await onLoadCalculateAndUpdateSBGFromExp();
+          await loadTable("sbg", "BudgetDB");
+        } finally {
+          isSyncRunning = false;
+        }
       }
 
       function filterSBGData() {
@@ -11468,7 +11807,7 @@
       }
 
       function addSBGRows(count = 5) {
-        const tbody = document.querySelector("#budgetPBBody");
+        const tbody = qs("#budgetPBBody");
         if (!tbody) return;
 
         // 🔥 REMOVE "NO DATA" MERGED ROW (IMPORTANT)
@@ -11531,7 +11870,7 @@
       }
 
       function getLastCumulativeFromTable() {
-        const container = document.getElementById("BudgetTableWrapper");
+        const container = id("BudgetTableWrapper");
 
         const rows = container.querySelectorAll("table tbody tr");
 
@@ -11562,7 +11901,7 @@
       }
 
       function CalculateCumulative(mode = "add") {
-        const tbody = document.querySelector("#BudgetTableWrapper tbody");
+        const tbody = qs("#BudgetTableWrapper tbody");
         if (!tbody) return;
 
         function calculate() {
@@ -11688,7 +12027,7 @@
       }
 
       function convertSBGTableToEditable() {
-        const tbody = document.querySelector("#BudgetTableWrapper table tbody");
+        const tbody = qs("#BudgetTableWrapper table tbody");
         if (!tbody) return;
 
         const rows = tbody.querySelectorAll("tr");
@@ -11742,118 +12081,96 @@
         },
       );
 
-      async function saveSBGData() {
-        const rows = document.querySelectorAll("#budgetPBBody tr");
-        const data = [];
+      async function saveSBGData(modeType = "add") {
+        let data = [];
 
-        rows.forEach((tr) => {
-          const rowIndex = tr.dataset.rowIndex || "";
+        // =========================
+        // 🔥 ADD MODE (USER INPUT)
+        // =========================
+        if (modeType === "add") {
+          const rows = qsa("#budgetPBBody tr");
 
-          // ✅ DATE
-          let date = "";
-          const dateInput = tr.querySelector('input[type="date"]');
-          if (dateInput) date = dateInput.value;
-          else date = formatDateInput(tr.children[0]?.textContent);
+          rows.forEach((tr) => {
+            const dateInput = tr.querySelector('input[type="date"]')?.value;
+            const station = tr.children[1]?.querySelector("input")?.value || "";
+            const bill = tr.querySelector(".bill-text")?.value || "";
+            const budget =
+              tr.querySelector(".budget-val")?.dataset?.value || "";
+            const details = tr.querySelector(".details-text")?.value || "";
+            const amount = Number(tr.querySelector(".amt")?.value || 0);
+            const cumulative = Number(
+              tr.querySelector(".cum")?.dataset?.value || 0,
+            );
 
-          // ✅ STATION
-          let station = "";
-          const stationInput = tr.querySelector("td:nth-child(2) input");
-          if (stationInput) station = stationInput.value;
-          else station = tr.children[1]?.textContent.trim();
+            // ❌ skip empty rows
+            if (!dateInput || !station || !budget || amount === 0) return;
 
-          // ✅ BILL
-          const bill =
-            tr.querySelector(".bill-text")?.value ||
-            tr.children[2]?.textContent ||
-            "";
-
-          // ✅ BUDGET
-          let budget = "";
-          // 🔹 CASE 1: Editable row
-          const budgetEl = tr.querySelector(".budget-val");
-
-          if (budgetEl) {
-            budget = budgetEl.dataset?.value || budgetEl.textContent;
-          }
-
-          // 🔹 CASE 2: Normal row
-          else {
-            budget = tr.children[3]?.textContent || "";
-          }
-
-          //console.log("📦 Budget (RAW):", JSON.stringify(budget));
-
-          // ✅ DETAILS
-          let details = "";
-          const detailsInput = tr.querySelector(".details-text");
-          if (detailsInput) details = detailsInput.value;
-          else details = tr.children[4]?.textContent.trim();
-
-          // ✅ AMOUNT
-          const rawAmount = CurrencytoNum(
-            tr.querySelector(".amt")?.value || tr.children[5]?.textContent || 0,
-          );
-
-          // ✅ CUMULATIVE
-          const cumEl = tr.querySelector(".cum");
-
-          const rawCumulative = Number(
-            cumEl?.dataset?.value ||
-              cumEl?.querySelector("input")?.value ||
-              CurrencytoNum(cumEl?.textContent) ||
-              0,
-          );
-
-          //console.log("ROW:", rowIndex, "CUM:", rawCumulative);
-
-          if (!date || !station || !details || rawAmount === 0) return;
-
-          data.push({
-            rowIndex: rowIndex ? Number(rowIndex) : null,
-            Date: formatDateBack(date),
-            Station: station,
-            "Bill / Invoice Details": bill,
-            "SBG Expenditure Under": budget,
-            "Expenditure Details": details,
-            "Expenditure Amount (₹ in 000)": Number(
-              (rawAmount / 1000).toFixed(3),
-            ),
-            "Cumulative Sum of Expenditure (₹ in 000)": Number(
-              (rawCumulative / 1000).toFixed(3),
-            ),
+            data.push({
+              Date: formatDateBack(dateInput),
+              Station: station.trim(),
+              "Bill / Invoice Details": bill.trim(),
+              "SBG Expenditure Under": budget.trim(),
+              "Expenditure Details": details.trim(),
+              "Expenditure Amount (₹ in 000)": Number(
+                (amount / 1000).toFixed(3),
+              ),
+              "Cumulative Sum of Expenditure (₹ in 000)": Number(
+                (cumulative / 1000).toFixed(3),
+              ),
+            });
           });
-        });
+        }
+
+        // =========================
+        // 🔥 SYNC MODE (PB DATA)
+        // =========================
+        else {
+          const pbRows = buildPBBudgetRows();
+
+          data = pbRows.map(mapRowArrayToObject);
+        }
 
         if (!data.length) {
-          alert("❌ Enter valid data");
+          alert("❌ No valid data");
           return false;
         }
 
-        //console.log("🚀 FINAL PAYLOAD:", data);
+        try {
+          const res = await fetch(
+            "https://office-management-f425.onrender.com/sbgexp/update",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                data: data,
+                mode: modeType === "add" ? "update" : "replace", // 🔥 KEY FIX
+              }),
+            },
+          );
 
-        const res = await fetch(
-          "https://office-management-f425.onrender.com/sbgexp/update",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ data }),
-          },
-        );
+          const result = await res.json();
 
-        const result = await res.json();
+          if (result?.status === "success") {
+            alert("✅ Uploaded Successfully");
 
-        if (result?.status === "success") {
-          alert("✅ Uploaded Successfully");
+            await reloadSBGExpData();
+            await updateBudgetDBFromSBGExp();
+            await loadTable("sbg", "BudgetDB");
 
-          await reloadSBGExpData();
-          await updateBudgetDBFromSBGExp();
-          await loadTable("sbg", "BudgetDB");
-          getBudgetFYColumns();
-          renderFilterMainBudgetExpTable();
+            getBudgetFYColumns();
+            renderFilterMainBudgetExpTable();
 
-          return true;
-        } else {
-          alert("❌ Save failed");
+            return true;
+          } else {
+            console.error(result);
+            alert("❌ Save failed");
+            return false;
+          }
+        } catch (err) {
+          console.error(err);
+          alert("❌ Network error");
           return false;
         }
       }
@@ -11877,7 +12194,7 @@
           isProcessing = true;
 
           try {
-            const wrapper = document.querySelector(".BudgetTableWrapper");
+            const wrapper = qs(".BudgetTableWrapper");
 
             if (!isActive) {
               // =========================
@@ -11919,7 +12236,7 @@
               // 🔥 SAVE MODE
               // =========================
 
-              const success = await saveSBGData();
+              const success = await saveSBGData(modeType);
               if (!success) {
                 isProcessing = false;
                 return;
@@ -12779,7 +13096,7 @@
       }
 
       function handleSalarySlipChange() {
-        document.querySelectorAll(".SSaction-group button").forEach((btn) => {
+        qsa(".SSaction-group button").forEach((btn) => {
           btn.disabled = false;
         });
 
@@ -13269,7 +13586,7 @@
         });
       }
 
-      document.querySelectorAll(".menu-option").forEach((opt) => {
+      qsa(".menu-option").forEach((opt) => {
         opt.addEventListener("click", function () {
           const type = this.dataset.type;
 
@@ -13849,12 +14166,10 @@
         selectedFY,
         mode = "calculated",
       ) {
-        const wrapper = document.querySelector(".ITtableWrapper");
+        const wrapper = qs(".ITtableWrapper");
         if (!wrapper) return;
         const ITfy = id("ITPage_FY").value;
-        const Sal = document.querySelector(
-          "input[name='salaryMode']:checked",
-        )?.value;
+        const Sal = qs("input[name='salaryMode']:checked")?.value;
         wrapper.innerHTML = "";
 
         const { data, lastPBMonth } = buildProjectedFY(
@@ -14198,7 +14513,7 @@
 
           // ✅ COUNT MONTH
           paidMonthCount++;
-          document.getElementById("paidMonthCountInput").value = paidMonthCount;
+          id("paidMonthCountInput").value = paidMonthCount;
 
           // ✅ ADD TDS
           totalTDS += Number(r["Net IT"]) || 0;
@@ -14528,7 +14843,7 @@
         wrapper.appendChild(mainTable);
 
         setTimeout(() => {
-          const rentInput = document.getElementById("rentInput");
+          const rentInput = id("rentInput");
           if (!rentInput) return;
 
           // ✅ restore value
@@ -14559,8 +14874,7 @@
 
             const elihra = Math.min(elihra1, elihra2, elihra3);
 
-            document.getElementById("hraValue").innerHTML =
-              formatCurrency(elihra);
+            id("hraValue").innerHTML = formatCurrency(elihra);
 
             // ✅ RECALCULATE TAXABLE
             let ReOldTaxable =
@@ -14574,7 +14888,7 @@
 
             ReOldTaxable = Math.max(0, ReOldTaxable);
 
-            document.getElementById("taxableVal").innerHTML =
+            id("taxableVal").innerHTML =
               "<b>" + formatCurrency(ReOldTaxable) + "</b>";
 
             // ✅ SLAB CALC
@@ -14656,7 +14970,7 @@
             }
 
             // ✅ UPDATE TABLE
-            document.getElementById("oldSlabBody").innerHTML = oldSlabHTML;
+            id("oldSlabBody").innerHTML = oldSlabHTML;
           });
         }, 100);
       }
@@ -14668,7 +14982,7 @@
       });
 
       function handleITChange() {
-        document.querySelectorAll(".ITaction-group button").forEach((btn) => {
+        qsa(".ITaction-group button").forEach((btn) => {
           btn.disabled = false;
         });
 
@@ -14682,9 +14996,7 @@
         // =========================
         // 🔥 GET CURRENT MODE
         // =========================
-        const selectedModeEl = document.querySelector(
-          "input[name='salaryMode']:checked",
-        );
+        const selectedModeEl = qs("input[name='salaryMode']:checked");
         const mode =
           selectedModeEl?.id === "calcSalary" ? "calculated" : "paid";
 
@@ -14693,7 +15005,7 @@
         // =========================
         // 🔄 LOADING STATE
         // =========================
-        const wrapper = document.querySelector(".ITtableWrapper");
+        const wrapper = qs(".ITtableWrapper");
         if (wrapper) wrapper.innerHTML = "Loading...";
 
         // =========================
@@ -14925,7 +15237,7 @@
       async function exportITExcel(mode = "single") {
         const workbook = new ExcelJS.Workbook();
 
-        const wrapper = document.querySelector(".ITtableWrapper"); // ✅ FIXED
+        const wrapper = qs(".ITtableWrapper"); // ✅ FIXED
         const station = id("ITPage_Station")?.value;
         const selectedFY = id("ITPage_FY")?.value;
         const selectedEmp = id("ITPage_Emp")?.value;
@@ -15375,7 +15687,7 @@
           // 🔥 RENDER (needed for calculation)
           renderCalculatedITTable(empName, selectedFY, "calculated");
 
-          const wrapper = document.querySelector(".ITtableWrapper");
+          const wrapper = qs(".ITtableWrapper");
           if (!wrapper) continue;
 
           // 🔥 RESTORE INPUT VALUE AFTER RENDER
@@ -15605,7 +15917,7 @@
       }
 
       function buildITHTML(mode = "single") {
-        const wrapper = document.querySelector(".ITtableWrapper");
+        const wrapper = qs(".ITtableWrapper");
         // 🔥 REMOVE FORMATTING
         //removeNumberFormatting(wrapper);
         const station = id("ITPage_Station")?.value;
@@ -15761,7 +16073,7 @@
         employees.forEach((empName) => {
           //renderCalculatedITTable(empName, selectedFY, "calculated");
 
-          const wrapper = document.querySelector(".ITtableWrapper");
+          const wrapper = qs(".ITtableWrapper");
           if (!wrapper) return;
 
           const clone = wrapper.cloneNode(true);
@@ -15852,12 +16164,12 @@
         itmenu.classList.remove("show");
       });
 
-      document.querySelectorAll("input[name='salaryMode']").forEach((radio) => {
+      qsa("input[name='salaryMode']").forEach((radio) => {
         radio.addEventListener("change", () => {
           const empName = id("ITPage_Emp")?.value;
           const selectedFY = id("ITPage_FY")?.value;
 
-          const wrapper = document.querySelector(".ITtableWrapper");
+          const wrapper = qs(".ITtableWrapper");
           if (wrapper) wrapper.innerHTML = "Loading...";
 
           // =========================
@@ -15874,10 +16186,10 @@
         });
       });
 
-      document.querySelectorAll(".menu-option").forEach((opt) => {
+      qsa(".menu-option").forEach((opt) => {
         opt.addEventListener("click", function () {
           const type = this.dataset.type;
-          const wrapper = document.querySelector(".ITtableWrapper");
+          const wrapper = qs(".ITtableWrapper");
 
           itmenu.classList.remove("show");
 
@@ -15909,10 +16221,10 @@
       //                        Pension Page Script
       // ==================================================================//
 
-      const pensionSelect = document.getElementById("PensionFor");
-      const checkbox = document.getElementById("CommutationOpted");
-      const commutationSelect = document.getElementById("CommutationOption");
-      const dateInput = document.getElementById("VRS_Death_Date");
+      const pensionSelect = id("PensionFor");
+      const checkbox = id("CommutationOpted");
+      const commutationSelect = id("CommutationOption");
+      const dateInput = id("VRS_Death_Date");
 
       function loadCommutationOptions() {
         for (let i = 1; i <= 40; i++) {
@@ -16232,7 +16544,7 @@
       }
 
       function togglePensionSections(sixMonthly, pensionType) {
-        const get = (cls) => document.querySelectorAll(`.${cls}`);
+        const get = (cls) => qsa(`.${cls}`);
         const set = (rows, visible) =>
           rows.forEach((r) => (r.style.display = visible ? "" : "none"));
 
@@ -16382,7 +16694,7 @@
       }
 
       function renderPensionTable(empName) {
-        const wrapper = document.querySelector(".PensionTableWrapper");
+        const wrapper = qs(".PensionTableWrapper");
         if (!wrapper) return;
 
         wrapper.innerHTML = "";
@@ -16589,47 +16901,49 @@
         // =========================
         let formulaText = "";
         let formulaValueText = "";
+        let gratuityValueFormula = "";
+        let gratuityTextFormula = "";
+        let gratuityValueText = "";
 
-        // -------------------------
         // TEXT FORMULA
-        // -------------------------
         if (gratuityFactor > 0) {
           if (Number.isInteger(gratuityFactor)) {
-            // 🔹 slab case (2, 6, 12, 20)
-            formulaText = `
-              \\text{(BP + DA)} \\times ${gratuityFactor}
-            `;
+            formulaText = `\\text{(BP + DA)} \\times ${gratuityFactor}`;
+            gratuityTextFormula = ` = (BP + DA) × ${gratuityFactor}`;
           } else {
-            // 🔹 fraction case (sixMonthly / 4)
-            formulaText = `
-              \\text{(BP + DA)} 
-              \\times \\frac{${sixMonthly}}{4}
-            `;
+            formulaText = `\\text{(BP + DA)} \\times \\frac{\\text {Completed 6-Month}}{4}`;
+            gratuityTextFormula = ` = (BP + DA) × (Completed 6-Month / 4)`;
           }
         } else {
-          formulaText = `
-            \\text{ Not Eligible since Completed Service is Less than 5 Years}
-          `;
+          formulaText = `\\text{Not Eligible}`;
+          gratuityTextFormula = ` = Not Eligible`;
         }
-        // -------------------------
-        // VALUE FORMULA
-        // -------------------------
+
+        // VALUE TEXT
         if (gratuityFactor > 0) {
           if (Number.isInteger(gratuityFactor)) {
             formulaValueText = `
-              \\text{=}
-              \\text{(${formatCurrency(lastPay)} + ${formatCurrency(daValue)})}
+              \\text{= (${formatCurrency(lastPay)} + ${formatCurrency(daValue)})}
               \\times ${gratuityFactor}
             `;
+
+            gratuityValueText = ` = (${formatCurrency(lastPay)} + ${formatCurrency(daValue)}) × ${gratuityFactor}`;
+
+            gratuityValueFormula = `(${lastPay}+${daValue})*${gratuityFactor}`;
           } else {
-            formulaValueText = `
-              \\text{=}
-              \\text{(${formatCurrency(lastPay)} + ${formatCurrency(daValue)})}
-              \\times \\frac{${sixMonthly}}{4}
-            `;
+            formulaValueText = `\\text{= (${formatCurrency(lastPay)} + ${formatCurrency(daValue)})} \\times \\frac{${sixMonthly}}{4}`;
+
+            gratuityValueText = ` = (${formatCurrency(lastPay)} + ${formatCurrency(daValue)}) × (${sixMonthly}/4)`;
+
+            gratuityValueFormula = `= (${lastPay}+${daValue})*(${sixMonthly}/4)`;
           }
+
+          //gratuityValueFormula =
+          //`MIN(${GratuityLimit},ROUND(${gratuityValueFormula},0))`;
         } else {
           formulaValueText = `\\text{= ₹ 0}`;
+          gratuityValueText = ` = ₹ 0`;
+          gratuityValueFormula = "0";
         }
 
         const benificialPay1 = Math.round(0.5 * avgEmol);
@@ -16787,7 +17101,7 @@
               <td colspan="3"><b>Qualifying Service</b></td>
               <td colspan="3">${totService}</td>
               <td colspan="3"><b>Completed 6 Monthly Period</b></td>
-              <td colspan="3">${sixMonthly}<span style="color:red;font-weight:bold;">${cappedsixMonthly}</span></td>
+              <td colspan="3">${sixMonthly}<span class="print-red" style="color:red !important;font-weight:bold !important;">${cappedsixMonthly}</span></td>
             </tr>
 
             <tr>
@@ -16857,7 +17171,8 @@
               </tr>
               <tr>
                 <td colspan="2">EL Encashment</td>
-                <td colspan="4" style="text-align:left; vertical-align:middle;">
+                <td colspan="4" style="text-align:left; vertical-align:middle;"
+                    data-text-formula=" = (BP + DA) * (EL (capped to 300) / 30)">
                    \\(
                   \\text{=} 
                   \\displaystyle \\frac{\\text{BP} + \\text{DA}}{30}
@@ -16865,7 +17180,8 @@
                   \\)
                 </td>
                 <td colspan="2">HPL Encashment</td>
-                <td colspan="4" style="text-align:left; vertical-align:middle;">
+                <td colspan="4" style="text-align:left; vertical-align:middle;" 
+                  data-text-formula=" =  (BP + DA) * (HPL (capped to 240) / 30)">
                   \\(
                   \\text{=}
                   \\displaystyle \\frac{\\text{BP} + \\text{DA}}{2 \\times 30}
@@ -16875,7 +17191,8 @@
               </tr>
               <tr>
                 <td colspan="2"></td>
-                <td colspan="4" style="text-align:left; vertical-align:middle;">
+                <td colspan="4" style="text-align:left; vertical-align:middle;" 
+                  data-text-formula=" = (${formatCurrency(lastPay)}+${formatCurrency(daValue)})*${ELused}/30">
                   
                   \\(
                   \\text{=}
@@ -16886,7 +17203,8 @@
 
                 </td>
                 <td colspan="2"></td>
-                <td colspan="4" style="text-align:left; vertical-align:middle;">
+                <td colspan="4" style="text-align:left; vertical-align:middle;" 
+                  data-text-formula=" = (${formatCurrency(hplLastPay)}+${formatCurrency(hpldaValue)})*${maxHPLAllowed}/30">
                   \\(
                   \\text{=}
                   \\displaystyle \\frac{\\text{${formatCurrency(hplLastPay)}} + \\text{${formatCurrency(hpldaValue)}}}{30}
@@ -16898,116 +17216,130 @@
               </tr>
               <tr>
                 <td colspan="2"></td>
-                <td colspan="4">
+                <td colspan="4" data-formula="= (${lastPay}+${daValue})*(${ELused}/30)">
                   <b>= ${formatCurrency(ELencash)}</b>
                 </td>
                 <td colspan="2"></td>
-                <td colspan="4">
+                <td colspan="4" data-formula="= (${hplLastPay}+${hpldaValue})*${maxHPLAllowed}/30">
                   <b>= ${formatCurrency(HPLencash)}</b>
                 </td>
               </tr>
 
               <tr> 
                 <td colspan="2">Total Leave Encashment</td>
-                <td colspan="10">= EL Encashment + HPL Encashment</td>
+                <td colspan="10" data-text-formula=" = EL Encashment + HPL Encashment">= EL Encashment + HPL Encashment</td>
               </tr>
 
               <tr>
                 <td colspan="2"></td>
-                <td colspan="10">
+                <td colspan="10" data-formula="=${totLeaveEncash}"">
                   <b>= ${formatCurrency(totLeaveEncash)}</b>
                 </td>
               </tr>
 
               <tr>
-                <th colspan="12" style="background:#edf1fa;color:black;"><b>2. GRATUITY CALCULATION <span class="print-red" id="gratuitySpan"></span></b></th>
+                <th colspan="12" style="background:#edf1fa;color:black;">2. GRATUITY CALCULATION
+                  <span class="print-red" id="gratuitySpan" style="color:red !important;font-weight:bold !important;"></span>
+                </th>
               </tr>
               <tr>
                 <td colspan="2">Gratuity</td>
-                <td colspan="10">
+                <td colspan="10"
+                    data-text-formula="${gratuityTextFormula}">
                   \\(
                   ${formulaText}
                   \\)
                 </td>
               </tr>
 
+              <!-- 🔹 Row 2 -->
               <tr class="gratuityRows">
                 <td colspan="2"></td>
-                <td colspan="10">
+                <td colspan="10"
+                    data-text-formula="${gratuityValueText}">
                   \\(
                   ${formulaValueText}
                   \\)
                 </td>
               </tr>
+
+              <!-- 🔹 Row 3 -->
               <tr class="gratuityRows">
                 <td colspan="2">Gratuity</td>
-                <td colspan="10">
+                <td colspan="10"
+                    data-formula="${gratuityValueFormula}">
                   <b>= ${formatCurrency(Gratuity)}</b>
                 </td>
               </tr>
               <tr>
-                <th colspan="12" style="background:#edf1fa;color:black;"><b>3. MOST BENIFICIAL PAY FOR PENSION CALCULATION <span class="print-red" id="BenificialSpan"></b></th>
+                <th colspan="12" style="background:#edf1fa;color:black;">3. MOST BENIFICIAL PAY FOR PENSION CALCULATION 
+                  <span class="print-red" id="BenificialSpan" style="color:red !important;font-weight:bold !important;">
+                </th>
               </tr>
               <tr class="BenificialRows">
                 <td colspan="2"> a). Average Emolument </td>
-                <td colspan="4"> = 50% of Average Basic pay of Last 10 Months</td>
+                <td colspan="4" data-text-formula=" = 50% of Average Basic pay of Last 10 Months"> = 50% of Average Basic pay of Last 10 Months</td>
                 <td colspan="2"> b). Last Drawn</td>
-                <td colspan="4"> = 50% of BP</td>
+                <td colspan="4" data-text-formula=" = 50% of BP"> = 50% of BP</td>
               </tr>
               <tr class="BenificialRows">
                 <td colspan="2"></td>
-                <td colspan="4"> = 50% x ${formatCurrency(avgEmol)}</td>
+                <td colspan="4" data-text-formula="  = 50% x ${formatCurrency(avgEmol)}"> = 50% x ${formatCurrency(avgEmol)}</td>
                 <td colspan="2"></td>
-                <td colspan="4"> = 50% x ${formatCurrency(lastPay)}</td>
+                <td colspan="4" data-text-formula=" = 50% x ${formatCurrency(lastPay)}"> = 50% x ${formatCurrency(lastPay)}</td>
               </tr>
               <tr class="BenificialRows">
                 <td colspan="2"></td>
-                <td colspan="4"> = ${formatCurrency(benificialPay1)}</td>
+                <td colspan="4" data-formula="0.5*${avgEmol}"> = ${formatCurrency(benificialPay1)}</td>
                 <td colspan="2"></td>
-                <td colspan="4"> = ${formatCurrency(benificialPay2)}</td>
+                <td colspan="4" data-formula="0.5*${lastPay}"> = ${formatCurrency(benificialPay2)}</td>
               </tr>
               <tr class="BenificialRows">
                 <td colspan="2">More Benificial Pay</td>
-                <td colspan="10"><b>= ${formatCurrency(moreBenificialPay)}</b></td>
+                <td colspan="10" data-formula="MAX(${benificialPay1},${benificialPay2})"><b>= ${formatCurrency(moreBenificialPay)}</b></td>
               </tr>
               <tr>
-                <th colspan="12"  style="background:#edf1fa;color:black;"><b>4. COMMUTATION CALCULATION <span class="print-red" id="CommuteSpan"></span></b></th>
+                <th colspan="12"  style="background:#edf1fa;color:black;">4. COMMUTATION CALCULATION 
+                  <span class="print-red" id="CommuteSpan" style="color:red !important;font-weight:bold !important;"></span>
+                </th>
               </tr>
               <tr class="CommuteRows">
                 <td colspan="2">Basic Pay for Commutation</td>
-                <td colspan="4">= Benificial Pay x Commutation (%)</td>
+                <td colspan="4" data-text-formula="  = Benificial Pay x Commutation (%)" >= Benificial Pay x Commutation (%)</td>
                 <td colspan="2">Age on Next Birthday</td>
                 <td colspan="4">${ageNext}</td>
               </tr>
               <tr class="CommuteRows">
                 <td colspan="2"></td>
-                <td colspan="4">= ${formatCurrency(moreBenificialPay)} x ${commutationPercent}%</td>
+                <td colspan="4" data-text-formula=" = ${formatCurrency(moreBenificialPay)} x ${commutationPercent}%">= ${formatCurrency(moreBenificialPay)} x ${commutationPercent}%</td>
                 <td colspan="2">Commutation Factor</td>
                 <td colspan="4">${commFactor}</td>
               </tr>
               <tr class="CommuteRows">                
                 <td colspan="2"></td>
-                <td colspan="4">= ${formatCurrency(commutationBasicPay)}</td>
+                <td colspan="4" data-formula="(${commutationPercent}*${moreBenificialPay})/100">= ${formatCurrency(commutationBasicPay)}</td>
                 <td colspan="6">
               </tr>
               <tr class="CommuteRows">                
                 <td colspan="2">Commutation Amount</td>
-                <td colspan="10">= Basic Pay for Commutation x Commutation Factor x 12</td>
+                <td colspan="10" data-text-formula=" = Basic Pay for Commutation x Commutation Factor x 12">= Basic Pay for Commutation x Commutation Factor x 12</td>
               </tr>
               <tr class="CommuteRows">                
                 <td colspan="2"></td>
-                <td colspan="10">= ${formatCurrency(commutationBasicPay)} x ${commFactor} x 12</td>
+                <td colspan="10" data-text-formula=" = ${formatCurrency(commutationBasicPay)} x ${commFactor} x 12">= ${formatCurrency(commutationBasicPay)} x ${commFactor} x 12</td>
               </tr>
               <tr class="CommuteRows">                
                 <td colspan="2"></td>
-                <td colspan="10"><b>= ${formatCurrency(commutation)}</b></td>
+                <td colspan="10" data-formula="${commutationBasicPay}*${commFactor}*12"><b>= ${formatCurrency(commutation)}</b></td>
               </tr>
               <tr>
                 <td colspan="2" style="background:#edf1fa;color:black;"><b>5. RESIDUAL PENSION</b></td>
-                <td colspan="10" style="background:#edf1fa;color:black;"><b>${formatCurrency(residualPension)}</b></td>
+                <td colspan="10" style="background:#edf1fa;color:black;" data-formula="${moreBenificialPay}-${commutationBasicPay}"><b> = ${formatCurrency(residualPension)}</b></td>
               </tr>
               <tr>
-                <th colspan="12"  style="background:#edf1fa;color:black;"><b>6. SUPERANNUATION PENSION CALCULATION <span class="print-red" id="supPensionSpan"></span></b></th>
+                <th colspan="12"  style="background:#edf1fa;color:black;">6. SUPERANNUATION PENSION CALCULATION 
+                  <span class="print-red" id="supPensionSpan" style="color:red !important;font-weight:bold !important;"></span>
+                </th>
               </tr>
               <tr class="supPensionRows">
                 <td colspan="3">Basic Pay</td>
@@ -17022,9 +17354,9 @@
                 <td colspan="3"><b>${formatCurrency(supPension)}</b></td>
               </tr>
                <tr>
-                <th colspan="12"  style="background:#edf1fa;color:black;"><b>7. ENHANCED PENSION CALCULATION 
-                  <span id="enhancedToDate" class="print-red"></span>
-                  <span class="print-red" id="enhPensionSpan"></span></b>
+                <th colspan="12"  style="background:#edf1fa;color:black;">7. ENHANCED PENSION CALCULATION 
+                  <span id="enhancedToDate" class="print-red" style="color:red !important;font-weight:bold !important;"></span>
+                  <span class="print-red" id="enhPensionSpan" style="color:red !important;font-weight:bold !important;"></span>
                 </th>
               </tr>
               <tr class="enhPensionRows">
@@ -17041,9 +17373,9 @@
               </tr>
               </tr>
                <tr>
-                <th colspan="12"  style="background:#edf1fa;color:black;"><b>8. REDUCED PENSION CALCULATION 
-                  <span id="reducedFromDate" class="print-red"></span>
-                  <span class="print-red" id="redPensionSpan"></span></b>
+                <th colspan="12"  style="background:#edf1fa;color:black;">8. REDUCED PENSION CALCULATION 
+                  <span id="reducedFromDate" class="print-red" style="color:red !important;font-weight:bold !important;"></span>
+                  <span class="print-red" id="redPensionSpan" style="color:red !important;font-weight:bold !important;"></span>
                 </th>
               </tr>
               <tr class="redPensionRows">
@@ -17099,7 +17431,7 @@
           if (!el) return;
 
           el.innerHTML = remarks[key]
-            ? `<span style="color:red;font-weight:bold;">${remarks[key]}</span>`
+            ? `<span class="print-red" style="color:red !important;font-weight:bold !important;">${remarks[key]}</span>`
             : "";
         });
 
@@ -17117,8 +17449,18 @@
         renderMathInElement(calculationTable, {
           delimiters: [
             { left: "$$", right: "$$", display: true },
-            { left: "\\(", right: "\\)", display: true }, // 🔥 change to true
+            { left: "\\(", right: "\\)", display: true },
           ],
+          throwOnError: false,
+          strict: "ignore",
+          ignoredTags: [
+            "script",
+            "noscript",
+            "style",
+            "textarea",
+            "pre",
+            "code",
+          ], // 🔥 add this
         });
         //}, 0);
 
@@ -17236,31 +17578,32 @@
         });
       }
 
-      document.querySelectorAll(".menu-option").forEach((opt) => {
-        opt.addEventListener("click", function () {
+      qsa(".menu-option").forEach((opt) => {
+        opt.addEventListener("click", async function () {
           const type = this.dataset.type;
-          const wrapper = document.querySelector(".PensionTableWrapper");
+          const wrapper = qs(".PensionTableWrapper");
 
           pensionmenu.classList.remove("show");
 
-          // =====SALARY SLIP PRINT =====
+          // ===== SINGLE PRINT =====
           if (type === "pdf-singlePension") {
-            openPrintWindow(buildPensionHTML("single"));
+            const html = await buildPensionHTML("single"); // ✅ FIX
+            openPrintWindow(html);
             restoreNumberFormatting(wrapper);
           }
 
-          // ===== ALL SALARY SLIP PRINT =====
+          // ===== ALL PRINT =====
           if (type === "pdf-allPension") {
-            openPrintWindow(buildPensionHTML("all"));
+            const html = await buildPensionHTML("all"); // ✅ FIX
+            openPrintWindow(html);
             restoreNumberFormatting(wrapper);
           }
 
-          // ===== SALARY SLIP EXCEL ✅ FIXED =====
+          // ===== EXCEL =====
           if (type === "excel-singlePension") {
             exportPensionExcel("single");
           }
 
-          // ===== ALL SALARY SLIP EXCEL =====
           if (type === "excel-allPension") {
             exportPensionExcel("all");
           }
@@ -17309,8 +17652,9 @@
       document.addEventListener("input", handlePensionEvents);
       document.addEventListener("change", handlePensionEvents);
 
-      function buildPensionHTML(mode = "single") {
-        const wrapper = document.querySelector(".PensionTableWrapper");
+      async function buildPensionHTML(mode = "single") {
+        //console.log(qs(".PensionTableWrapper").querySelectorAll(".print-red"));
+        const wrapper = qs(".PensionTableWrapper");
         const station = id("PensionPage_Station")?.value;
         const selectedEmp = id("PensionPage_Emp")?.value;
 
@@ -17353,7 +17697,7 @@
         );
 
         // =========================
-        // 🔥 COPY ALL STYLES (INCLUDING KATEX)
+        // 🔥 COPY ALL STYLES
         // =========================
         document
           .querySelectorAll("style, link[rel='stylesheet']")
@@ -17364,88 +17708,53 @@
           });
 
         // =========================
-        // 🔥 PRINT CSS
+        // 🔥 PRINT CSS (FIXED)
         // =========================
         const style = doc.createElement("style");
 
         style.textContent = `
-            @page {
-              size: A4 portrait;
-              margin: 5mm;
-            }
+    @page { size: A4 portrait; margin: 5mm; }
 
-            body {
-              margin: 0;
-              font-size: 10px;
-            }
+    body { margin: 0; font-size: 10px; }
 
-            /* allow natural flow */
-            .page {
-              margin: 0 auto;
-              padding-right: 2mm;
-            }
+    .page { margin: 0 auto; padding-right: 2mm; }
 
-            /* tables */
-            table {
-              width: 100%;
-              border-collapse: collapse;
-            }
+    table { width: 100%; border-collapse: collapse; }
 
-            /* allow row splitting if needed */
-            tr {
-              break-inside: auto;
-            }
+    tr { break-inside: auto; }
 
-            /* cells */
-            td, th {
-              padding: 4px;
-              font-size: 10px;
-            }
+    td, th { padding: 4px; font-size: 10px; }
 
-            /* ✅ REMOVE ONLY SCROLL (NO PAGE CONTROL HERE) */
-            .PensionTableWrapper,
-            .SectionPage,
-            .right-panel {
-              overflow: visible !important;
-              height: auto !important;
-              max-height: none !important;
-            }
+    .PensionTableWrapper,
+    .SectionPage,
+    .right-panel {
+      overflow: visible !important;
+      height: auto !important;
+      max-height: none !important;
+    }
 
-            /* ✅ KaTeX FIX */
-            .katex {
-              display: inline-block !important;
-              white-space: normal !important;
-              line-height: 1.4;
-            }
+    .katex {
+      display: inline-block !important;
+      white-space: normal !important;
+      line-height: 1.4;
+    }
 
-            /* print colors */
-            * {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
 
-            #emolumentContainer, #calculationContainer, #pensionContainer{
-              border:none;
-              padding:0;
-            }
+    #emolumentContainer, #calculationContainer, #pensionContainer{
+      border:none;
+      padding:0;
+    }
 
-            span {
-              color: inherit;
-            }
-
-            span[style*="color:red"] {
-              color: #d00000 !important;
-              -webkit-text-fill-color: #d00000 !important;
-              font-weight: bold !important;
-            }
-
-            @media print {
-              .print-red {
-                color: red !important;
-                font-weight: bold !important;
-              }
-            }
-        `;
+    /* 🔥 FIX: ALWAYS APPLY RED */
+    .print-red {
+      color: #d00000 !important;
+      font-weight: bold !important;
+    }
+  `;
 
         doc.head.appendChild(style);
 
@@ -17469,24 +17778,31 @@
         }
 
         // =========================
-        // 🔁 LOOP EMPLOYEES
+        // 🔁 LOOP EMPLOYEES (FIXED)
         // =========================
-        employees.forEach((empName) => {
-          // 🔥 IMPORTANT: fresh render
+        for (const empName of employees) {
+          // 🔥 render fresh UI
           renderPensionTable(empName);
 
-          const liveWrapper = document.querySelector(".PensionTableWrapper");
-          if (!liveWrapper) return;
+          // 🔥 force dependent updates (IMPORTANT)
+          updatePensionUI?.();
+          setDAPercent?.();
+
+          // 🔥 WAIT FOR DOM TO UPDATE (CRITICAL FIX)
+          await new Promise((r) => setTimeout(r, 50));
+
+          const liveWrapper = qs(".PensionTableWrapper");
+          if (!liveWrapper) continue;
 
           const clone = liveWrapper.cloneNode(true);
 
           // =========================
-          // 🔥 FIX 1: COPY INPUT VALUES
+          // 🔥 COPY INPUT VALUES
           // =========================
           copyInputValues(liveWrapper, clone);
 
           // =========================
-          // 🔥 FIX 2: CONVERT INPUTS TO TEXT
+          // 🔥 CONVERT INPUTS TO TEXT
           // =========================
           clone.querySelectorAll("input, select, textarea").forEach((inp) => {
             const span = document.createElement("span");
@@ -17507,8 +17823,9 @@
           });
 
           removeNumberFormatting(clone);
+
           // =========================
-          // 🔥 FIX 3: PRESERVE NESTED TABLES
+          // 🔥 TABLE FIX
           // =========================
           clone.querySelectorAll("table").forEach((tbl) => {
             tbl.style.width = "100%";
@@ -17516,7 +17833,7 @@
           });
 
           // =========================
-          // 🔥 FIX 4: KATEX FORMULA DISPLAY
+          // 🔥 KATEX FIX
           // =========================
           clone.querySelectorAll(".katex").forEach((el) => {
             el.style.display = "inline-block";
@@ -17524,9 +17841,24 @@
           });
 
           // =========================
-          // 🔥 CLEANUP (OPTIONAL)
+          // 🔥 CLEANUP
           // =========================
           clone.querySelectorAll(".no-print").forEach((el) => el.remove());
+
+          // =========================
+          // 🔥 FIX: APPLY RED AFTER KATEX (FINAL)
+          // =========================
+          clone.querySelectorAll(".print-red").forEach((el) => {
+            // 🔥 APPLY STYLE DIRECTLY (DO NOT REPLACE)
+            el.style.setProperty("color", "#d00000", "important");
+            el.style.setProperty("font-weight", "bold", "important");
+
+            // 🔥 ALSO FIX INNER CHILDREN (CRITICAL)
+            el.querySelectorAll("*").forEach((child) => {
+              child.style.setProperty("color", "#d00000", "important");
+              child.style.setProperty("font-weight", "bold", "important");
+            });
+          });
 
           // =========================
           // 🔥 CREATE PAGE
@@ -17534,16 +17866,14 @@
           const page = doc.createElement("div");
           page.className = "page";
 
-          // 🔥 HEADER
           const header = buildPrintHeader(doc);
           header.classList.add("print-header");
-          page.appendChild(header);
 
-          // 🔥 CONTENT
+          page.appendChild(header);
           page.appendChild(clone);
 
           doc.body.appendChild(page);
-        });
+        }
 
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
@@ -17551,7 +17881,7 @@
       async function exportPensionExcel(mode = "single") {
         const workbook = new ExcelJS.Workbook();
 
-        const wrapper = document.querySelector(".PensionTableWrapper");
+        const wrapper = qs(".PensionTableWrapper");
         const station = id("PensionPage_Station")?.value;
         const selectedEmp = id("PensionPage_Emp")?.value;
 
@@ -17619,6 +17949,44 @@
           return null;
         }
 
+        function extractRichText(node, richText = []) {
+          // TEXT NODE
+          if (node.nodeType === Node.TEXT_NODE) {
+            let text = node.textContent;
+
+            if (text) {
+              text = text.replace(/\s+/g, " "); // 🔥 remove line breaks
+              text = text.trim();
+
+              if (text) {
+                richText.push({ text: text + " " }); // 🔥 keep spacing inline
+              }
+            }
+          }
+
+          // ELEMENT NODE
+          else if (node.nodeType === Node.ELEMENT_NODE) {
+            const isRed = node.classList?.contains("print-red");
+            const isBold = node.tagName === "B" || node.tagName === "STRONG";
+
+            node.childNodes.forEach((child) => {
+              const temp = [];
+              extractRichText(child, temp);
+
+              temp.forEach((part) => {
+                part.font = {
+                  ...(part.font || {}),
+                  ...(isRed ? { color: { argb: "FFFF0000" } } : {}),
+                  ...(isBold ? { bold: true } : {}),
+                };
+                richText.push(part);
+              });
+            });
+          }
+
+          return richText;
+        }
+
         // =========================
         // 🔥 MAIN TABLE PROCESSOR
         // =========================
@@ -17684,7 +18052,31 @@
               // =========================
               // 🔥 VALUE
               // =========================
-              excelCell.value = parseValue(text);
+              const formula = cell.getAttribute("data-formula");
+              const textFormula = cell.getAttribute("data-text-formula");
+              const textValue = cell.getAttribute("data-text-value");
+
+              if (formula) {
+                // 🔥 FINAL ROW → real Excel formula
+                excelCell.value = { formula: formula };
+              } else if (textFormula) {
+                // 🔹 Row 1 → generic formula text
+                excelCell.value = textFormula;
+              } else if (textValue) {
+                // 🔹 Row 2 → substituted values
+                excelCell.value = "= " + textValue;
+              } else {
+                // 🔹 Normal cells
+                const hasRed = cell.querySelector(".print-red");
+
+                if (hasRed) {
+                  const richText = extractRichText(cell);
+
+                  excelCell.value = { richText };
+                } else {
+                  excelCell.value = parseValue(text);
+                }
+              }
 
               // =========================
               // 🔥 FONT
@@ -17780,7 +18172,7 @@
         for (const empName of employees) {
           renderPensionTable(empName);
 
-          const wrapper = document.querySelector(".PensionTableWrapper");
+          const wrapper = qs(".PensionTableWrapper");
           if (!wrapper) continue;
 
           const sheet = workbook.addWorksheet(empName.substring(0, 25));
@@ -17816,7 +18208,7 @@
           // 🔥 LOGO (FIXED POSITION)
           // =========================
           const base64 = await urlToBase64(
-            "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+            "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
           );
 
           const imageId = workbook.addImage({
@@ -17826,8 +18218,8 @@
 
           // 🔥 Position inside first row (header row)
           sheet.addImage(imageId, {
-            tl: { col: 0.2, row: 0 },   // left top
-            ext: { width: 65, height: 65 }
+            tl: { col: 0.2, row: 0 }, // left top
+            ext: { width: 65, height: 65 },
           });
 
           // =========================
