@@ -211,7 +211,7 @@ def update_sbgexp():
 
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
-        mode = req_data.get("mode", "update")  # 🔥 NEW
+        mode = req_data.get("mode", "update")  # 🔥 IMPORTANT
 
         if not edit_rows:
             return jsonify({"status": "error", "message": "No data received"}), 400
@@ -224,21 +224,49 @@ def update_sbgexp():
         rows = data[1:]
 
         # =========================
-        # 🔥 REPLACE MODE (FINAL FIX)
+        # 🔧 HELPERS
+        # =========================
+        def clean(val):
+            return str(val).strip().lower()
+
+        def normalize_date(val):
+            try:
+                return datetime.strptime(val.strip(), "%d-%m-%Y").strftime("%Y-%m-%d")
+            except:
+                return clean(val)
+
+        def clean_details(val):
+            if not val:
+                return ""
+            val = str(val).lower()
+            val = re.sub(r"\(.*?\)", "", val)  # remove dynamic breakup
+            return re.sub(r"\s+", " ", val).strip()
+
+        def make_key(row):
+            return f"{normalize_date(row.get('Date',''))}|{clean(row.get('Station',''))}|{clean(row.get('SBG Expenditure Under',''))}|{clean_details(row.get('Expenditure Details',''))}"
+
+        # =========================
+        # 🔥 REPLACE MODE (FULL RESET)
         # =========================
         if mode == "replace":
 
-            # 🔥 FULL CLEAR (THIS IS THE REAL FIX)
+            # 🔥 FULL CLEAR (NO DUPLICATES POSSIBLE)
             sbgexp_sheet.clear()
 
-            # 🔥 REWRITE HEADER
+            # rewrite header
             sbgexp_sheet.append_row(headers)
 
-            # 🔥 ADD NEW DATA
-            new_rows = [
-                [row_obj.get(h, "") for h in headers]
-                for row_obj in edit_rows
-            ]
+            # remove duplicates from incoming
+            seen = set()
+            new_rows = []
+
+            for row_obj in edit_rows:
+                key = make_key(row_obj)
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                new_rows.append([row_obj.get(h, "") for h in headers])
 
             if new_rows:
                 sbgexp_sheet.append_rows(new_rows)
@@ -251,66 +279,42 @@ def update_sbgexp():
             })
 
         # =========================
-        # 🔍 Column indexes
+        # 🔥 UPDATE MODE (SMART UPSERT)
         # =========================
         date_idx = headers.index("Date")
         station_idx = headers.index("Station")
         budget_idx = headers.index("SBG Expenditure Under")
         details_idx = headers.index("Expenditure Details")
 
-        # =========================
-        # 🔧 HELPERS
-        # =========================
-        def clean(val):
-            return re.sub(r"\s+", " ", str(val).strip().lower())
-
-        def normalize_date(val):
-            try:
-                return datetime.strptime(val.strip(), "%d-%m-%Y").strftime("%Y-%m-%d")
-            except:
-                return clean(val)
-
-        def clean_details(val):
-            if not val:
-                return ""
-
-            val = str(val).lower()
-
-            # remove dynamic employee breakup
-            val = re.sub(r"\(.*?\)", "", val)
-
-            return re.sub(r"\s+", " ", val).strip()
-
-        # =========================
-        # 🔥 EXISTING ROW MAP
-        # =========================
+        # build existing row map
         row_map = {}
 
         for i, r in enumerate(rows):
-            key = f"{normalize_date(r[date_idx])}|{clean(r[station_idx])}|{clean(r[budget_idx])}|{clean_details(r[details_idx])}"
-            row_map[key] = i + 2  # sheet row number
+            existing_row = {
+                "Date": r[date_idx],
+                "Station": r[station_idx],
+                "SBG Expenditure Under": r[budget_idx],
+                "Expenditure Details": r[details_idx],
+            }
+            key = make_key(existing_row)
+            row_map[key] = i + 2
 
-        # =========================
-        # 🔄 PROCESS INCOMING
-        # =========================
         update_cells = []
         new_rows = []
         seen_keys = set()
 
         for row_obj in edit_rows:
 
-            key = f"{normalize_date(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean_details(row_obj.get('Expenditure Details'))}"
+            key = make_key(row_obj)
 
-            # prevent duplicates in same request
+            # prevent duplicate in same request
             if key in seen_keys:
                 continue
             seen_keys.add(key)
 
             new_row = [row_obj.get(h, "") for h in headers]
 
-            # =========================
-            # 🔁 UPDATE EXISTING
-            # =========================
+            # 🔁 UPDATE
             if key in row_map:
                 row_num = row_map[key]
 
@@ -320,21 +324,15 @@ def update_sbgexp():
                         "values": [[val]]
                     })
 
-            # =========================
-            # ➕ ADD NEW ROW
-            # =========================
+            # ➕ INSERT
             else:
                 new_rows.append(new_row)
 
-        # =========================
-        # ⚡ BULK UPDATE
-        # =========================
+        # bulk update
         if update_cells:
             sbgexp_sheet.batch_update(update_cells)
 
-        # =========================
-        # ➕ APPEND NEW ROWS
-        # =========================
+        # append new
         if new_rows:
             sbgexp_sheet.append_rows(new_rows)
 
