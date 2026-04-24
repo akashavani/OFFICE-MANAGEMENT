@@ -211,17 +211,23 @@ def update_sbgexp():
 
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
-        mode = req_data.get("mode", "update")  # 🔥 IMPORTANT
+        mode = req_data.get("mode", "update")
 
         if not edit_rows:
             return jsonify({"status": "error", "message": "No data received"}), 400
 
         # =========================
-        # 📥 EXISTING DATA
+        # 🔥 FIXED HEADERS (IMPORTANT)
         # =========================
-        data = sbgexp_sheet.get_all_values()
-        headers = data[0]
-        rows = data[1:]
+        headers = [
+            "Date",
+            "Station",
+            "Bill / Invoice Details",
+            "SBG Expenditure Under",
+            "Expenditure Details",
+            "Expenditure Amount (₹ in 000)",
+            "Cumulative Sum of Expenditure (₹ in 000)"
+        ]
 
         # =========================
         # 🔧 HELPERS
@@ -246,22 +252,32 @@ def update_sbgexp():
             return f"{normalize_date(row.get('Date',''))}|{clean(row.get('Station',''))}|{clean(row.get('SBG Expenditure Under',''))}|{clean_details(row.get('Expenditure Details',''))}"
 
         # =========================
+        # 🔥 REMOVE HEADER ROW FROM INPUT
+        # =========================
+        cleaned_rows = []
+        for row in edit_rows:
+            if str(row.get("Date", "")).strip().lower() == "date":
+                continue
+            cleaned_rows.append(row)
+
+        edit_rows = cleaned_rows
+
+        # =========================
         # 🔥 REPLACE MODE (FULL RESET)
         # =========================
         if mode == "replace":
 
-            # 🔥 FULL CLEAR (NO DUPLICATES POSSIBLE)
             sbgexp_sheet.clear()
 
-            # rewrite header
+            # ✅ write correct headers
             sbgexp_sheet.append_row(headers)
 
-            # remove duplicates from incoming
             seen = set()
             new_rows = []
 
             for row_obj in edit_rows:
                 key = make_key(row_obj)
+
                 if key in seen:
                     continue
                 seen.add(key)
@@ -274,21 +290,28 @@ def update_sbgexp():
             return jsonify({
                 "status": "success",
                 "mode": "replace",
-                "added": len(new_rows),
-                "updated": 0
+                "added": len(new_rows)
             })
 
         # =========================
         # 🔥 UPDATE MODE (SMART UPSERT)
         # =========================
+        data = sbgexp_sheet.get_all_values()
+
+        if not data:
+            sbgexp_sheet.append_row(headers)
+            rows = []
+        else:
+            rows = data[1:]
+
+        # column indexes
         date_idx = headers.index("Date")
         station_idx = headers.index("Station")
         budget_idx = headers.index("SBG Expenditure Under")
         details_idx = headers.index("Expenditure Details")
 
-        # build existing row map
+        # build existing map
         row_map = {}
-
         for i, r in enumerate(rows):
             existing_row = {
                 "Date": r[date_idx],
@@ -307,7 +330,7 @@ def update_sbgexp():
 
             key = make_key(row_obj)
 
-            # prevent duplicate in same request
+            # skip duplicates in same request
             if key in seen_keys:
                 continue
             seen_keys.add(key)
@@ -328,11 +351,9 @@ def update_sbgexp():
             else:
                 new_rows.append(new_row)
 
-        # bulk update
         if update_cells:
             sbgexp_sheet.batch_update(update_cells)
 
-        # append new
         if new_rows:
             sbgexp_sheet.append_rows(new_rows)
 
