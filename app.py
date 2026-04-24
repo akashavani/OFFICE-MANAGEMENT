@@ -211,6 +211,7 @@ def update_sbgexp():
 
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
+        mode = req_data.get("mode", "update")  # 🔥 NEW
 
         if not edit_rows:
             return jsonify({"status": "error", "message": "No data received"}), 400
@@ -222,7 +223,32 @@ def update_sbgexp():
         headers = data[0]
         rows = data[1:]
 
+        # =========================
+        # 🔥 REPLACE MODE (FINAL FIX)
+        # =========================
+        if mode == "replace":
+            # Keep only header row
+            sbgexp_sheet.resize(rows=1)
+
+            # Build fresh rows
+            new_rows = [
+                [row_obj.get(h, "") for h in headers]
+                for row_obj in edit_rows
+            ]
+
+            if new_rows:
+                sbgexp_sheet.append_rows(new_rows)
+
+            return jsonify({
+                "status": "success",
+                "mode": "replace",
+                "added": len(new_rows),
+                "updated": 0
+            })
+
+        # =========================
         # 🔍 Column indexes
+        # =========================
         date_idx = headers.index("Date")
         station_idx = headers.index("Station")
         budget_idx = headers.index("SBG Expenditure Under")
@@ -246,13 +272,10 @@ def update_sbgexp():
 
             val = str(val).lower()
 
-            # 🔥 remove dynamic employee breakup (inside brackets)
+            # remove dynamic employee breakup
             val = re.sub(r"\(.*?\)", "", val)
 
-            # normalize spaces
-            val = re.sub(r"\s+", " ", val).strip()
-
-            return val
+            return re.sub(r"\s+", " ", val).strip()
 
         # =========================
         # 🔥 EXISTING ROW MAP
@@ -274,7 +297,7 @@ def update_sbgexp():
 
             key = f"{normalize_date(row_obj.get('Date'))}|{clean(row_obj.get('Station'))}|{clean(row_obj.get('SBG Expenditure Under'))}|{clean_details(row_obj.get('Expenditure Details'))}"
 
-            # 🔥 prevent duplicates within request
+            # prevent duplicates in same request
             if key in seen_keys:
                 continue
             seen_keys.add(key)
@@ -313,6 +336,7 @@ def update_sbgexp():
 
         return jsonify({
             "status": "success",
+            "mode": "update",
             "updated": len(update_cells),
             "added": len(new_rows)
         })
