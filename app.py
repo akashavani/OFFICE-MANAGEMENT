@@ -201,7 +201,6 @@ def update_pb():
         return jsonify({"status": "error", "message": str(e)}), 500
     
     
-    
 @app.route("/sbgexp/update", methods=["POST"])
 def update_sbgexp():
     try:
@@ -211,13 +210,13 @@ def update_sbgexp():
 
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
-        mode = req_data.get("mode", "update")
+        mode = req_data.get("mode", "replace")  # 🔥 flexible
 
         if not edit_rows:
             return jsonify({"status": "error", "message": "No data received"}), 400
 
         # =========================
-        # 🔥 FIXED HEADERS (IMPORTANT)
+        # 🔥 FIXED HEADERS
         # =========================
         headers = [
             "Date",
@@ -245,29 +244,23 @@ def update_sbgexp():
             if not val:
                 return ""
             val = str(val).lower()
-            val = re.sub(r"\(.*?\)", "", val)  # remove dynamic breakup
+            val = re.sub(r"\(.*?\)", "", val)  # 🔥 remove dynamic breakup
             return re.sub(r"\s+", " ", val).strip()
 
         def make_key(row):
             return f"{normalize_date(row.get('Date',''))}|{clean(row.get('Station',''))}|{clean(row.get('SBG Expenditure Under',''))}|{clean_details(row.get('Expenditure Details',''))}"
 
         # =========================
-        # 🔥 REMOVE HEADER ROW FROM INPUT
+        # 🔥 CLEAN INPUT (CRITICAL)
         # =========================
         cleaned_rows = []
 
         for row in edit_rows:
-            date_val = str(row.get("Date", "")).strip().lower()
+            date_val = str(row.get("Date", "")).strip()
 
-            # ❌ skip header
-            if date_val == "date":
+            if not date_val or date_val.lower() == "date":
                 continue
 
-            # ❌ skip blank rows
-            if not date_val or date_val == "none":
-                continue
-
-            # ❌ skip invalid rows
             if not row.get("Station") or not row.get("SBG Expenditure Under"):
                 continue
 
@@ -276,17 +269,15 @@ def update_sbgexp():
         edit_rows = cleaned_rows
 
         # =========================
-        # 🔥 REPLACE MODE (FULL RESET)
+        # 🔥 REPLACE MODE (SAFE RESET)
         # =========================
         if mode == "replace":
 
             sbgexp_sheet.clear()
-
-            # ✅ write correct headers
             sbgexp_sheet.append_row(headers)
 
             seen = set()
-            new_rows = []
+            final_rows = []
 
             for row_obj in edit_rows:
                 key = make_key(row_obj)
@@ -295,42 +286,36 @@ def update_sbgexp():
                     continue
                 seen.add(key)
 
-                new_rows.append([row_obj.get(h, "") for h in headers])
+                final_rows.append([row_obj.get(h, "") for h in headers])
 
-            if new_rows:
-                sbgexp_sheet.append_rows(new_rows)
+            if final_rows:
+                sbgexp_sheet.append_rows(final_rows)
 
             return jsonify({
                 "status": "success",
                 "mode": "replace",
-                "added": len(new_rows)
+                "added": len(final_rows)
             })
 
         # =========================
-        # 🔥 UPDATE MODE (SMART UPSERT)
+        # 🔥 UPDATE MODE (FUTURE USE)
         # =========================
         data = sbgexp_sheet.get_all_values()
 
         if not data:
             sbgexp_sheet.append_row(headers)
-            rows = []
+            existing_rows = []
         else:
-            rows = data[1:]
-
-        # column indexes
-        date_idx = headers.index("Date")
-        station_idx = headers.index("Station")
-        budget_idx = headers.index("SBG Expenditure Under")
-        details_idx = headers.index("Expenditure Details")
+            existing_rows = data[1:]
 
         # build existing map
         row_map = {}
-        for i, r in enumerate(rows):
+        for i, r in enumerate(existing_rows):
             existing_row = {
-                "Date": r[date_idx],
-                "Station": r[station_idx],
-                "SBG Expenditure Under": r[budget_idx],
-                "Expenditure Details": r[details_idx],
+                "Date": r[0],
+                "Station": r[1],
+                "SBG Expenditure Under": r[3],
+                "Expenditure Details": r[4],
             }
             key = make_key(existing_row)
             row_map[key] = i + 2
@@ -343,14 +328,13 @@ def update_sbgexp():
 
             key = make_key(row_obj)
 
-            # skip duplicates in same request
             if key in seen_keys:
                 continue
             seen_keys.add(key)
 
             new_row = [row_obj.get(h, "") for h in headers]
 
-            # 🔁 UPDATE
+            # 🔁 UPDATE EXISTING
             if key in row_map:
                 row_num = row_map[key]
 
@@ -360,7 +344,7 @@ def update_sbgexp():
                         "values": [[val]]
                     })
 
-            # ➕ INSERT
+            # ➕ ADD NEW
             else:
                 new_rows.append(new_row)
 
