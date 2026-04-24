@@ -206,27 +206,12 @@ def update_sbgexp():
     try:
         import re
         from datetime import datetime
-        import gspread
 
         req_data = request.get_json()
         edit_rows = req_data.get("data", [])
-        mode = req_data.get("mode", "replace")  # 🔥 flexible
 
         if not edit_rows:
             return jsonify({"status": "error", "message": "No data received"}), 400
-
-        # =========================
-        # 🔥 FIXED HEADERS
-        # =========================
-        headers = [
-            "Date",
-            "Station",
-            "Bill / Invoice Details",
-            "SBG Expenditure Under",
-            "Expenditure Details",
-            "Expenditure Amount (₹ in 000)",
-            "Cumulative Sum of Expenditure (₹ in 000)"
-        ]
 
         # =========================
         # 🔧 HELPERS
@@ -238,13 +223,13 @@ def update_sbgexp():
             try:
                 return datetime.strptime(val.strip(), "%d-%m-%Y").strftime("%Y-%m-%d")
             except:
-                return clean(val)
+                return ""
 
         def clean_details(val):
             if not val:
                 return ""
             val = str(val).lower()
-            val = re.sub(r"\(.*?\)", "", val)  # 🔥 remove dynamic breakup
+            val = re.sub(r"\(.*?\)", "", val)  # remove dynamic part
             return re.sub(r"\s+", " ", val).strip()
 
         def make_key(row):
@@ -253,63 +238,49 @@ def update_sbgexp():
         # =========================
         # 🔥 CLEAN INPUT (CRITICAL)
         # =========================
-        cleaned_rows = []
+        cleaned = []
 
         for row in edit_rows:
-            date_val = str(row.get("Date", "")).strip()
-
-            if not date_val or date_val.lower() == "date":
+            if not isinstance(row, dict):
                 continue
 
-            if not row.get("Station") or not row.get("SBG Expenditure Under"):
+            date = str(row.get("Date", "")).strip()
+            station = str(row.get("Station", "")).strip()
+            budget = str(row.get("SBG Expenditure Under", "")).strip()
+
+            # ❌ remove header-like rows
+            if date.lower() == "date":
                 continue
 
-            cleaned_rows.append(row)
+            # ❌ remove blank rows
+            if not date or not station or not budget:
+                continue
 
-        edit_rows = cleaned_rows
+            # ❌ invalid date
+            if not normalize_date(date):
+                continue
 
-        # =========================
-        # 🔥 REPLACE MODE (SAFE RESET)
-        # =========================
-        if mode == "replace":
+            cleaned.append(row)
 
-            sbgexp_sheet.clear()
-            sbgexp_sheet.append_row(headers)
-
-            seen = set()
-            final_rows = []
-
-            for row_obj in edit_rows:
-                key = make_key(row_obj)
-
-                if key in seen:
-                    continue
-                seen.add(key)
-
-                final_rows.append([row_obj.get(h, "") for h in headers])
-
-            if final_rows:
-                sbgexp_sheet.append_rows(final_rows)
-
-            return jsonify({
-                "status": "success",
-                "mode": "replace",
-                "added": len(final_rows)
-            })
+        if not cleaned:
+            return jsonify({"status": "success", "rows_written": 0})
 
         # =========================
-        # 🔥 UPDATE MODE (FUTURE USE)
+        # 📥 READ EXISTING (KEEP HEADER SAFE)
         # =========================
         data = sbgexp_sheet.get_all_values()
 
         if not data:
-            sbgexp_sheet.append_row(headers)
-            existing_rows = []
-        else:
-            existing_rows = data[1:]
+            return jsonify({"status": "error", "message": "Header missing in sheet"})
 
-        # build existing map
+        headers = data[0]   # row 1 untouched
+        existing_rows = data[1:]
+
+        # =========================
+        # 🔥 BUILD EXISTING KEY MAP
+        # =========================
         row_map = {}
+
         for i, r in enumerate(existing_rows):
             existing_row = {
                 "Date": r[0],
@@ -318,27 +289,30 @@ def update_sbgexp():
                 "Expenditure Details": r[4],
             }
             key = make_key(existing_row)
-            row_map[key] = i + 2
+            row_map[key] = i + 2  # actual sheet row
 
+        # =========================
+        # 🔄 UPSERT LOGIC
+        # =========================
         update_cells = []
         new_rows = []
-        seen_keys = set()
+        seen = set()
 
-        for row_obj in edit_rows:
+        for row in cleaned:
 
-            key = make_key(row_obj)
+            key = make_key(row)
 
-            if key in seen_keys:
+            if key in seen:
                 continue
-            seen_keys.add(key)
+            seen.add(key)
 
-            new_row = [row_obj.get(h, "") for h in headers]
+            values = [row.get(h, "") for h in headers]
 
             # 🔁 UPDATE EXISTING
             if key in row_map:
                 row_num = row_map[key]
 
-                for col_idx, val in enumerate(new_row):
+                for col_idx, val in enumerate(values):
                     update_cells.append({
                         "range": gspread.utils.rowcol_to_a1(row_num, col_idx + 1),
                         "values": [[val]]
@@ -346,8 +320,11 @@ def update_sbgexp():
 
             # ➕ ADD NEW
             else:
-                new_rows.append(new_row)
+                new_rows.append(values)
 
+        # =========================
+        # 🔥 APPLY CHANGES
+        # =========================
         if update_cells:
             sbgexp_sheet.batch_update(update_cells)
 
@@ -356,7 +333,6 @@ def update_sbgexp():
 
         return jsonify({
             "status": "success",
-            "mode": "update",
             "updated": len(update_cells),
             "added": len(new_rows)
         })
