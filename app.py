@@ -4,6 +4,9 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
 import json
+import threading
+import time
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -396,10 +399,28 @@ def bulk_update_sbg():
             "message": str(e)
         }), 500
     
+@app.route("/health")
+def health():
+    return "OK", 200
     # =========================
 # RUN SERVER
 # =========================
+SELF_URL = os.environ.get("SELF_URL", "https://office-management-f425.onrender.com/health")
+
+def self_ping():
+    while True:
+        try:
+            res = requests.get(SELF_URL)
+            print(f"[SELF-PING] {res.status_code}")
+        except Exception as e:
+            print("[SELF-PING ERROR]", e)
+
+        time.sleep(600)  # 10 minutes
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
+
+    # 🔥 start self-ping thread
+    threading.Thread(target=self_ping, daemon=True).start()
+
     app.run(host="0.0.0.0", port=port)
