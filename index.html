@@ -2861,7 +2861,8 @@
             </div>
           </div>
           <input type="hidden" id="paidMonthCountInput" />
-          <div id="ITInfoPanel"
+          <div
+            id="ITInfoPanel"
             style="
               display: flex;
               flex-direction: row;
@@ -2963,7 +2964,8 @@
                 </div>
               </div>
             </div>
-            <div id="PensionInfoPanel"
+            <div
+              id="PensionInfoPanel"
               style="
                 display: flex;
                 flex-direction: row;
@@ -3119,7 +3121,8 @@
               </button>
             </div>
           </div>
-          <table id="PensionInputPanel"
+          <table
+            id="PensionInputPanel"
             style="
               width: 100%;
               padding: 4px;
@@ -16334,7 +16337,7 @@
           depth = 0,
         ) {
           let currentRow = startRow;
-          
+
           const rows = table.querySelectorAll(
             ":scope > thead > tr, :scope > tbody > tr, :scope > tr",
           );
@@ -16473,14 +16476,18 @@
           renderCalculatedITTable(empName, selectedFY, salMode);
 
           if (mode === "all") {
-            wrapper.style.opacity = "0";  // 🔥 
-            id("ITInfoPanel").querySelectorAll("span").forEach(el => {
-              el.textContent = "0";
-            });
-            id("ITInfoPanel").querySelectorAll(".ITpanelDiv").forEach(el => {
-              el.style.background = "rgb(215, 255, 201)";
-            });
-          }          
+            wrapper.style.opacity = "0"; // 🔥
+            id("ITInfoPanel")
+              .querySelectorAll("span")
+              .forEach((el) => {
+                el.textContent = "0";
+              });
+            id("ITInfoPanel")
+              .querySelectorAll(".ITpanelDiv")
+              .forEach((el) => {
+                el.style.background = "rgb(215, 255, 201)";
+              });
+          }
 
           // 🔥 RESTORE INPUT VALUE AFTER RENDER
           const rentValue = window.houseRentMap?.[empName] || "";
@@ -16629,20 +16636,23 @@
         // =========================
         if (mode === "all") {
           if (empDropdown) {
-            empDropdown.selectedIndex = -1;   // 🔥 clears selection
-            empDropdown.value = "";           // extra safety
-
+            empDropdown.selectedIndex = -1; // 🔥 clears selection
+            empDropdown.value = ""; // extra safety
           }
 
           if (wrapper) {
-            id("ITInfoPanel").querySelectorAll("span").forEach(el => {
-              el.textContent = "0";
-            });
+            id("ITInfoPanel")
+              .querySelectorAll("span")
+              .forEach((el) => {
+                el.textContent = "0";
+              });
 
-            id("ITInfoPanel").querySelectorAll(".ITpanelDiv").forEach(el => {
-              el.style.background = "rgb(215, 255, 201)";
-            });
-            wrapper.innerHTML = "";           // 🔥 clear table UI
+            id("ITInfoPanel")
+              .querySelectorAll(".ITpanelDiv")
+              .forEach((el) => {
+                el.style.background = "rgb(215, 255, 201)";
+              });
+            wrapper.innerHTML = ""; // 🔥 clear table UI
           }
           wrapper.style.opacity = "1";
         }
@@ -16903,7 +16913,9 @@
         function syncInputs(wrapper) {
           wrapper.querySelectorAll("input, select, textarea").forEach((el) => {
             if (el.tagName === "SELECT") {
-              [...el.options].forEach(opt => opt.selected = opt.value === el.value);
+              [...el.options].forEach(
+                (opt) => (opt.selected = opt.value === el.value),
+              );
             } else if (el.type === "checkbox" || el.type === "radio") {
               if (el.checked) el.setAttribute("checked", "checked");
               else el.removeAttribute("checked");
@@ -16916,30 +16928,32 @@
         // =========================
         // 🔁 LOOP EMPLOYEES (FIXED)
         // =========================
-        
 
-        for (const empName of employees) {          
+        for (const empName of employees) {
           if (empDropdown) {
             empDropdown.value = empName;
           }
-
 
           // 🔥 RENDER DIRECTLY
           renderCalculatedITTable(empName, selectedFY, salMode);
 
           if (mode === "all") {
-            wrapper.style.opacity = "0";  // 🔥 
-            id("ITInfoPanel").querySelectorAll("span").forEach(el => {
-              el.textContent = "0";
-            });
-            id("ITInfoPanel").querySelectorAll(".ITpanelDiv").forEach(el => {
-              el.style.background = "rgb(215, 255, 201)";
-            });
+            wrapper.style.opacity = "0"; // 🔥
+            id("ITInfoPanel")
+              .querySelectorAll("span")
+              .forEach((el) => {
+                el.textContent = "0";
+              });
+            id("ITInfoPanel")
+              .querySelectorAll(".ITpanelDiv")
+              .forEach((el) => {
+                el.style.background = "rgb(215, 255, 201)";
+              });
           }
 
           // 🔥 WAIT FOR DOM + CALCULATION
-          await new Promise(r => requestAnimationFrame(r));
-          await new Promise(r => requestAnimationFrame(r));
+          await new Promise((r) => requestAnimationFrame(r));
+          await new Promise((r) => requestAnimationFrame(r));
 
           const liveWrapper = qs(".ITtableWrapper");
           if (!liveWrapper) continue;
@@ -16951,7 +16965,7 @@
           const temp = document.createElement("div");
           temp.innerHTML = liveWrapper.outerHTML;
           const clone = temp.firstElementChild;
-          
+
           // =========================
           // 🔥 CONVERT INPUTS TO TEXT
           // =========================
@@ -17016,26 +17030,28 @@
         // =========================
         if (mode === "all") {
           if (empDropdown) {
-            empDropdown.selectedIndex = -1;   // 🔥 clears selection
-            empDropdown.value = "";           // extra safety
-
+            empDropdown.selectedIndex = -1; // 🔥 clears selection
+            empDropdown.value = ""; // extra safety
           }
 
           if (wrapper) {
-            id("ITInfoPanel").querySelectorAll("span").forEach(el => {
-              el.textContent = "0";
-            });
-            id("ITInfoPanel").querySelectorAll(".ITpanelDiv").forEach(el => {
-              el.style.background = "rgb(215, 255, 201)";
-            });
-            wrapper.innerHTML = "";           // 🔥 clear table UI
+            id("ITInfoPanel")
+              .querySelectorAll("span")
+              .forEach((el) => {
+                el.textContent = "0";
+              });
+            id("ITInfoPanel")
+              .querySelectorAll(".ITpanelDiv")
+              .forEach((el) => {
+                el.style.background = "rgb(215, 255, 201)";
+              });
+            wrapper.innerHTML = ""; // 🔥 clear table UI
           }
-          wrapper.style.opacity = "1"; 
+          wrapper.style.opacity = "1";
         }
 
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
-
 
       function updateITPrintMenuState() {
         const hasEmp = id("ITPage_Emp")?.value;
@@ -18589,7 +18605,6 @@
         if (!wrapper) return;
 
         wrapper.querySelectorAll("input").forEach((el) => {
-
           // ❌ skip checkboxes & radio
           if (el.type === "checkbox" || el.type === "radio") return;
 
@@ -18604,7 +18619,6 @@
         });
       }
 
-      
       async function buildPensionHTML(mode = "single") {
         //console.log(qs(".PensionTableWrapper").querySelectorAll(".print-red"));
         const wrapper = qs(".PensionTableWrapper");
@@ -18745,7 +18759,9 @@
         function syncInputs(wrapper) {
           wrapper.querySelectorAll("input, select, textarea").forEach((el) => {
             if (el.tagName === "SELECT") {
-              [...el.options].forEach(opt => opt.selected = opt.value === el.value);
+              [...el.options].forEach(
+                (opt) => (opt.selected = opt.value === el.value),
+              );
             } else if (el.type === "checkbox" || el.type === "radio") {
               if (el.checked) el.setAttribute("checked", "checked");
               else el.removeAttribute("checked");
@@ -18758,7 +18774,7 @@
         // =========================
         // 🔁 LOOP EMPLOYEES (FIXED)
         // =========================
-        for (const empName of employees) {          
+        for (const empName of employees) {
           if (empDropdown) {
             empDropdown.value = empName;
           }
@@ -18766,17 +18782,19 @@
           // 🔥 RENDER DIRECTLY
           renderPensionTable(empName);
 
-          if(mode = "all"){
-            id("PensionInfoPanel").querySelectorAll("span").forEach(el => {
+          if ((mode = "all")) {
+            id("PensionInfoPanel")
+              .querySelectorAll("span")
+              .forEach((el) => {
                 el.textContent = "0";
               });
-              id("VRS_Death_Date").value = ""
-              wrapper.style.opacity = "0"
+            id("VRS_Death_Date").value = "";
+            wrapper.style.opacity = "0";
           }
 
           // 🔥 WAIT FOR DOM + CALCULATION
-          await new Promise(r => requestAnimationFrame(r));
-          await new Promise(r => requestAnimationFrame(r));
+          await new Promise((r) => requestAnimationFrame(r));
+          await new Promise((r) => requestAnimationFrame(r));
 
           const liveWrapper = qs(".PensionTableWrapper");
           if (!liveWrapper) continue;
@@ -18868,19 +18886,20 @@
         // =========================
         if (mode === "all") {
           if (empDropdown) {
-            empDropdown.selectedIndex = -1;   // 🔥 clears selection
-            empDropdown.value = "";           // extra safety
+            empDropdown.selectedIndex = -1; // 🔥 clears selection
+            empDropdown.value = ""; // extra safety
+          }
 
-          }
-          
           if (wrapper) {
-            id("PensionInfoPanel").querySelectorAll("span").forEach(el => {
-              el.textContent = "0";
-            });
-            id("VRS_Death_Date").value = ""
-            wrapper.innerHTML = "";           // 🔥 clear table UI
+            id("PensionInfoPanel")
+              .querySelectorAll("span")
+              .forEach((el) => {
+                el.textContent = "0";
+              });
+            id("VRS_Death_Date").value = "";
+            wrapper.innerHTML = ""; // 🔥 clear table UI
           }
-          wrapper.style.opacity ="1"
+          wrapper.style.opacity = "1";
         }
 
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
@@ -19189,7 +19208,9 @@
         function syncInputs(wrapper) {
           wrapper.querySelectorAll("input, select, textarea").forEach((el) => {
             if (el.tagName === "SELECT") {
-              [...el.options].forEach(opt => opt.selected = opt.value === el.value);
+              [...el.options].forEach(
+                (opt) => (opt.selected = opt.value === el.value),
+              );
             } else if (el.type === "checkbox" || el.type === "radio") {
               if (el.checked) el.setAttribute("checked", "checked");
               else el.removeAttribute("checked");
@@ -19203,7 +19224,7 @@
           const wrapper = qs(".PensionTableWrapper");
           if (!wrapper) continue;
 
-          // 🔥 SET CONTEXT        
+          // 🔥 SET CONTEXT
           if (empDropdown) {
             empDropdown.value = empName;
           }
@@ -19211,17 +19232,19 @@
           // 🔥 RENDER
           renderPensionTable(empName);
 
-          if(mode = "all"){
-            id("PensionInfoPanel").querySelectorAll("span").forEach(el => {
+          if ((mode = "all")) {
+            id("PensionInfoPanel")
+              .querySelectorAll("span")
+              .forEach((el) => {
                 el.textContent = "0";
               });
-              id("VRS_Death_Date").value = ""
-              wrapper.style.opacity = "0"
+            id("VRS_Death_Date").value = "";
+            wrapper.style.opacity = "0";
           }
 
-        // 🔥 WAIT FOR CALCULATION
-          await new Promise(r => requestAnimationFrame(r));
-          await new Promise(r => requestAnimationFrame(r));
+          // 🔥 WAIT FOR CALCULATION
+          await new Promise((r) => requestAnimationFrame(r));
+          await new Promise((r) => requestAnimationFrame(r));
 
           // 🔥 SYNC VALUES
           syncInputs(wrapper);
@@ -19342,17 +19365,18 @@
         // =========================
         if (mode === "all") {
           if (empDropdown) {
-            empDropdown.selectedIndex = -1;   // 🔥 clears selection
-            empDropdown.value = "";           // extra safety
-
+            empDropdown.selectedIndex = -1; // 🔥 clears selection
+            empDropdown.value = ""; // extra safety
           }
-          
+
           if (wrapper) {
-            id("PensionInfoPanel").querySelectorAll("span").forEach(el => {
-              el.textContent = "0";
-            });
-            id("VRS_Death_Date").value = ""
-            wrapper.innerHTML = "";           // 🔥 clear table UI
+            id("PensionInfoPanel")
+              .querySelectorAll("span")
+              .forEach((el) => {
+                el.textContent = "0";
+              });
+            id("VRS_Death_Date").value = "";
+            wrapper.innerHTML = ""; // 🔥 clear table UI
           }
           wrapper.style.opacity = "1";
         }
