@@ -3084,7 +3084,9 @@
                 <col style="width: 60px" />
                 <col style="width: 170px" />
                 <col style="width: 80px" />
-                <col style="width: 250px" />
+                <col style="width: 120px" />
+                <col style="width: 80px" />
+                <col style="width: 120px" />
                 <col style="width: 120px" />
                 <col style="width: 400px" />
               </colgroup>
@@ -3093,6 +3095,8 @@
                 <td><select id="BudgetPage_Station"></select></td>
                 <td><label for="BudgetPage_FY">FY :</label></td>
                 <td><select id="BudgetPage_FY"></select></td>
+                <td><label for="BudgetPage_Month">Month :</label></td>
+                <td><select id="BudgetPage_Month"></select></td>
                 <td><label>Budget under</label></td>
                 <td>
                   <select id="BudgetUnderSelect" style="width: 400px"></select>
@@ -4453,9 +4457,9 @@
         applyFilters();
       }
 
-      /* =======================================================================
-    🔥🔥🔥🔥MAIN PAGE (DASHBOARD) 🔥🔥🔥🔥
-    ========================================================================== */
+    //================================================================================//
+      //                🔥🔥🔥🔥🔥MAIN PAGE DASHBOARD SCRIPT🔥🔥🔥🔥🔥
+      //=============================================================================//
 
       /* ============== SIDEBAR TOGGLE======================== */
       function toggleSidebar() {
@@ -4512,9 +4516,9 @@
         });
       }
 
-      /* ==================================================================
-    🔥🔥🔥🔥 DATABASE PAGE SCRIPT 🔥🔥🔥🔥
-    =====================================================================*/
+      //================================================================================//
+      //                🔥🔥🔥🔥🔥DATABASE SCRIPT🔥🔥🔥🔥🔥
+      //=============================================================================//
 
       /* ===========  WITHIN DATABASE PAGE SWITCH TABLE ==================== */
 
@@ -4569,9 +4573,11 @@
         });
       });
 
-      /* ==================================================================
-    🔥🔥🔥🔥 Employee Page Script 🔥🔥🔥🔥
-    =====================================================================*/
+
+      //================================================================================//
+      //                🔥🔥🔥🔥🔥EMPLOYEE PAGE SCRIPT🔥🔥🔥🔥🔥
+      //=============================================================================//
+
       function fillEmpDetails(empName) {
         if (!empName || !window.empCalcHeaders) return;
 
@@ -4596,9 +4602,10 @@
         });
       }
 
-      /* ==================================================================
-    🔥🔥🔥🔥 PayBill Page Script 🔥🔥🔥🔥
-    =====================================================================*/
+
+      //================================================================================//
+      //                🔥🔥🔥🔥🔥PAY BILL PAGE SCRIPT🔥🔥🔥🔥🔥
+      //=============================================================================//
 
       /* ============DEPARTMENT MAP (EmpDB)============= */
       function getDeptMap() {
@@ -10525,7 +10532,9 @@
         saveAs(new Blob([buffer]), `${station} PayBill ${month}.xlsx`);
       }
 
-      //===========================Budget Page Script =================== //
+      //================================================================================//
+      //                🔥🔥🔥🔥🔥BUDGET PAGE SCRIPT🔥🔥🔥🔥🔥
+      //=============================================================================//
 
       function toggleButton() {
         const sbgselect = id("BudgetUnderSelect");
@@ -10604,6 +10613,101 @@
 
           select.appendChild(optgroup);
         });
+        loadBudgetMonthDropdown();
+      }
+
+      function loadBudgetMonthDropdown() {
+        if (!sbgExpData || !sbgExpData.rows) {
+          console.warn("❌ sbgExpData not loaded");
+          return;
+        }
+
+        const select = document.getElementById("BudgetPage_Month");
+        const fySelect = document.getElementById("BudgetPage_FY");
+        const budgetSelect = document.getElementById("BudgetUnderSelect");
+
+        if (!select || !fySelect || !budgetSelect) return;
+
+        const selectedFY = fySelect.value;
+        const selectedBudget = budgetSelect.value;
+
+        const monthMap = new Map();
+
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+
+        sbgExpData.rows.forEach((row) => {
+          const dateStr = row[0]; // Date
+          const budget = String(row[3] || "").trim(); // Budget column
+
+          if (!dateStr) return;
+
+          // 🔥 FILTER BY BUDGET
+          if (selectedBudget && budget !== selectedBudget) return;
+
+          // 🔥 GET FY FROM DATE
+          const fy = getFYFromDateStr(dateStr);
+
+          // 🔥 FILTER BY FY
+          if (selectedFY && fy !== selectedFY) return;
+
+          // 🔥 EXTRACT MONTH
+          const parts = dateStr.split("-");
+          if (parts.length !== 3) return;
+
+          const mm = parseInt(parts[1], 10);
+          const yyyy = parts[2];
+
+          if (!mm || !yyyy) return;
+
+          const monthText = `${monthNames[mm - 1]}-${yyyy}`;
+          const key = `${yyyy}-${String(mm).padStart(2, "0")}`;
+
+          monthMap.set(key, monthText);
+        });
+
+        // 🔥 SORT
+        const sortedMonths = [...monthMap.entries()]
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map((e) => e[1]);
+
+        // 🔥 RESET DROPDOWN
+        select.innerHTML = "";
+
+        // ✅ ALWAYS ADD "ALL MONTHS"
+        const allOpt = document.createElement("option");
+        allOpt.value = "ALL";
+        allOpt.textContent = "All Months";
+        allOpt.selected = true;
+        select.appendChild(allOpt);
+
+        // 🔥 IF NO DATA → STOP HERE
+        if (!sortedMonths.length) {
+          console.warn("⚠ No months found for selected FY/Budget");
+          return;
+        }
+
+        // 🔥 ADD MONTHS
+        sortedMonths.forEach((month) => {
+          const opt = document.createElement("option");
+          opt.value = month;
+          opt.textContent = month;
+          select.appendChild(opt);
+        });
+
+        //console.log("✅ Filtered Months:", sortedMonths);
       }
 
       function getBudgetFY(dateStr) {
@@ -11402,12 +11506,13 @@
         }
       }
 
-      function filterSBGData() {
+      function filterSBGexpData() {
         if (!sbgExpData || !sbgExpData.rows) return [];
 
         const station = id("BudgetPage_Station")?.value || "";
         const budget = id("BudgetUnderSelect")?.value || "";
         const fy = id("BudgetPage_FY")?.value || "";
+        const selectedMonth = id("BudgetPage_Month")?.value || "ALL";
 
         if (
           !station ||
@@ -11417,14 +11522,27 @@
           budget === "Select Budget" ||
           fy === "Select"
         ) {
-          console.warn("⚠ Select all filters (Station, Budget, FY)");
           return [];
         }
 
-        // 🔥 KEEP ORIGINAL INDEX
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+
         return sbgExpData.rows
           .map((row, i) => ({
-            rowIndex: i + 2, // 🔥 ACTUAL SHEET ROW
+            rowIndex: i + 2,
             values: row,
           }))
           .filter((obj) => {
@@ -11432,14 +11550,33 @@
 
             const rowDate = String(row[0] || "").trim();
             const rowStation = String(row[1] || "").trim();
-            //const rowBudget = String(row[3] || "").trim();
-            const rowBudget = String(row[3] || "");
+            const rowBudget = String(row[3] || "").trim();
 
             const rowFY = getFYFromDateStr(rowDate);
 
-            return (
-              rowStation === station && rowBudget === budget && rowFY === fy
-            );
+            // 🔥 BASIC FILTER
+            if (
+              !(rowStation === station && rowBudget === budget && rowFY === fy)
+            ) {
+              return false;
+            }
+
+            // =========================
+            // 🔥 MONTH FILTER (NEW)
+            // =========================
+            if (selectedMonth === "ALL") return true;
+
+            const parts = rowDate.split("-");
+            if (parts.length !== 3) return false;
+
+            const mm = parseInt(parts[1], 10);
+            const yyyy = parts[2];
+
+            if (!mm || !yyyy) return false;
+
+            const rowMonth = `${monthNames[mm - 1]}-${yyyy}`;
+
+            return rowMonth === selectedMonth;
           });
       }
 
@@ -11514,35 +11651,12 @@
         container.innerHTML = "";
 
         const station = id("BudgetPage_Station")?.value || "";
-        const budget = id("BudgetUnderSelect");
+        const budget = id("BudgetUnderSelect")?.value || "";
         const fy = id("BudgetPage_FY")?.value || "";
+        const month = id("BudgetPage_Month")?.value || "ALL";
 
         // =========================
-        // ❌ INVALID FILTER
-        // =========================
-        if (
-          !station ||
-          !budget ||
-          !fy ||
-          station === "Select" ||
-          budget === "Select Budget" ||
-          fy === "Select"
-        ) {
-          toggleSBGButtons("allDisabled");
-
-          container.innerHTML = `
-      <p style="text-align:center; color:#888;">
-        Please select Station, Budget & Financial Year
-      </p>
-    `;
-          return;
-        }
-
-        // 🔥 FETCH DATA
-        const data = filterSBGData();
-
-        // =========================
-        // 🔥 CREATE TABLE ONCE
+        // 🔥 CREATE TABLE FIRST (ALWAYS)
         // =========================
         const table = document.createElement("table");
         table.className = "budget-table";
@@ -11574,19 +11688,61 @@
         tbody.id = "budgetPBBody";
 
         // =========================
+        // ❌ INVALID FILTER
+        // =========================
+        if (
+          !station ||
+          !budget ||
+          !fy ||
+          station === "Select" ||
+          budget === "Select Budget" ||
+          fy === "Select"
+        ) {
+          toggleSBGButtons("allDisabled");
+
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+
+          td.colSpan = 7;
+          td.style.textAlign = "center";
+          td.style.background = "#edebb7"
+          td.style.color = "red";
+          td.style.fontWeight = "bold"
+          td.style.fontSize = "12px"
+          td.style.padding = "20px";
+          td.textContent = "==============🚫Please select Station, Budget & Financial Year🚫==============";
+
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+
+          table.appendChild(tbody);
+          container.appendChild(table);
+          return;
+        }
+
+        // 🔥 FETCH DATA
+        const data = filterSBGexpData();
+
+        // =========================
         // ❌ NO DATA
         // =========================
         if (!data.length) {
           toggleSBGButtons("noData");
 
           const tr = document.createElement("tr");
-
           const td = document.createElement("td");
+
           td.colSpan = 7;
           td.style.textAlign = "center";
-          td.style.color = "#888";
+          td.style.background = "#edebb7"
+          td.style.color = "red";
+          td.style.fontSize = "12px"
+          td.style.fontWeight = "bold"
           td.style.padding = "20px";
-          td.textContent = "No data found";
+
+          td.textContent =
+            month === "ALL" ? "==============🚫No Data found🚫==============" : 
+            `==============🚫No data found for ${month}🚫==============`;
 
           tr.appendChild(td);
           tbody.appendChild(tr);
@@ -12072,7 +12228,7 @@
         return `${y}-${m}-${d}`;
       }
 
-      ["BudgetUnderSelect", "BudgetPage_Station", "BudgetPage_FY"].forEach(
+      ["BudgetUnderSelect","BudgetPage_Month"].forEach(
         (idName) => {
           id(idName)?.addEventListener("change", () => {
             getBudgetFYColumns();
@@ -12080,6 +12236,14 @@
           });
         },
       );
+
+      ["BudgetPage_Station","BudgetPage_FY"].forEach((idName) => {
+        id(idName)?.addEventListener("change", () => {
+          loadBudgetMonthDropdown();
+          getBudgetFYColumns();
+          renderFilterMainBudgetExpTable();
+        });
+      });
 
       async function saveSBGData(modeType = "add") {
         let data = [];
@@ -12264,6 +12428,614 @@
           }
         };
       }
+
+
+      async function buildBudgetHTML() {
+        const wrapper = id("BudgetTableWrapper");
+        const budget = id("BudgetUnderSelect")?.value || "";
+        const station = id("BudgetPage_Station")?.value;
+        const fy = id("BudgetPage_FY")?.value;
+        if (!wrapper) return "";
+
+        const table = wrapper.querySelector("table");
+        if (!table) {
+          alert("No data to print");
+          return "";
+        }
+
+        const doc = document.implementation.createHTMLDocument("SBG Expenditure");
+
+        // 🔥 COPY STYLES
+        document
+          .querySelectorAll("style, link[rel='stylesheet']")
+          .forEach((el) => {
+            try {
+              doc.head.appendChild(el.cloneNode(true));
+            } catch {}
+          });
+
+        // 🔥 PRINT CSS
+        const style = doc.createElement("style");
+       style.textContent = `
+        @page { size: A4 portrait; margin: 5mm 5mm 20mm 5mm; background: white; }
+
+        body {
+          margin: 0;
+          font-size: 10px;
+          background: white;
+          border-radius: 0 !important;
+        }
+
+        .page {
+          margin: 0 auto;
+          padding-right: 2mm;
+          background: white;
+          border-radius: 0 !important;
+          padding-top: 10mm;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          border: 1px solid gray;
+          background: white;
+          border-radius: 0 !important;
+        }
+
+        td, th {
+          padding: 4px;
+          font-size: 10px;
+          background: white;
+          border-radius: 0 !important;
+        }
+
+        .print-header {
+          border: none;
+        }
+
+        div {
+          border: none;
+          border-radius: 0 !important;
+        }
+
+        /* 🔥 CONTROL COLUMN WIDTHS */
+        .SBGprint-table col:nth-child(1) { width: 10% !important; } 
+        .SBGprint-table col:nth-child(2) { width: 20% !important; } 
+        .SBGprint-table col:nth-child(3) { width: 40% !important; } 
+        .SBGprint-table col:nth-child(4) { width: 15% !important; } 
+        .SBGprint-table col:nth-child(5) { width: 15% !important; } 
+
+        /* 🔥 HIDE 4th COLUMN (Budget column) */
+        .SBGprint-table th:nth-child(4),
+        .SBGprint-table td:nth-child(4),
+        .SBGprint-table th:nth-child(2),
+        .SBGprint-table td:nth-child(2)  {
+          display: none !important;
+        }
+
+        /* 🔥 FORCE REMOVE FROM ALL ELEMENTS */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          border-radius: 0 !important;
+        }
+
+        /* 🔥 EXTRA STRONG FIX (IMPORTANT) */
+        table, tr, td, th {
+          border-radius: 0 !important;
+        }
+
+        /* 🔥 HEADER (TOP LEFT) */
+        .print-top-header {
+          position: fixed;
+          top: 5mm;
+          left: 5mm;
+          font-size: 9px;
+          font-style: italic;
+          color: #808080;
+        }
+
+        /* 🔹 FOOTER CONTAINER */
+      .print-footer {
+        position: fixed;
+        bottom: 5mm;
+        right: 5mm;   /* ✅ push to right */
+        width: auto;  /* ✅ IMPORTANT */
+        font-size: 9px;
+        color: #808080;
+        text-align: right;
+      }
+
+      /* 🔹 REMOVE absolute positioning (if any) */
+      .print-footer-right {
+        position: static !important;
+      }
+      `;
+        doc.head.appendChild(style);
+
+        // 🔥 CLONE TABLE
+        const clone = table.cloneNode(true);
+        clone.classList.add("SBGprint-table");
+        removeNumberFormatting(clone);
+
+        clone.querySelectorAll(".no-print").forEach((el) => el.remove());
+
+        // 🔥 PAGE
+        const page = doc.createElement("div");
+        page.className = "page";
+
+        const header = buildPrintHeader(doc, station);
+        header.classList.add("print-header");
+
+        // 🔥 CUSTOM SUB HEADER
+        const subHeader = doc.createElement("div");
+        subHeader.style.textAlign = "center";
+        subHeader.style.fontWeight = "bold";
+        subHeader.style.margin = "5px 0 10px 0";
+
+        subHeader.textContent = `Details of Expenditure under ${budget} for the FY-${fy}`;
+
+        function getInputValue(idName) {
+          const el = document.getElementById(idName);
+          return el?.value || "0";
+        }
+
+        const sanctioned = getInputValue("SBGsanctioned");
+        const utilised = getInputValue("SBGutilised");
+        const available = getInputValue("SBGavailable");
+
+        const summaryTable = doc.createElement("table");
+          summaryTable.style.width = "100%";
+          summaryTable.style.margin = "5px 0 10px 0";
+          summaryTable.style.borderCollapse = "collapse";
+
+          summaryTable.innerHTML = `
+            <tr style="font-weight:bold; text-align:center;">
+              <td style="text-align:right">SBG Sanctioned :</td>
+              <td style="text-align:left">${sanctioned}</td>
+              <td style="text-align:right">SBG Utilised :</td>
+              <td style="text-align:left">${utilised}</td>
+              <td style="text-align:right">SBG Available :</td>
+              <td style="text-align:left">${available}</td>
+            </tr>
+          `;
+
+        // 🔥 APPEND
+        page.appendChild(header);
+        page.appendChild(subHeader);
+        page.appendChild(summaryTable);
+        page.appendChild(clone);
+
+        // 🔥 FILE NAME (same as Excel)
+        const fileName = `${station}-${budget}-${fy}-SBG`;
+
+        // 🔹 HEADER (TOP LEFT)
+        const topHeader = doc.createElement("div");
+        topHeader.className = "print-top-header";
+        topHeader.textContent = fileName;
+
+        // 🔹 FOOTER (RIGHT ONLY)
+        const footer = doc.createElement("div");
+        footer.className = "print-footer";
+
+        footer.textContent =
+          "Generated on " +
+          new Date().toLocaleDateString("en-GB");
+
+        doc.body.appendChild(footer);
+
+        // 🔹 APPEND
+        doc.body.appendChild(topHeader);
+        doc.body.appendChild(footer);
+
+        // ADD TO DOC
+        doc.body.appendChild(topHeader);
+        doc.body.appendChild(footer);
+
+        doc.body.appendChild(page);
+
+        // ✅ RETURN HTML (CRITICAL FIX)
+        return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+      }
+
+      const budgetprintBtn = id("SBGprintBtn");
+      const budgetexcelBtn = id("SBGexcelBtn");
+      
+
+      // 🔹 PRINT BUTTON
+      budgetprintBtn.addEventListener("click", async () => {
+        const wrapper = qs(".BudgetTableWrapper");
+        const html = await buildBudgetHTML();
+        if (!html) return;
+
+        openPrintWindow(html);
+        restoreNumberFormatting(wrapper);
+      });
+
+      budgetexcelBtn.addEventListener("click", async () => {
+        exportSBGExcel();
+      });
+
+
+      async function exportSBGExcel() {
+        const workbook = new ExcelJS.Workbook();
+
+        const wrapper = document.getElementById("BudgetTableWrapper");
+        if (!wrapper) return;
+
+        const table = wrapper.querySelector("table");
+        if (!table) {
+          alert("No data to export");
+          return;
+        }
+
+        const station = id("BudgetPage_Station")?.value || "";
+        const budget = id("BudgetUnderSelect")?.value || "";
+        const fy = id("BudgetPage_FY")?.value || "";
+
+        const getVal = (idName) =>
+          document.getElementById(idName)?.value || "0";
+
+        const sanctioned = getVal("SBGsanctioned");
+        const utilised = getVal("SBGutilised");
+        const available = getVal("SBGavailable");
+
+        const sheet = workbook.addWorksheet("SBG Expenditure");
+
+        sheet.properties.defaultRowHeight = 18;
+
+        // =========================
+        // 🔥 HELPERS (COLOR)
+        // =========================
+        function isValidFill(bg) {
+          if (!bg) return false;
+          if (bg === "transparent") return false;
+          if (bg.includes("rgba") && bg.endsWith(", 0)")) return false;
+
+          const m = bg.match(/\d+/g);
+          if (!m || m.length < 3) return false;
+
+          const [r, g, b] = m.map(Number);
+
+          // ❌ skip black
+          if (r === 0 && g === 0 && b === 0) return false;
+
+          return true;
+        }
+
+        function rgbToARGB(rgb) {
+          const m = rgb.match(/\d+/g);
+          if (!m || m.length < 3) return null;
+
+          const [r, g, b] = m.map(Number);
+
+          // ❌ skip black
+          if (r === 0 && g === 0 && b === 0) return null;
+
+          return (
+            "FF" +
+            [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")
+          );
+        }
+
+        function getFontColor(color) {
+          const m = color?.match(/\d+/g);
+          if (!m || m.length < 3) return undefined;
+
+          const [r, g, b] = m.map(Number);
+
+          // skip black (default)
+          if (r === 0 && g === 0 && b === 0) return undefined;
+
+          return {
+            argb:
+              "FF" +
+              [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join(""),
+          };
+        }
+
+        function parseValue(text) {
+          if (!text) return " ";
+          const clean = text.replace(/[,₹\s]/g, "");
+          return !isNaN(clean) && clean !== "" ? Number(clean) : text;
+        }
+
+        function isMerged(sheet, row, col) {
+          const cell = sheet.getCell(row, col);
+          return !!cell.master && cell.master !== cell;
+        }
+
+        function getEffectiveBackground(cell) {
+          let bg = window.getComputedStyle(cell).backgroundColor;
+
+          if (bg && bg !== "transparent" && !bg.includes("rgba(0, 0, 0, 0)")) {
+            return bg;
+          }
+
+          const tr = cell.closest("tr");
+          if (tr) {
+            bg = window.getComputedStyle(tr).backgroundColor;
+            if (
+              bg &&
+              bg !== "transparent" &&
+              !bg.includes("rgba(0, 0, 0, 0)")
+            ) {
+              return bg;
+            }
+          }
+
+          const table = cell.closest("table");
+          if (table) {
+            bg = window.getComputedStyle(table).backgroundColor;
+            if (
+              bg &&
+              bg !== "transparent" &&
+              !bg.includes("rgba(0, 0, 0, 0)")
+            ) {
+              return bg;
+            }
+          }
+
+          return null;
+        }
+
+        // =========================
+        // 🔥 HEADER
+        // =========================
+        sheet.mergeCells(1, 1, 1, 5);
+
+        const headerCell = sheet.getCell(1, 1);
+
+        headerCell.value = {
+          richText: [
+            { text: "PRASAR BHARATI\n", font: { bold: true, size: 12 } },
+            { text: "INDIA'S PUBLIC SERVICE BROADCASTER\n", font: { bold: true, size: 12 } },
+            { text: `${station}\n`, font: { bold: true, size: 12 } },
+            { text: "ALL INDIA RADIO", font: { bold: true, size: 12 } },
+          ],
+        };
+
+        headerCell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
+
+        headerCell.border = {
+          bottom: { style: "medium", color: { argb: "FF000000" } }
+        };
+
+        sheet.getRow(1).height = 78;
+        sheet.getRow(2).height = 25;
+
+        // =========================
+        // 🔥 LOGO
+        // =========================
+        const base64 = await urlToBase64(
+          "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+        );
+
+        const imageId = workbook.addImage({
+          base64,
+          extension: "png",
+        });
+
+        sheet.addImage(imageId, {
+          tl: { col: 0.2, row: 0 },
+          ext: { width: 60, height: 60 },
+        });
+
+        // =========================
+        // 🔥 SUB HEADER
+        // =========================
+        sheet.mergeCells(2, 1, 2, 5);
+
+        const subCell = sheet.getCell(2, 1);
+        subCell.value = `Details of Expenditure under ${budget} for the FY-${fy}`;
+        subCell.font = { bold: true };
+        subCell.alignment = { horizontal: "center", wrapText: true };
+
+        // =========================
+        // 🔥 SUMMARY ROW
+        // =========================
+        sheet.getCell("A3").value = "SBG Sanctioned";
+        sheet.getCell("C3").value = "SBG Utilised";
+        sheet.getCell("D3").value = "SBG Available";
+
+        // 🔥 MERGE CELLS
+        sheet.mergeCells("A3:B3");
+        sheet.mergeCells("D3:E3");
+
+        // 🔥 STYLE
+        ["A3", "C3", "D3"].forEach(cell => {
+          const c = sheet.getCell(cell);
+          c.font = { bold: true };
+          c.alignment = { horizontal: "center", vertical: "middle" };
+          c.border = {
+            top: { style: "thin" },
+            bottom: { style: "thin" },
+            left: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+
+        // =========================
+        // 🔥 SUMMARY VALUE ROW (ROW 4)
+        // =========================
+        sheet.getCell("A4").value = CurrencytoNum(sanctioned);
+        sheet.getCell("C4").value = CurrencytoNum(utilised);
+        sheet.getCell("D4").value = CurrencytoNum(available);
+
+        // 🔥 MERGE
+        sheet.mergeCells("A4:B4");
+        sheet.mergeCells("D4:E4");
+
+        // 🔥 STYLE VALUES
+        ["A4", "C4", "D4"].forEach(cell => {
+          const c = sheet.getCell(cell);
+          c.alignment = { horizontal: "center", vertical: "middle" };
+          c.border = {
+            top: { style: "thin" },
+            bottom: { style: "thin" },
+            left: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+
+        // 🔥 NEXT ROW START
+        let currentRow = 6;
+
+        // =========================
+        // 🔥 TABLE DATA
+        // =========================
+        const rows = table.querySelectorAll("tr");
+
+        rows.forEach((tr) => {
+          const cells = tr.querySelectorAll("th, td");
+          const excelRow = sheet.getRow(currentRow++);
+
+          let colPointer = 1;
+
+          cells.forEach((cell, colIndex) => {
+            if (colIndex === 1 || colIndex === 3) return;
+
+            let text = cell.innerText.trim().replace(/[,₹]/g, "");
+            const value = isNaN(text) ? text : Number(text);
+
+            const c = excelRow.getCell(colPointer++);
+            c.value = value;
+
+            const cs = getComputedStyle(cell);
+
+            // FONT COLOR
+            const fontColor = getFontColor(cs.color);
+            c.font = {
+              name: "Calibri",
+              size: 11,
+              bold: cs.fontWeight === "bold" || parseInt(cs.fontWeight) >= 600,
+              ...(fontColor ? { color: fontColor } : {})
+            };
+
+            // FORCE RED CLASS
+            if (cell.querySelector(".print-red")) {
+              c.font = {
+                ...(c.font || {}),
+                color: { argb: "FFFF0000" },
+                bold: true
+              };
+            }
+
+            // BACKGROUND
+            const bg = getEffectiveBackground(cell);
+              if (isValidFill(bg)) {
+                const argb = rgbToARGB(bg);
+                if (argb) {
+                  c.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb },
+                  };
+                }
+              }
+
+            c.alignment = {
+              vertical: "middle",
+              horizontal: colPointer > 4 ? "right" : "left",
+              wrapText: true
+            };
+
+            c.border = {
+              top: { style: "thin" },
+              bottom: { style: "thin" },
+              left: { style: "thin" },
+              right: { style: "thin" }
+            };
+          });
+
+          // FIX HEADER ROW WITHOUT OVERRITING COLORS
+          if (tr.querySelector("th")) {
+            excelRow.eachCell(cell => {
+              cell.font = {
+                ...(cell.font || {}),
+                bold: true
+              };
+              cell.alignment = {
+                horizontal: "center",
+                vertical: "middle",
+                wrapText: true
+              };
+            });
+          }
+
+          // 🔥 FIX WRAP ISSUE
+          excelRow.height = 22;
+        });
+
+        // 🔥 ALLOW AUTO HEIGHT AFTER RENDER
+        sheet.eachRow((row, rowNumber) => {
+          if (rowNumber >= 6) row.height = undefined;
+        });
+
+        // =========================
+        // 🔥 COLUMN WIDTH
+        // =========================
+        sheet.columns = [
+          { width: 12 },
+          { width: 28 },
+          { width: 55 },
+          { width: 18 },
+          { width: 20 },
+        ];
+
+        // =========================
+        // 🔥 PRINT SETUP
+        // =========================
+        const lastRow = currentRow - 1;
+
+        sheet.pageSetup = {
+            paperSize: 9, // 🔥 A4
+            orientation: "portrait",
+            //scale: 100,
+            horizontalCentered: true,
+            verticalCentered: false,
+            fitToPage: true,
+            fitToWidth: 1,
+            //fitToHeight: false,
+            fitToHeight: 999,
+            margins: {
+              left: 0.3,
+              right: 0.3,
+              top: 0.5,
+              bottom: 0.5,
+              header: 0.3,
+              footer: 0.3,
+            },
+            printArea: `A1:E${lastRow}`,
+          };
+
+          const fileName = `${station}-${budget}-FY-${fy}-SBG.xlsx`;
+
+          sheet.headerFooter = {
+            differentFirst: false,
+            differentOddEven: false,
+
+            // 🔹 HEADER (LEFT, SMALL, ITALIC, GRAY)
+            oddHeader:
+              "&L&K808080&\"Calibri,Italic\"&10" +
+              fileName.replace(".xlsx", ""),
+
+            // 🔹 FOOTER
+            oddFooter:
+              "&CPage &P of &N" +
+              "&R&K808080Generated on " +
+              new Date().toLocaleDateString("en-GB"),
+          };
+
+        const buffer = await workbook.xlsx.writeBuffer();
+
+        saveAs(new Blob([buffer]), `${fileName}`);
+      }
+
 
       //================================================================================//
       //                🔥🔥🔥🔥🔥SALARY SLIP SCRIPT🔥🔥🔥🔥🔥
@@ -15884,37 +16656,39 @@
         });
       }
 
-      function buildPrintHeader(doc) {
-        const header = doc.createElement("table");
-        header.style.width = "100%";
-        header.style.borderCollapse = "collapse";
-        header.style.marginBottom = "6px";
 
-        header.innerHTML = `
-          <tr>
-            <!-- LOGO -->
-            <td style="width:70px; text-align:left;">
-              <img 
-                src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-                style="width:60px;height:60px;"
-              />
-            </td>
+      function buildPrintHeader(doc, station = "") {
+  const header = doc.createElement("table");
+  header.style.width = "100%";
+  header.style.borderCollapse = "collapse";
+  header.style.marginBottom = "6px";
+  header.style.borderBottom = "solid 2px black"; // ✅ FIXED
 
-            <!-- TEXT -->
-            <td style="text-align:center;">
-              <div style="font-size:13px;font-weight:bold;">PRASAR BHARATI</div>
-              <div style="font-size:13px;font-weight:bold;">INDIA'S PUBLIC SERVICE BROADCASTER</div>
-              <div style="font-size:13px;font-weight:bold;">AIR Dharwad</div>
-              <div style="font-size:13px;font-weight:bold;">ALL INDIA RADIO</div>
-            </td>
+  header.innerHTML = `
+    <tr>
+      <!-- LOGO -->
+      <td style="width:70px; text-align:left;">
+        <img 
+          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+          style="width:60px;height:60px;"
+        />
+      </td>
 
-            <!-- EMPTY -->
-            <td style="width:70px;"></td>
-          </tr>
-        `;
+      <!-- TEXT -->
+      <td style="text-align:center;">
+        <div style="font-size:12px;font-weight:bold;">PRASAR BHARATI</div>
+        <div style="font-size:12px;font-weight:bold;">INDIA'S PUBLIC SERVICE BROADCASTER</div>
+        <div style="font-size:12px;font-weight:bold;">ALL INDIA RADIO DHARWAD</div>
+        <div style="font-size:12px;font-weight:bold;">${station || ""}</div>
+      </td>
 
-        return header;
-      }
+      <!-- EMPTY -->
+      <td style="width:70px;"></td>
+    </tr>
+  `;
+
+  return header;
+}
 
       function buildITHTML(mode = "single") {
         const wrapper = qs(".ITtableWrapper");
@@ -15981,7 +16755,7 @@
             margin-top: 5mm;
             margin-right: 5mm;
             margin-left: 5mm;
-            margin-bottom: 10mm; /* 🔥 increase bottom */
+            margin-bottom: 20mm; /* 🔥 increase bottom */
           }
           body {
             margin: 0;
@@ -16094,7 +16868,7 @@
           page.className = "page";
 
           // ✅ ADD HEADER FIRST (NEW)
-          const header = buildPrintHeader(doc);
+          const header = buildPrintHeader(doc, station);
           page.appendChild(header);
 
           // ✅ ADD CONTENT
@@ -17523,6 +18297,7 @@
       const pensionmenu = id("PensionprintMenu");
       const pensionprintBtn = id("PensionprintBtn");
       const pensionexcelBtn = id("PensionexcelBtn");
+      
 
       // 🔹 PRINT BUTTON
       pensionprintBtn.addEventListener("click", (e) => {
@@ -17713,7 +18488,7 @@
         const style = doc.createElement("style");
 
         style.textContent = `
-    @page { size: A4 portrait; margin: 5mm; }
+    @page { size: A4 portrait; margin: 5mm 5mm 20mm 5mm; }
 
     body { margin: 0; font-size: 10px; }
 
@@ -17866,7 +18641,7 @@
           const page = doc.createElement("div");
           page.className = "page";
 
-          const header = buildPrintHeader(doc);
+          const header = buildPrintHeader(doc, station);
           header.classList.add("print-header");
 
           page.appendChild(header);
