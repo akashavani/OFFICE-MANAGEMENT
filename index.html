@@ -2289,8 +2289,8 @@
                         <div class="header-text">
                           <h1>PRASAR BHARATI</h1>
                           <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
-                          <h2>AIR Dharwad</h2>
                           <h2>ALL INDIA RADIO</h2>
+                          <h2 class="DAAheader-Station"></h2>
                         </div>
                       </div>
                     </th>
@@ -2302,10 +2302,11 @@
                         border: solid 1.5px black;
                         padding: 2px;
                         text-align: center;
+                        max-height: 25px !important;
+                        height: 25px !important;
                       "
                     >
                       MANUAL BILL OF DA ARREARS IN r/o ALL GO STAFF
-                      <h3 class="DAAheader-Station"></h3>
                     </th>
                   </tr>
                   <tr>
@@ -2377,8 +2378,8 @@
                         <div class="header-text">
                           <h1>PRASAR BHARATI</h1>
                           <h2>INDIA'S PUBLIC SERVICE BROADCASTER</h2>
-                          <h2>AIR Dharwad</h2>
                           <h2>ALL INDIA RADIO</h2>
+                          <h2 class="DAAheader-Station"></h2>
                         </div>
                       </div>
                     </th>
@@ -2393,8 +2394,6 @@
                       "
                     >
                       MANUAL BILL OF DA ARREARS IN r/o ALL PRASAR BHARATI STAFF
-                      OF
-                      <h3 class="DAAheader-Station"></h3>
                     </th>
                   </tr>
                   <tr>
@@ -2862,7 +2861,7 @@
             </div>
           </div>
           <input type="hidden" id="paidMonthCountInput" />
-          <div
+          <div id="ITInfoPanel"
             style="
               display: flex;
               flex-direction: row;
@@ -2964,7 +2963,7 @@
                 </div>
               </div>
             </div>
-            <div
+            <div id="PensionInfoPanel"
               style="
                 display: flex;
                 flex-direction: row;
@@ -3120,7 +3119,7 @@
               </button>
             </div>
           </div>
-          <table
+          <table id="PensionInputPanel"
             style="
               width: 100%;
               padding: 4px;
@@ -3245,6 +3244,15 @@
       let isAddMode = false;
       let isEditMode = false;
       let isPBProcessing = false;
+      let empData = {};
+      let pbData = {};
+      let cpcData = {};
+      let qtrsData = {};
+      let cityData = {};
+      let sbgExpData = { headers: [], rows: [] };
+      let sbgData = {}; // BudgetDB (SBG)
+      let itData = {};
+      let commData = {};
 
       // Prevent infinite reload loop
       if (!sessionStorage.getItem("reloaded")) {
@@ -3275,22 +3283,23 @@
         initMenu();
         renderIcons();
         disableAllButtons();
-        updateAndRenderDAA();
 
         // Default page click
         const firstBtn = qs(".menu-btn");
         if (firstBtn) firstBtn.click();
 
-        // Load ALL DATA HERE (🔥 single place)
+        // 🔥 LOAD DATA ONLY ONCE
         await loadAllData();
-        await loadData();
+
+        // AFTER data is ready
         buildEmpDBWithCalc();
         initFilters();
+        updateAndRenderDAA();
 
-        // Indicator AFTER UI ready
         moveIndicator();
         refreshPBView();
 
+        // Toggle buttons
         setupPBToggleButton("PBeditBtn", {
           defaultText: "Edit",
           activeText: "Save",
@@ -3331,14 +3340,14 @@
           "edit",
         );
 
-        //setupSBGEditButton("SBGeditBtn");
-
         bindPayBillView(
           "PayBillPage_Station",
           "PayBillPage_FY",
           "PayBillPage_SalMonth",
         );
-        setTimeout(() => {
+
+        // ⚡ Faster than setTimeout
+        requestAnimationFrame(() => {
           const station = id("PayBillPage_Station")?.value;
           const fy = id("PayBillPage_FY")?.value;
           const month = id("PayBillPage_SalMonth")?.value;
@@ -3347,37 +3356,33 @@
             createPayBillViewTables(station, fy, month);
             setDAPercent();
           }
-        }, 200);
+        });
 
-        /* =========================
-         🔹 DA BINDING
-      ========================= */
-
+        // DA binding
         on("PayBillPage_SalMonth", "change", () => {
           setDAPercent();
-          resetDAAInEditTables(); // 🔥 important
+          resetDAAInEditTables();
           updateAndRenderDAA();
         });
+
         on("PayBillPage_Station", "change", setDAPercent);
-        qsa(".SSaction-group button").forEach((btn) => {
-          btn.disabled = true;
-        });
-        qsa(".ITaction-group button").forEach((btn) => {
-          btn.disabled = true;
-        });
+
+        qsa(".SSaction-group button").forEach((btn) => (btn.disabled = true));
+        qsa(".ITaction-group button").forEach((btn) => (btn.disabled = true));
         document
           .querySelectorAll(".Pensionaction-group button")
-          .forEach((btn) => {
-            btn.disabled = true;
-          });
+          .forEach((btn) => (btn.disabled = true));
+
         loadCommutationOptions();
         updatePensionUI();
       });
 
       //🔥🔥🔥🔥 GET DATA FROM SHEET🔥🔥🔥🔥//
-      async function loadTable(api, tableId) {
+      async function loadTable(api, tableId, shouldRender = true) {
+        console.log("🔥 loadTable:", api);
+
         try {
-          let res = await fetch(
+          const res = await fetch(
             `https://office-management-f425.onrender.com/${api}`,
           );
 
@@ -3388,19 +3393,15 @@
 
           let result = await res.json();
 
-          //console.log("API Database Loaded:", api, result);
-          console.log("API Database Loaded:", api);
-
-          // 🔥 ADD THIS HERE (IMPORTANT)
-          if (api === "pb") pbData = result;
-          if (api === "emp") empData = result;
-
           let headers, data;
 
-          // 🔥 HANDLE BOTH FORMATS
           if (Array.isArray(result)) {
+            if (result.length === 0) return;
+
             headers = Object.keys(result[0]);
             data = result.map((obj) => headers.map((h) => obj[h]));
+
+            result = { headers, rows: data }; // 🔥 FIX
           } else if (result.headers && result.rows) {
             headers = result.headers;
             data = result.rows;
@@ -3409,40 +3410,25 @@
             return;
           }
 
-          let table = id(tableId);
-          if (!table) {
-            console.error("Table not found:", tableId);
-            return;
-          }
+          // ✅ Store AFTER normalize
+          if (api === "emp") empData = result;
+          if (api === "pb") pbData = result;
+          if (api === "cpc") cpcData = result;
+          if (api === "qtrs") qtrsData = result;
+          if (api === "city") cityData = result;
+          if (api === "sbg") sbgData = result;
+          if (api === "sbgexp") sbgExpData = result;
+          if (api === "it") itData = result;
+          if (api === "comm") commData = result;
 
-          table.innerHTML = "";
+          if (!shouldRender) return;
 
-          if (!data || data.length === 0) return;
+          const table = id(tableId);
+          if (!table) return;
 
-          // 🔹 HEADER
-          let thead = "<thead><tr>";
-          headers.forEach((h) => {
-            thead += `<th>${h}</th>`;
-          });
-          thead += "</tr></thead>";
+          const thead = `<thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>`;
+          const tbody = `<tbody>${data.map((row) => `<tr>${row.map((v) => `<td>${v ?? ""}</td>`).join("")}</tr>`).join("")}</tbody>`;
 
-          // 🔹 BODY
-          let tbody = "<tbody>";
-
-          data.forEach((row) => {
-            let tr = "<tr>";
-
-            row.forEach((val) => {
-              tr += `<td>${val ?? ""}</td>`;
-            });
-
-            tr += "</tr>";
-            tbody += tr;
-          });
-
-          tbody += "</tbody>";
-
-          // 🔹 FINAL TABLE
           table.innerHTML = thead + tbody;
         } catch (err) {
           console.error("Error loading table:", api, err);
@@ -3450,22 +3436,31 @@
       }
 
       async function loadAllData() {
+        // 🔴 STEP 1: Load REQUIRED data first
+        await loadTable("emp", "EmpDB", false);
+        await loadTable("pb", "PBDB");
+        await loadTable("cpc", "CPC7DB"); // ✅ FIX (moved here)
+
+        // 🔴 STEP 2: Now safe to calculate
+        buildEmpDBWithCalc();
+
+        // 🔴 STEP 3: Sync
+        await syncPBtoSBG();
+
+        // 🔴 STEP 4: Load sbg after update
+        await loadTable("sbg", "BudgetDB");
+        await loadTable("sbgexp", "SBGexpenditureDB");
+
+        renderBudgetfromPBData();
+        renderFilterMainBudgetExpTable();
+
+        // 🟢 STEP 5: Remaining (parallel)
         await Promise.all([
-          loadTable("emp", "EmpDB"),
-          loadTable("sbg", "BudgetDB"),
-          loadTable("sbgexp", "SBGexpenditureDB"),
-          loadTable("pb", "PBDB"),
-          loadTable("cpc", "CPC7DB"),
           loadTable("qtrs", "QtrsRateDB"),
           loadTable("city", "CityZoneDB"),
           loadTable("comm", "CommFactDB"),
           loadTable("it", "ITDB"),
         ]);
-        renderBudgetfromPBData();
-
-        // 🔥 THEN SYNC
-        await syncPBtoSBG();
-        renderFilterMainBudgetExpTable();
       }
 
       async function loadData() {
@@ -4206,12 +4201,6 @@
         return {};
       }
 
-      let empData = {};
-      let pbData = {};
-
-      let sbgExpData = { headers: [], rows: [] };
-      let sbgData = {}; // BudgetDB (SBG)
-
       function applyFilters() {
         //console.log("FILTER isAddMode:", isAddMode);
         if (!pbData.headers) return;
@@ -4457,7 +4446,7 @@
         applyFilters();
       }
 
-    //================================================================================//
+      //================================================================================//
       //                🔥🔥🔥🔥🔥MAIN PAGE DASHBOARD SCRIPT🔥🔥🔥🔥🔥
       //=============================================================================//
 
@@ -4573,7 +4562,6 @@
         });
       });
 
-
       //================================================================================//
       //                🔥🔥🔥🔥🔥EMPLOYEE PAGE SCRIPT🔥🔥🔥🔥🔥
       //=============================================================================//
@@ -4601,7 +4589,6 @@
           }
         });
       }
-
 
       //================================================================================//
       //                🔥🔥🔥🔥🔥PAY BILL PAGE SCRIPT🔥🔥🔥🔥🔥
@@ -9400,11 +9387,12 @@
           margin-right: 5mm;
           margin-left: 5mm;
           margin-bottom: 10mm; /* 🔥 increase bottom */
+          background: white !important;
         }
 
       * { font-family: "Inter", Arial, Helvetica, sans-serif; font-size: 11px;padding:0;margin:0}
 
-      body{padding:5px 5px;}
+      body{padding:5px 5px;background: white !important;}
 
       .header {
         display: flex;
@@ -9456,6 +9444,7 @@
         table-layout: auto;        /* 🔥 natural sizing */
         border-collapse: collapse;
         margin: 0 auto;
+        background: white !important;
       }
 
       td:nth-child(2) {
@@ -9665,7 +9654,7 @@
           margin-top: 5mm;
           margin-right: 5mm;
           margin-left: 5mm;
-          margin-bottom: 25mm; /* 🔥 increase bottom */
+          margin-bottom: 10mm; /* 🔥 increase bottom */
         }
 
         *{font-size: 11px;font-family: "Inter", Arial, Helvetica, sans-serif;}
@@ -10264,6 +10253,7 @@
 
         async function createSheet(html, name) {
           const sheet = workbook.addWorksheet(`PayBill-${name}`);
+          const station = id("PayBillPage_Station").value;
 
           /* ===== LOGO ===== */
           const response = await fetch(
@@ -10289,11 +10279,27 @@
 
           const rows = Array.from(table.rows);
 
-          /* 🔥 FIX: get MAX column count (important for NPS) */
+          // 🔥 Find HRIS column index
+          let hrisIndex = -1;
+          let srIndex = -1;
+
+          const headerCells = rows[0].cells;
+
+          for (let i = 0; i < headerCells.length; i++) {
+            const text = headerCells[i].innerText.trim();
+
+            if (text === "HRIS") hrisIndex = i;
+            if (text === "Sr No" || text === "Sr No." || text === "Sr")
+              srIndex = i;
+          }
+
+          /* 🔥 FIX: get MAX column count */
           let colCount = 0;
           rows.forEach((r) => {
             colCount = Math.max(colCount, r.cells.length);
           });
+
+          if (hrisIndex !== -1) colCount--; // remove HRIS
 
           const lastColLetter = getExcelCol(colCount);
 
@@ -10353,15 +10359,20 @@
           sheet.mergeCells(`A1:${safeLastColLetter}1`);
           sheet.getCell("A1").value = "PRASAR BHARATI";
           sheet.getCell("A1").alignment = { horizontal: "center" };
-          sheet.getCell("A1").font = { bold: true, size: 12 };
+          sheet.getCell("A1").font = { bold: true, size: 11 };
 
           sheet.mergeCells(`A2:${safeLastColLetter}2`);
           sheet.getCell("A2").value = "INDIA'S PUBLIC SERVICE BROADCASTER";
           sheet.getCell("A2").alignment = { horizontal: "center" };
 
+          sheet.mergeCells(`A3:${safeLastColLetter}3`);
+          sheet.getCell("A3").value = "ALL INDIA RADIO";
+          sheet.getCell("A3").alignment = { horizontal: "center" };
+          sheet.getCell("A3").font = { bold: true, size: 11 };
+
           sheet.mergeCells(`A4:${safeLastColLetter}4`);
           const cellA4 = sheet.getCell("A4");
-          cellA4.value = "AKASHAVANI KARWAR";
+          cellA4.value = `${station}`; // ✅ FIX
           cellA4.alignment = { horizontal: "center" };
           cellA4.font = { bold: true, size: 11 };
 
@@ -10386,24 +10397,23 @@
           rows.forEach((tr, i) => {
             const excelRow = sheet.getRow(startRow + i);
 
-            /* 🔥 FIX: force equal columns */
-            for (let j = 0; j < colCount; j++) {
+            let excelCol = 1;
+
+            for (let j = 0; j < tr.cells.length; j++) {
+              if (j === hrisIndex) continue; // 🔥 skip both
+
               const td = tr.cells[j];
-              const cell = excelRow.getCell(j + 1);
+              const cell = excelRow.getCell(excelCol); // ✅ FIX
 
               let val = td ? td.innerText.trim() : "";
 
-              // 🔥 GET STYLE FROM HTML
               const styleAttr = td?.getAttribute("style") || "";
-
-              // Check highlight
               const isYellow = styleAttr.includes("background");
               const isBold = styleAttr.includes("font-weight");
 
               const num = parseFloat(val.replace(/,/g, ""));
               cell.value = isNaN(num) ? val : num;
 
-              /* ===== STYLE ===== */
               if (val !== "") {
                 cell.border = {
                   top: { style: "thin" },
@@ -10429,22 +10439,22 @@
               }
 
               if (!isNaN(num)) {
-                cell.alignment = { horizontal: "right", vertical: "middle" };
+                cell.alignment = { horizontal: "right" };
               }
-
-              // 🔥 APPLY HTML STYLE TO EXCEL
 
               if (isYellow) {
                 cell.fill = {
                   type: "pattern",
                   pattern: "solid",
-                  fgColor: { argb: "FFFFF59D" },
+                  fgColor: { argb: "FFFF00" },
                 };
               }
 
               if (isBold) {
                 cell.font = { ...cell.font, bold: true };
               }
+
+              excelCol++; // 🔥 IMPORTANT
             }
           });
 
@@ -11500,7 +11510,7 @@
           await loadSBGData();
           await updateBudgetDBFromSBGExp();
           await onLoadCalculateAndUpdateSBGFromExp();
-          await loadTable("sbg", "BudgetDB");
+          //await loadTable("sbg", "BudgetDB");
         } finally {
           isSyncRunning = false;
         }
@@ -11705,12 +11715,13 @@
 
           td.colSpan = 7;
           td.style.textAlign = "center";
-          td.style.background = "#edebb7"
+          td.style.background = "#edebb7";
           td.style.color = "red";
-          td.style.fontWeight = "bold"
-          td.style.fontSize = "12px"
+          td.style.fontWeight = "bold";
+          td.style.fontSize = "12px";
           td.style.padding = "20px";
-          td.textContent = "==============🚫Please select Station, Budget & Financial Year🚫==============";
+          td.textContent =
+            "==============🚫Please select Station, Budget & Financial Year🚫==============";
 
           tr.appendChild(td);
           tbody.appendChild(tr);
@@ -11734,15 +11745,16 @@
 
           td.colSpan = 7;
           td.style.textAlign = "center";
-          td.style.background = "#edebb7"
+          td.style.background = "#edebb7";
           td.style.color = "red";
-          td.style.fontSize = "12px"
-          td.style.fontWeight = "bold"
+          td.style.fontSize = "12px";
+          td.style.fontWeight = "bold";
           td.style.padding = "20px";
 
           td.textContent =
-            month === "ALL" ? "==============🚫No Data found🚫==============" : 
-            `==============🚫No data found for ${month}🚫==============`;
+            month === "ALL"
+              ? "==============🚫No Data found🚫=============="
+              : `==============🚫No data found for ${month}🚫==============`;
 
           tr.appendChild(td);
           tbody.appendChild(tr);
@@ -12228,16 +12240,14 @@
         return `${y}-${m}-${d}`;
       }
 
-      ["BudgetUnderSelect","BudgetPage_Month"].forEach(
-        (idName) => {
-          id(idName)?.addEventListener("change", () => {
-            getBudgetFYColumns();
-            renderFilterMainBudgetExpTable();
-          });
-        },
-      );
+      ["BudgetUnderSelect", "BudgetPage_Month"].forEach((idName) => {
+        id(idName)?.addEventListener("change", () => {
+          getBudgetFYColumns();
+          renderFilterMainBudgetExpTable();
+        });
+      });
 
-      ["BudgetPage_Station","BudgetPage_FY"].forEach((idName) => {
+      ["BudgetPage_Station", "BudgetPage_FY"].forEach((idName) => {
         id(idName)?.addEventListener("change", () => {
           loadBudgetMonthDropdown();
           getBudgetFYColumns();
@@ -12429,7 +12439,6 @@
         };
       }
 
-
       async function buildBudgetHTML() {
         const wrapper = id("BudgetTableWrapper");
         const budget = id("BudgetUnderSelect")?.value || "";
@@ -12443,7 +12452,8 @@
           return "";
         }
 
-        const doc = document.implementation.createHTMLDocument("SBG Expenditure");
+        const doc =
+          document.implementation.createHTMLDocument("SBG Expenditure");
 
         // 🔥 COPY STYLES
         document
@@ -12456,7 +12466,7 @@
 
         // 🔥 PRINT CSS
         const style = doc.createElement("style");
-       style.textContent = `
+        style.textContent = `
         @page { size: A4 portrait; margin: 5mm 5mm 20mm 5mm; background: white; }
 
         body {
@@ -12585,11 +12595,11 @@
         const available = getInputValue("SBGavailable");
 
         const summaryTable = doc.createElement("table");
-          summaryTable.style.width = "100%";
-          summaryTable.style.margin = "5px 0 10px 0";
-          summaryTable.style.borderCollapse = "collapse";
+        summaryTable.style.width = "100%";
+        summaryTable.style.margin = "5px 0 10px 0";
+        summaryTable.style.borderCollapse = "collapse";
 
-          summaryTable.innerHTML = `
+        summaryTable.innerHTML = `
             <tr style="font-weight:bold; text-align:center;">
               <td style="text-align:right">SBG Sanctioned :</td>
               <td style="text-align:left">${sanctioned}</td>
@@ -12619,8 +12629,7 @@
         footer.className = "print-footer";
 
         footer.textContent =
-          "Generated on " +
-          new Date().toLocaleDateString("en-GB");
+          "Generated on " + new Date().toLocaleDateString("en-GB");
 
         doc.body.appendChild(footer);
 
@@ -12640,7 +12649,6 @@
 
       const budgetprintBtn = id("SBGprintBtn");
       const budgetexcelBtn = id("SBGexcelBtn");
-      
 
       // 🔹 PRINT BUTTON
       budgetprintBtn.addEventListener("click", async () => {
@@ -12655,7 +12663,6 @@
       budgetexcelBtn.addEventListener("click", async () => {
         exportSBGExcel();
       });
-
 
       async function exportSBGExcel() {
         const workbook = new ExcelJS.Workbook();
@@ -12789,9 +12796,12 @@
         headerCell.value = {
           richText: [
             { text: "PRASAR BHARATI\n", font: { bold: true, size: 12 } },
-            { text: "INDIA'S PUBLIC SERVICE BROADCASTER\n", font: { bold: true, size: 12 } },
-            { text: `${station}\n`, font: { bold: true, size: 12 } },
-            { text: "ALL INDIA RADIO", font: { bold: true, size: 12 } },
+            {
+              text: "INDIA'S PUBLIC SERVICE BROADCASTER\n",
+              font: { bold: true, size: 12 },
+            },
+            { text: "ALL INDIA RADIO\n", font: { bold: true, size: 12 } },
+            { text: `${station}`, font: { bold: true, size: 12 } },
           ],
         };
 
@@ -12802,7 +12812,7 @@
         };
 
         headerCell.border = {
-          bottom: { style: "medium", color: { argb: "FF000000" } }
+          bottom: { style: "medium", color: { argb: "FF000000" } },
         };
 
         sheet.getRow(1).height = 78;
@@ -12812,7 +12822,7 @@
         // 🔥 LOGO
         // =========================
         const base64 = await urlToBase64(
-          "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+          "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
         );
 
         const imageId = workbook.addImage({
@@ -12847,7 +12857,7 @@
         sheet.mergeCells("D3:E3");
 
         // 🔥 STYLE
-        ["A3", "C3", "D3"].forEach(cell => {
+        ["A3", "C3", "D3"].forEach((cell) => {
           const c = sheet.getCell(cell);
           c.font = { bold: true };
           c.alignment = { horizontal: "center", vertical: "middle" };
@@ -12871,7 +12881,7 @@
         sheet.mergeCells("D4:E4");
 
         // 🔥 STYLE VALUES
-        ["A4", "C4", "D4"].forEach(cell => {
+        ["A4", "C4", "D4"].forEach((cell) => {
           const c = sheet.getCell(cell);
           c.alignment = { horizontal: "center", vertical: "middle" };
           c.border = {
@@ -12913,7 +12923,7 @@
               name: "Calibri",
               size: 11,
               bold: cs.fontWeight === "bold" || parseInt(cs.fontWeight) >= 600,
-              ...(fontColor ? { color: fontColor } : {})
+              ...(fontColor ? { color: fontColor } : {}),
             };
 
             // FORCE RED CLASS
@@ -12921,48 +12931,48 @@
               c.font = {
                 ...(c.font || {}),
                 color: { argb: "FFFF0000" },
-                bold: true
+                bold: true,
               };
             }
 
             // BACKGROUND
             const bg = getEffectiveBackground(cell);
-              if (isValidFill(bg)) {
-                const argb = rgbToARGB(bg);
-                if (argb) {
-                  c.fill = {
-                    type: "pattern",
-                    pattern: "solid",
-                    fgColor: { argb },
-                  };
-                }
+            if (isValidFill(bg)) {
+              const argb = rgbToARGB(bg);
+              if (argb) {
+                c.fill = {
+                  type: "pattern",
+                  pattern: "solid",
+                  fgColor: { argb },
+                };
               }
+            }
 
             c.alignment = {
               vertical: "middle",
               horizontal: colPointer > 4 ? "right" : "left",
-              wrapText: true
+              wrapText: true,
             };
 
             c.border = {
               top: { style: "thin" },
               bottom: { style: "thin" },
               left: { style: "thin" },
-              right: { style: "thin" }
+              right: { style: "thin" },
             };
           });
 
           // FIX HEADER ROW WITHOUT OVERRITING COLORS
           if (tr.querySelector("th")) {
-            excelRow.eachCell(cell => {
+            excelRow.eachCell((cell) => {
               cell.font = {
                 ...(cell.font || {}),
-                bold: true
+                bold: true,
               };
               cell.alignment = {
                 horizontal: "center",
                 vertical: "middle",
-                wrapText: true
+                wrapText: true,
               };
             });
           }
@@ -12993,49 +13003,47 @@
         const lastRow = currentRow - 1;
 
         sheet.pageSetup = {
-            paperSize: 9, // 🔥 A4
-            orientation: "portrait",
-            //scale: 100,
-            horizontalCentered: true,
-            verticalCentered: false,
-            fitToPage: true,
-            fitToWidth: 1,
-            //fitToHeight: false,
-            fitToHeight: 999,
-            margins: {
-              left: 0.3,
-              right: 0.3,
-              top: 0.5,
-              bottom: 0.5,
-              header: 0.3,
-              footer: 0.3,
-            },
-            printArea: `A1:E${lastRow}`,
-          };
+          paperSize: 9, // 🔥 A4
+          orientation: "portrait",
+          //scale: 100,
+          horizontalCentered: true,
+          verticalCentered: false,
+          fitToPage: true,
+          fitToWidth: 1,
+          //fitToHeight: false,
+          fitToHeight: 999,
+          margins: {
+            left: 0.3,
+            right: 0.3,
+            top: 0.5,
+            bottom: 0.5,
+            header: 0.3,
+            footer: 0.3,
+          },
+          printArea: `A1:E${lastRow}`,
+        };
 
-          const fileName = `${station}-${budget}-FY-${fy}-SBG.xlsx`;
+        const fileName = `${station}-${budget}-FY-${fy}-SBG.xlsx`;
 
-          sheet.headerFooter = {
-            differentFirst: false,
-            differentOddEven: false,
+        sheet.headerFooter = {
+          differentFirst: false,
+          differentOddEven: false,
 
-            // 🔹 HEADER (LEFT, SMALL, ITALIC, GRAY)
-            oddHeader:
-              "&L&K808080&\"Calibri,Italic\"&10" +
-              fileName.replace(".xlsx", ""),
+          // 🔹 HEADER (LEFT, SMALL, ITALIC, GRAY)
+          oddHeader:
+            '&L&K808080&"Calibri,Italic"&10' + fileName.replace(".xlsx", ""),
 
-            // 🔹 FOOTER
-            oddFooter:
-              "&CPage &P of &N" +
-              "&R&K808080Generated on " +
-              new Date().toLocaleDateString("en-GB"),
-          };
+          // 🔹 FOOTER
+          oddFooter:
+            "&CPage &P of &N" +
+            "&R&K808080Generated on " +
+            new Date().toLocaleDateString("en-GB"),
+        };
 
         const buffer = await workbook.xlsx.writeBuffer();
 
         saveAs(new Blob([buffer]), `${fileName}`);
       }
-
 
       //================================================================================//
       //                🔥🔥🔥🔥🔥SALARY SLIP SCRIPT🔥🔥🔥🔥🔥
@@ -14239,41 +14247,42 @@
         const style = doc.createElement("style");
 
         style.textContent = `
-    @page {
-      size: A4 portrait;
-      margin: 5mm;
-    }
+          @page {
+            size: A4 portrait;
+            margin: 5mm;
+            background: white !important;
+          }
 
-    body {
-      margin: 0;
-      background: white;
-    }
+          body {
+            margin: 0;
+            background: white;
+          }
 
-    .page {
-      margin: 0 auto;
-      page-break-after: always;
-    }
+          .page {
+            margin: 0 auto;
+            page-break-after: always;
+          }
 
-    .page:last-child {
-      page-break-after: auto;
-    }
+          .page:last-child {
+            page-break-after: auto;
+          }
 
-    .page * {
-      overflow: visible !important;
-      max-height: none !important;
-      height: auto !important;
-      background: white;
-    }
+          .page * {
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
+            background: white;
+          }
 
-    img {
-      max-width: 60px !important;
-      max-height: 60px !important;
-    }
+          img {
+            max-width: 60px !important;
+            max-height: 60px !important;
+          }
 
-    tr {
-      page-break-inside: avoid;
-    }
-  `;
+          tr {
+            page-break-inside: avoid;
+          }
+        `;
 
         doc.head.appendChild(style);
 
@@ -16013,6 +16022,10 @@
         const station = id("ITPage_Station")?.value;
         const selectedFY = id("ITPage_FY")?.value;
         const selectedEmp = id("ITPage_Emp")?.value;
+        const empDropdown = id("ITPage_Emp");
+        const selectedModeEl = qs("input[name='salaryMode']:checked");
+        const salMode =
+          selectedModeEl?.id === "calcSalary" ? "calculated" : "paid";
 
         if (!selectedFY) return;
 
@@ -16058,22 +16071,6 @@
           );
         }
 
-        function getFontColor(color) {
-          const m = color?.match(/\d+/g);
-          if (!m || m.length < 3) return undefined;
-
-          const [r, g, b] = m.map(Number);
-
-          // skip black (default)
-          if (r === 0 && g === 0 && b === 0) return undefined;
-
-          return {
-            argb:
-              "FF" +
-              [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join(""),
-          };
-        }
-
         function parseValue(text) {
           if (!text) return " ";
           const clean = text.replace(/[,₹\s]/g, "");
@@ -16083,6 +16080,21 @@
         function isMerged(sheet, row, col) {
           const cell = sheet.getCell(row, col);
           return !!cell.master && cell.master !== cell;
+        }
+
+        function getFontColor(color) {
+          if (!color) return { argb: "FF000000" }; // default black
+
+          const match = color.match(/\d+/g);
+          if (!match) return { argb: "FF000000" };
+
+          const [r, g, b] = match.map(Number);
+
+          const toHex = (n) => n.toString(16).padStart(2, "0").toUpperCase();
+
+          return {
+            argb: "FF" + toHex(r) + toHex(g) + toHex(b),
+          };
         }
 
         function getEffectiveBackground(cell) {
@@ -16119,6 +16131,49 @@
           return null;
         }
 
+        // 🔥 GET EFFECTIVE COLOR
+        function getEffectiveColor(cell) {
+          let el = cell;
+
+          while (el && el !== document.body) {
+            const color = window.getComputedStyle(el).color;
+
+            const m = color?.match(/\d+/g);
+            if (m && m.length >= 3) {
+              const [r, g, b] = m.map(Number);
+
+              // skip default black
+              if (!(r === 0 && g === 0 && b === 0)) {
+                return getFontColor(color);
+              }
+            }
+
+            el = el.parentElement;
+          }
+
+          return { argb: "FF000000" };
+        }
+
+        function isBold(cell) {
+          // 1️⃣ check tags inside cell
+          if (cell.querySelector("b, strong")) return true;
+
+          // 2️⃣ check current + parent elements
+          let el = cell;
+
+          while (el && el !== document.body) {
+            const fw = window.getComputedStyle(el).fontWeight;
+
+            if (fw === "bold" || parseInt(fw) >= 600) {
+              return true;
+            }
+
+            el = el.parentElement;
+          }
+
+          return false;
+        }
+
         // =========================
         // 🔥 UPDATED PROCESS FUNCTION
         // =========================
@@ -16150,7 +16205,7 @@
                 sheet,
                 nestedTables[1],
                 currentRow,
-                8,
+                8, // 🔥 start column for right table
                 depth + 1,
               );
 
@@ -16174,32 +16229,13 @@
             // =========================
             // 🔥 NORMAL ROW
             // =========================
-
-            // ✅ Calculate TRUE total columns (with colspan)
-            let totalCols = 0;
-            cells.forEach((c) => (totalCols += c.colSpan || 1));
-
             let colIndex = 1;
             const excelRow = sheet.getRow(currentRow);
 
             let hasValue = false;
 
             cells.forEach((cell) => {
-              let text = cell.innerText.trim();
-
-              const input = cell.querySelector("#rentInput");
-
-              if (input) {
-                const val = input.value || "";
-
-                // 🔥 FIX: insert value BEFORE closing bracket
-                text = text.replace(/\)\s*$/, `${val})`);
-
-                // If no closing bracket found (fallback)
-                if (!text.includes(val)) {
-                  text = text + " " + val;
-                }
-              }
+              const text = cell.innerText.trim();
               if (text) hasValue = true;
 
               const cs = window.getComputedStyle(cell);
@@ -16214,43 +16250,40 @@
               excelCell.font = {
                 name: "Calibri",
                 size: 11,
-                bold:
-                  cs.fontWeight === "bold" ||
-                  parseInt(cs.fontWeight) >= 600 ||
-                  cell.querySelector("b, strong"),
-                color: getFontColor(cs.color),
+                bold: isBold(cell), // 🔥 FINAL FIX
+                color: getEffectiveColor(cell),
               };
 
-              // ✅ Detect last column
-              const isLastColumn = colIndex + colSpan - 1 === totalCols;
+              excelCell.alignment = {
+                horizontal: cs.textAlign || "left",
+                vertical: "middle",
+                wrapText: true,
+              };
 
-              // ✅ Detect merged cell
-              const isMergedCell = colSpan >= 7;
-              const isFirstColumn = colIndex === 1;
-              // =========================
-              // 🔥 FINAL ALIGNMENT RULE
-              // =========================
-              if (isMergedCell) {
-                // ❌ DO NOTHING — keep original alignment only
-                excelCell.alignment = {
-                  horizontal: cs.textAlign || "left",
-                  vertical: "middle",
-                  wrapText: true,
-                };
-              } else {
-                // ✅ Only apply padding to last column
+              const startCol = colIndex;
+              const endCol = colIndex + colSpan - 1;
 
-                excelCell.alignment = {
-                  horizontal: isLastColumn ? "right" : cs.textAlign || "left",
-                  vertical: "middle",
-                  wrapText: true,
-                  indent: isFirstColumn || isLastColumn ? 2 : 0, // ✅ added first column
-                };
+              // 🔥 LEFT PADDING (OLD + NEW FIRST COLUMN)
+              if (startCol === 1 || startCol === 8) {
+                excelCell.alignment.indent = 1;
               }
 
-              // 🔥 BACKGROUND
+              // 🔥 RIGHT PADDING (OLD + NEW LAST COLUMN)
+              if (endCol === 7 || endCol === 14) {
+                if (typeof excelCell.value === "string") {
+                  excelCell.value = excelCell.value + "  ";
+                }
+              }
+
+              // 🔥 BACKGROUND FIX
               const bg = getEffectiveBackground(cell);
-              if (isValidFill(bg)) {
+
+              const trParent = cell.closest("tr");
+              if (!bg || bg === "transparent") {
+                bg = window.getComputedStyle(trParent).backgroundColor;
+              }
+
+              if (bg && bg !== "transparent") {
                 const argb = rgbToARGB(bg);
                 if (argb) {
                   excelCell.fill = {
@@ -16262,20 +16295,12 @@
               }
 
               // 🔥 BORDER
-              if (currentRow === 2) {
-                // ✅ Only bottom border for 2nd row
-                excelCell.border = {
-                  bottom: { style: "thin" },
-                };
-              } else {
-                // ✅ Normal borders for other rows
-                excelCell.border = {
-                  top: { style: "thin" },
-                  bottom: { style: "thin" },
-                  left: { style: "thin" },
-                  right: { style: "thin" },
-                };
-              }
+              excelCell.border = {
+                top: { style: "thin" },
+                bottom: { style: "thin" },
+                left: { style: "thin" },
+                right: { style: "thin" },
+              };
 
               // 🔥 SAFE MERGE
               if (colSpan > 1) {
@@ -16309,7 +16334,7 @@
           depth = 0,
         ) {
           let currentRow = startRow;
-
+          
           const rows = table.querySelectorAll(
             ":scope > thead > tr, :scope > tbody > tr, :scope > tr",
           );
@@ -16324,21 +16349,8 @@
             let hasValue = false;
 
             cells.forEach((cell) => {
-              let text = cell.innerText.trim();
-
-              const input = cell.querySelector("#rentInput");
-
-              if (input) {
-                const val = input.value || "";
-
-                // 🔥 FIX: insert value BEFORE closing bracket
-                text = text.replace(/\)\s*$/, `${val})`);
-
-                // If no closing bracket found (fallback)
-                if (!text.includes(val)) {
-                  text = text + " " + val;
-                }
-              }
+              const text = cell.innerText.trim();
+              if (text) hasValue = true;
 
               const cs = window.getComputedStyle(cell);
               const colSpan = cell.colSpan || 1;
@@ -16352,48 +16364,41 @@
               excelCell.font = {
                 name: "Calibri",
                 size: 11,
-                bold:
-                  cs.fontWeight === "bold" ||
-                  parseInt(cs.fontWeight) >= 600 ||
-                  cell.querySelector("b, strong"),
-                color: getFontColor(cs.color),
+                bold: isBold(cell), // 🔥 FINAL FIX
+                color: getEffectiveColor(cell),
               };
 
-              // ✅ Calculate TRUE total columns (same as main table)
-              let totalCols = 0;
-              cells.forEach((c) => (totalCols += c.colSpan || 1));
+              excelCell.alignment = {
+                horizontal: cs.textAlign || "left",
+                vertical: "middle",
+                wrapText: true,
+              };
 
-              // ✅ Detect positions
-              const isFirstColumn = colIndex === startCol;
-              const isLastColumn =
-                colIndex + colSpan - 1 === startCol + totalCols - 1;
+              // 🔥 COLUMN RANGE CALCULATION
+              const startCol = colIndex;
+              const endCol = colIndex + colSpan - 1;
 
-              // ✅ Detect merged cells (same rule you used)
-              const isMergedCell = colSpan >= 7;
+              // 🔥 LEFT PADDING (NEW TABLE FIRST COLUMN)
+              if (startCol === 8) {
+                excelCell.alignment.indent = 1;
+              }
 
-              // =========================
-              // 🔥 FINAL ALIGNMENT (MATCHES MAIN TABLE)
-              // =========================
-              if (isMergedCell) {
-                excelCell.alignment = {
-                  horizontal: cs.textAlign || "left",
-                  vertical: "middle",
-                  wrapText: true,
-                };
-              } else {
-                excelCell.alignment = {
-                  horizontal: isLastColumn ? "right" : cs.textAlign || "left",
-                  vertical: "middle",
-                  wrapText: true,
-                  indent: isFirstColumn || isLastColumn ? 2 : 0,
-                };
+              // 🔥 RIGHT PADDING (NEW TABLE LAST COLUMN)
+              if (endCol === 14) {
+                if (typeof excelCell.value === "string") {
+                  excelCell.value = excelCell.value + "  ";
+                }
               }
 
               // 🔥 BACKGROUND
-
               const bg = getEffectiveBackground(cell);
+              const trParent = cell.closest("tr");
 
-              if (isValidFill(bg)) {
+              if (!bg || bg === "transparent") {
+                bg = window.getComputedStyle(trParent).backgroundColor;
+              }
+
+              if (bg && bg !== "transparent") {
                 const argb = rgbToARGB(bg);
                 if (argb) {
                   excelCell.fill = {
@@ -16455,12 +16460,27 @@
         // =========================
         // 🔁 LOOP
         // =========================
-        for (const empName of employees) {
-          // 🔥 RENDER (needed for calculation)
-          renderCalculatedITTable(empName, selectedFY, "calculated");
+        const fileName =
+          mode === "single"
+            ? `${selectedEmp}-${station}-FY-${selectedFY}-IT Calculation.xlsx`
+            : `${station}-FY-${selectedFY}-IT Calculations.xlsx`;
 
+        for (const empName of employees) {
           const wrapper = qs(".ITtableWrapper");
           if (!wrapper) continue;
+
+          // 🔥 RENDER (needed for calculation)
+          renderCalculatedITTable(empName, selectedFY, salMode);
+
+          if (mode === "all") {
+            wrapper.style.opacity = "0";  // 🔥 
+            id("ITInfoPanel").querySelectorAll("span").forEach(el => {
+              el.textContent = "0";
+            });
+            id("ITInfoPanel").querySelectorAll(".ITpanelDiv").forEach(el => {
+              el.style.background = "rgb(215, 255, 201)";
+            });
+          }          
 
           // 🔥 RESTORE INPUT VALUE AFTER RENDER
           const rentValue = window.houseRentMap?.[empName] || "";
@@ -16484,8 +16504,8 @@
               lines: [
                 "PRASAR BHARATI",
                 "INDIA'S PUBLIC SERVICE BROADCASTER",
-                "AIR Dharwad",
                 "ALL INDIA RADIO",
+                `${station}`,
               ],
               logo: "https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l",
             };
@@ -16575,11 +16595,26 @@
               left: 0.3,
               right: 0.3,
               top: 0.5,
-              bottom: 0.5,
+              bottom: 0.6,
               header: 0.3,
               footer: 0.3,
             },
             printArea: `A1:N${lastRow}`,
+          };
+
+          sheet.headerFooter = {
+            differentFirst: false,
+            differentOddEven: false,
+
+            // 🔹 HEADER (LEFT, SMALL, ITALIC, GRAY)
+            oddHeader:
+              '&L&K808080&"Calibri,Italic"&10' + fileName.replace(".xlsx", ""),
+
+            // 🔹 FOOTER
+            oddFooter:
+              "&CPage &P of &N" +
+              "&R&K808080Generated on " +
+              new Date().toLocaleDateString("en-GB"),
           };
         }
 
@@ -16587,13 +16622,30 @@
         // 📥 DOWNLOAD
         // =========================
         const buffer = await workbook.xlsx.writeBuffer();
-
-        const fileName =
-          mode === "single"
-            ? `${selectedEmp}-IT Calculation.xlsx`
-            : `${station}-IT Calculations.xlsx`;
-
         saveAs(new Blob([buffer]), fileName);
+
+        // =========================
+        // 🔥 RESET UI AFTER ALL MODE
+        // =========================
+        if (mode === "all") {
+          if (empDropdown) {
+            empDropdown.selectedIndex = -1;   // 🔥 clears selection
+            empDropdown.value = "";           // extra safety
+
+          }
+
+          if (wrapper) {
+            id("ITInfoPanel").querySelectorAll("span").forEach(el => {
+              el.textContent = "0";
+            });
+
+            id("ITInfoPanel").querySelectorAll(".ITpanelDiv").forEach(el => {
+              el.style.background = "rgb(215, 255, 201)";
+            });
+            wrapper.innerHTML = "";           // 🔥 clear table UI
+          }
+          wrapper.style.opacity = "1";
+        }
       }
 
       async function urlToBase64(url) {
@@ -16656,47 +16708,50 @@
         });
       }
 
-
       function buildPrintHeader(doc, station = "") {
-  const header = doc.createElement("table");
-  header.style.width = "100%";
-  header.style.borderCollapse = "collapse";
-  header.style.marginBottom = "6px";
-  header.style.borderBottom = "solid 2px black"; // ✅ FIXED
+        const header = doc.createElement("table");
+        header.style.width = "100%";
+        header.style.borderCollapse = "collapse";
+        header.style.marginBottom = "6px";
+        header.style.borderBottom = "solid 2px black"; // ✅ FIXED
 
-  header.innerHTML = `
-    <tr>
-      <!-- LOGO -->
-      <td style="width:70px; text-align:left;">
-        <img 
-          src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
-          style="width:60px;height:60px;"
-        />
-      </td>
+        header.innerHTML = `
+          <tr>
+            <!-- LOGO -->
+            <td style="width:70px; text-align:left;">
+              <img 
+                src="https://lh3.googleusercontent.com/d/1sQffx9-cScAEVjVIB_joxX2IMyKYKQ6l"
+                style="width:60px;height:60px;"
+              />
+            </td>
 
-      <!-- TEXT -->
-      <td style="text-align:center;">
-        <div style="font-size:12px;font-weight:bold;">PRASAR BHARATI</div>
-        <div style="font-size:12px;font-weight:bold;">INDIA'S PUBLIC SERVICE BROADCASTER</div>
-        <div style="font-size:12px;font-weight:bold;">ALL INDIA RADIO DHARWAD</div>
-        <div style="font-size:12px;font-weight:bold;">${station || ""}</div>
-      </td>
+            <!-- TEXT -->
+            <td style="text-align:center;">
+              <div style="font-size:12px;font-weight:bold;">PRASAR BHARATI</div>
+              <div style="font-size:12px;font-weight:bold;">INDIA'S PUBLIC SERVICE BROADCASTER</div>
+              <div style="font-size:12px;font-weight:bold;">ALL INDIA RADIO</div>
+              <div style="font-size:12px;font-weight:bold;">${station || ""}</div>
+            </td>
 
-      <!-- EMPTY -->
-      <td style="width:70px;"></td>
-    </tr>
-  `;
+            <!-- EMPTY -->
+            <td style="width:70px;"></td>
+          </tr>
+        `;
 
-  return header;
-}
+        return header;
+      }
 
-      function buildITHTML(mode = "single") {
+      async function buildITHTML(mode = "single") {
         const wrapper = qs(".ITtableWrapper");
         // 🔥 REMOVE FORMATTING
         //removeNumberFormatting(wrapper);
         const station = id("ITPage_Station")?.value;
         const selectedFY = id("ITPage_FY")?.value;
         const selectedEmp = id("ITPage_Emp")?.value;
+        const empDropdown = id("ITPage_Emp");
+        const selectedModeEl = qs("input[name='salaryMode']:checked");
+        const salMode =
+          selectedModeEl?.id === "calcSalary" ? "calculated" : "paid";
 
         if (!wrapper || !selectedFY) return "";
 
@@ -16767,6 +16822,7 @@
             margin: 0 auto;
             page-break-after: always;
             padding-right: 2mm;
+            background: white !important;
           }
 
           .page:last-child {
@@ -16810,6 +16866,7 @@
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
+            opacity: 1 !important;
           }
 
           .rowITregimeHeader {
@@ -16821,64 +16878,164 @@
 
         doc.head.appendChild(style);
 
+        // =========================
+        // 🔧 COPY INPUT VALUES
+        // =========================
         function copyInputValues(source, target) {
-          const sourceInputs = source.querySelectorAll(
-            "input, textarea, select",
-          );
-          const targetInputs = target.querySelectorAll(
-            "input, textarea, select",
-          );
+          const src = source.querySelectorAll("input, textarea, select");
+          const tgt = target.querySelectorAll("input, textarea, select");
 
-          sourceInputs.forEach((input, i) => {
-            const cloneInput = targetInputs[i];
-            if (!cloneInput) return;
+          src.forEach((input, i) => {
+            const clone = tgt[i];
+            if (!clone) return;
 
             if (input.type === "checkbox" || input.type === "radio") {
-              cloneInput.checked = input.checked;
+              clone.checked = input.checked;
             } else {
-              cloneInput.value = input.value;
+              clone.value = input.value;
             }
           });
         }
 
         // =========================
-        // 🔁 LOOP EMPLOYEES
+        // 🔧 SYNC INPUT VALUES
         // =========================
-        employees.forEach((empName) => {
-          //renderCalculatedITTable(empName, selectedFY, "calculated");
+        function syncInputs(wrapper) {
+          wrapper.querySelectorAll("input, select, textarea").forEach((el) => {
+            if (el.tagName === "SELECT") {
+              [...el.options].forEach(opt => opt.selected = opt.value === el.value);
+            } else if (el.type === "checkbox" || el.type === "radio") {
+              if (el.checked) el.setAttribute("checked", "checked");
+              else el.removeAttribute("checked");
+            } else {
+              el.setAttribute("value", el.value);
+            }
+          });
+        }
 
-          const wrapper = qs(".ITtableWrapper");
-          if (!wrapper) return;
+        // =========================
+        // 🔁 LOOP EMPLOYEES (FIXED)
+        // =========================
+        
 
-          const clone = wrapper.cloneNode(true);
+        for (const empName of employees) {          
+          if (empDropdown) {
+            empDropdown.value = empName;
+          }
 
-          // 🔥 COPY INPUT VALUES
-          copyInputValues(wrapper, clone);
 
-          // 🔥 OPTIONAL: convert inputs to text for print
-          clone.querySelectorAll("input").forEach((inp) => {
+          // 🔥 RENDER DIRECTLY
+          renderCalculatedITTable(empName, selectedFY, salMode);
+
+          if (mode === "all") {
+            wrapper.style.opacity = "0";  // 🔥 
+            id("ITInfoPanel").querySelectorAll("span").forEach(el => {
+              el.textContent = "0";
+            });
+            id("ITInfoPanel").querySelectorAll(".ITpanelDiv").forEach(el => {
+              el.style.background = "rgb(215, 255, 201)";
+            });
+          }
+
+          // 🔥 WAIT FOR DOM + CALCULATION
+          await new Promise(r => requestAnimationFrame(r));
+          await new Promise(r => requestAnimationFrame(r));
+
+          const liveWrapper = qs(".ITtableWrapper");
+          if (!liveWrapper) continue;
+
+          // 🔥 SYNC INPUT VALUES
+          syncInputs(liveWrapper);
+
+          // 🔥 SNAPSHOT
+          const temp = document.createElement("div");
+          temp.innerHTML = liveWrapper.outerHTML;
+          const clone = temp.firstElementChild;
+          
+          // =========================
+          // 🔥 CONVERT INPUTS TO TEXT
+          // =========================
+          clone.querySelectorAll("input, select, textarea").forEach((inp) => {
             const span = document.createElement("span");
-            span.textContent = inp.value;
+
+            if (inp.type === "checkbox") {
+              span.textContent = inp.checked ? "✔" : "";
+            } else {
+              let val = inp.value || "";
+
+              if (!isNaN(val.replace(/[,₹\s]/g, ""))) {
+                val = val.replace(/[,₹\s]/g, "");
+              }
+
+              span.textContent = val;
+            }
+
             inp.replaceWith(span);
           });
 
           removeNumberFormatting(clone);
 
+          // =========================
+          // 🔥 TABLE FIX
+          // =========================
+          clone.querySelectorAll("table").forEach((tbl) => {
+            tbl.style.width = "100%";
+            tbl.style.borderCollapse = "collapse";
+          });
+
+          // =========================
+          // 🔥 KATEX FIX
+          // =========================
+          clone.querySelectorAll(".katex").forEach((el) => {
+            el.style.display = "inline-block";
+            el.style.whiteSpace = "nowrap";
+          });
+
+          // =========================
+          // 🔥 CLEANUP
+          // =========================
+          clone.querySelectorAll(".no-print").forEach((el) => el.remove());
+
+          // =========================
+          // 🔥 CREATE PAGE
+          // =========================
           const page = doc.createElement("div");
           page.className = "page";
 
-          // ✅ ADD HEADER FIRST (NEW)
           const header = buildPrintHeader(doc, station);
-          page.appendChild(header);
+          header.classList.add("print-header");
 
-          // ✅ ADD CONTENT
+          page.appendChild(header);
           page.appendChild(clone);
 
           doc.body.appendChild(page);
-        });
+        }
+
+        // =========================
+        // 🔥 RESET UI AFTER ALL MODE
+        // =========================
+        if (mode === "all") {
+          if (empDropdown) {
+            empDropdown.selectedIndex = -1;   // 🔥 clears selection
+            empDropdown.value = "";           // extra safety
+
+          }
+
+          if (wrapper) {
+            id("ITInfoPanel").querySelectorAll("span").forEach(el => {
+              el.textContent = "0";
+            });
+            id("ITInfoPanel").querySelectorAll(".ITpanelDiv").forEach(el => {
+              el.style.background = "rgb(215, 255, 201)";
+            });
+            wrapper.innerHTML = "";           // 🔥 clear table UI
+          }
+          wrapper.style.opacity = "1"; 
+        }
 
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
+
 
       function updateITPrintMenuState() {
         const hasEmp = id("ITPage_Emp")?.value;
@@ -16961,7 +17118,7 @@
       });
 
       qsa(".menu-option").forEach((opt) => {
-        opt.addEventListener("click", function () {
+        opt.addEventListener("click", async function () {
           const type = this.dataset.type;
           const wrapper = qs(".ITtableWrapper");
 
@@ -16969,13 +17126,15 @@
 
           // =====SALARY SLIP PRINT =====
           if (type === "pdf-singleIT") {
-            openPrintWindow(buildITHTML("single"));
+            const html = await buildITHTML("single"); // ✅ FIX
+            openPrintWindow(html);
             restoreNumberFormatting(wrapper);
           }
 
           // ===== ALL SALARY SLIP PRINT =====
           if (type === "pdf-allIT") {
-            openPrintWindow(buildITHTML("all"));
+            const html = await buildITHTML("all"); // ✅ FIX
+            openPrintWindow(html);
             restoreNumberFormatting(wrapper);
           }
 
@@ -18297,7 +18456,6 @@
       const pensionmenu = id("PensionprintMenu");
       const pensionprintBtn = id("PensionprintBtn");
       const pensionexcelBtn = id("PensionexcelBtn");
-      
 
       // 🔹 PRINT BUTTON
       pensionprintBtn.addEventListener("click", (e) => {
@@ -18427,11 +18585,32 @@
       document.addEventListener("input", handlePensionEvents);
       document.addEventListener("change", handlePensionEvents);
 
+      function resetWrapperInputs(wrapper) {
+        if (!wrapper) return;
+
+        wrapper.querySelectorAll("input").forEach((el) => {
+
+          // ❌ skip checkboxes & radio
+          if (el.type === "checkbox" || el.type === "radio") return;
+
+          // 🔹 handle date separately (optional)
+          if (el.type === "date") {
+            el.value = "";
+            return;
+          }
+
+          // 🔥 set all other inputs to 0
+          el.value = "0";
+        });
+      }
+
+      
       async function buildPensionHTML(mode = "single") {
         //console.log(qs(".PensionTableWrapper").querySelectorAll(".print-red"));
         const wrapper = qs(".PensionTableWrapper");
         const station = id("PensionPage_Station")?.value;
         const selectedEmp = id("PensionPage_Emp")?.value;
+        const empDropdown = id("PensionPage_Emp");
 
         if (!wrapper) return "";
 
@@ -18488,13 +18667,20 @@
         const style = doc.createElement("style");
 
         style.textContent = `
-    @page { size: A4 portrait; margin: 5mm 5mm 20mm 5mm; }
+    @page { size: A4 portrait; margin: 5mm 5mm 20mm 5mm;background:white; }
 
-    body { margin: 0; font-size: 10px; }
+    body { margin: 0; font-size: 10px;background:white; }
 
-    .page { margin: 0 auto; padding-right: 2mm; }
+    .page { 
+      margin: 0 auto; padding-right: 2mm; page-break-after: always;
+      break-after: page;background:white;
+    }
 
-    table { width: 100%; border-collapse: collapse; }
+    .page:last-child {
+      page-break-after: auto;
+    }
+
+    table { width: 100%; border-collapse: collapse;background:white; }
 
     tr { break-inside: auto; }
 
@@ -18517,6 +18703,7 @@
     * {
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
+      opacity: 1 !important;
     }
 
     #emolumentContainer, #calculationContainer, #pensionContainer{
@@ -18553,28 +18740,54 @@
         }
 
         // =========================
+        // 🔧 SYNC INPUT VALUES
+        // =========================
+        function syncInputs(wrapper) {
+          wrapper.querySelectorAll("input, select, textarea").forEach((el) => {
+            if (el.tagName === "SELECT") {
+              [...el.options].forEach(opt => opt.selected = opt.value === el.value);
+            } else if (el.type === "checkbox" || el.type === "radio") {
+              if (el.checked) el.setAttribute("checked", "checked");
+              else el.removeAttribute("checked");
+            } else {
+              el.setAttribute("value", el.value);
+            }
+          });
+        }
+
+        // =========================
         // 🔁 LOOP EMPLOYEES (FIXED)
         // =========================
-        for (const empName of employees) {
-          // 🔥 render fresh UI
+        for (const empName of employees) {          
+          if (empDropdown) {
+            empDropdown.value = empName;
+          }
+
+          // 🔥 RENDER DIRECTLY
           renderPensionTable(empName);
 
-          // 🔥 force dependent updates (IMPORTANT)
-          updatePensionUI?.();
-          setDAPercent?.();
+          if(mode = "all"){
+            id("PensionInfoPanel").querySelectorAll("span").forEach(el => {
+                el.textContent = "0";
+              });
+              id("VRS_Death_Date").value = ""
+              wrapper.style.opacity = "0"
+          }
 
-          // 🔥 WAIT FOR DOM TO UPDATE (CRITICAL FIX)
-          await new Promise((r) => setTimeout(r, 50));
+          // 🔥 WAIT FOR DOM + CALCULATION
+          await new Promise(r => requestAnimationFrame(r));
+          await new Promise(r => requestAnimationFrame(r));
 
           const liveWrapper = qs(".PensionTableWrapper");
           if (!liveWrapper) continue;
 
-          const clone = liveWrapper.cloneNode(true);
+          // 🔥 SYNC INPUT VALUES
+          syncInputs(liveWrapper);
 
-          // =========================
-          // 🔥 COPY INPUT VALUES
-          // =========================
-          copyInputValues(liveWrapper, clone);
+          // 🔥 SNAPSHOT
+          const temp = document.createElement("div");
+          temp.innerHTML = liveWrapper.outerHTML;
+          const clone = temp.firstElementChild;
 
           // =========================
           // 🔥 CONVERT INPUTS TO TEXT
@@ -18650,6 +18863,26 @@
           doc.body.appendChild(page);
         }
 
+        // =========================
+        // 🔥 RESET UI AFTER ALL MODE
+        // =========================
+        if (mode === "all") {
+          if (empDropdown) {
+            empDropdown.selectedIndex = -1;   // 🔥 clears selection
+            empDropdown.value = "";           // extra safety
+
+          }
+          
+          if (wrapper) {
+            id("PensionInfoPanel").querySelectorAll("span").forEach(el => {
+              el.textContent = "0";
+            });
+            id("VRS_Death_Date").value = ""
+            wrapper.innerHTML = "";           // 🔥 clear table UI
+          }
+          wrapper.style.opacity ="1"
+        }
+
         return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
       }
 
@@ -18659,6 +18892,7 @@
         const wrapper = qs(".PensionTableWrapper");
         const station = id("PensionPage_Station")?.value;
         const selectedEmp = id("PensionPage_Emp")?.value;
+        const empDropdown = id("PensionPage_Emp");
 
         if (mode === "single" && !selectedEmp) return;
 
@@ -18936,6 +19170,11 @@
           return currentRow;
         }
 
+        const fileName =
+          mode === "single"
+            ? `${selectedEmp}-${station}-Pension Calculation.xlsx`
+            : `${station}-Pension Calculations.xlsx`;
+
         // =========================
         // 🔁 EMP LOOP
         // =========================
@@ -18944,11 +19183,48 @@
             ? [selectedEmp]
             : [...new Set(rows.map((r) => r[nameIndex]))];
 
-        for (const empName of employees) {
-          renderPensionTable(empName);
+        // =========================
+        // 🔧 SYNC INPUT VALUES
+        // =========================
+        function syncInputs(wrapper) {
+          wrapper.querySelectorAll("input, select, textarea").forEach((el) => {
+            if (el.tagName === "SELECT") {
+              [...el.options].forEach(opt => opt.selected = opt.value === el.value);
+            } else if (el.type === "checkbox" || el.type === "radio") {
+              if (el.checked) el.setAttribute("checked", "checked");
+              else el.removeAttribute("checked");
+            } else {
+              el.setAttribute("value", el.value);
+            }
+          });
+        }
 
+        for (const empName of employees) {
           const wrapper = qs(".PensionTableWrapper");
           if (!wrapper) continue;
+
+          // 🔥 SET CONTEXT        
+          if (empDropdown) {
+            empDropdown.value = empName;
+          }
+
+          // 🔥 RENDER
+          renderPensionTable(empName);
+
+          if(mode = "all"){
+            id("PensionInfoPanel").querySelectorAll("span").forEach(el => {
+                el.textContent = "0";
+              });
+              id("VRS_Death_Date").value = ""
+              wrapper.style.opacity = "0"
+          }
+
+        // 🔥 WAIT FOR CALCULATION
+          await new Promise(r => requestAnimationFrame(r));
+          await new Promise(r => requestAnimationFrame(r));
+
+          // 🔥 SYNC VALUES
+          syncInputs(wrapper);
 
           const sheet = workbook.addWorksheet(empName.substring(0, 25));
 
@@ -18966,8 +19242,8 @@
                 text: "INDIA'S PUBLIC SERVICE BROADCASTER\n",
                 font: { bold: true, size: 12 },
               },
-              { text: "AIR Dharwad\n", font: { bold: true, size: 12 } },
-              { text: "ALL INDIA RADIO", font: { bold: true, size: 12 } },
+              { text: "ALL INDIA RADIO\n", font: { bold: true, size: 12 } },
+              { text: `${station}`, font: { bold: true, size: 12 } },
             ],
           };
 
@@ -19034,22 +19310,52 @@
               left: 0.3,
               right: 0.3,
               top: 0.5,
-              bottom: 0.5,
+              bottom: 0.6,
               header: 0.3,
               footer: 0.3,
             },
             printArea: `A1:L${lastRow}`,
           };
+
+          sheet.headerFooter = {
+            differentFirst: false,
+            differentOddEven: false,
+
+            // 🔹 HEADER (LEFT, SMALL, ITALIC, GRAY)
+            oddHeader:
+              '&L&K808080&"Calibri,Italic"&10' + fileName.replace(".xlsx", ""),
+
+            // 🔹 FOOTER
+            oddFooter:
+              "&CPage &P of &N" +
+              "&R&K808080Generated on " +
+              new Date().toLocaleDateString("en-GB"),
+          };
         }
 
         const buffer = await workbook.xlsx.writeBuffer();
 
-        const fileName =
-          mode === "single"
-            ? `${selectedEmp}-Pension Calculation.xlsx`
-            : `${station}-Pension Calculations.xlsx`;
-
         saveAs(new Blob([buffer]), fileName);
+
+        // =========================
+        // 🔥 RESET UI AFTER ALL MODE
+        // =========================
+        if (mode === "all") {
+          if (empDropdown) {
+            empDropdown.selectedIndex = -1;   // 🔥 clears selection
+            empDropdown.value = "";           // extra safety
+
+          }
+          
+          if (wrapper) {
+            id("PensionInfoPanel").querySelectorAll("span").forEach(el => {
+              el.textContent = "0";
+            });
+            id("VRS_Death_Date").value = ""
+            wrapper.innerHTML = "";           // 🔥 clear table UI
+          }
+          wrapper.style.opacity = "1";
+        }
       }
     </script>
   </body>
